@@ -3,7 +3,7 @@ import { DocumentItem } from "../component/DocumentItem";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
-  onCameraCapture?: () => void;
+  onCameraCapture?: () => Promise<void>;
   onDocumentCreated?: (docId: string) => void;
 }
 
@@ -195,12 +195,12 @@ export class LibraryView {
 
     // Bind normal mode events
     this.addNewBtn?.addEventListener("click", () => this.handleNewDocument());
-    this.cameraCaptureBtn?.addEventListener("click", () => this.config.onCameraCapture());
+    this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
     // this.galleryInputBtn?.addEventListener("click", () => this.handleGalleryImport());
     // this.uploadedFilesBtn?.addEventListener("click", () => this.handleUploadedFiles());
 
     // // Bind selection mode events
-    // this.shareBtn?.addEventListener("click", () => this.handleShare());
+    this.shareBtn?.addEventListener("click", async () => await this.handleShare());
     // this.printBtn?.addEventListener("click", () => this.handlePrint());
     // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
     // this.downloadBtn?.addEventListener("click", () => this.handleDownload());
@@ -220,10 +220,34 @@ export class LibraryView {
     this.setVisible(true);
   }
 
+  private async handleShare() {
+    const files = [];
+
+    for (let i = 0; i < this.checkedDocUids.length; i++) {
+      const doc = DDV.documentManager.getDocument(this.checkedDocUids[i]);
+      if (doc.pages.length) {
+        const pdfBlob = await doc.saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        });
+        files.push(new File([pdfBlob], `${doc.name}.pdf`, { type: "application/pdf" }));
+      }
+    }
+
+    if (navigator.canShare && navigator.canShare({ files })) {
+      navigator.share({
+        files,
+        title: "PDF Files",
+      });
+    } else {
+      alert(`Your system doesn't support sharing PDF files.`);
+    }
+  }
+
   private handleDelete() {
     DDV.documentManager.deleteDocuments([...this.checkedDocUids]);
     // showInfoDialog("Deleted", root)
-    alert("Deleted documents"); // TODO
+    alert("Deleted document(s)"); // TODO
 
     this.setVisible(true);
     this.toggleShowSelectedToolbar();
