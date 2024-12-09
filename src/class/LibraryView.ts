@@ -1,9 +1,9 @@
-import { DDV } from "dynamsoft-document-viewer";
+import { DDV, IDocument } from "dynamsoft-document-viewer";
 import { DocumentItem } from "../component/DocumentItem";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
-  onCameraCapture?: () => void;
+  onCameraCapture?: () => Promise<void>;
   onDocumentCreated?: (docId: string) => void;
 }
 
@@ -138,10 +138,17 @@ export class LibraryView {
         this.checkedDocUids.push(item.getUid());
       }
     });
-    const checkedDocCount = this.checkedDocUids.length;
+    const show = !!this.checkedDocUids.length;
 
-    this.toolbarContainer.style.display = !!checkedDocCount ? "none" : "flex";
-    this.selectedToolbarContainer.style.display = !!checkedDocCount ? "flex" : "none";
+    this.toolbarContainer.style.display = show ? "none" : "flex";
+    this.selectedToolbarContainer.style.display = show ? "flex" : "none";
+
+    // Set disabled attribute and class for buttons
+    const isSingleSelection = this.checkedDocUids.length === 1;
+
+    this.printBtn.classList.toggle("selected", isSingleSelection);
+    this.printBtn.classList.toggle("disabled", !isSingleSelection);
+    this.printBtn.setAttribute("disabled", isSingleSelection ? "false" : "true");
   }
 
   private bindDocumentManagerEvents() {
@@ -195,15 +202,15 @@ export class LibraryView {
 
     // Bind normal mode events
     this.addNewBtn?.addEventListener("click", () => this.handleNewDocument());
-    this.cameraCaptureBtn?.addEventListener("click", () => this.config.onCameraCapture());
+    this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
     // this.galleryInputBtn?.addEventListener("click", () => this.handleGalleryImport());
     // this.uploadedFilesBtn?.addEventListener("click", () => this.handleUploadedFiles());
 
     // // Bind selection mode events
-    // this.shareBtn?.addEventListener("click", () => this.handleShare());
-    // this.printBtn?.addEventListener("click", () => this.handlePrint());
+    this.shareBtn?.addEventListener("click", async () => await this.handleShare());
+    this.printBtn?.addEventListener("click", () => this.handlePrint());
     // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
-    // this.downloadBtn?.addEventListener("click", () => this.handleDownload());
+    this.downloadBtn?.addEventListener("click", () => this.handleDownload());
     this.deleteBtn?.addEventListener("click", () => this.handleDelete());
     this.backBtn?.addEventListener("click", () => this.handleBackButton());
   }
@@ -220,10 +227,73 @@ export class LibraryView {
     this.setVisible(true);
   }
 
+  private async handleShare() {
+    const files = [];
+
+    for (let i = 0; i < this.checkedDocUids.length; i++) {
+      const doc = DDV.documentManager.getDocument(this.checkedDocUids[i]);
+      if (doc.pages.length) {
+        const pdfBlob = await doc.saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        });
+        files.push(new File([pdfBlob], `${doc.name}.pdf`, { type: "application/pdf" }));
+      }
+    }
+
+    if (navigator.canShare && navigator.canShare({ files })) {
+      navigator.share({
+        files,
+        title: "PDF Files",
+      });
+    } else {
+      alert(`Your system doesn't support sharing PDF files.`);
+    }
+  }
+
+  private async handlePrint() {
+    if (this.checkedDocUids.length > 1) {
+      console.warn("Please select 1 document to print");
+      return;
+    }
+
+    const docUid = this.checkedDocUids[0];
+    const doc = DDV.documentManager.getDocument(docUid);
+
+    if (doc.pages) {
+      doc.print();
+    }
+  }
+
+  private handleDownload() {
+    const docDownload = (doc: IDocument) => {
+      doc
+        .saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${doc.name}.pdf`;
+          a.click();
+          a.remove();
+        });
+    };
+
+    this.checkedDocUids.forEach((uid) => {
+      const doc = DDV.documentManager.getDocument(uid);
+      if (doc.pages.length) {
+        docDownload(doc);
+      }
+    });
+  }
+
   private handleDelete() {
     DDV.documentManager.deleteDocuments([...this.checkedDocUids]);
     // showInfoDialog("Deleted", root)
-    alert("Deleted documents"); // TODO
+    alert("Deleted document(s)"); // TODO
 
     this.setVisible(true);
     this.toggleShowSelectedToolbar();
@@ -498,6 +568,11 @@ user-select: none;
 
 .mwc-library-control-btn.selected.back {
   background-color: #323234;
+}
+
+.mwc-library-control-btn.disabled {
+  background-color: #323234;
+  cursor: not-allowed;
 }
 
 .mwc-library-control-icon {
