@@ -138,20 +138,10 @@ export class LibraryView {
         this.checkedDocUids.push(item.getUid());
       }
     });
-    const checkedDocCount = this.checkedDocUids.length;
+    const show = !!this.checkedDocUids.length;
 
-    this.toolbarContainer.style.display = !!checkedDocCount ? "none" : "flex";
-    this.selectedToolbarContainer.style.display = !!checkedDocCount ? "flex" : "none";
-
-    const isSingleSelection = checkedDocCount === 1;
-    // Set disabled attribute and class for buttons
-    [this.shareBtn, this.printBtn, this.uploadBtn, this.downloadBtn].forEach((btn) => {
-      if (btn) {
-        btn.classList.toggle("selected", isSingleSelection);
-        btn.classList.toggle("disabled", !isSingleSelection);
-        btn.setAttribute("disabled", isSingleSelection ? "false" : "true");
-      }
-    });
+    this.toolbarContainer.style.display = show ? "none" : "flex";
+    this.selectedToolbarContainer.style.display = show ? "flex" : "none";
   }
 
   private bindDocumentManagerEvents() {
@@ -231,12 +221,6 @@ export class LibraryView {
   }
 
   private async handleShare() {
-    // Dont allow action if selected items are more than 1
-    const isSingleSelection = this.checkedDocUids?.length === 1;
-    if (!isSingleSelection) {
-      return;
-    }
-
     const files = [];
 
     for (let i = 0; i < this.checkedDocUids.length; i++) {
@@ -538,11 +522,6 @@ user-select: none;
 
 .mwc-library-control-btn.selected.back {
   background-color: #323234;
-}
-
-.mwc-library-control-btn.disabled {
-  background-color: #323234;
-  cursor: not-allowed;
 }
 
 .mwc-library-control-icon {
