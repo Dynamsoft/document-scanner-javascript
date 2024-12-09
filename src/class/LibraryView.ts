@@ -142,6 +142,13 @@ export class LibraryView {
 
     this.toolbarContainer.style.display = show ? "none" : "flex";
     this.selectedToolbarContainer.style.display = show ? "flex" : "none";
+
+    // Set disabled attribute and class for buttons
+    const isSingleSelection = this.checkedDocUids.length === 1;
+
+    this.printBtn.classList.toggle("selected", isSingleSelection);
+    this.printBtn.classList.toggle("disabled", !isSingleSelection);
+    this.printBtn.setAttribute("disabled", isSingleSelection ? "false" : "true");
   }
 
   private bindDocumentManagerEvents() {
@@ -201,7 +208,7 @@ export class LibraryView {
 
     // // Bind selection mode events
     this.shareBtn?.addEventListener("click", async () => await this.handleShare());
-    // this.printBtn?.addEventListener("click", () => this.handlePrint());
+    this.printBtn?.addEventListener("click", () => this.handlePrint());
     // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
     this.downloadBtn?.addEventListener("click", () => this.handleDownload());
     this.deleteBtn?.addEventListener("click", () => this.handleDelete());
@@ -241,6 +248,20 @@ export class LibraryView {
       });
     } else {
       alert(`Your system doesn't support sharing PDF files.`);
+    }
+  }
+
+  private async handlePrint() {
+    if (this.checkedDocUids.length > 1) {
+      console.warn("Please select 1 document to print");
+      return;
+    }
+
+    const docUid = this.checkedDocUids[0];
+    const doc = DDV.documentManager.getDocument(docUid);
+
+    if (doc.pages) {
+      doc.print();
     }
   }
 
@@ -547,6 +568,11 @@ user-select: none;
 
 .mwc-library-control-btn.selected.back {
   background-color: #323234;
+}
+
+.mwc-library-control-btn.disabled {
+  background-color: #323234;
+  cursor: not-allowed;
 }
 
 .mwc-library-control-icon {
