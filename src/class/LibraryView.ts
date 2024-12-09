@@ -1,4 +1,4 @@
-import { DDV } from "dynamsoft-document-viewer";
+import { DDV, IDocument } from "dynamsoft-document-viewer";
 import { DocumentItem } from "../component/DocumentItem";
 
 export interface LibraryViewConfig {
@@ -203,7 +203,7 @@ export class LibraryView {
     this.shareBtn?.addEventListener("click", async () => await this.handleShare());
     // this.printBtn?.addEventListener("click", () => this.handlePrint());
     // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
-    // this.downloadBtn?.addEventListener("click", () => this.handleDownload());
+    this.downloadBtn?.addEventListener("click", () => this.handleDownload());
     this.deleteBtn?.addEventListener("click", () => this.handleDelete());
     this.backBtn?.addEventListener("click", () => this.handleBackButton());
   }
@@ -242,6 +242,31 @@ export class LibraryView {
     } else {
       alert(`Your system doesn't support sharing PDF files.`);
     }
+  }
+
+  private handleDownload() {
+    const docDownload = (doc: IDocument) => {
+      doc
+        .saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${doc.name}.pdf`;
+          a.click();
+          a.remove();
+        });
+    };
+
+    this.checkedDocUids.forEach((uid) => {
+      const doc = DDV.documentManager.getDocument(uid);
+      if (doc.pages.length) {
+        docDownload(doc);
+      }
+    });
   }
 
   private handleDelete() {
