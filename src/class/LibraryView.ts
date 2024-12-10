@@ -1,5 +1,6 @@
 import { DDV, IDocument } from "dynamsoft-document-viewer";
 import { DocumentItem } from "../component/DocumentItem";
+import { showInfoDialog } from "../util";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
@@ -88,6 +89,7 @@ export class LibraryView {
     Object.assign(this.config.container.style, {
       display: "flex",
       flexDirection: "column",
+      position: "relative", // Used for showInfoDialog
     });
   }
 
@@ -239,6 +241,8 @@ export class LibraryView {
         await doc.loadSource(sources);
       }
 
+      showInfoDialog("Created", this.config.container);
+
       return doc;
     } catch (ex: any) {
       let errMsg = ex.message || ex;
@@ -318,8 +322,8 @@ export class LibraryView {
 
   private handleDelete() {
     DDV.documentManager.deleteDocuments([...this.checkedDocUids]);
-    // showInfoDialog("Deleted", root)
-    alert("Deleted document(s)"); // TODO
+
+    showInfoDialog("Deleted", this.config.container);
 
     this.setVisible(true);
     this.toggleShowSelectedToolbar();

@@ -37,6 +37,11 @@ export class PageView {
     const styleSheet = document.createElement("style");
     styleSheet.textContent = DEFAULT_PAGE_VIEW_STYLE;
     document.head.appendChild(styleSheet);
+
+    // assign styling to container
+    Object.assign(this.config.container.style, {
+      position: "relative", // Used for showInfoDialog
+    });
   }
 
   private bindPageViewEvents() {

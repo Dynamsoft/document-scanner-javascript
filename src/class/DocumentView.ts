@@ -1,5 +1,5 @@
 import { BrowseViewer, DDV } from "dynamsoft-document-viewer";
-import { isMobile } from "../util";
+import { isMobile, showInfoDialog } from "../util";
 
 export interface DocumentViewConfig {
   container: HTMLElement;
@@ -80,6 +80,7 @@ export class DocumentView {
     Object.assign(this.config.container.style, {
       display: "flex",
       flexDirection: "column",
+      position: "relative", // Used for showInfoDialog
     });
   }
 
@@ -286,7 +287,7 @@ export class DocumentView {
     if (selectedIndex.length > 0) {
       this.browseViewer.currentDocument.deletePages(selectedIndex);
 
-      alert("Deleted Page(s)");
+      showInfoDialog("Deleted", this.config.container);
       if (this.browseViewer.currentDocument.pages.length === 0) {
         this.toggleShowContentContainer(false);
         this.handleBackButton();
