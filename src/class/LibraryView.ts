@@ -203,7 +203,10 @@ export class LibraryView {
     this.backBtn = this.selectedToolbarContainer.querySelector(".mwc-library-control-btn:nth-child(6)");
 
     // Bind normal mode events
-    this.addNewBtn?.addEventListener("click", () => this.handleNewDocument());
+    this.addNewBtn?.addEventListener("click", async () => {
+      await this.handleNewDocument();
+      showInfoDialog("Created", this.config.container);
+    });
     this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
     this.galleryInputBtn?.addEventListener("click", async () => await this.config.onGalleryImport());
     // this.uploadedFilesBtn?.addEventListener("click", () => this.handleUploadedFiles());
@@ -213,7 +216,10 @@ export class LibraryView {
     this.printBtn?.addEventListener("click", () => this.handlePrint());
     // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
     this.downloadBtn?.addEventListener("click", () => this.handleDownload());
-    this.deleteBtn?.addEventListener("click", () => this.handleDelete());
+    this.deleteBtn?.addEventListener("click", () => {
+      this.handleDelete();
+      showInfoDialog("Deleted", this.config.container);
+    });
     this.backBtn?.addEventListener("click", () => this.handleBackButton());
   }
 
@@ -240,8 +246,6 @@ export class LibraryView {
       if (sources) {
         await doc.loadSource(sources);
       }
-
-      showInfoDialog("Created", this.config.container);
 
       return doc;
     } catch (ex: any) {
@@ -322,8 +326,6 @@ export class LibraryView {
 
   private handleDelete() {
     DDV.documentManager.deleteDocuments([...this.checkedDocUids]);
-
-    showInfoDialog("Deleted", this.config.container);
 
     this.setVisible(true);
     this.toggleShowSelectedToolbar();
