@@ -1,5 +1,6 @@
 import { DDV, DisplayModeEnum, EditViewer, UiConfig } from "dynamsoft-document-viewer";
 import { mobileEditViewerUiConfig } from "../util/uiConfig";
+import { showInfoDialog } from "../util";
 
 export interface PageViewConfig {
   container: HTMLElement;
@@ -46,6 +47,17 @@ export class PageView {
 
   private bindPageViewEvents() {
     this.editViewer.on("backToDocument", () => this.config.onDocumentClick());
+
+    this.editViewer.on("showThumbnailPageByClear", () => {
+      showInfoDialog("Deleted", this.config.container);
+
+      const count = this.editViewer.currentDocument.pages.length;
+
+      if (!count) {
+        // Simulate return to document
+        this.config.onDocumentClick();
+      }
+    });
   }
 
   async openPage(docId: string) {
