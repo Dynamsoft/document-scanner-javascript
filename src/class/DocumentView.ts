@@ -129,6 +129,8 @@ export class DocumentView {
           borderRadius: "1px",
           left: "6px",
           top: "6px",
+          width: "24px",
+          height: "24px",
           visibility: "hidden",
         },
         currentPageStyle: {
@@ -263,12 +265,12 @@ export class DocumentView {
     // Update checkbox visibility
     this.browseViewer.updateStyle("checkboxStyle", {
       visibility: show ? "visible" : "hidden",
+      border: "1px solid #707070",
     });
   }
 
   private handleFileOperationsClick() {
     this.updateToolbarState();
-
     this.toggleSelectionMode(true);
   }
 
