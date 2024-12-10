@@ -1,10 +1,11 @@
-import { EnumCapturedResultItemType, Quadrilateral } from "dynamsoft-core";
-import { DrawingLayer, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
+import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core";
+import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { MobileDocumentScannerConfig, SharedResources } from "../core/MobileDocumentScanner";
 import { bindControlButton } from "../util";
 import { DocumentScanResult } from "./DocumentScannerView";
 
+const DEFAULT_CORNER_SIZE = 60;
 interface DocumentNormalizerViewControls {
   fullImageBtn?: HTMLElement | string; // Can be element or selector
   autoBoundsBtn?: HTMLElement | string;
@@ -58,19 +59,128 @@ export default class DocumentNormalizerView {
     this.layer = this.imageEditorView.createDrawingLayer();
     this.imageEditorView.setOriginalImage(this.resources.result.originalImageResult);
 
+    this.setupDrawingLayerStyle(); // Set style for drawing layer
     this.setupInitialDetectedQuad();
     this.setupNormalizerControls();
+    this.setupQuadConstraints();
+  }
+
+  private setupDrawingLayerStyle() {
+    const styleID = DrawingStyleManager.createDrawingStyle({
+      lineWidth: 5,
+      fillStyle: "transparent",
+      strokeStyle: "#FE8E14",
+      paintMode: "stroke",
+    });
+
+    this.layer.setDefaultStyle(styleID);
+  }
+
+  private setupQuadConstraints() {
+    const canvas = this.layer.fabricCanvas;
+
+    canvas.defaultCursor = "default";
+    canvas.hoverCursor = "default";
+    canvas.moveCursor = "default";
+
+    canvas.on("object:scaling", (e: any) => {
+      const obj = e.target;
+      const points = obj.points;
+      const bounds = this.getCanvasBounds();
+
+      // Constrain scaling to canvas bounds
+      points.forEach((point: Point) => {
+        point.x = Math.max(0, Math.min(bounds.width, point.x));
+        point.y = Math.max(0, Math.min(bounds.height, point.y));
+      });
+
+      obj.set({
+        points: points,
+        dirty: true,
+      });
+      canvas.renderAll();
+    });
+
+    canvas.on("object:modified", (e: any) => {
+      const obj = e.target;
+      if (!obj) return;
+
+      const points = obj.points;
+      const bounds = this.getCanvasBounds();
+
+      // Ensure all points stay within bounds
+      let needsConstraint = false;
+      points.forEach((point: Point) => {
+        if (point.x < 0 || point.x > bounds.width || point.y < 0 || point.y > bounds.height) {
+          needsConstraint = true;
+        }
+      });
+
+      if (needsConstraint) {
+        points.forEach((point: Point) => {
+          point.x = Math.max(0, Math.min(bounds.width, point.x));
+          point.y = Math.max(0, Math.min(bounds.height, point.y));
+        });
+
+        obj.set({
+          points: points,
+          dirty: true,
+        });
+        canvas.renderAll();
+      }
+    });
+  }
+
+  private getCanvasBounds() {
+    const canvas = this.layer.fabricCanvas;
+    return {
+      width: canvas.getWidth(),
+      height: canvas.getHeight(),
+    };
+  }
+
+  private addQuadToLayer(newQuad: QuadDrawingItem) {
+    this.layer.clearDrawingItems();
+
+    const fabricObject = newQuad._getFabricObject();
+    fabricObject.cornerSize = DEFAULT_CORNER_SIZE;
+
+    // Make quad non-draggable but keep corner controls
+    fabricObject.lockMovementX = true;
+    fabricObject.lockMovementY = true;
+
+    // Make circle transparent to show corner on drag
+    fabricObject.on("mousedown", function (e: any) {
+      if (e.target && e.target.controls) {
+        this.cornerColor = "transparent";
+        this.dirty = true;
+        this.canvas?.renderAll();
+      }
+    });
+
+    fabricObject.on("mouseup", function () {
+      this.cornerColor = "#FE8E14";
+      this.dirty = true;
+      this.canvas?.renderAll();
+    });
+
+    this.layer.renderAll();
+    this.layer.addDrawingItems([newQuad]);
+
+    // Select the quad immediately after adding it
+    this.layer.fabricCanvas.setActiveObject(fabricObject);
+    this.layer.fabricCanvas.renderAll();
   }
 
   private setupInitialDetectedQuad() {
+    let quad: QuadDrawingItem;
     // Draw the detected quadrilateral
     if (this.resources.result.detectedQuadrilateral) {
-      const quadItem = new QuadDrawingItem(this.resources.result.detectedQuadrilateral);
-      this.layer.addDrawingItems([quadItem]);
+      quad = new QuadDrawingItem(this.resources.result.detectedQuadrilateral);
     } else {
       // If no quad detected, draw full image quad
       const { width, height } = this.resources.result.originalImageResult;
-      const fullQuad = new QuadDrawingItem({
+      quad = new QuadDrawingItem({
         points: [
           { x: 0, y: 0 },
           { x: width, y: 0 },
@@ -79,8 +189,9 @@ export default class DocumentNormalizerView {
         ],
         area: width * height,
       } as Quadrilateral);
-      this.layer.addDrawingItems([fullQuad]);
     }
+
+    this.addQuadToLayer(quad);
   }
 
   private createDefaultControls(): HTMLElement {
@@ -163,8 +274,7 @@ export default class DocumentNormalizerView {
       area: width * height,
     } as Quadrilateral);
 
-    this.layer.clearDrawingItems();
-    this.layer.addDrawingItems([fullQuad]);
+    this.addQuadToLayer(fullQuad);
   }
 
   async setBoundaryAutomatically() {
@@ -179,8 +289,7 @@ export default class DocumentNormalizerView {
     )?.location;
 
     if (quad) {
-      this.layer.clearDrawingItems();
-      this.layer.addDrawingItems([new QuadDrawingItem(quad)]);
+      this.addQuadToLayer(new QuadDrawingItem(quad));
     } else {
       this.setFullImageBoundary();
     }
@@ -363,14 +472,19 @@ const DEFAULT_NORMALIZER_CONTROLS_STYLE = `
   user-select: none;
 }
 
+.mwc-image-normalizer-control-btn div:last-child {
+  padding-bottom: 0.5rem;
+}
+
 .mwc-image-normalizer-control-btn.finish {
   background-color: #000000;
   color: #fe8e14;
 }
 
 .mwc-image-normalizer-control-icon svg {
-        width: max(3vmin, 24px);
-      height: max(3vmin, 24px);
+  padding-top: 0.5rem;
+  width: max(3vmin, 24px);
+  height: max(3vmin, 24px);
 }
 `;
 

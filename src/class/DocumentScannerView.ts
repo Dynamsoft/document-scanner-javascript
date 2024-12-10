@@ -60,7 +60,7 @@ export default class DocumentScannerView {
       const { cameraView, cameraEnhancer, cvRouter } = this.resources;
 
       // Set up cameraView styling
-      cameraView.setVideoFit("cover");
+      // cameraView.getVideoElement().style.objectPosition = "center";
       cameraView.setScanRegionMaskStyle({
         ...cameraView.getScanRegionMaskStyle(),
         strokeStyle: "transparent",

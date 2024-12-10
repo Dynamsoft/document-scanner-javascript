@@ -255,7 +255,7 @@ export default class ScanResultView {
       Object.assign(this.config.scanResultViewConfig.container.style, {
         display: "flex",
         width: "100%",
-        backgroundColor: "#1e1e1e",
+        backgroundColor: "#575757",
         fontSize: "12px",
         flexDirection: "column",
         alignItems: "center",
@@ -264,12 +264,9 @@ export default class ScanResultView {
       // Create and add preview image container
       const previewImageContainer = document.createElement("div");
       Object.assign(previewImageContainer.style, {
-        flex: "1",
         width: "100%",
         height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        textAlign: "center",
       });
 
       // Add preview image
@@ -397,7 +394,11 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
   gap: 0.5rem;
   border: 1px solid #575757;
   text-align: center;
-  padding: 0.5rem;
+  user-select: none;
+}
+
+.mwc-preview-control-btn div:last-child {
+  padding-bottom: 0.5rem;
 }
 
 .mwc-preview-control-btn.finish {
@@ -406,8 +407,9 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
 }
 
 .mwc-preview-control-icon svg {
-        width: max(3vmin, 24px);
-      height: max(3vmin, 24px);
+  padding-top: 0.5rem;
+  width: max(3vmin, 24px);
+  height: max(3vmin, 24px);
 }
 `;
 

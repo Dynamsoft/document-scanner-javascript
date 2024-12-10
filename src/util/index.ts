@@ -23,3 +23,7 @@ export function bindControlButton(
   button.addEventListener("click", handler);
   return button;
 }
+
+export function isMobile() {
+  return "ontouchstart" in document.documentElement;
+}

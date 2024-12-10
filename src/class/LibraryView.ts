@@ -4,17 +4,18 @@ import { DocumentItem } from "../component/DocumentItem";
 export interface LibraryViewConfig {
   container: HTMLElement;
   onCameraCapture?: () => Promise<void>;
+  onGalleryImport?: () => Promise<void>;
   onDocumentCreated?: (docId: string) => void;
+  onDocumentClick?: (docId: string) => void;
 }
 
 export class LibraryView {
   checkedDocUids: string[] = [];
   docItems: DocumentItem[] = [];
 
-  isSelectionMode: boolean = false;
-  docSelectAll: HTMLElement;
-  enterSelectionMode: HTMLElement;
-  cancelSelectionMode: HTMLElement;
+  docSelectAll: HTMLElement; // todo
+  enterSelectionMode: HTMLElement; //todo
+  cancelSelectionMode: HTMLElement; //todo
 
   headerContainer: HTMLElement;
   emptyContentContainer: HTMLElement;
@@ -50,7 +51,6 @@ export class LibraryView {
   setVisible(visible: boolean) {
     this.config.container.style.display = visible ? "flex" : "none";
 
-    this.isSelectionMode = false;
     this.toggleShowSelectedToolbar();
 
     if (visible) {
@@ -203,7 +203,7 @@ export class LibraryView {
     // Bind normal mode events
     this.addNewBtn?.addEventListener("click", () => this.handleNewDocument());
     this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
-    // this.galleryInputBtn?.addEventListener("click", () => this.handleGalleryImport());
+    this.galleryInputBtn?.addEventListener("click", async () => await this.config.onGalleryImport());
     // this.uploadedFilesBtn?.addEventListener("click", () => this.handleUploadedFiles());
 
     // // Bind selection mode events
@@ -219,10 +219,36 @@ export class LibraryView {
     this.toggleShowSelectedToolbar();
   }
 
+  async createAndLoadDocument(
+    sources?: Array<{
+      convertMode: string;
+      fileData: Blob;
+      renderOptions?: {
+        renderAnnotations?: string;
+      };
+    }>
+  ) {
+    try {
+      // Create new document
+      const doc = DDV.documentManager.createDocument({
+        name: `Doc-${Date.now()}`,
+      });
+
+      // Load all sources
+      if (sources) {
+        await doc.loadSource(sources);
+      }
+
+      return doc;
+    } catch (ex: any) {
+      let errMsg = ex.message || ex;
+      alert(`Failed to create and load document: ${errMsg}`);
+      console.error("Failed to create and load document: ", errMsg);
+    }
+  }
+
   private async handleNewDocument() {
-    const doc = DDV.documentManager.createDocument({
-      name: `Doc-${Date.now()}`,
-    });
+    await this.createAndLoadDocument();
 
     this.setVisible(true);
   }
@@ -308,7 +334,7 @@ export class LibraryView {
   }
 
   private handleDocumentClick(docId: string) {
-    console.log(docId);
+    this.config.onDocumentClick?.(docId);
   }
 }
 
@@ -489,7 +515,7 @@ const DEFAULT_LIBRARY_STYLE = `
 display: flex;
 font-family: Verdana;
 height: 48px;
-font-size: 38px;
+font-size: 24px;
 align-items: center;
 justify-content: center;
 background-color: #F5F5F5;
@@ -516,12 +542,12 @@ user-select: none;
   flex-direction: column;
   font-family: Verdana;
   align-items: center;
-  justify-content: center;
   padding: 1rem;
+  user-select: none;
 }
 
-.mwc-library-content-empty svg {
-  width: 70%;
+.mwc-document-view-content-empty svg {
+  width: 300px;
   height: auto;
 }
 
@@ -589,19 +615,19 @@ user-select: none;
 const LIBRARY_CONTROLS_HTML = `
   <div class="mwc-library-control-btn">
     <div class="mwc-library-control-icon">${ICONS.newDoc}</div>
-    <div>New Doc</div>
+    <div>New</div>
   </div>
   <div class="mwc-library-control-btn">
     <div class="mwc-library-control-icon">${ICONS.cameraCapture}</div>
-    <div>Camera Capture</div>
+    <div>Capture</div>
   </div>
   <div class="mwc-library-control-btn">
     <div class="mwc-library-control-icon">${ICONS.galleryImport}</div>
-    <div>Gallery Import</div>
+    <div>Import</div>
   </div>
     <div class="mwc-library-control-btn">
     <div class="mwc-library-control-icon">${ICONS.uploadedFiles}</div>
-    <div>Uploaded Files</div>
+    <div>History</div>
   </div>
 `;
 
@@ -635,9 +661,12 @@ const SELECTED_LIBRARY_CONTROLS_HTML = `
 const EMPTY_CONTENT_CONTAINER_HTML = `
 ${ICONS.emptyLibrary}
 <div class="title">
-Empty
+  Start your first document!
 </div>
 <div class="desc">
-  Create your document
+  <ul>
+    <li>Click "<b>New</b>" to create a blank document</li>
+    <li>Click "<b>Capture</b>" or "<b>Import</b>" to use images</li>
+  </ul>
 </div>
 `;

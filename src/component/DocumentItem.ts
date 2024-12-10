@@ -49,11 +49,12 @@ export class DocumentItem {
   }
 
   private async updateThumbnail(doc: any): Promise<void> {
+    const thumbnailContainer = this.dom.querySelector(".mwc-document-thumbnail");
+    thumbnailContainer.textContent = "";
+
     if (doc.pages[0]) {
       const data = await doc.getPageData(doc.pages[0]);
       const url = URL.createObjectURL(data.display.data);
-      const thumbnailContainer = this.dom.querySelector(".mwc-document-thumbnail");
-      thumbnailContainer.textContent = "";
 
       const img = document.createElement("img");
       img.className = "mwc-image-thumbnail";
@@ -61,6 +62,8 @@ export class DocumentItem {
       img.src = url;
 
       thumbnailContainer.append(img);
+    } else {
+      thumbnailContainer.innerHTML = ICONS.defaultDocument;
     }
   }
 
@@ -155,7 +158,6 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   align-items:center;
   background-color: #EFEFEF;
   cursor: pointer;
-  gap: 24px;
   font-family: Verdana;
 }
 
@@ -201,6 +203,7 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
 
 .mwc-image-thumbnail {
   width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
