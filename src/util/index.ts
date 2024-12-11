@@ -71,6 +71,6 @@ const infoDialogStyle: Partial<CSSStyleDeclaration> = {
   zIndex: "999",
   fontFamily: "Verdana",
   padding: "1rem",
-  gap: "1rem",
+  gap: "0.5rem",
   transform: "translate(-50%, -50%)",
 };
