@@ -36,7 +36,7 @@ export class DocumentView {
 
   constructor(private config: DocumentViewConfig) {}
 
-  async initialize() {
+  initialize() {
     if (!this.config.container) {
       throw new Error("Please create a Document View Container element");
     }

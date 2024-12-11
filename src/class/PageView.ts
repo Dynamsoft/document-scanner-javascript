@@ -12,7 +12,7 @@ export class PageView {
 
   constructor(private config: PageViewConfig) {}
 
-  async initialize() {
+  initialize() {
     if (!this.config.container) {
       throw new Error("Please create a Page Container element");
     }

@@ -4,7 +4,7 @@ import MobileDocumentScanner, { MobileDocumentScannerConfig } from "./MobileDocu
 import { LicenseManager } from "dynamsoft-license";
 import { PageView, PageViewConfig } from "../class/PageView";
 import { DocumentView, DocumentViewConfig } from "../class/DocumentView";
-import { DSImageData, NormalizedImageResultItem, NormalizedImagesResult } from "dynamsoft-capture-vision-bundle";
+import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 
 enum EnumMWCViews {
   Library = "library",
@@ -29,6 +29,8 @@ class MobileWebCapture extends MobileDocumentScanner {
 
   private currentView: EnumMWCViews = null;
   private navigationStack: EnumMWCViews[] = [];
+
+  private isInitialized = false;
 
   constructor(config: MobileWebCaptureConfig) {
     // Pass the MobileDocumentScannerConfig portion to super
@@ -75,6 +77,10 @@ class MobileWebCapture extends MobileDocumentScanner {
 
   //TODO type
   async initialize(): Promise<any> {
+    if (this.isInitialized) {
+      return;
+    }
+
     try {
       const MobileDocumentScanner = await super.initialize();
 
@@ -87,12 +93,15 @@ class MobileWebCapture extends MobileDocumentScanner {
       // Configure image filter feature which is in edit viewer
       DDV.setProcessingHandler("imageFilter", new DDV.ImageFilter());
 
-      await super.initialize();
       await this.initializeDDV();
-      await this.initializeViews();
+      this.initializeViews();
+
+      this.isInitialized = true;
 
       return MobileDocumentScanner;
     } catch (ex: any) {
+      this.isInitialized = false;
+
       let errMsg = ex?.message || ex;
       console.error("Initialization Failed:", errMsg);
       alert("Initialization Failed");
@@ -105,17 +114,15 @@ class MobileWebCapture extends MobileDocumentScanner {
     DDV.setProcessingHandler("imageFilter", new DDV.ImageFilter());
   }
 
-  private async initializeViews(): Promise<void> {
+  private initializeViews() {
     const { Library, Document, Page } = EnumMWCViews;
     this.mwcViews[Library].instance = new LibraryView(this.mwcViews[Library].config as LibraryViewConfig);
     this.mwcViews[Document].instance = new DocumentView(this.mwcViews[Document].config as DocumentViewConfig);
     this.mwcViews[Page].instance = new PageView(this.mwcViews[Page].config as PageViewConfig);
 
-    await Promise.all([
-      this.mwcViews[Library].instance.initialize(),
-      this.mwcViews[Document].instance.initialize(),
-      this.mwcViews[Page].instance.initialize(),
-    ]);
+    this.mwcViews[Library].instance.initialize();
+    this.mwcViews[Document].instance.initialize();
+    this.mwcViews[Page].instance.initialize();
   }
 
   private switchView(targetView: EnumMWCViews) {
@@ -138,7 +145,10 @@ class MobileWebCapture extends MobileDocumentScanner {
   }
 
   async launch(view: EnumMWCViews) {
-    await this.initialize();
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
     this.switchView(view || EnumMWCViews.Library);
   }
 
@@ -260,10 +270,14 @@ class MobileWebCapture extends MobileDocumentScanner {
 
   dispose() {
     Object.values(this.mwcViews).forEach((view) => {
-      // view.instance?.dispose?.();
-      // todo dispose
+      // if (view.instance && typeof view.instance.dispose === "function") {
+      //   view.instance.dispose();
+      // }
     });
+
     super.dispose();
+
+    this.isInitialized = false;
   }
 }
 

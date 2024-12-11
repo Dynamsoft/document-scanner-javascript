@@ -39,7 +39,7 @@ export class LibraryView {
 
   constructor(private config: LibraryViewConfig) {}
 
-  async initialize() {
+  initialize() {
     if (!this.config.container) {
       throw new Error("Please create a Library Container element");
     }
