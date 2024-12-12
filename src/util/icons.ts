@@ -167,7 +167,7 @@ export const MWC_ICONS = {
     </g>
   </svg>
     `,
-  documentBtn: `
+  document: `
     <svg id="document" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="24" viewBox="0 0 20 24">
       <defs>
         <clipPath id="documentclip-path">
@@ -251,7 +251,7 @@ export const MWC_ICONS = {
       </g>
     </svg>
     `,
-  exportImage: `<svg id="export-image" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28" height="24" viewBox="0 0 28 24">
+  export: `<svg id="export-image" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28" height="24" viewBox="0 0 28 24">
     <defs>
       <clipPath id="exportImageclip-path">
         <rect id="Rectangle_2771" data-name="Rectangle 2771" width="28" height="24" fill="#fff"/>
@@ -357,13 +357,97 @@ export const MWC_ICONS = {
 `,
   finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
   <defs>
-    <clipPath id="clip-path">
+    <clipPath id="finishclip-path">
       <rect id="Rectangle_2775" data-name="Rectangle 2775" width="24" height="24" fill="#fe8e14"/>
     </clipPath>
   </defs>
-  <g id="Group_584" data-name="Group 584" clip-path="url(#clip-path)">
+  <g id="Group_584" data-name="Group 584" clip-path="url(#finishclip-path)">
     <path id="Path_1526" data-name="Path 1526" d="M17.6,6.7l-6.691,9.081L6.313,12.11a.5.5,0,0,0-.625.781l5,4a.508.508,0,0,0,.378.1.493.493,0,0,0,.337-.2l7-9.5A.5.5,0,1,0,17.6,6.7" fill="#fe8e14"/>
     <path id="Path_1527" data-name="Path 1527" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0m0,23A11,11,0,1,1,23,12,11.013,11.013,0,0,1,12,23" fill="#fe8e14"/>
+  </g>
+</svg>
+`,
+  captureAnother: `
+<svg id="capture-another" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.761" height="23" viewBox="0 0 28.761 23">
+  <defs>
+    <clipPath id="captureAnotherclip-path">
+      <rect id="Rectangle_2777" data-name="Rectangle 2777" width="28.761" height="23" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="Group_589" data-name="Group 589" clip-path="url(#captureAnotherclip-path)">
+    <path id="Path_1544" data-name="Path 1544" d="M25.877,3.639H21.663a.7.7,0,0,1-.575-.288l-.575-.764C19.264.961,18.59,0,17.44,0H11.4C10.151,0,9.486.961,8.336,2.588l-.674.764a.7.7,0,0,1-.575.288H2.875C.476,3.639,0,5.077,0,6.227v13.9C0,22.041,1.051,23,2.974,23H25.787c1.914,0,2.974-.961,2.974-2.776v-14c-.008-1.147-.485-2.585-2.884-2.585m-.1,18.411H2.974c-1.339,0-2.013-.575-2.013-1.824v-14c0-.863.189-1.626,1.914-1.626H7.188a1.666,1.666,0,0,0,1.339-.674L9.1,3.162c1.15-1.626,1.536-2.2,2.2-2.2H17.34c.674,0,1.15.575,2.3,2.2l.575.764a1.562,1.562,0,0,0,1.339.674h4.313c1.725,0,1.914.764,1.914,1.626v14h.009c0,1.249-.673,1.824-2.012,1.824" fill="#fff"/>
+    <path id="Path_1545" data-name="Path 1545" d="M14.38,6.194a6.5,6.5,0,1,0,6.5,6.5,6.508,6.508,0,0,0-6.5-6.5m0,12a5.5,5.5,0,1,1,5.5-5.5,5.507,5.507,0,0,1-5.5,5.5" fill="#fff"/>
+    <path id="Path_1546" data-name="Path 1546" d="M17.381,12.194h-2.5v-2.5a.5.5,0,0,0-1,0v2.5h-2.5a.5.5,0,0,0,0,1h2.5v2.5a.5.5,0,1,0,1,0v-2.5h2.5a.5.5,0,0,0,0-1" fill="#fff"/>
+  </g>
+</svg>
+`,
+  edit: `
+<svg id="edit" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24.002" height="24" viewBox="0 0 24.002 24">
+  <defs>
+    <clipPath id="editclip-path">
+      <rect id="Rectangle_2778" data-name="Rectangle 2778" width="24.002" height="24" fill="none" stroke="#fff" stroke-width="1"/>
+    </clipPath>
+  </defs>
+  <g id="Group_591" data-name="Group 591" clip-path="url(#editclip-path)">
+    <path id="Path_1547" data-name="Path 1547" d="M21.5,13.5v9a1,1,0,0,1-1,1H1.5a1,1,0,0,1-1-1V3.5a1,1,0,0,1,1-1h11" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+    <path id="Path_1548" data-name="Path 1548" d="M9.824,17.007l-3.99,1.049L7,14.177,20.674.5,23.5,3.328Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+  </g>
+</svg>
+`,
+  crop: `
+<svg id="crop" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="cropclip-path">
+      <rect id="Rectangle_2787" data-name="Rectangle 2787" width="24" height="24" fill="currentColor"/>
+    </clipPath>
+  </defs>
+  <g id="Group_609" data-name="Group 609" clip-path="url(#cropclip-path)">
+    <path id="Path_1569" data-name="Path 1569" d="M18.95,5.05a.745.745,0,0,1,.243.536V18.2h.974V5.586a1.681,1.681,0,0,0-.521-1.232,1.681,1.681,0,0,0-1.232-.521H5.8v.974h12.61a.745.745,0,0,1,.536.243" fill="currentColor"/>
+    <path id="Path_1570" data-name="Path 1570" d="M5.609,19.17a.789.789,0,0,1-.779-.779V0H3.856V3.833H0v.974H3.856V18.391a1.748,1.748,0,0,0,1.753,1.753H19.193V24h.974V20.144H24V19.17Z" fill="currentColor"/>
+  </g>
+</svg>
+`,
+  rotate: `
+<svg id="rotate" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="rotateclip-path">
+      <rect id="Rectangle_2786" data-name="Rectangle 2786" width="24" height="24" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="Group_607" data-name="Group 607" clip-path="url(#rotateclip-path)">
+    <path id="Path_1567" data-name="Path 1567" d="M15.557,11H1.5A1.5,1.5,0,0,0,0,12.5v10A1.5,1.5,0,0,0,1.5,24H15.557a1.5,1.5,0,0,0,1.5-1.5v-10a1.5,1.5,0,0,0-1.5-1.5m.5,11.5a.5.5,0,0,1-.5.5H1.5a.5.5,0,0,1-.5-.5v-10a.5.5,0,0,1,.5-.5H15.557a.5.5,0,0,1,.5.5Z" fill="#fff"/>
+    <path id="Path_1568" data-name="Path 1568" d="M21.022,6.667A9.785,9.785,0,0,0,13.845,3.69h-2.2l2.9-2.876L13.83,0,9.624,4.181,13.83,8.387l.717-.814-2.9-2.9h2.2a8.825,8.825,0,0,1,6.5,2.69,8.859,8.859,0,0,1,2.677,6.483l.982,0a9.777,9.777,0,0,0-2.978-7.175" fill="#fff"/>
+  </g>
+</svg>
+`,
+  annotate: `
+<svg id="annotate" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="annotateclip-path">
+      <rect id="Rectangle_2785" data-name="Rectangle 2785" width="24" height="24" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="Group_605" data-name="Group 605" clip-path="url(#annotateclip-path)">
+    <path id="Path_1561" data-name="Path 1561" d="M9.575,21H4.934A2.5,2.5,0,0,0,2.99,19.051V4.949A2.5,2.5,0,0,0,4.934,3H18.993a2.5,2.5,0,0,0,1.943,1.949V11.11a.5.5,0,1,0,1,0V4.949A2.5,2.5,0,1,0,18.993,2H4.934A2.493,2.493,0,1,0,2,4.949v14.1A2.5,2.5,0,1,0,4.934,22H9.575a.5.5,0,0,0,0-1M21.435,1a1.5,1.5,0,1,1-1.5,1.5,1.5,1.5,0,0,1,1.5-1.5M1,2.5A1.495,1.495,0,1,1,2.493,4,1.5,1.5,0,0,1,1,2.5M2.493,23a1.5,1.5,0,1,1,1.494-1.5A1.5,1.5,0,0,1,2.493,23" fill="#fff"/>
+    <path id="Path_1562" data-name="Path 1562" d="M23.561,14.718l-.908-.912a1.483,1.483,0,0,0-1.944-.149l-4.539,3.35-2.563,2.571a.5.5,0,0,0,0,.707l.277.278-1.791,1.711A1,1,0,0,0,12.779,24h2.883a.5.5,0,0,0,.333-.128l.626-.563.509.511a.5.5,0,0,0,.7,0l2.613-2.627,3.264-4.534a1.5,1.5,0,0,0-.151-1.941M15.471,23H12.779l1.81-1.73L15.915,22.6Zm7.434-6.928-3.214,4.475-2.208,2.212-2.82-2.829,2.155-2.167,4.482-3.3a.5.5,0,0,1,.647.05h0l.907.912a.5.5,0,0,1,.05.647" fill="#fff"/>
+    <path id="Path_1563" data-name="Path 1563" d="M5.082,10.014a4.479,4.479,0,0,0,.738,2.46c.007.012.007.025.015.036l.009.009a4.5,4.5,0,1,0-.762-2.505M9.07,6.565V9.746L6.428,11.512A3.464,3.464,0,0,1,9.07,6.565m3.988,3.449a3.474,3.474,0,0,1-6.075,2.329L9.845,10.43a.5.5,0,0,0,.222-.416V6.565a3.491,3.491,0,0,1,2.991,3.449" fill="#fff"/>
+    <path id="Path_1564" data-name="Path 1564" d="M18.542,6.534H16.049a.5.5,0,0,0,0,1h2.493a.5.5,0,0,0,0-1" fill="#fff"/>
+    <path id="Path_1565" data-name="Path 1565" d="M18.542,9.534H16.049a.5.5,0,0,0,0,1h2.493a.5.5,0,0,0,0-1" fill="#fff"/>
+    <path id="Path_1566" data-name="Path 1566" d="M18.542,12.534H16.049a.5.5,0,0,0,0,1h2.493a.5.5,0,0,0,0-1" fill="#fff"/>
+  </g>
+</svg>
+`,
+  arrowDown: `
+<svg xmlns="http://www.w3.org/2000/svg" width="6.5" height="4.008" viewBox="0 0 6.5 4.008">
+  <g id="arrow-down" transform="translate(1145.886 -1660.582) rotate(90)">
+    <path id="Path_75" data-name="Path 75" d="M1661.34,1145.886l3.25-3.25-3.25-3.25-.758.758,2.492,2.492-2.492,2.492Z" transform="translate(0)" fill="#fff"/>
+  </g>
+</svg>
+`,
+  arrowUp: `
+<svg xmlns="http://www.w3.org/2000/svg" width="6.5" height="4.008" viewBox="0 0 6.5 4.008">
+  <g id="arrow-up" transform="translate(-1139.386 1664.59) rotate(-90)">
+    <path id="Path_75" data-name="Path 75" d="M1661.34,1145.886l3.25-3.25-3.25-3.25-.758.758,2.492,2.492-2.492,2.492Z" transform="translate(0)" fill="#fe8e14"/>
   </g>
 </svg>
 `,

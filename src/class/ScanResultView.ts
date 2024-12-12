@@ -351,7 +351,7 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
 
 const DEFAULT_PREVIEW_CONTROLS_HTML = `
   <div class="mwc-preview-control-btn">
-    <div class="mwc-preview-control-icon">${MWC_ICONS.exportImage}</div>
+    <div class="mwc-preview-control-icon">${MWC_ICONS.export}</div>
     <div>Export Image</div>
   </div>
   <div class="mwc-preview-control-btn">
