@@ -346,6 +346,8 @@ export default class DocumentScannerView {
      */
     if (this.frameCount >= this.config.consecutiveResultFramesBeforeNormalization) {
       this.frameCount = 0;
+      await this.toggleAutoCapture(false); // turn off auto capture
+
       await this.takePhoto();
     }
   }
