@@ -301,12 +301,12 @@ export const MWC_ICONS = {
 <svg id="continue" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
   <defs>
     <clipPath id="continueclip-path">
-      <rect id="Rectangle_2774" data-name="Rectangle 2774" width="24" height="24" fill="#fff"/>
+      <rect id="Rectangle_2774" data-name="Rectangle 2774" width="24" height="24" fill="currentColor"/>
     </clipPath>
   </defs>
   <g id="Group_582" data-name="Group 582" clip-path="url(#continueclip-path)">
-    <path id="Path_1524" data-name="Path 1524" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0m0,23A11,11,0,1,1,23,12,11.013,11.013,0,0,1,12,23" fill="#fff"/>
-    <path id="Path_1525" data-name="Path 1525" d="M19.862,12a.17.17,0,0,0,0-.024.512.512,0,0,0-.033-.168.532.532,0,0,0-.113-.17l-4.219-4.29a.5.5,0,0,0-.714,0,.51.51,0,0,0,0,.719l3.371,3.428H4.643a.509.509,0,0,0,0,1.018h13.5l-3.373,3.428a.512.512,0,0,0,0,.72.5.5,0,0,0,.714,0l4.224-4.295a.438.438,0,0,0,.056-.086.5.5,0,0,0,.051-.078A.521.521,0,0,0,19.862,12h0" fill="#fff"/>
+    <path id="Path_1524" data-name="Path 1524" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0m0,23A11,11,0,1,1,23,12,11.013,11.013,0,0,1,12,23" fill="currentColor"/>
+    <path id="Path_1525" data-name="Path 1525" d="M19.862,12a.17.17,0,0,0,0-.024.512.512,0,0,0-.033-.168.532.532,0,0,0-.113-.17l-4.219-4.29a.5.5,0,0,0-.714,0,.51.51,0,0,0,0,.719l3.371,3.428H4.643a.509.509,0,0,0,0,1.018h13.5l-3.373,3.428a.512.512,0,0,0,0,.72.5.5,0,0,0,.714,0l4.224-4.295a.438.438,0,0,0,.056-.086.5.5,0,0,0,.051-.078A.521.521,0,0,0,19.862,12h0" fill="currentColor"/>
   </g>
 </svg>
   `,

@@ -340,12 +340,14 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
 
 .mwc-preview-control-btn.continue {
   background-color: #000000;
+  color: #fe8e14;
 }
 
 .mwc-preview-control-icon svg {
   padding-top: 0.5rem;
   width: 24px;
   height: 24px;
+  fill: #fe8e14;
 }
 `;
 
