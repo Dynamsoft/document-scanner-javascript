@@ -40,6 +40,12 @@ export const mobileEditViewerUiConfig = {
       type: DDV.Elements.Layout,
       className: "ddv-edit-viewer-footer-mobile",
       children: [
+        {
+          type: DDV.Elements.DeleteCurrent,
+          events: {
+            click: "showDocumentPageByDelete",
+          },
+        },
         DDV.Elements.Crop,
         {
           type: DDV.Elements.AnnotationSet,

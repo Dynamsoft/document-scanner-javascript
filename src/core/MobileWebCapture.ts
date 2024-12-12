@@ -69,6 +69,7 @@ class MobileWebCapture extends MobileDocumentScanner {
         config: {
           container: pageViewConfig.container,
           onDocumentClick: () => this.switchView(EnumMWCViews.Document),
+          onAddPage: () => this.handleCameraCapture(EnumMWCViews.Document),
         },
         isVisible: false,
       },
@@ -180,7 +181,7 @@ class MobileWebCapture extends MobileDocumentScanner {
           const doc = await (this.mwcViews.library.instance as LibraryView).createAndLoadDocument(sources);
 
           this.handleDocumentClick(doc.uid);
-        } else if (sourceView === EnumMWCViews.Document) {
+        } else if (sourceView === EnumMWCViews.Document || sourceView === EnumMWCViews.Page) {
           // Add to current document when capturing from Document view
           const documentView = this.mwcViews[EnumMWCViews.Document].instance as DocumentView;
           const currentDoc = documentView.browseViewer.currentDocument;
@@ -192,9 +193,6 @@ class MobileWebCapture extends MobileDocumentScanner {
                 fileData: blob,
               },
             ]);
-
-            // Stay on document view with updated content
-            documentView.setVisible(true);
           }
         }
       }

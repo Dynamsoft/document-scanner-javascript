@@ -6,6 +6,7 @@ import { MWC_ICONS } from "../util/icons";
 export interface PageViewConfig {
   container: HTMLElement;
   onDocumentClick?: () => void;
+  onAddPage?: () => void;
 }
 
 export class PageView {
@@ -17,7 +18,7 @@ export class PageView {
 
   documentBtn: HTMLElement;
   exportBtn: HTMLElement;
-  retakeBtn: HTMLElement;
+  deletePageBtn: HTMLElement;
   captureAnotherBtn: HTMLElement;
   editBtn: HTMLElement;
 
@@ -94,7 +95,7 @@ export class PageView {
   private bindPageViewEvents() {
     this.editViewer.on("backToDocument", () => this.handleDocumentBtn());
 
-    this.editViewer.on("showThumbnailPageByClear", () => {
+    this.editViewer.on("showDocumentPageByDelete", () => {
       showInfoDialog("Deleted", this.config.container);
 
       const count = this.editViewer.currentDocument.pages.length;
@@ -117,7 +118,6 @@ export class PageView {
         this.toggleDDVHeaderButtons(true);
         this.isCroppingMode = false;
       }
-      console.log(e);
     });
 
     // Bind behavior to buttons in annotation mode
@@ -177,7 +177,7 @@ export class PageView {
     // Normal mode toolbar
     this.documentBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(1)");
     this.exportBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(2)");
-    this.retakeBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(3)");
+    this.deletePageBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(3)");
     this.captureAnotherBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(4)");
     this.editBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(5)");
 
@@ -190,7 +190,8 @@ export class PageView {
     // Bind normal mode events
     this.documentBtn?.addEventListener("click", () => this.handleDocumentBtn());
     // this.exportBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
-    // this.retakeBtn?.addEventListener("click", () => this.config.onGalleryImport());
+    this.deletePageBtn?.addEventListener("click", () => this.handleDeletePage());
+    this.captureAnotherBtn?.addEventListener("click", () => this.config.onAddPage());
     this.editBtn?.addEventListener("click", () => this.handleEditMode());
 
     // Bind Edit mode events
@@ -220,6 +221,10 @@ export class PageView {
     this.editViewer.saveOperations();
 
     this.config.onDocumentClick();
+  }
+
+  private handleDeletePage() {
+    (this.config.container.querySelector(".ddv-delete-current") as HTMLElement).click();
   }
 
   private updateEditViewTopbar(mode: "base" | "edit") {
@@ -415,12 +420,12 @@ const PAGE_VIEW_CONTROLS_HTML = `
     <div>Export</div>
   </div>
   <div class="mwc-page-view-control-btn">
-    <div class="mwc-page-view-control-icon">${MWC_ICONS.retake}</div>
-    <div>Re-take</div>
+    <div class="mwc-page-view-control-icon">${MWC_ICONS.delete}</div>
+    <div>Delete Page</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.captureAnother}</div>
-    <div>Add</div>
+    <div>Add Page</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.edit}</div>
