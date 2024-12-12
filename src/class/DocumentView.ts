@@ -1,4 +1,4 @@
-import { BrowseViewer, DDV } from "dynamsoft-document-viewer";
+import { BrowseViewer, DDV, IDocument } from "dynamsoft-document-viewer";
 import { isMobile, showInfoDialog } from "../util";
 import { MWC_ICONS } from "../util/icons";
 
@@ -27,6 +27,7 @@ export class DocumentView {
   libraryBtn: HTMLElement;
   cameraCaptureBtn: HTMLElement;
   galleryInputBtn: HTMLElement;
+  downloadBtn: HTMLElement;
   fileOperationsBtn: HTMLElement;
 
   copyToBtn: HTMLElement;
@@ -212,7 +213,8 @@ export class DocumentView {
     this.libraryBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(1)");
     this.cameraCaptureBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(2)");
     this.galleryInputBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(3)");
-    this.fileOperationsBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(4)");
+    this.downloadBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(4)");
+    this.fileOperationsBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(5)");
 
     // Selection mode toolbar
     this.copyToBtn = this.selectedToolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(1)");
@@ -225,6 +227,7 @@ export class DocumentView {
     this.libraryBtn?.addEventListener("click", () => this.config.onLibraryClick());
     this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
     this.galleryInputBtn?.addEventListener("click", () => this.config.onGalleryImport());
+    this.downloadBtn?.addEventListener("click", () => DocumentView.handleDownload(this.browseViewer.currentDocument));
     this.fileOperationsBtn?.addEventListener("click", () => this.handleFileOperationsClick());
 
     // // Bind selection mode events
@@ -268,6 +271,26 @@ export class DocumentView {
       visibility: show ? "visible" : "hidden",
       border: "1px solid #707070",
     });
+  }
+
+  static handleDownload(doc: IDocument) {
+    if (doc?.pages?.length) {
+      doc
+        .saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${doc.name}.pdf`;
+          a.click();
+          a.remove();
+        });
+    } else {
+      console.warn("Failed to download. Document contains no pages");
+    }
   }
 
   private handleFileOperationsClick() {
@@ -434,7 +457,11 @@ const DOCUMENT_VIEW_CONTROLS_HTML = `
     <div class="mwc-document-view-control-icon">${MWC_ICONS.galleryImport}</div>
     <div>Import</div>
   </div>
-    <div class="mwc-document-view-control-btn">
+  <div class="mwc-document-view-control-btn">
+    <div class="mwc-document-view-control-icon">${MWC_ICONS.download}</div>
+    <div>Download</div>
+  </div>
+  <div class="mwc-document-view-control-btn">
     <div class="mwc-document-view-control-icon">${MWC_ICONS.fileOperations}</div>
     <div>Manage</div>
   </div>

@@ -1,7 +1,8 @@
-import { DDV, IDocument } from "dynamsoft-document-viewer";
+import { DDV } from "dynamsoft-document-viewer";
 import { DocumentItem } from "../component/DocumentItem";
 import { showInfoDialog } from "../util";
 import { MWC_ICONS } from "../util/icons";
+import { DocumentView } from "./DocumentView";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
@@ -301,27 +302,9 @@ export class LibraryView {
   }
 
   private handleDownload() {
-    const docDownload = (doc: IDocument) => {
-      doc
-        .saveToPdf({
-          mimeType: "application/octet-stream",
-          saveAnnotation: "annotation",
-        })
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${doc.name}.pdf`;
-          a.click();
-          a.remove();
-        });
-    };
-
     this.checkedDocUids.forEach((uid) => {
       const doc = DDV.documentManager.getDocument(uid);
-      if (doc.pages.length) {
-        docDownload(doc);
-      }
+      DocumentView.handleDownload(doc);
     });
   }
 
