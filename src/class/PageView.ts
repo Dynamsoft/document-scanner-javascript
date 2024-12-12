@@ -93,8 +93,6 @@ export class PageView {
   }
 
   private bindPageViewEvents() {
-    this.editViewer.on("backToDocument", () => this.handleDocumentBtn());
-
     this.editViewer.on("showDocumentPageByDelete", () => {
       showInfoDialog("Deleted", this.config.container);
 

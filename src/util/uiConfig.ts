@@ -11,20 +11,7 @@ export const mobileTopBarChildrenConfig: Record<"base" | "edit", any> = {
   edit: {
     type: DDV.Elements.Layout,
     className: "ddv-edit-viewer-header-mobile",
-    children: [
-      {
-        type: DDV.Elements.Button,
-        className: "mwc-icon iconReset",
-        style: {
-          fontSize: "22px",
-        },
-        events: {
-          click: "resetAllAnnotation",
-        },
-      },
-      DDV.Elements.Undo,
-      DDV.Elements.Redo,
-    ],
+    children: [DDV.Elements.Undo, DDV.Elements.Redo],
   },
 };
 
