@@ -1,0 +1,56 @@
+{
+  "name": "dynamsoft-mobile-document-scanner",
+  "version": "10.2.1007",
+  "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
+  "main": "./dist/mwc-2.js",
+  "module": "./dist/mwc-2.esm.js",
+  "files": [
+    "/dist",
+    "/LICENSE"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": {
+        "require": "./dist/types/index.d.cts",
+        "import": "./dist/types/index.d.ts"
+      },
+      "import": "./dist/mwc-2.esm.js",
+      "require": "./dist/mwc-2.js"
+    }
+  },
+  "types": "./dist/types/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:production": "rollup -c --environment BUILD:production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ TO DO"
+  },
+  "keywords": [
+    "barcode",
+    "js",
+    "javascript"
+  ],
+  "author": "Dynamsoft",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/ TO DO"
+  },
+  "homepage": "https://www.dynamsoft.com",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.11.6",
+    "rollup": "^4.9.5",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dynamsoft-capture-vision-bundle": "2.4.2200"
+  }
+}

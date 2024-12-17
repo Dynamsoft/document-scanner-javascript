@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+      "baseUrl": ".", 
+      "paths": {
+      "dynamsoft-mobile-document-scanner": ["mds/types/index.d.ts"]  // Point to the types file
+    },
+      "target": "es2017",
+      "module": "esnext",
+      "outDir": "dist",
+      "moduleResolution": "node",
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "sourceMap": true,
+      "declaration": true,
+      "declarationMap": true,
+      "declarationDir": "./types",
+      "noImplicitAny": true,
+      "resolveJsonModule": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "mds/types/**/*.d.ts"  // Include the type definitions
+      ],    
+    "exclude": [
+      "node_modules/**"
+    ]
+  }
+  
