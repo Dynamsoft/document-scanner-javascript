@@ -1,8 +1,17 @@
-import { DDV } from "dynamsoft-document-viewer";
+import { DDV, IDocument } from "dynamsoft-document-viewer";
 import { DocumentItem } from "../component/DocumentItem";
 import { showInfoDialog } from "../util";
 import { MWC_ICONS } from "../util/icons";
 import { DocumentView } from "./DocumentView";
+
+type Status = "success" | "failed";
+
+type UploadedDocument = {
+  fileName: string;
+  downloadUrl: string;
+  status: Status;
+  uploadTime?: string;
+};
 
 export interface LibraryViewConfig {
   container: HTMLElement;
@@ -10,11 +19,14 @@ export interface LibraryViewConfig {
   onGalleryImport?: () => Promise<void>;
   onDocumentCreated?: (docId: string) => void;
   onDocumentClick?: (docId: string) => void;
+  uploadDocument?: (pdfBlob: Blob) => void | UploadedDocument;
 }
 
 export class LibraryView {
   checkedDocUids: string[] = [];
   docItems: DocumentItem[] = [];
+
+  uploadedFiles: UploadedDocument[] = [];
 
   docSelectAll: HTMLElement; // todo
   enterSelectionMode: HTMLElement; //todo
@@ -153,15 +165,15 @@ export class LibraryView {
     this.printBtn.classList.toggle("selected", isSingleSelection);
     this.printBtn.classList.toggle("disabled", !isSingleSelection);
     this.printBtn.setAttribute("disabled", isSingleSelection ? "false" : "true");
+
+    if (!this.config.uploadDocument) {
+      this.printBtn.classList.add("disabled");
+      this.printBtn.setAttribute("disabled", "true");
+    }
   }
 
   private bindDocumentManagerEvents() {
     DDV.documentManager.on("documentCreated", (e) => {
-      // const emptyContainer = this.dom.getElementsByClassName("empty-container")[0];
-
-      // if(emptyContainer.style.display !== "none") {
-      //     this._showEmptyImageInfo(false)
-      // }
       const docItem = new DocumentItem({
         docId: e.docUid,
         onCheckedChange: () => this.handleDocumentChecked(),
@@ -216,7 +228,7 @@ export class LibraryView {
     // // Bind selection mode events
     this.shareBtn?.addEventListener("click", async () => await this.handleShare());
     this.printBtn?.addEventListener("click", () => this.handlePrint());
-    // this.uploadBtn?.addEventListener("click", () => this.handleUpload());
+    this.uploadBtn?.addEventListener("click", () => this.handleUpload());
     this.downloadBtn?.addEventListener("click", () => this.handleDownload());
     this.deleteBtn?.addEventListener("click", () => {
       this.handleDelete();
@@ -296,8 +308,58 @@ export class LibraryView {
     const docUid = this.checkedDocUids[0];
     const doc = DDV.documentManager.getDocument(docUid);
 
-    if (doc.pages) {
+    if (doc?.pages?.length) {
       doc.print();
+    }
+  }
+
+  private addUploadedFile(result: UploadedDocument) {
+    const uploadedDoc: UploadedDocument = {
+      fileName: result.fileName,
+      downloadUrl: result.downloadUrl,
+      uploadTime: result.uploadTime ?? "",
+      status: result.status,
+    };
+    this.uploadedFiles.push(uploadedDoc);
+  }
+
+  private async handleUpload() {
+    if (!this.config.uploadDocument) {
+      throw new Error("No upload function configured");
+    }
+
+    try {
+      const uploadPromises = this.checkedDocUids.map(async (uid) => {
+        const doc = DDV.documentManager.getDocument(uid);
+        if (doc?.pages?.length) {
+          const pdfBlob = await doc.saveToPdf({
+            mimeType: "application/pdf",
+            saveAnnotation: "annotation",
+          });
+
+          return await this.config.uploadDocument(pdfBlob);
+        } else {
+          console.warn(`Upload failed: ${doc.name} contains no pages`);
+          showInfoDialog("Document contains no pages!", this.config.container, "warning");
+        }
+      });
+
+      const results = await Promise.all(uploadPromises);
+      const successfulUploads = results?.filter(
+        (r) => (r as UploadedDocument)?.status === "success"
+      ) as UploadedDocument[];
+
+      if (successfulUploads.length) {
+        showInfoDialog("Uploaded", this.config.container);
+        successfulUploads.forEach((result) => {
+          this.addUploadedFile(result);
+        });
+        this.handleBackButton(); // Clear selection
+      }
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.error("Upload failed:", errMsg);
+      showInfoDialog("Upload Failed", this.config.container, "warning");
     }
   }
 

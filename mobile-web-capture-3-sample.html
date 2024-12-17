@@ -53,6 +53,56 @@
 
       const normalizedResult = document.querySelector("#normalized-result");
 
+      const uploadToServer = async (pdfBlob) => {
+        try {
+          // Configuration
+          const BASE_URL = "https://tst.dynamsoft.com/temp/collect/mwc-server-test";
+          const fileName = `doc_${Date.now()}.pdf`;
+
+          // Create form data
+          const formData = new FormData();
+          formData.append("RemoteFile", pdfBlob, fileName);
+          formData.append("filename", fileName);
+          formData.append("SessionID", "MWC");
+
+          // Upload file
+          const response = await fetch(`${BASE_URL}/SaveToFileEx.aspx`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const responseText = await response.text();
+
+          if (!responseText || !responseText.includes("UploadedRealFileName")) {
+            throw new Error("Invalid server response");
+          }
+
+          const serverFile = responseText.match(/UploadedRealFileName:(\d+)\\(.+)$/);
+          if (!serverFile) {
+            throw new Error("Failed to parse server response");
+          }
+
+          const [, uploadTime, serverFileName] = serverFile;
+          const downloadUrl = `${BASE_URL}/online_demo_download.aspx?ImageName=${encodeURIComponent(
+            `${uploadTime}\\${serverFileName}`
+          )}`;
+
+          // NOTE: Ensure the object returned contains status, fileName, and downloadUrl
+          return {
+            status: "success",
+            fileName: serverFileName,
+            downloadUrl,
+            uploadTime,
+          };
+        } catch (error) {
+          console.error("Upload failed:", error);
+          return {
+            status: "failed",
+            fileName: "",
+          };
+        }
+      };
+
       // Initialize MWC
       const mwc = new MobileWebCapture({
         license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
@@ -65,6 +115,7 @@
         },
         libraryViewConfig: {
           container: libraryContainer,
+          uploadDocument: uploadToServer,
         },
         documentViewConfig: {
           container: documentContainer,

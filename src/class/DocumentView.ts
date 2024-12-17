@@ -273,26 +273,6 @@ export class DocumentView {
     });
   }
 
-  static handleDownload(doc: IDocument) {
-    if (doc?.pages?.length) {
-      doc
-        .saveToPdf({
-          mimeType: "application/octet-stream",
-          saveAnnotation: "annotation",
-        })
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${doc.name}.pdf`;
-          a.click();
-          a.remove();
-        });
-    } else {
-      console.warn("Failed to download. Document contains no pages");
-    }
-  }
-
   private handleFileOperationsClick() {
     this.updateToolbarState();
     this.toggleSelectionMode(true);
@@ -328,6 +308,49 @@ export class DocumentView {
 
   private handleBackButton() {
     this.toggleSelectionMode(false);
+  }
+
+  static handleDownload(doc: IDocument) {
+    if (doc?.pages?.length) {
+      doc
+        .saveToPdf({
+          mimeType: "application/octet-stream",
+          saveAnnotation: "annotation",
+        })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${doc.name}.pdf`;
+          a.click();
+          a.remove();
+        });
+    } else {
+      console.warn("Failed to download. Document contains no pages");
+    }
+  }
+
+  static async handleUpload(doc: IDocument, uploadUrl: string) {
+    const pdfBlob = await doc.saveToPdf({
+      mimeType: "application/pdf",
+      saveAnnotation: "annotation",
+    });
+
+    const formData = new FormData();
+    formData.append("file", pdfBlob, `${doc.name}.pdf`);
+    formData.append("documentName", doc.name);
+    formData.append("uploadTime", new Date().toISOString());
+
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    return response;
   }
 }
 
