@@ -547,13 +547,13 @@ user-select: none;
   background-color: #E36605;
 }
 
-.mwc-library-control-btn.selected.back {
-  background-color: #323234;
-}
-
 .mwc-library-control-btn.disabled {
   background-color: #323234;
   cursor: not-allowed;
+}
+
+.mwc-library-control-btn.disabled >div {
+  opacity: 0.4;
 }
 
 .mwc-library-control-icon {

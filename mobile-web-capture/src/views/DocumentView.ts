@@ -471,13 +471,13 @@ user-select: none;
   background-color: #E36605;
 }
 
-.mwc-document-view-control-btn.selected.back {
-  background-color: #323234;
-}
-
 .mwc-document-view-control-btn.disabled {
   background-color: #323234;
   cursor: not-allowed;
+}
+
+.mwc-document-view-control-btn.disabled >div {
+  opacity: 0.4;
 }
 
 .mwc-document-view-control-icon {
