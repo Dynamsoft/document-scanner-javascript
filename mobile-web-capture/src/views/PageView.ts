@@ -464,7 +464,7 @@ const DEFAULT_PAGE_VIEW_STYLE = `
 const PAGE_VIEW_CONTROLS_HTML = `
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.back}</div>
-    <div>Document</div>
+    <div>Back</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.delete}</div>
