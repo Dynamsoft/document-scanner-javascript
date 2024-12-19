@@ -21,7 +21,8 @@ export class PageView {
   annotationToolbarContainer: HTMLElement;
 
   documentBtn: HTMLElement;
-  exportBtn: HTMLElement;
+  uploadBtn: HTMLElement;
+  downloadBtn: HTMLElement;
   deletePageBtn: HTMLElement;
   captureAnotherBtn: HTMLElement;
   editBtn: HTMLElement;
@@ -178,10 +179,11 @@ export class PageView {
   private bindToolbarEvents() {
     // Normal mode toolbar
     this.documentBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(1)");
-    this.exportBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(2)");
-    this.deletePageBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(3)");
-    this.captureAnotherBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(4)");
-    this.editBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(5)");
+    this.deletePageBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(2)");
+    this.captureAnotherBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(3)");
+    this.uploadBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(4)");
+    this.downloadBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(5)");
+    this.editBtn = this.toolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(6)");
 
     // Edit mode toolbar
     this.cropBtn = this.editToolbarContainer.querySelector(".mwc-page-view-control-btn:nth-child(1)");
@@ -191,9 +193,10 @@ export class PageView {
 
     // Bind normal mode events
     this.documentBtn?.addEventListener("click", () => this.handleDocumentBtn());
-    this.exportBtn?.addEventListener("click", async () => await this.handleUpload());
     this.deletePageBtn?.addEventListener("click", () => this.handleDeletePage());
     this.captureAnotherBtn?.addEventListener("click", () => this.config.onAddPage());
+    this.uploadBtn?.addEventListener("click", async () => await this.handleUpload());
+    this.downloadBtn?.addEventListener("click", async () => await this.handleDownload());
     this.editBtn?.addEventListener("click", () => this.handleEditMode());
 
     // Bind Edit mode events
@@ -309,12 +312,11 @@ export class PageView {
     try {
       const doc = this.editViewer.currentDocument;
       const currentPage = this.editViewer.getCurrentPageIndex();
-
-      const pdfBlob = await doc.saveToJpeg(currentPage, {
+      const blob = await doc.saveToJpeg(currentPage, {
         saveAnnotation: true,
       });
 
-      const result = await this.config?.exportConfig?.uploadToServer(`${doc.name}-${currentPage}.jpg`, pdfBlob);
+      const result = await this.config?.exportConfig?.uploadToServer(`${doc.name}-${currentPage}.jpg`, blob);
 
       if ((result as UploadedDocument)?.status === "success") {
         showInfoDialog("Uploaded", this.config.container);
@@ -324,6 +326,27 @@ export class PageView {
       let errMsg = ex?.message || ex;
       console.error("Upload failed:", errMsg);
       showInfoDialog("Upload Failed", this.config.container, "warning");
+    }
+  }
+
+  private async handleDownload() {
+    try {
+      const doc = this.editViewer.currentDocument;
+      const currentPage = this.editViewer.getCurrentPageIndex();
+      const blob = await doc.saveToJpeg(currentPage, {
+        saveAnnotation: true,
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${doc.name}.jpg`;
+      a.click();
+      a.remove();
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.warn("Download failed:", errMsg);
+      showInfoDialog("Download Failed", this.config.container, "warning");
     }
   }
 
@@ -440,12 +463,8 @@ const DEFAULT_PAGE_VIEW_STYLE = `
 
 const PAGE_VIEW_CONTROLS_HTML = `
   <div class="mwc-page-view-control-btn">
-    <div class="mwc-page-view-control-icon">${MWC_ICONS.document}</div>
+    <div class="mwc-page-view-control-icon">${MWC_ICONS.back}</div>
     <div>Document</div>
-  </div>
-  <div class="mwc-page-view-control-btn">
-    <div class="mwc-page-view-control-icon">${MWC_ICONS.export}</div>
-    <div>Export</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.delete}</div>
@@ -454,6 +473,14 @@ const PAGE_VIEW_CONTROLS_HTML = `
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.captureAnother}</div>
     <div>Add Page</div>
+  </div>
+  <div class="mwc-page-view-control-btn">
+    <div class="mwc-page-view-control-icon">${MWC_ICONS.upload}</div>
+    <div>Upload</div>
+  </div>
+    <div class="mwc-page-view-control-btn">
+    <div class="mwc-page-view-control-icon">${MWC_ICONS.download}</div>
+    <div>Download</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.edit}</div>

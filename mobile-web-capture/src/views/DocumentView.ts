@@ -506,7 +506,7 @@ ${MWC_ICONS.emptyLibrary}
 
 const DOCUMENT_VIEW_CONTROLS_HTML = `
   <div class="mwc-document-view-control-btn">
-    <div class="mwc-document-view-control-icon">${MWC_ICONS.library}</div>
+    <div class="mwc-document-view-control-icon">${MWC_ICONS.back}</div>
     <div>Library</div>
   </div>
   <div class="mwc-document-view-control-btn">
