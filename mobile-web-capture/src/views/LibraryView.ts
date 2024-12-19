@@ -3,10 +3,11 @@ import { DocumentItem } from "./components/DocumentItem";
 import { showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
 import { DocumentView } from "./DocumentView";
+import { DocumentHistoryItem } from "./components/DocumentHistoryItem";
 
 type Status = "success" | "failed";
 
-type UploadedDocument = {
+export type UploadedDocument = {
   fileName: string;
   downloadUrl: string;
   status: Status;
@@ -20,6 +21,8 @@ export interface LibraryViewConfig {
   onDocumentCreated?: (docId: string) => void;
   onDocumentClick?: (docId: string) => void;
   uploadDocument?: (pdfBlob: Blob) => void | UploadedDocument;
+  downloadDocument?: (doc: UploadedDocument) => void;
+  deleteDocument?: (doc: UploadedDocument) => void;
 }
 
 export class LibraryView {
@@ -27,6 +30,7 @@ export class LibraryView {
   docItems: DocumentItem[] = [];
 
   uploadedFiles: UploadedDocument[] = [];
+  isHistoryView: boolean = false;
 
   docSelectAll: HTMLElement; // todo
   enterSelectionMode: HTMLElement; //todo
@@ -35,6 +39,9 @@ export class LibraryView {
   headerContainer: HTMLElement;
   emptyContentContainer: HTMLElement;
   libraryContentContainer: HTMLElement;
+
+  emptyHistoryContainer: HTMLElement;
+  historyContentContainer: HTMLElement;
 
   toolbarContainer: HTMLElement;
   selectedToolbarContainer: HTMLElement;
@@ -72,7 +79,7 @@ export class LibraryView {
       const docs = DDV.documentManager.getAllDocuments();
       const docCount = docs.length;
 
-      this.toggleShowContentContainer(!!docCount);
+      this.showLibraryContentContainer(!!docCount);
 
       if (docCount) {
         this.docItems.forEach((item) => {
@@ -90,6 +97,7 @@ export class LibraryView {
     this.createStylesheet();
     this.createHeader();
     this.createLibraryDocuments();
+    this.createHistoryView();
     this.createToolbar();
   }
 
@@ -127,6 +135,20 @@ export class LibraryView {
     this.config.container.append(this.emptyContentContainer);
   }
 
+  private createHistoryView() {
+    this.historyContentContainer = document.createElement("div");
+    this.historyContentContainer.className = "mwc-history-content";
+    this.historyContentContainer.style.display = "none";
+
+    this.emptyHistoryContainer = document.createElement("div");
+    this.emptyHistoryContainer.className = "mwc-history-content-empty";
+    this.emptyHistoryContainer.innerHTML = EMPTY_HISTORY_CONTAINER_HTML;
+    this.emptyHistoryContainer.style.display = "none";
+
+    this.config.container.append(this.historyContentContainer);
+    this.config.container.append(this.emptyHistoryContainer);
+  }
+
   private createToolbar() {
     this.toolbarContainer = document.createElement("div");
     this.toolbarContainer.className = "mwc-library-controls";
@@ -142,9 +164,38 @@ export class LibraryView {
     this.bindToolbarEvents();
   }
 
-  private toggleShowContentContainer(show: boolean) {
+  private showLibraryContentContainer(show: boolean) {
     this.emptyContentContainer.style.display = show ? "none" : "flex";
     this.libraryContentContainer.style.display = show ? "flex" : "none";
+  }
+
+  private showHistoryContentContainer(show: boolean) {
+    this.emptyHistoryContainer.style.display = show ? "none" : "flex";
+    this.historyContentContainer.style.display = show ? "flex" : "none";
+  }
+
+  private toggleHistoryView(show: boolean) {
+    this.isHistoryView = show;
+
+    // Toggle headers
+    this.headerContainer.textContent = show ? "History" : "Library";
+
+    // Toggle content
+    if (show) {
+      this.libraryContentContainer.style.display = "none";
+      this.emptyContentContainer.style.display = "none";
+      this.showHistoryContentContainer(!!this.uploadedFiles.length);
+    } else {
+      this.historyContentContainer.style.display = "none";
+      this.emptyHistoryContainer.style.display = "none";
+
+      this.showLibraryContentContainer(!!this.docItems.length);
+    }
+
+    // Update toolbar button
+    this.uploadedFilesBtn.innerHTML = show
+      ? `<div class="mwc-library-control-icon">${MWC_ICONS.back}</div><div>Back</div>`
+      : `<div class="mwc-library-control-icon">${MWC_ICONS.uploadedFiles}</div><div>History</div>`;
   }
 
   private toggleShowSelectedToolbar() {
@@ -218,12 +269,28 @@ export class LibraryView {
 
     // Bind normal mode events
     this.addNewBtn?.addEventListener("click", async () => {
+      if (this.isHistoryView) {
+        this.toggleHistoryView(false);
+      }
+
       await this.handleNewDocument();
       showInfoDialog("Created", this.config.container);
     });
-    this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
-    this.galleryInputBtn?.addEventListener("click", async () => await this.config.onGalleryImport());
-    // this.uploadedFilesBtn?.addEventListener("click", () => this.handleUploadedFiles());
+    this.cameraCaptureBtn?.addEventListener("click", async () => {
+      if (this.isHistoryView) {
+        this.toggleHistoryView(false);
+      }
+
+      await this.config.onCameraCapture();
+    });
+    this.galleryInputBtn?.addEventListener("click", async () => {
+      if (this.isHistoryView) {
+        this.toggleHistoryView(false);
+      }
+
+      await this.config.onGalleryImport();
+    });
+    this.uploadedFilesBtn?.addEventListener("click", () => this.toggleHistoryView(!this.isHistoryView));
 
     // // Bind selection mode events
     this.shareBtn?.addEventListener("click", async () => await this.handleShare());
@@ -321,6 +388,21 @@ export class LibraryView {
       status: result.status,
     };
     this.uploadedFiles.push(uploadedDoc);
+
+    const historyItem = new DocumentHistoryItem({
+      doc: result,
+      onDeleteDocument: () => this.handleHistoryDelete(result),
+      onDownloadDocument: () => this.config?.downloadDocument(result),
+    });
+
+    this.historyContentContainer.append(historyItem.getDom());
+  }
+
+  private async handleHistoryDelete(doc: UploadedDocument) {
+    this.config?.deleteDocument(doc);
+    this.uploadedFiles = this.uploadedFiles.filter((file) => file.uploadTime !== doc.uploadTime);
+
+    this.showHistoryContentContainer(!!this.uploadedFiles.length);
   }
 
   private async handleUpload() {
@@ -404,6 +486,7 @@ padding: 0.5rem;
 user-select: none;
 }
 
+.mwc-history-content,
 .mwc-library-content {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -415,6 +498,7 @@ user-select: none;
   margin-bottom: 30px;
 }
 
+.mwc-history-content-empty,
 .mwc-library-content-empty {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -431,11 +515,13 @@ user-select: none;
   height: auto;
 }
 
+.mwc-history-content-empty .title,
 .mwc-library-content-empty .title {
   margin-top: 2rem;
   font-size: 24px;
 }
 
+.mwc-history-content-empty .desc,
 .mwc-library-content-empty .desc {
   font-size: 16px;
 }
@@ -548,5 +634,12 @@ ${MWC_ICONS.emptyLibrary}
     <li>Click "<b>New</b>" to create a blank document</li>
     <li>Click "<b>Capture</b>" or "<b>Import</b>" to use images</li>
   </ul>
+</div>
+`;
+
+const EMPTY_HISTORY_CONTAINER_HTML = `
+${MWC_ICONS.emptyLibrary}
+<div class="title">
+  No uploaded files found!
 </div>
 `;

@@ -2,8 +2,8 @@
   "name": "dynamsoft-mobile-web-capture",
   "version": "10.2.1007",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/mwc-2.js",
-  "module": "./dist/mwc-2.esm.js",
+  "main": "./dist/mobile-web-capture.js",
+  "module": "./dist/mobile-web-capture.esm.js",
   "files": [
     "/dist",
     "/LICENSE",
@@ -16,8 +16,8 @@
         "require": "./dist/types/index.d.cts",
         "import": "./dist/types/index.d.ts"
       },
-      "import": "./dist/mwc-2.esm.js",
-      "require": "./dist/mwc-2.js"
+      "import": "./dist/mobile-web-capture.esm.js",
+      "require": "./dist/mobile-web-capture.js"
     }
   },
   "types": "./dist/types/index.d.ts",

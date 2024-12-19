@@ -58,3 +58,25 @@ const infoDialogStyle: Partial<CSSStyleDeclaration> = {
   gap: "0.25rem",
   transform: "translate(-50%, -50%)",
 };
+
+// Format ticks from C#
+export function formatTicks(ticks?: string): string {
+  if (!ticks) return "";
+  const ticksTo1970 = 621355968000000000;
+  const ticksPerMillisecond = 10000;
+
+  const milliseconds = (Number(ticks) - ticksTo1970) / ticksPerMillisecond;
+  const date = new Date(milliseconds);
+
+  // Get time zone offset in minutes and convert to milliseconds
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+  const localDate = new Date(milliseconds + timezoneOffset);
+
+  return localDate.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

@@ -53,6 +53,8 @@ class MobileWebCapture extends MobileDocumentScanner {
           onGalleryImport: () => this.handleGalleryImport(EnumMWCViews.Library),
           onDocumentClick: (docId) => this.handleDocumentClick(docId),
           uploadDocument: libraryViewConfig.uploadDocument,
+          downloadDocument: libraryViewConfig.downloadDocument,
+          deleteDocument: libraryViewConfig.deleteDocument,
         },
         isVisible: false,
       },

@@ -2,8 +2,8 @@
   "name": "dynamsoft-mobile-document-scanner",
   "version": "10.2.1007",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/mwc-2.js",
-  "module": "./dist/mwc-2.esm.js",
+  "main": "./dist/mobile-document-scanner.js",
+  "module": "./dist/mobile-document-scanner.esm.js",
   "files": [
     "/dist",
     "/LICENSE"
@@ -15,8 +15,8 @@
         "require": "./dist/types/index.d.cts",
         "import": "./dist/types/index.d.ts"
       },
-      "import": "./dist/mwc-2.esm.js",
-      "require": "./dist/mwc-2.js"
+      "import": "./dist/mobile-document-scanner.esm.js",
+      "require": "./dist/mobile-document-scanner.js"
     }
   },
   "types": "./dist/types/index.d.ts",

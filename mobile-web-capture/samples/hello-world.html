@@ -103,6 +103,29 @@
         }
       };
 
+      const deleteFromServer = async (doc) => {
+        try {
+          console.log(doc);
+          const BASE_URL = `https://tst.dynamsoft.com/temp/collect/mwc-server-test`;
+
+          const response = await fetch(
+            `${BASE_URL}/DeleteFile.aspx?SessionId=MWC&ImageName=${encodeURIComponent(
+              `${doc.uploadTime}\\${doc.fileName}`
+            )}`
+          );
+        } catch (error) {
+          console.error("Delete failed:", error);
+        }
+      };
+
+      const downloadFromServer = async (doc) => {
+        try {
+          window.open(doc.downloadUrl);
+        } catch (error) {
+          console.error("Download failed:", error);
+        }
+      };
+
       // Initialize MWC
       const mwc = new MobileWebCapture({
         license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
@@ -116,6 +139,8 @@
         libraryViewConfig: {
           container: libraryContainer,
           uploadDocument: uploadToServer,
+          downloadDocument: downloadFromServer,
+          deleteDocument: deleteFromServer,
         },
         documentViewConfig: {
           container: documentContainer,
