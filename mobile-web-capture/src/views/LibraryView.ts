@@ -408,7 +408,7 @@ export class LibraryView {
             saveAnnotation: "annotation",
           });
 
-          return await this.config?.exportConfig?.uploadToServer(doc.name, pdfBlob);
+          return await this.config?.exportConfig?.uploadToServer(`${doc.name}.pdf`, pdfBlob);
         } else {
           console.warn(`Upload failed: ${doc.name} contains no pages`);
           showInfoDialog("Document contains no pages!", this.config.container, "warning");
