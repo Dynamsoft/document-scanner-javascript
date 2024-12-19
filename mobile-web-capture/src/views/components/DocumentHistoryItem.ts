@@ -1,4 +1,4 @@
-import { UploadedDocument } from "../LibraryView";
+import { UploadedDocument } from "src/MobileWebCapture";
 import { formatTicks } from "../utils";
 import { MWC_ICONS } from "../utils/icons";
 

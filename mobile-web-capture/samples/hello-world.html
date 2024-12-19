@@ -53,15 +53,14 @@
 
       const normalizedResult = document.querySelector("#normalized-result");
 
-      const uploadToServer = async (pdfBlob) => {
+      const uploadToServer = async (fileName, blob) => {
         try {
           // Configuration
           const BASE_URL = "https://tst.dynamsoft.com/temp/collect/mwc-server-test";
-          const fileName = `doc_${Date.now()}.pdf`;
 
           // Create form data
           const formData = new FormData();
-          formData.append("RemoteFile", pdfBlob, fileName);
+          formData.append("RemoteFile", blob, fileName);
           formData.append("filename", fileName);
           formData.append("SessionID", "MWC");
 
@@ -105,7 +104,6 @@
 
       const deleteFromServer = async (doc) => {
         try {
-          console.log(doc);
           const BASE_URL = `https://tst.dynamsoft.com/temp/collect/mwc-server-test`;
 
           const response = await fetch(
@@ -147,6 +145,11 @@
         },
         pageViewConfig: {
           container: pageContainer,
+        },
+        exportConfig: {
+          uploadToServer,
+          downloadFromServer,
+          deleteFromServer,
         },
       });
       const { scannerView, normalizerView, scanResultView } = await mwc.initialize();

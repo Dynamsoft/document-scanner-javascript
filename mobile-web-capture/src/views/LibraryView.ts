@@ -1,35 +1,26 @@
-import { DDV, IDocument } from "dynamsoft-document-viewer";
+import { DDV } from "dynamsoft-document-viewer";
 import { DocumentItem } from "./components/DocumentItem";
 import { showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
 import { DocumentView } from "./DocumentView";
 import { DocumentHistoryItem } from "./components/DocumentHistoryItem";
-
-type Status = "success" | "failed";
-
-export type UploadedDocument = {
-  fileName: string;
-  downloadUrl: string;
-  status: Status;
-  uploadTime?: string;
-};
+import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
+  uploadedFiles: UploadedDocument[];
+  updateUploadedFiles: (newUploadedFiles: UploadedDocument[]) => void;
+  exportConfig: ExportConfig;
   onCameraCapture?: () => Promise<void>;
   onGalleryImport?: () => Promise<void>;
   onDocumentCreated?: (docId: string) => void;
   onDocumentClick?: (docId: string) => void;
-  uploadDocument?: (pdfBlob: Blob) => void | UploadedDocument;
-  downloadDocument?: (doc: UploadedDocument) => void;
-  deleteDocument?: (doc: UploadedDocument) => void;
 }
 
 export class LibraryView {
   checkedDocUids: string[] = [];
   docItems: DocumentItem[] = [];
 
-  uploadedFiles: UploadedDocument[] = [];
   isHistoryView: boolean = false;
 
   docSelectAll: HTMLElement; // todo
@@ -184,7 +175,8 @@ export class LibraryView {
     if (show) {
       this.libraryContentContainer.style.display = "none";
       this.emptyContentContainer.style.display = "none";
-      this.showHistoryContentContainer(!!this.uploadedFiles.length);
+      this.showHistoryContentContainer(!!this.config.uploadedFiles.length);
+      this.addUploadedFilesToHistory();
     } else {
       this.historyContentContainer.style.display = "none";
       this.emptyHistoryContainer.style.display = "none";
@@ -217,7 +209,7 @@ export class LibraryView {
     this.printBtn.classList.toggle("disabled", !isSingleSelection);
     this.printBtn.setAttribute("disabled", isSingleSelection ? "false" : "true");
 
-    if (!this.config.uploadDocument) {
+    if (!this.config?.exportConfig?.uploadToServer) {
       this.printBtn.classList.add("disabled");
       this.printBtn.setAttribute("disabled", "true");
     }
@@ -380,33 +372,30 @@ export class LibraryView {
     }
   }
 
-  private addUploadedFile(result: UploadedDocument) {
-    const uploadedDoc: UploadedDocument = {
-      fileName: result.fileName,
-      downloadUrl: result.downloadUrl,
-      uploadTime: result.uploadTime ?? "",
-      status: result.status,
-    };
-    this.uploadedFiles.push(uploadedDoc);
+  private addUploadedFilesToHistory() {
+    // reset history content
+    this.historyContentContainer.textContent = "";
 
-    const historyItem = new DocumentHistoryItem({
-      doc: result,
-      onDeleteDocument: () => this.handleHistoryDelete(result),
-      onDownloadDocument: () => this.config?.downloadDocument(result),
+    this.config.uploadedFiles.forEach((files) => {
+      const historyItem = new DocumentHistoryItem({
+        doc: files,
+        onDeleteDocument: () => this.handleHistoryDelete(files),
+        onDownloadDocument: () => this.config?.exportConfig?.downloadFromServer(files),
+      });
+
+      this.historyContentContainer.append(historyItem.getDom());
     });
-
-    this.historyContentContainer.append(historyItem.getDom());
   }
 
   private async handleHistoryDelete(doc: UploadedDocument) {
-    this.config?.deleteDocument(doc);
-    this.uploadedFiles = this.uploadedFiles.filter((file) => file.uploadTime !== doc.uploadTime);
+    this.config?.exportConfig.deleteFromServer(doc);
+    this.config.updateUploadedFiles(this.config.uploadedFiles.filter((file) => file.uploadTime !== doc.uploadTime));
 
-    this.showHistoryContentContainer(!!this.uploadedFiles.length);
+    this.showHistoryContentContainer(!!this.config.uploadedFiles.length);
   }
 
   private async handleUpload() {
-    if (!this.config.uploadDocument) {
+    if (!this.config?.exportConfig?.uploadToServer) {
       throw new Error("No upload function configured");
     }
 
@@ -419,7 +408,7 @@ export class LibraryView {
             saveAnnotation: "annotation",
           });
 
-          return await this.config.uploadDocument(pdfBlob);
+          return await this.config?.exportConfig?.uploadToServer(doc.name, pdfBlob);
         } else {
           console.warn(`Upload failed: ${doc.name} contains no pages`);
           showInfoDialog("Document contains no pages!", this.config.container, "warning");
@@ -434,7 +423,7 @@ export class LibraryView {
       if (successfulUploads.length) {
         showInfoDialog("Uploaded", this.config.container);
         successfulUploads.forEach((result) => {
-          this.addUploadedFile(result);
+          this.config.uploadedFiles.push(result);
         });
         this.handleBackButton(); // Clear selection
       }

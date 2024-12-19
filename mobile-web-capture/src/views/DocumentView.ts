@@ -1,9 +1,13 @@
 import { BrowseViewer, DDV, IDocument } from "dynamsoft-document-viewer";
 import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
+import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
 
 export interface DocumentViewConfig {
   container: HTMLElement;
+  uploadedFiles: UploadedDocument[];
+  updateUploadedFiles: (newUploadedFiles: UploadedDocument[]) => void;
+  exportConfig: ExportConfig;
   onCameraCapture?: () => Promise<void>;
   onGalleryImport?: () => Promise<void>;
   onLibraryClick?: () => void;
@@ -27,6 +31,7 @@ export class DocumentView {
   libraryBtn: HTMLElement;
   cameraCaptureBtn: HTMLElement;
   galleryInputBtn: HTMLElement;
+  uploadBtn: HTMLElement;
   downloadBtn: HTMLElement;
   fileOperationsBtn: HTMLElement;
 
@@ -213,8 +218,9 @@ export class DocumentView {
     this.libraryBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(1)");
     this.cameraCaptureBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(2)");
     this.galleryInputBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(3)");
-    this.downloadBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(4)");
-    this.fileOperationsBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(5)");
+    this.uploadBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(4)");
+    this.downloadBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(5)");
+    this.fileOperationsBtn = this.toolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(6)");
 
     // Selection mode toolbar
     this.copyToBtn = this.selectedToolbarContainer.querySelector(".mwc-document-view-control-btn:nth-child(1)");
@@ -227,6 +233,7 @@ export class DocumentView {
     this.libraryBtn?.addEventListener("click", () => this.config.onLibraryClick());
     this.cameraCaptureBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
     this.galleryInputBtn?.addEventListener("click", () => this.config.onGalleryImport());
+    this.uploadBtn?.addEventListener("click", async () => await this.handleUpload());
     this.downloadBtn?.addEventListener("click", () => DocumentView.handleDownload(this.browseViewer.currentDocument));
     this.fileOperationsBtn?.addEventListener("click", () => this.handleFileOperationsClick());
 
@@ -308,6 +315,36 @@ export class DocumentView {
 
   private handleBackButton() {
     this.toggleSelectionMode(false);
+  }
+
+  private async handleUpload() {
+    if (!this.config?.exportConfig?.uploadToServer) {
+      throw new Error("No upload function configured");
+    }
+
+    try {
+      const doc = this.browseViewer.currentDocument;
+      if (doc?.pages?.length) {
+        const pdfBlob = await doc.saveToPdf({
+          mimeType: "application/pdf",
+          saveAnnotation: "annotation",
+        });
+
+        const result = await this.config?.exportConfig?.uploadToServer(`${doc.name}.pdf`, pdfBlob);
+
+        if ((result as UploadedDocument)?.status === "success") {
+          showInfoDialog("Uploaded", this.config.container);
+          this.config.uploadedFiles.push(result as UploadedDocument);
+        }
+      } else {
+        console.warn(`Upload failed: ${doc.name} contains no pages`);
+        showInfoDialog("Document contains no pages!", this.config.container, "warning");
+      }
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.error("Upload failed:", errMsg);
+      showInfoDialog("Upload Failed", this.config.container, "warning");
+    }
   }
 
   static handleDownload(doc: IDocument) {
@@ -479,6 +516,10 @@ const DOCUMENT_VIEW_CONTROLS_HTML = `
   <div class="mwc-document-view-control-btn">
     <div class="mwc-document-view-control-icon">${MWC_ICONS.galleryImport}</div>
     <div>Import</div>
+  </div>
+    <div class="mwc-document-view-control-btn">
+    <div class="mwc-document-view-control-icon">${MWC_ICONS.upload}</div>
+    <div>Upload</div>
   </div>
   <div class="mwc-document-view-control-btn">
     <div class="mwc-document-view-control-icon">${MWC_ICONS.download}</div>

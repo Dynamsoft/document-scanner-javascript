@@ -22,19 +22,36 @@ interface MobileWebCaptureConfig extends MobileDocumentScannerConfig {
   libraryViewConfig?: LibraryViewConfig;
   documentViewConfig?: DocumentViewConfig;
   pageViewConfig?: PageViewConfig;
+  exportConfig?: ExportConfig;
+}
+
+type Status = "success" | "failed";
+
+export type UploadedDocument = {
+  fileName: string;
+  downloadUrl: string;
+  status: Status;
+  uploadTime?: string;
+};
+
+export interface ExportConfig {
+  uploadToServer?: (fileName: string, blob: Blob) => void | UploadedDocument;
+  downloadFromServer?: (doc: UploadedDocument) => void;
+  deleteFromServer?: (doc: UploadedDocument) => void;
 }
 
 class MobileWebCapture extends MobileDocumentScanner {
   private mwcViews: Record<EnumMWCViews, MWCView>;
 
   private currentView: EnumMWCViews = null;
-  private navigationStack: EnumMWCViews[] = [];
 
   private isInitialized = false;
 
+  private uploadedFiles: UploadedDocument[] = [];
+
   constructor(config: MobileWebCaptureConfig) {
     // Pass the MobileDocumentScannerConfig portion to super
-    const { libraryViewConfig, documentViewConfig, pageViewConfig, license, ...baseConfig } = config;
+    const { libraryViewConfig, documentViewConfig, pageViewConfig, license, exportConfig, ...baseConfig } = config;
     super({ license, ...baseConfig });
 
     if (license) {
@@ -52,9 +69,9 @@ class MobileWebCapture extends MobileDocumentScanner {
           onCameraCapture: () => this.handleCameraCapture(EnumMWCViews.Library),
           onGalleryImport: () => this.handleGalleryImport(EnumMWCViews.Library),
           onDocumentClick: (docId) => this.handleDocumentClick(docId),
-          uploadDocument: libraryViewConfig.uploadDocument,
-          downloadDocument: libraryViewConfig.downloadDocument,
-          deleteDocument: libraryViewConfig.deleteDocument,
+          exportConfig,
+          uploadedFiles: this.uploadedFiles,
+          updateUploadedFiles: this.updateUploadedFiles,
         },
         isVisible: false,
       },
@@ -65,6 +82,9 @@ class MobileWebCapture extends MobileDocumentScanner {
           onGalleryImport: () => this.handleGalleryImport(EnumMWCViews.Document),
           onLibraryClick: () => this.switchView(EnumMWCViews.Library),
           onPageClick: (docId) => this.handlePageClick(docId),
+          exportConfig,
+          uploadedFiles: this.uploadedFiles,
+          updateUploadedFiles: this.updateUploadedFiles,
         },
         isVisible: false,
       },
@@ -73,6 +93,9 @@ class MobileWebCapture extends MobileDocumentScanner {
           container: pageViewConfig.container,
           onDocumentClick: () => this.switchView(EnumMWCViews.Document),
           onAddPage: () => this.handleCameraCapture(EnumMWCViews.Document),
+          exportConfig,
+          uploadedFiles: this.uploadedFiles,
+          updateUploadedFiles: this.updateUploadedFiles,
         },
         isVisible: false,
       },
@@ -144,7 +167,6 @@ class MobileWebCapture extends MobileDocumentScanner {
     targetState.isVisible = true;
     targetState.instance?.setVisible?.(true);
 
-    this.navigationStack.push(this.currentView);
     this.currentView = targetView;
   }
 
@@ -154,14 +176,6 @@ class MobileWebCapture extends MobileDocumentScanner {
     }
 
     this.switchView(view || EnumMWCViews.Library);
-  }
-
-  async goBack() {
-    const previousView = this.navigationStack.pop();
-    if (!previousView) return false;
-
-    this.switchView(previousView);
-    return true;
   }
 
   private async handleCameraCapture(sourceView: EnumMWCViews) {
@@ -267,6 +281,10 @@ class MobileWebCapture extends MobileDocumentScanner {
     pageView.openPage(docId);
 
     this.switchView(EnumMWCViews.Page);
+  }
+
+  private updateUploadedFiles(newUploadedFiles: UploadedDocument[]) {
+    this.uploadedFiles = newUploadedFiles;
   }
 
   dispose() {

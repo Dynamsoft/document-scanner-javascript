@@ -2,11 +2,15 @@ import { DDV, DisplayModeEnum, EditViewer, UiConfig } from "dynamsoft-document-v
 import { mobileEditViewerUiConfig, mobileTopBarChildrenConfig } from "./utils/uiConfig";
 import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
+import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
 
 export interface PageViewConfig {
   container: HTMLElement;
   onDocumentClick?: () => void;
   onAddPage?: () => void;
+  uploadedFiles: UploadedDocument[];
+  updateUploadedFiles: (newUploadedFiles: UploadedDocument[]) => void;
+  exportConfig: ExportConfig;
 }
 
 export class PageView {
@@ -187,7 +191,7 @@ export class PageView {
 
     // Bind normal mode events
     this.documentBtn?.addEventListener("click", () => this.handleDocumentBtn());
-    // this.exportBtn?.addEventListener("click", async () => await this.config.onCameraCapture());
+    this.exportBtn?.addEventListener("click", async () => await this.handleUpload());
     this.deletePageBtn?.addEventListener("click", () => this.handleDeletePage());
     this.captureAnotherBtn?.addEventListener("click", () => this.config.onAddPage());
     this.editBtn?.addEventListener("click", () => this.handleEditMode());
@@ -294,6 +298,32 @@ export class PageView {
     } catch (ex) {
       console.error(ex);
       alert(ex);
+    }
+  }
+
+  private async handleUpload() {
+    if (!this.config?.exportConfig?.uploadToServer) {
+      throw new Error("No upload function configured");
+    }
+
+    try {
+      const doc = this.editViewer.currentDocument;
+      const currentPage = this.editViewer.getCurrentPageIndex();
+
+      const pdfBlob = await doc.saveToJpeg(currentPage, {
+        saveAnnotation: true,
+      });
+
+      const result = await this.config?.exportConfig?.uploadToServer(`${doc.name}-${currentPage}.jpg`, pdfBlob);
+
+      if ((result as UploadedDocument)?.status === "success") {
+        showInfoDialog("Uploaded", this.config.container);
+        this.config.uploadedFiles.push(result as UploadedDocument);
+      }
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.error("Upload failed:", errMsg);
+      showInfoDialog("Upload Failed", this.config.container, "warning");
     }
   }
 
