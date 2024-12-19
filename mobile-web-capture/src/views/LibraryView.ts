@@ -184,7 +184,10 @@ export class LibraryView {
       this.showLibraryContentContainer(!!this.docItems.length);
     }
 
-    // Update toolbar button
+    // Update toolbar button (hide other buttons)
+    this.addNewBtn.style.display = show ? "none" : "flex";
+    this.cameraCaptureBtn.style.display = show ? "none" : "flex";
+    this.galleryInputBtn.style.display = show ? "none" : "flex";
     this.uploadedFilesBtn.innerHTML = show
       ? `<div class="mwc-library-control-icon">${MWC_ICONS.back}</div><div>Back</div>`
       : `<div class="mwc-library-control-icon">${MWC_ICONS.uploadedFiles}</div><div>History</div>`;
