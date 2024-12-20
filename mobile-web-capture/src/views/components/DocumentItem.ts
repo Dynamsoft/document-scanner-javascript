@@ -9,7 +9,8 @@ export interface DocumentItemConfig {
 export class DocumentItem {
   private dom: HTMLElement;
   private checkbox: HTMLInputElement;
-  public checked = false;
+  checked = false;
+  isSelectMode = false;
 
   constructor(private config: DocumentItemConfig) {
     this.createUI();
@@ -70,41 +71,39 @@ export class DocumentItem {
   private bindEvents(): void {
     this.dom.addEventListener("click", (e) => {
       if (e.target !== this.checkbox) {
-        this.config.onDocumentClick?.(this.config.docId);
+        if (this.isSelectMode) {
+          this.toggleCheck();
+        } else {
+          this.config.onDocumentClick?.(this.config.docId);
+        }
       }
     });
 
     this.checkbox.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.checked = this.checkbox.checked;
-      this.updateSelectionStyle();
-      this.config.onCheckedChange?.(this.config.docId, this.checked);
+      this.toggleCheck();
     });
   }
 
-  toggleSelection(check?: boolean): void {
-    if (typeof check === "boolean") {
-      this.checked = check;
-    } else {
-      this.checked = !this.checked;
+  setSelectMode(show: boolean): void {
+    this.isSelectMode = show;
+
+    if (!show) {
+      this.uncheckDocument();
     }
-    this.checkbox.checked = this.checked;
-    this.updateSelectionStyle();
-    this.config.onCheckedChange?.(this.config.docId, this.checked);
   }
 
-  private updateSelectionStyle(): void {
-    if (this.checked) {
-      this.dom.classList.add("selected");
-    } else {
-      this.dom.classList.remove("selected");
-    }
+  toggleCheck(check?: boolean): void {
+    this.checked = check ?? !this.checked;
+    this.checkbox.checked = this.checked;
+    this.dom.classList.toggle("selected", this.checked);
+    this.config.onCheckedChange?.(this.config.docId, this.checked);
   }
 
   uncheckDocument(): void {
     this.checked = false;
     this.checkbox.checked = false;
-    this.updateSelectionStyle();
+    this.dom.classList.remove("selected");
   }
 
   getDom(): HTMLElement {

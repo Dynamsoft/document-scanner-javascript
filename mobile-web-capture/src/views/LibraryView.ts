@@ -23,11 +23,14 @@ export class LibraryView {
 
   isHistoryView: boolean = false;
 
+  isSelectionMode: boolean = false;
   docSelectAll: HTMLElement; // todo
-  enterSelectionMode: HTMLElement; //todo
   cancelSelectionMode: HTMLElement; //todo
 
   headerContainer: HTMLElement;
+  headerSelectionContainer: HTMLElement;
+  headerTitleContainer: HTMLElement;
+
   emptyContentContainer: HTMLElement;
   libraryContentContainer: HTMLElement;
 
@@ -109,9 +112,82 @@ export class LibraryView {
   private createHeader() {
     this.headerContainer = document.createElement("div");
     this.headerContainer.className = "mwc-library-header";
-    this.headerContainer.textContent = "Library";
+
+    this.headerTitleContainer = document.createElement("div");
+    this.headerTitleContainer.className = "mwc-library-header-title";
+    this.headerTitleContainer.textContent = "Library";
+
+    this.headerSelectionContainer = document.createElement("div");
+    this.headerSelectionContainer.className = "mwc-library-header-selection";
+    this.headerSelectionContainer.style.display = "none";
+    this.headerSelectionContainer.innerHTML = `
+      <button type="button" class="mwc-library-header-btn">Select All</button>
+      <button type="button" class="mwc-library-header-btn">Cancel</button>
+    `;
+
+    this.headerContainer.appendChild(this.headerTitleContainer);
+    this.headerContainer.appendChild(this.headerSelectionContainer);
+
+    this.docSelectAll = this.headerSelectionContainer.querySelector("button:first-child");
+    this.cancelSelectionMode = this.headerSelectionContainer.querySelector("button:last-child");
+
+    // Bind events
+    this.docSelectAll?.addEventListener("click", () => this.handleSelectAll());
+    this.cancelSelectionMode?.addEventListener("click", () => this.exitSelectionMode());
 
     this.config.container.append(this.headerContainer);
+  }
+
+  private enterSelectionMode() {
+    if (this.isSelectionMode) return;
+
+    this.isSelectionMode = true;
+    this.headerSelectionContainer.style.display = "flex";
+    this.headerTitleContainer.textContent = "Select Items";
+
+    this.docItems.forEach((item) => item.setSelectMode(true));
+
+    this.updateHeaderButtons();
+  }
+
+  private exitSelectionMode() {
+    this.isSelectionMode = false;
+    this.headerSelectionContainer.style.display = "none";
+    this.headerTitleContainer.textContent = this.isHistoryView ? "History" : "Library";
+
+    this.docItems.forEach((item) => {
+      item.setSelectMode(false);
+    });
+    this.toggleShowSelectedToolbar();
+    this.updateHeaderButtons();
+  }
+
+  private handleSelectAll() {
+    const allSelected = this.docItems.every((item) => item.checked);
+    this.docItems.forEach((item) => item.toggleCheck(!allSelected));
+
+    this.toggleShowSelectedToolbar();
+    this.updateHeaderButtons();
+  }
+
+  private handleDocumentChecked() {
+    const hasCheckedItems = this.docItems.some((item) => item.checked);
+
+    if (hasCheckedItems && !this.isSelectionMode) {
+      this.enterSelectionMode();
+    } else if (!hasCheckedItems && this.isSelectionMode) {
+      this.exitSelectionMode();
+    }
+
+    this.updateHeaderButtons();
+    this.toggleShowSelectedToolbar();
+  }
+
+  private updateHeaderButtons() {
+    const allSelected = this.docItems.every((item) => item.checked);
+
+    this.docSelectAll.style.display = allSelected ? "none" : "flex";
+    this.cancelSelectionMode.style.display = allSelected ? "flex" : "none";
   }
 
   private createLibraryDocuments() {
@@ -166,10 +242,14 @@ export class LibraryView {
   }
 
   private toggleHistoryView(show: boolean) {
+    if (this.isSelectionMode) {
+      this.exitSelectionMode();
+    }
+
     this.isHistoryView = show;
 
-    // Toggle headers
-    this.headerContainer.textContent = show ? "History" : "Library";
+    // Toggle header title
+    this.headerTitleContainer.textContent = show ? "History" : "Library";
 
     // Toggle content
     if (show) {
@@ -223,7 +303,11 @@ export class LibraryView {
       const docItem = new DocumentItem({
         docId: e.docUid,
         onCheckedChange: () => this.handleDocumentChecked(),
-        onDocumentClick: (docId) => this.handleDocumentClick(docId),
+        onDocumentClick: (docId) => {
+          if (!this.isSelectionMode) {
+            this.handleDocumentClick(docId);
+          }
+        },
       });
 
       // Add to start of array
@@ -297,10 +381,6 @@ export class LibraryView {
       showInfoDialog("Deleted", this.config.container);
     });
     this.backBtn?.addEventListener("click", () => this.handleBackButton());
-  }
-
-  private handleDocumentChecked() {
-    this.toggleShowSelectedToolbar();
   }
 
   async createAndLoadDocument(
@@ -456,7 +536,7 @@ export class LibraryView {
     this.docItems.forEach((item) => item.uncheckDocument());
     this.checkedDocUids = [];
 
-    this.toggleShowSelectedToolbar();
+    this.exitSelectionMode();
   }
 
   private handleDocumentClick(docId: string) {
@@ -476,6 +556,26 @@ background-color: #F5F5F5;
 flex: 0 1 48px;
 padding: 0.5rem;
 user-select: none;
+}
+
+.mwc-library-header-selection {
+  display: none;
+  position: absolute;
+  right: 1rem;
+}
+
+.mwc-library-header-btn {
+  background: none;
+  border: none;
+  color: #FE8E14;
+  font-family: Verdana;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.mwc-library-header-btn:hover {
+  text-decoration: underline;
 }
 
 .mwc-history-content,
