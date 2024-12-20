@@ -152,10 +152,11 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
 .mwc-document-item {
   display: flex;
   justify-content: space-between;
-  align-items:center;
+  align-items: center;
   background-color: #EFEFEF;
   cursor: pointer;
   font-family: Verdana;
+  padding: 15px;
 }
 
 .mwc-document-item.selected {
@@ -163,10 +164,9 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
 }
 
 .mwc-document-info-container {
-  padding: 15px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 12px;
 }
 
 .mwc-document-info {
@@ -182,6 +182,10 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
 
 .mwc-document-item .mwc-document-name-container .mwc-document-name {
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 60px);
 }
 
 .mwc-document-item .mwc-document-name-container .mwc-document-rename-btn{
@@ -226,6 +230,5 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   accent-color: #FE8E14;
   width: 24px;
   height: 24px;
-  margin-right: 15px;
 }
 `;

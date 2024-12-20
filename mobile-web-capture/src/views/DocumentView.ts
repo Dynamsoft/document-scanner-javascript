@@ -443,7 +443,7 @@ user-select: none;
   overflow: hidden;
   text-overflow: ellipsis;
   
-  max-width: 100%; /* or a specific pixel value like 200px */
+  max-width: 100%;
 }
 
 .mwc-document-view-header-rename-btn {
