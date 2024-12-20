@@ -5,6 +5,7 @@ import { MWC_ICONS } from "./utils/icons";
 import { DocumentView } from "./DocumentView";
 import { DocumentHistoryItem } from "./components/DocumentHistoryItem";
 import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
+import { showModal } from "./components/Modal";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
@@ -353,7 +354,6 @@ export class LibraryView {
       }
 
       await this.handleNewDocument();
-      showInfoDialog("Created", this.config.container);
     });
     this.cameraCaptureBtn?.addEventListener("click", async () => {
       if (this.isHistoryView) {
@@ -384,6 +384,7 @@ export class LibraryView {
   }
 
   async createAndLoadDocument(
+    name: string,
     sources?: Array<{
       convertMode: string;
       fileData: Blob;
@@ -395,7 +396,7 @@ export class LibraryView {
     try {
       // Create new document
       const doc = DDV.documentManager.createDocument({
-        name: `Doc-${Date.now()}`,
+        name: name || `Doc-${Date.now()}`,
       });
 
       // Load all sources
@@ -412,9 +413,18 @@ export class LibraryView {
   }
 
   private async handleNewDocument() {
-    await this.createAndLoadDocument();
-
-    this.setVisible(true);
+    showModal({
+      title: "New Document",
+      placeholder: "Enter document name",
+      confirmText: "Create",
+      onConfirm: async (name) => {
+        const doc = await this.createAndLoadDocument(name || `Doc-${Date.now()}`);
+        if (doc) {
+          this.setVisible(true);
+          showInfoDialog("Created", this.config.container);
+        }
+      },
+    });
   }
 
   private async handleShare() {

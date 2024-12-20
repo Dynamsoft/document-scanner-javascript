@@ -195,7 +195,10 @@ class MobileWebCapture extends MobileDocumentScanner {
               fileData: blob,
             },
           ];
-          const doc = await (this.mwcViews.library.instance as LibraryView).createAndLoadDocument(sources);
+          const doc = await (this.mwcViews.library.instance as LibraryView).createAndLoadDocument(
+            `Doc-${Date.now()}`,
+            sources
+          );
 
           this.handleDocumentClick(doc.uid);
         } else if (sourceView === EnumMWCViews.Document || sourceView === EnumMWCViews.Page) {
@@ -245,7 +248,10 @@ class MobileWebCapture extends MobileDocumentScanner {
 
       if (sourceArray.length > 0) {
         if (sourceView === EnumMWCViews.Library) {
-          const doc = await (this.mwcViews.library.instance as LibraryView).createAndLoadDocument(sourceArray);
+          const doc = await (this.mwcViews.library.instance as LibraryView).createAndLoadDocument(
+            `Doc-${Date.now()}`,
+            sourceArray
+          );
 
           this.handleDocumentClick(doc.uid);
         } else if (sourceView === EnumMWCViews.Document) {
