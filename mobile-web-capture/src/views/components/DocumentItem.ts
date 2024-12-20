@@ -1,14 +1,18 @@
 import { DDV } from "dynamsoft-document-viewer";
+import { MWC_ICONS } from "../utils/icons";
 
 export interface DocumentItemConfig {
   docId: string;
   onDocumentClick?: (docId: string) => void;
   onCheckedChange?: (docId: string, checked: boolean) => void;
+  onRename?: (docId: string) => void;
 }
 
 export class DocumentItem {
   private dom: HTMLElement;
   private checkbox: HTMLInputElement;
+  private renameBtn: HTMLElement;
+
   checked = false;
   isSelectMode = false;
 
@@ -28,10 +32,15 @@ export class DocumentItem {
     this.dom.innerHTML = `
       <div class="mwc-document-info-container">
         <div class="mwc-document-thumbnail">
-          ${ICONS.defaultDocument}
+          ${MWC_ICONS.defaultDocument}
         </div>
         <div class="mwc-document-info">
-          <div class="mwc-document-name">${doc.name}</div>
+          <div class="mwc-document-name-container">
+            <div class="mwc-document-name">${doc.name}</div>
+            <button type="button" class="mwc-document-rename-btn">
+              ${MWC_ICONS.edit}
+            </button>
+          </div>
           <div class="mwc-document-pages">${count} pages</div>
         </div>
       </div>
@@ -39,6 +48,7 @@ export class DocumentItem {
     `;
 
     this.checkbox = this.dom.querySelector(".mwc-document-checkbox");
+    this.renameBtn = this.dom.querySelector(".mwc-document-rename-btn");
     this.updateThumbnail(doc);
   }
 
@@ -64,7 +74,7 @@ export class DocumentItem {
 
       thumbnailContainer.append(img);
     } else {
-      thumbnailContainer.innerHTML = ICONS.defaultDocument;
+      thumbnailContainer.innerHTML = MWC_ICONS.defaultDocument;
     }
   }
 
@@ -82,6 +92,12 @@ export class DocumentItem {
     this.checkbox.addEventListener("click", (e) => {
       e.stopPropagation();
       this.toggleCheck();
+    });
+
+    // Add event listener
+    this.renameBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.config.onRename?.(this.config.docId);
     });
   }
 
@@ -132,24 +148,6 @@ export class DocumentItem {
   }
 }
 
-const ICONS = {
-  defaultDocument: `
-<svg id="document" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="24" viewBox="0 0 20 24">
-  <defs>
-    <clipPath id="documentclip-path">
-      <rect id="Rectangle_2779" data-name="Rectangle 2779" width="20" height="24" fill="#9AA0A6"/>
-    </clipPath>
-  </defs>
-  <g id="Group_593" data-name="Group 593" clip-path="url(#documentclip-path)">
-    <path id="Path_1549" data-name="Path 1549" d="M19.56,3.85,16.15.44A1.52,1.52,0,0,0,15.09,0H4.5A1.5,1.5,0,0,0,3,1.5V3H1.5A1.5,1.5,0,0,0,0,4.5v18A1.5,1.5,0,0,0,1.5,24h14A1.5,1.5,0,0,0,17,22.5V21h1.5A1.5,1.5,0,0,0,20,19.5V4.91a1.52,1.52,0,0,0-.44-1.06M16,22.5a.5.5,0,0,1-.5.5H1.5a.5.5,0,0,1-.5-.5V4.5A.5.5,0,0,1,1.5,4H3V19.5A1.5,1.5,0,0,0,4.5,21H16Zm3-3a.5.5,0,0,1-.5.5H4.5a.5.5,0,0,1-.5-.5V1.5A.5.5,0,0,1,4.5,1H15.09a.492.492,0,0,1,.35.15l3.41,3.41a.468.468,0,0,1,.15.35Z" fill="#9AA0A6"/>
-    <path id="Path_1550" data-name="Path 1550" d="M7.66,6.4h5.18a.5.5,0,0,0,0-1H7.66a.5.5,0,0,0,0,1" fill="#9AA0A6"/>
-    <path id="Path_1551" data-name="Path 1551" d="M15.5,9.08h-8a.5.5,0,1,0,0,1h8a.5.5,0,1,0,0-1" fill="#9AA0A6"/>
-    <path id="Path_1552" data-name="Path 1552" d="M15.5,13.08h-8a.5.5,0,1,0,0,1h8a.5.5,0,0,0,0-1" fill="#9AA0A6"/>
-  </g>
-</svg>
-`,
-};
-
 const DEFAULT_DOCUMENT_ITEM_STYLE = `
 .mwc-document-item {
   display: flex;
@@ -177,8 +175,25 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   gap: 10px;
 }
 
-.mwc-document-item .mwc-document-name {
+.mwc-document-item .mwc-document-name-container {
+  display: flex;
+  gap: 8px;
+}
+
+.mwc-document-item .mwc-document-name-container .mwc-document-name {
   font-size: 16px;
+}
+
+.mwc-document-item .mwc-document-name-container .mwc-document-rename-btn{
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mwc-document-item .mwc-document-name-container .mwc-document-rename-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: black;
 }
 
 .mwc-document-item .mwc-document-pages {

@@ -309,6 +309,7 @@ export class LibraryView {
             this.handleDocumentClick(docId);
           }
         },
+        onRename: (docId) => this.handleRename(docId),
       });
 
       // Add to start of array
@@ -423,6 +424,24 @@ export class LibraryView {
           this.setVisible(true);
           showInfoDialog("Created", this.config.container);
         }
+      },
+    });
+  }
+
+  private handleRename(docId: string) {
+    const doc = DDV.documentManager.getDocument(docId);
+    if (!doc) return;
+
+    showModal({
+      title: "Rename Document",
+      placeholder: "Enter document name",
+      initialValue: doc.name,
+      confirmText: "Rename",
+      onConfirm: (newName) => {
+        doc.rename(newName);
+        const docItem = this.docItems.find((item) => item.getUid() === docId);
+        docItem?.update();
+        showInfoDialog("Renamed", this.config.container);
       },
     });
   }

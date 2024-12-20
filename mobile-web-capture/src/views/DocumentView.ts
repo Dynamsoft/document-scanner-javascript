@@ -2,6 +2,7 @@ import { BrowseViewer, DDV, IDocument } from "dynamsoft-document-viewer";
 import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
 import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
+import { showModal } from "./components/Modal";
 
 export interface DocumentViewConfig {
   container: HTMLElement;
@@ -22,6 +23,9 @@ export class DocumentView {
   isDragged: boolean = false;
 
   headerContainer: HTMLElement;
+  headerTitleContainer: HTMLElement;
+  headerRenameBtn: HTMLElement;
+
   browseViewerContainer: HTMLElement;
   emptyContentContainer: HTMLElement;
 
@@ -94,7 +98,17 @@ export class DocumentView {
   private createHeader() {
     this.headerContainer = document.createElement("div");
     this.headerContainer.className = "mwc-document-view-header";
-    this.headerContainer.textContent = "Document View"; // TODO change to name
+    this.headerContainer.innerHTML = `
+      <div class="mwc-document-view-header-name">Document View</div>
+      <button type="button" class="mwc-document-view-header-rename-btn">
+        ${MWC_ICONS.edit}
+      </button>
+    `;
+
+    this.headerTitleContainer = this.headerContainer.querySelector(".mwc-document-view-header-name");
+    this.headerRenameBtn = this.headerContainer.querySelector(".mwc-document-view-header-rename-btn");
+
+    this.headerRenameBtn.addEventListener("click", () => this.handleRename());
 
     this.config.container.append(this.headerContainer);
   }
@@ -103,7 +117,24 @@ export class DocumentView {
     const doc = this.browseViewer.currentDocument;
     const docName = doc?.name || "Document Name";
 
-    this.headerContainer.textContent = docName;
+    this.headerTitleContainer.textContent = docName;
+  }
+
+  private handleRename() {
+    const doc = this.browseViewer.currentDocument;
+    if (!doc) return;
+
+    showModal({
+      title: "Rename Document",
+      placeholder: "Enter document name",
+      initialValue: doc.name,
+      confirmText: "Rename",
+      onConfirm: (newName) => {
+        doc.rename(newName);
+        this.updateHeaderTitle();
+        showInfoDialog("Renamed", this.config.container);
+      },
+    });
   }
 
   private createBrowseView() {
@@ -394,15 +425,37 @@ export class DocumentView {
 const DEFAULT_DOCUMENT_VIEW_STYLE = `
 .mwc-document-view-header {
 display: flex;
-font-family: Verdana;
 height: 48px;
-font-size: 18px;
 align-items: center;
 justify-content: center;
-background-color: #F5F5F5;
 flex: 0 1 48px;
 padding: 0.5rem;
+background-color: #F5F5F5;
+gap: 8px;
+}
+
+.mwc-document-view-header-name {
+font-family: Verdana;
+font-size: 18px;
 user-select: none;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  max-width: 100%; /* or a specific pixel value like 200px */
+}
+
+.mwc-document-view-header-rename-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mwc-document-view-header-rename-btn svg {
+width: 18px;
+height: 18px;
+stroke: black;
 }
 
 .mwc-document-view-browse-viewer {

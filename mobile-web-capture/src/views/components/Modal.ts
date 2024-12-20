@@ -40,10 +40,8 @@ export function showModal(config: ModalConfig) {
   const confirmBtn = modalContainer.querySelector(".confirm");
   const cancelBtn = modalContainer.querySelector(".cancel");
 
-  // Focus input
   input?.focus();
 
-  // Bind events
   confirmBtn?.addEventListener("click", () => {
     config.onConfirm(input.value.trim());
     modalContainer.remove();
@@ -66,12 +64,6 @@ export function showModal(config: ModalConfig) {
   input?.addEventListener("keyup", (e) => {
     if (e.key === "Enter") {
       config.onConfirm(input.value.trim());
-      modalContainer.remove();
-    }
-  });
-
-  modalContainer.addEventListener("click", (e) => {
-    if (e.target === modalContainer) {
       modalContainer.remove();
     }
   });
