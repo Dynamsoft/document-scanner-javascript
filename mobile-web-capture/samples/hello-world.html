@@ -31,6 +31,7 @@
     <div id="library-view-container" style="height: 80vh"></div>
     <div id="document-view-container" style="height: 80vh"></div>
     <div id="page-view-container" style="height: 80vh"></div>
+    <div id="transfer-view-container" style="height: 80vh"></div>
     <div id="normalized-result"></div>
 
     <script type="module">
@@ -47,6 +48,7 @@
       const libraryContainer = document.querySelector("#library-view-container");
       const documentContainer = document.querySelector("#document-view-container");
       const pageContainer = document.querySelector("#page-view-container");
+      const transferPageContainer = document.querySelector("#transfer-view-container");
 
       const startLibraryBtn = document.querySelector("#start-library");
       const startPageBtn = document.querySelector("#start-page");
@@ -145,6 +147,9 @@
         },
         pageViewConfig: {
           container: pageContainer,
+        },
+        transferViewConfig: {
+          container: transferPageContainer,
         },
         exportConfig: {
           uploadToServer,

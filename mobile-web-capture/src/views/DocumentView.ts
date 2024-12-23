@@ -3,6 +3,7 @@ import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
 import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
 import { showModal } from "./components/Modal";
+import { TransferMode } from "./TransferView";
 
 export interface DocumentViewConfig {
   container: HTMLElement;
@@ -13,6 +14,7 @@ export interface DocumentViewConfig {
   onGalleryImport?: () => Promise<void>;
   onLibraryClick?: () => void;
   onPageClick?: (docId: string, pageIndex: number) => void;
+  onTransferPages?: (mode: TransferMode, docId: string, selectedIdx: number[]) => void;
   groupUid?: string;
 }
 
@@ -269,8 +271,8 @@ export class DocumentView {
     this.fileOperationsBtn?.addEventListener("click", () => this.handleFileOperationsClick());
 
     // // Bind selection mode events
-    // this.copyToBtn?.addEventListener("click", async () => await this.handleCopyTo());
-    // this.moveToBtn?.addEventListener("click", () => this.handleMoveTo());
+    this.copyToBtn?.addEventListener("click", () => this.handleTransferPage("copy"));
+    this.moveToBtn?.addEventListener("click", () => this.handleTransferPage("move"));
     this.selectAllBtn?.addEventListener("click", () => this.handleSelectAll());
     this.deleteBtn?.addEventListener("click", () => this.handleDelete());
     this.backBtn?.addEventListener("click", () => this.handleBackButton());
@@ -316,6 +318,13 @@ export class DocumentView {
     this.toggleSelectionMode(true);
   }
 
+  private handleTransferPage(mode: TransferMode) {
+    const currentDoc = this.browseViewer.currentDocument;
+    const selectedIndex = this.browseViewer.getSelectedPageIndices();
+
+    this.config.onTransferPages(mode, currentDoc.uid, selectedIndex);
+  }
+
   private handleSelectAll() {
     if (this.browseViewer.getSelectedPageIndices().length === this.browseViewer.currentDocument.pages.length) {
       this.browseViewer.selectPages([]);
@@ -344,7 +353,7 @@ export class DocumentView {
     }
   }
 
-  private handleBackButton() {
+  handleBackButton() {
     this.toggleSelectionMode(false);
   }
 
@@ -494,7 +503,7 @@ stroke: black;
 
 .mwc-document-view-controls {
   display: flex;
-  height: 65px;
+  height: 6rem;
   background-color: #323234;
   align-items: center;
   font-size: 12px;
@@ -517,7 +526,14 @@ stroke: black;
   gap: 0.5rem;
   text-align: center;
   user-select: none;
-  padding: 0.5rem;
+}
+
+.mwc-document-view-control-btn >div:first-child {
+  padding-top: 1rem;
+}
+
+.mwc-document-view-control-btn >div:last-child {
+  padding-bottom: 1rem;
 }
 
 .mwc-document-view-control-btn.selected {
@@ -560,7 +576,7 @@ ${MWC_ICONS.emptyLibrary}
 const DOCUMENT_VIEW_CONTROLS_HTML = `
   <div class="mwc-document-view-control-btn">
     <div class="mwc-document-view-control-icon">${MWC_ICONS.back}</div>
-    <div>Library</div>
+    <div>Back</div>
   </div>
   <div class="mwc-document-view-control-btn">
     <div class="mwc-document-view-control-icon">${MWC_ICONS.cameraCapture}</div>

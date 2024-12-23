@@ -55,5 +55,10 @@
     "dynamsoft-capture-vision-bundle": "2.4.2200",
     "dynamsoft-document-viewer": "2.1.0",
     "dynamsoft-mobile-document-scanner": "file:./mds"
-  }
+  },
+  "bundledDependencies": [
+    "dynamsoft-capture-vision-bundle",
+    "dynamsoft-document-viewer",
+    "dynamsoft-mobile-document-scanner"
+  ]
 }

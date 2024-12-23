@@ -5,16 +5,19 @@ import { LicenseManager } from "dynamsoft-license";
 import { PageView, PageViewConfig } from "./views/PageView";
 import { DocumentView, DocumentViewConfig } from "./views/DocumentView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
+import { TransferMode, TransferView, TransferViewConfig } from "./views/TransferView";
+import { showInfoDialog } from "./views/utils";
 
 enum EnumMWCViews {
   Library = "library",
   Page = "page",
   Document = "document",
+  Transfer = "transfer",
 }
 
 interface MWCView {
-  instance?: LibraryView | DocumentView | PageView;
-  config: LibraryViewConfig | DocumentViewConfig | PageViewConfig;
+  instance?: LibraryView | DocumentView | PageView | TransferView;
+  config: LibraryViewConfig | DocumentViewConfig | PageViewConfig | TransferViewConfig;
   isVisible: boolean;
 }
 
@@ -22,6 +25,7 @@ interface MobileWebCaptureConfig extends MobileDocumentScannerConfig {
   libraryViewConfig?: LibraryViewConfig;
   documentViewConfig?: DocumentViewConfig;
   pageViewConfig?: PageViewConfig;
+  transferViewConfig?: TransferViewConfig;
   exportConfig?: ExportConfig;
 }
 
@@ -51,7 +55,15 @@ class MobileWebCapture extends MobileDocumentScanner {
 
   constructor(config: MobileWebCaptureConfig) {
     // Pass the MobileDocumentScannerConfig portion to super
-    const { libraryViewConfig, documentViewConfig, pageViewConfig, license, exportConfig, ...baseConfig } = config;
+    const {
+      libraryViewConfig,
+      documentViewConfig,
+      pageViewConfig,
+      license,
+      exportConfig,
+      transferViewConfig,
+      ...baseConfig
+    } = config;
     super({ license, ...baseConfig });
 
     if (license) {
@@ -85,6 +97,7 @@ class MobileWebCapture extends MobileDocumentScanner {
           exportConfig,
           uploadedFiles: this.uploadedFiles,
           updateUploadedFiles: this.updateUploadedFiles,
+          onTransferPages: (mode, docId, selectedIdx) => this.handleTransferPage(mode, docId, selectedIdx),
         },
         isVisible: false,
       },
@@ -96,6 +109,14 @@ class MobileWebCapture extends MobileDocumentScanner {
           exportConfig,
           uploadedFiles: this.uploadedFiles,
           updateUploadedFiles: this.updateUploadedFiles,
+        },
+        isVisible: false,
+      },
+      [EnumMWCViews.Transfer]: {
+        config: {
+          container: transferViewConfig.container,
+          onConfirmTransfer: (mode) => this.handleTransferPageConfirm(mode),
+          onCancelTransfer: () => this.handleTransferPageCancel(),
         },
         isVisible: false,
       },
@@ -142,30 +163,32 @@ class MobileWebCapture extends MobileDocumentScanner {
   }
 
   private initializeViews() {
-    const { Library, Document, Page } = EnumMWCViews;
+    const { Library, Document, Page, Transfer } = EnumMWCViews;
     this.mwcViews[Library].instance = new LibraryView(this.mwcViews[Library].config as LibraryViewConfig);
     this.mwcViews[Document].instance = new DocumentView(this.mwcViews[Document].config as DocumentViewConfig);
     this.mwcViews[Page].instance = new PageView(this.mwcViews[Page].config as PageViewConfig);
+    this.mwcViews[Transfer].instance = new TransferView(this.mwcViews[Transfer].config as TransferViewConfig);
 
     this.mwcViews[Library].instance.initialize();
     this.mwcViews[Document].instance.initialize();
     this.mwcViews[Page].instance.initialize();
+    this.mwcViews[Transfer].instance.initialize();
   }
 
-  private switchView(targetView: EnumMWCViews) {
+  private switchView(targetView: EnumMWCViews, config?: any) {
     if (targetView === this.currentView) return;
 
     if (this.currentView) {
       // Hide current view
       const currentState = this.mwcViews[this.currentView];
       currentState.isVisible = false;
-      currentState.instance?.setVisible?.(false);
+      currentState.instance?.setVisible?.(false, config);
     }
 
     // Show target view
     const targetState = this.mwcViews[targetView];
     targetState.isVisible = true;
-    targetState.instance?.setVisible?.(true);
+    targetState.instance?.setVisible?.(true, config);
 
     this.currentView = targetView;
   }
@@ -291,6 +314,27 @@ class MobileWebCapture extends MobileDocumentScanner {
 
   private updateUploadedFiles(newUploadedFiles: UploadedDocument[]) {
     this.uploadedFiles = newUploadedFiles;
+  }
+
+  private handleTransferPage(mode: TransferMode, docId: string, selectedIdx: number[]) {
+    // should use switchView
+    this.switchView(EnumMWCViews.Transfer, {
+      mode,
+      docId,
+      selectedIdx,
+    });
+  }
+
+  private handleTransferPageConfirm(mode: TransferMode) {
+    (this.mwcViews.document.instance as DocumentView).handleBackButton();
+    showInfoDialog(
+      mode === "copy" ? "Pasted" : mode === "move" ? "Moved" : "",
+      this.mwcViews.document.config.container
+    );
+  }
+
+  private handleTransferPageCancel() {
+    this.switchView(EnumMWCViews.Document);
   }
 
   dispose() {

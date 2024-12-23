@@ -359,13 +359,6 @@ export class PageView {
 const encodedBackBtn = (icon: string) => encodeURIComponent(icon.trim()).replace(/'/g, "%27").replace(/"/g, "%22");
 
 const DEFAULT_PAGE_VIEW_STYLE = `
-.mwc-icon.icon-back_arrow {
-  background-image: url('data:image/svg+xml;utf8,${encodedBackBtn(MWC_ICONS.document)}');
-  background-size: initial;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
 .mwc-page-view-controls {
   display: flex;
   height: 6rem;
@@ -375,6 +368,7 @@ const DEFAULT_PAGE_VIEW_STYLE = `
   font-family: Verdana;
   color: white;
   width: 100%;
+  flex: 0 1 65px;
 }
 
 .mwc-page-view-control-btn {
@@ -392,8 +386,12 @@ const DEFAULT_PAGE_VIEW_STYLE = `
   user-select: none;
 }
 
-.mwc-page-view-control-btn div:last-child {
-  padding-bottom: 0.5rem;
+.mwc-page-view-control-btn >div:first-child {
+  padding-top: 1rem;
+}
+
+.mwc-page-view-control-btn >div:last-child {
+  padding-bottom: 1rem;
 }
 
 .mwc-page-view-control-btn.finish {
@@ -402,7 +400,6 @@ const DEFAULT_PAGE_VIEW_STYLE = `
 }
 
 .mwc-page-view-control-icon svg {
-  padding-top: 0.5rem;
   width: 24px;
   height: 24px;
   fill: white;
@@ -468,7 +465,7 @@ const PAGE_VIEW_CONTROLS_HTML = `
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.delete}</div>
-    <div>Delete Page</div>
+    <div>Delete</div>
   </div>
   <div class="mwc-page-view-control-btn">
     <div class="mwc-page-view-control-icon">${MWC_ICONS.captureAnother}</div>

@@ -105,7 +105,7 @@ export class DocumentItem {
     this.isSelectMode = show;
 
     if (!show) {
-      this.uncheckDocument();
+      this.toggleCheck(false);
     }
   }
 
@@ -114,12 +114,6 @@ export class DocumentItem {
     this.checkbox.checked = this.checked;
     this.dom.classList.toggle("selected", this.checked);
     this.config.onCheckedChange?.(this.config.docId, this.checked);
-  }
-
-  uncheckDocument(): void {
-    this.checked = false;
-    this.checkbox.checked = false;
-    this.dom.classList.remove("selected");
   }
 
   getDom(): HTMLElement {
@@ -150,13 +144,13 @@ export class DocumentItem {
 
 const DEFAULT_DOCUMENT_ITEM_STYLE = `
 .mwc-document-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 90% 10%;
   background-color: #EFEFEF;
   cursor: pointer;
   font-family: Verdana;
   padding: 15px;
+  align-items: center
 }
 
 .mwc-document-item.selected {
@@ -172,12 +166,13 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
 .mwc-document-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  padding-right: 1rem;
 }
 
 .mwc-document-item .mwc-document-name-container {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 90% 10%;
 }
 
 .mwc-document-item .mwc-document-name-container .mwc-document-name {
@@ -185,7 +180,6 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 60px);
 }
 
 .mwc-document-item .mwc-document-name-container .mwc-document-rename-btn{

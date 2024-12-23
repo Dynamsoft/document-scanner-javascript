@@ -6,6 +6,7 @@ import { DocumentView } from "./DocumentView";
 import { DocumentHistoryItem } from "./components/DocumentHistoryItem";
 import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
 import { showModal } from "./components/Modal";
+import { TransferItem } from "./components/TransferItem";
 
 export interface LibraryViewConfig {
   container: HTMLElement;
@@ -79,7 +80,6 @@ export class LibraryView {
       if (docCount) {
         this.docItems.forEach((item) => {
           item.update();
-          // item.toggleDocRenameMode(false);
         });
       }
     }
@@ -266,9 +266,9 @@ export class LibraryView {
     }
 
     // Update toolbar button (hide other buttons)
-    this.addNewBtn.style.display = show ? "none" : "flex";
-    this.cameraCaptureBtn.style.display = show ? "none" : "flex";
-    this.galleryInputBtn.style.display = show ? "none" : "flex";
+    this.addNewBtn.style.visibility = show ? "hidden" : "visible";
+    this.cameraCaptureBtn.style.visibility = show ? "hidden" : "visible";
+    this.galleryInputBtn.style.visibility = show ? "hidden" : "visible";
     this.uploadedFilesBtn.innerHTML = show
       ? `<div class="mwc-library-control-icon">${MWC_ICONS.back}</div><div>Back</div>`
       : `<div class="mwc-library-control-icon">${MWC_ICONS.uploadedFiles}</div><div>History</div>`;
@@ -562,7 +562,7 @@ export class LibraryView {
 
   private handleBackButton() {
     // Uncheck all documents
-    this.docItems.forEach((item) => item.uncheckDocument());
+    this.docItems.forEach((item) => item.toggleCheck(false));
     this.checkedDocUids = [];
 
     this.exitSelectionMode();
@@ -649,7 +649,7 @@ user-select: none;
 
 .mwc-library-controls {
   display: flex;
-  height: 65px;
+  height: 6rem;
   background-color: #323234;
   align-items: center;
   font-size: 12px;
@@ -672,7 +672,6 @@ user-select: none;
   gap: 0.5rem;
   text-align: center;
   user-select: none;
-  padding: 0.5rem;
 }
 
 .mwc-library-control-btn.selected {
@@ -686,6 +685,14 @@ user-select: none;
 
 .mwc-library-control-btn.disabled >div {
   opacity: 0.4;
+}
+
+.mwc-library-control-btn >div:first-child {
+  padding-top: 1rem;
+}
+
+.mwc-library-control-btn >div:last-child {
+  padding-bottom: 1rem;
 }
 
 .mwc-library-control-icon {
