@@ -3,11 +3,13 @@ import { CoreModule } from "dynamsoft-core";
 import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
 import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentNormalizerView, { DocumentNormalizerViewConfig } from "./views/DocumentNormalizerView";
-import DocumentScannerView, { DocumentScanResult } from "./views/DocumentScannerView";
+import DocumentScannerView, { DocumentScanResult, EnumResultStatusCode } from "./views/DocumentScannerView";
 import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
 
+import "dynamsoft-document-normalizer";
+
 // Default DCE UI path
-const DEFAULT_DCE_UI_PATH = "../dist/mobile-document-scanner.ui.html";
+const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
 
 // Interfaces
 interface UtilizedTemplateNames {
@@ -15,7 +17,7 @@ interface UtilizedTemplateNames {
   normalize: string;
 }
 
-export interface MobileDocumentScannerConfig {
+export interface DocumentScannerConfig {
   license?: string;
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
@@ -35,14 +37,14 @@ export interface SharedResources {
 }
 
 // Main class
-class MobileDocumentScanner {
+class DocumentScanner {
   private scannerView?: DocumentScannerView;
   private scanResultView?: ScanResultView;
   private normalizerView?: DocumentNormalizerView;
   private resources: Partial<SharedResources> = {};
   private isCapturing = false;
 
-  constructor(private config: MobileDocumentScannerConfig) {
+  constructor(private config: DocumentScannerConfig) {
     this.config = {
       license: config.license || "",
       templateFilePath: config.templateFilePath || null,
@@ -144,7 +146,7 @@ class MobileDocumentScanner {
    * 3. Shows preview with options to edit/normalize
    * @returns Promise that resolves with the final scan results
    */
-  async startImageCapture(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentScanResult> {
     // Prevent multiple capture sessions
     if (this.isCapturing) {
       throw new Error("Capture session already in progress");
@@ -162,19 +164,29 @@ class MobileDocumentScanner {
       }
 
       // Start scanning process
-      const scanResult = await this.scannerView.scanImage();
+      const scanResult = await this.scannerView.launch();
 
-      if (!scanResult?.success) {
-        throw new Error("Failed to capture image");
+      if (scanResult?.status.code !== EnumResultStatusCode.SUCCESS) {
+        return {
+          status: {
+            code: scanResult?.status.code,
+            message: scanResult?.status.message || "Failed to capture image",
+          },
+        };
       }
 
       // Show scanResultView with the captured result
-      const scanResultView = await this.scanResultView.showPreview();
+      const scanResultView = await this.scanResultView.launch();
 
       return scanResultView;
     } catch (error) {
-      console.error("Document capture flow failed:", error);
-      throw error;
+      console.error("Document capture flow failed:", error?.message || error);
+      return {
+        status: {
+          code: EnumResultStatusCode.FAILED,
+          message: `Document capture flow failed. ${error?.message || error}`,
+        },
+      };
     } finally {
       this.isCapturing = false;
     }
@@ -216,4 +228,4 @@ class MobileDocumentScanner {
   }
 }
 
-export default MobileDocumentScanner;
+export default DocumentScanner;

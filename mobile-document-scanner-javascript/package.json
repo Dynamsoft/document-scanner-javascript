@@ -1,9 +1,9 @@
 {
-  "name": "dynamsoft-mobile-document-scanner",
+  "name": "dynamsoft-document-scanner",
   "version": "10.2.1007",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/mobile-document-scanner.js",
-  "module": "./dist/mobile-document-scanner.esm.js",
+  "main": "./dist/document-scanner.js",
+  "module": "./dist/document-scanner.esm.js",
   "files": [
     "/dist",
     "/LICENSE"
@@ -15,8 +15,8 @@
         "require": "./dist/types/index.d.cts",
         "import": "./dist/types/index.d.ts"
       },
-      "import": "./dist/mobile-document-scanner.esm.js",
-      "require": "./dist/mobile-document-scanner.js"
+      "import": "./dist/document-scanner.bundle.mjs",
+      "require": "./dist/document-scanner.bundle.js"
     }
   },
   "types": "./dist/types/index.d.ts",
@@ -31,7 +31,7 @@
     "url": "git+https://github.com/ TO DO"
   },
   "keywords": [
-    "barcode",
+    "document scanning",
     "js",
     "javascript"
   ],
@@ -45,12 +45,14 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "rollup-plugin-dts": "^6.1.1",
     "@types/node": "^20.11.6",
     "rollup": "^4.9.5",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "dynamsoft-camera-enhancer": "4.1.0-beta-202410310121",
     "dynamsoft-capture-vision-bundle": "2.4.2200"
   }
 }

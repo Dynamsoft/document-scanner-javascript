@@ -1,9 +1,9 @@
 import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core";
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { MobileDocumentScannerConfig, SharedResources } from "../MobileDocumentScanner";
+import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
 import { bindControlButton } from "./utils";
-import { DocumentScanResult } from "./DocumentScannerView";
+import { DocumentScanResult, EnumResultStatusCode } from "./DocumentScannerView";
 import { MWC_ICONS } from "./utils/icons";
 
 const DEFAULT_CORNER_SIZE = 60;
@@ -26,7 +26,7 @@ export default class DocumentNormalizerView {
   private controls: DocumentNormalizerViewControls;
   private currentNormalizerResolver?: (result: DocumentScanResult) => void;
 
-  constructor(private resources: SharedResources, private config: MobileDocumentScannerConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentScannerConfig) {}
 
   async initialize(): Promise<void> {
     if (!this.resources.result) {
@@ -335,8 +335,17 @@ export default class DocumentNormalizerView {
     this.hideEditor();
   }
 
-  async showEditor(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentScanResult> {
     try {
+      if (!this.resources.result?.normalizedImageResult) {
+        return {
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: "No image available for normalization",
+          },
+        };
+      }
+
       this.config.documentNormalizerViewConfig.container.textContent = "";
       await this.initialize();
       this.config.documentNormalizerViewConfig.container.style.display = "flex";
@@ -348,7 +357,14 @@ export default class DocumentNormalizerView {
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
-      throw errMsg;
+      if (!this.resources.result?.normalizedImageResult) {
+        return {
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: errMsg,
+          },
+        };
+      }
     }
   }
 

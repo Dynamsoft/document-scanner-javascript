@@ -53,6 +53,22 @@
             <path d="M118,85 408,407 394,427 104,105Z" />
           </svg>
         </div>
+        <div class="dce-mn-close" title="close">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            width="24"
+            height="24"
+            stroke-width="4"
+          >
+            <path d="M18 6l-12 12"></path>
+            <path d="M6 6l12 12"></path>
+          </svg>
+        </div>
       </div>
       <div
         class="dce-camera-related-container"
@@ -532,7 +548,7 @@
 
     .dce-mn-torch {
       position: absolute;
-      right: 12px;
+      right: 48px; /* 24px (close icon) + 12px + 12px*/
       display: flex;
       justify-content: center;
       align-items: center;
@@ -541,12 +557,32 @@
     .dce-mn-torch-auto,
     .dce-mn-torch-on,
     .dce-mn-torch-off {
-      height: max(3vmin, 24px);
+      height: 24px;
+      width: 24px;
       padding: max(0.5vmin, 4px);
       box-sizing: border-box;
       border-radius: max(1.5vmin, 12px);
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
+    }
+
+    .dce-mn-close {
+      position: absolute;
+      right: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dce-mn-close svg {
+      height: 24px;
+      width: 24px;
+      padding: max(0.5vmin, 4px);
+      box-sizing: border-box;
+      border-radius: max(1.5vmin, 12px);
+      background: rgba(100, 100, 100, 0.5);
+      cursor: pointer;
+      stroke: white;
     }
 
     .dce-mn-resolution-box {
@@ -597,8 +633,8 @@
     }
 
     .dce-mn-bounds-detection > svg {
-      width: max(3vmin, 24px);
-      height: max(3vmin, 24px);
+      height: 24px;
+      width: 24px;
     }
 
     .dce-mn-bounds-detection-text {
@@ -640,8 +676,8 @@
     }
 
     .dce-mn-auto-capture > svg {
-      width: max(3vmin, 24px);
-      height: max(3vmin, 24px);
+      height: 24px;
+      width: 24px;
     }
 
     .dce-mn-auto-capture-text {

@@ -1,5 +1,5 @@
-import { MobileDocumentScannerConfig, SharedResources } from "../MobileDocumentScanner";
-import DocumentScannerView, { DocumentScanResult } from "./DocumentScannerView";
+import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
+import DocumentScannerView, { DocumentScanResult, EnumResultStatusCode } from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { bindControlButton } from "./utils";
 import DocumentNormalizerView from "./DocumentNormalizerView";
@@ -28,12 +28,12 @@ export default class ScanResultView {
 
   constructor(
     private resources: SharedResources,
-    private config: MobileDocumentScannerConfig,
+    private config: DocumentScannerConfig,
     private scanner: DocumentScannerView,
     private normalizerView: DocumentNormalizerView
   ) {}
 
-  async showPreview(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentScanResult> {
     try {
       this.config.scanResultViewConfig.container.textContent = "";
       await this.initialize();
@@ -86,7 +86,7 @@ export default class ScanResultView {
   private async handleNormalize() {
     try {
       this.hidePreview();
-      const result = await this.normalizerView.showEditor();
+      const result = await this.normalizerView.launch();
 
       // After normalization is complete, show preview again with updated image
       if (result.normalizedImageResult) {
@@ -108,8 +108,10 @@ export default class ScanResultView {
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
-          success: false,
-          error: error as Error,
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: error?.message || error,
+          },
         });
       }
       throw error;
@@ -119,27 +121,35 @@ export default class ScanResultView {
   private async handleRetake() {
     try {
       this.hidePreview();
-      const result = await this.scanner.scanImage();
+      const result = await this.scanner.launch();
 
-      // After retake is complete, show preview again with updated image
-      if (result) {
-        // Update shared resources with new scan result
-        if (this.resources.onResultUpdated) {
+      if (this.currentScanResultViewResolver && result?.status?.code === EnumResultStatusCode.FAILED) {
+        this.currentScanResultViewResolver(result);
+
+        return;
+      }
+
+      // Handle success case
+      if (this.resources.onResultUpdated) {
+        if (result?.status.code === EnumResultStatusCode.CANCELLED) {
+          this.resources.onResultUpdated(this.resources.result);
+        } else if (result?.status.code === EnumResultStatusCode.SUCCESS) {
           this.resources.onResultUpdated(result);
         }
-
-        // Clear current preview and reinitialize with new image
-        this.dispose(true); // true = preserve resolver
-        await this.initialize();
-        this.config.scanResultViewConfig.container.style.display = "flex";
       }
+
+      this.dispose(true);
+      await this.initialize();
+      this.config.scanResultViewConfig.container.style.display = "flex";
     } catch (error) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
-          success: false,
-          error: error as Error,
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: error?.message || error,
+          },
         });
       }
       throw error;
@@ -165,8 +175,10 @@ export default class ScanResultView {
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
-          success: false,
-          error: error as Error,
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: error?.message || error,
+          },
         });
       }
       throw error;

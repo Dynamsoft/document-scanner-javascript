@@ -6,18 +6,29 @@ import {
   Quadrilateral,
 } from "dynamsoft-core";
 import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { MobileDocumentScannerConfig, SharedResources } from "../MobileDocumentScanner";
+import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
+
+export enum EnumResultStatusCode {
+  SUCCESS = 0,
+  CANCELLED = 1,
+  FAILED = 2,
+}
+
+type ResultStatus = {
+  code: EnumResultStatusCode;
+  message?: string;
+};
 
 export interface DocumentScanResult {
-  success: boolean;
+  status: ResultStatus;
   normalizedImageResult?: NormalizedImageResultItem | DSImageData;
   originalImageResult?: OriginalImageResultItem["imageData"];
   detectedQuadrilateral?: Quadrilateral;
-  error?: Error;
 }
 
 interface DCEElements {
+  closeScannerBtn: HTMLElement | null;
   takePhotoBtn: HTMLElement | null;
   boundsDetectionBtn: HTMLElement | null;
   autoCaptureBtn: HTMLElement | null;
@@ -41,6 +52,7 @@ export default class DocumentScannerView {
 
   // Elements
   private DCE_ELEMENTS: DCEElements = {
+    closeScannerBtn: null,
     takePhotoBtn: null,
     boundsDetectionBtn: null,
     autoCaptureBtn: null,
@@ -49,7 +61,7 @@ export default class DocumentScannerView {
   // Scan Resolve
   private currentScanResolver?: (result: DocumentScanResult) => void;
 
-  constructor(private resources: SharedResources, private config: MobileDocumentScannerConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentScannerConfig) {}
 
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -71,11 +83,12 @@ export default class DocumentScannerView {
 
       // Initialize the template parameters for DL scanning4
       if (this.config.templateFilePath) {
+        console.log("here");
         await cvRouter.initSettings(this.config.templateFilePath);
       } else {
-        let newSettings = await cvRouter.getSimplifiedSettings("DetectDocumentBoundaries_Default");
+        let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
         newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-        await cvRouter.updateSettings("DetectDocumentBoundaries_Default", newSettings);
+        await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
       }
 
       const resultReceiver = new CapturedResultReceiver();
@@ -102,6 +115,7 @@ export default class DocumentScannerView {
     }
 
     this.DCE_ELEMENTS = {
+      closeScannerBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-close"),
       takePhotoBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo"),
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
       autoCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture"),
@@ -115,7 +129,7 @@ export default class DocumentScannerView {
   }
 
   private assignDCEClickEvents() {
-    if (!this.DCE_ELEMENTS.takePhotoBtn || !this.DCE_ELEMENTS.boundsDetectionBtn || !this.DCE_ELEMENTS.autoCaptureBtn) {
+    if (!Object.values(this.DCE_ELEMENTS).every(Boolean)) {
       throw new Error("Camera control elements not found");
     }
 
@@ -125,6 +139,7 @@ export default class DocumentScannerView {
     this.takePhoto = this.takePhoto.bind(this);
     this.toggleBoundsDetection = this.toggleBoundsDetection.bind(this);
     this.toggleAutoCapture = this.toggleAutoCapture.bind(this);
+    this.closeCamera = this.closeCamera.bind(this);
 
     this.DCE_ELEMENTS.takePhotoBtn.addEventListener("click", this.takePhoto, eventOptions);
 
@@ -139,6 +154,21 @@ export default class DocumentScannerView {
       async () => await this.toggleAutoCapture(),
       eventOptions
     );
+
+    this.DCE_ELEMENTS.closeScannerBtn.addEventListener("click", async () => await this.handleCloseBtn(), eventOptions);
+  }
+
+  async handleCloseBtn() {
+    await this.closeCamera();
+
+    if (this.currentScanResolver) {
+      this.currentScanResolver({
+        status: {
+          code: EnumResultStatusCode.CANCELLED,
+          message: "Cancelled",
+        },
+      });
+    }
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
@@ -296,7 +326,10 @@ export default class DocumentScannerView {
       this.closeCamera();
 
       const result = {
-        success: true,
+        status: {
+          code: EnumResultStatusCode.SUCCESS,
+          message: "Success",
+        },
         originalImageResult: this.originalImageData,
         normalizedImageResult,
         detectedQuadrilateral,
@@ -311,6 +344,14 @@ export default class DocumentScannerView {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
       alert(errMsg);
+
+      const result = {
+        status: {
+          code: EnumResultStatusCode.FAILED,
+          message: "Error capturing image",
+        },
+      };
+      this.currentScanResolver(result);
     }
   }
 
@@ -352,7 +393,7 @@ export default class DocumentScannerView {
     }
   }
 
-  async scanImage(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentScanResult> {
     await this.initialize();
 
     const { cvRouter, cameraEnhancer } = this.resources;
