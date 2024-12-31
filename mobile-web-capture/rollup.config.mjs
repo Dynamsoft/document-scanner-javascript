@@ -77,7 +77,7 @@ export default [
         exports: "named",
         sourcemap: true,
         globals: {
-          "dynamsoft-document-scanner": "DDS",
+          "dynamsoft-document-scanner": "DocumentScanner",
         },
       },
     ],
@@ -104,7 +104,7 @@ export default [
         exports: "named",
         sourcemap: true,
         globals: {
-          "dynamsoft-document-scanner": "DDS",
+          "dynamsoft-document-scanner": "DocumentScanner",
         },
       },
     ],
@@ -130,7 +130,7 @@ export default [
         exports: "named",
         sourcemap: true,
         globals: {
-          "dynamsoft-document-scanner": "DDS",
+          "dynamsoft-document-scanner": "DocumentScanner",
         },
       },
     ],

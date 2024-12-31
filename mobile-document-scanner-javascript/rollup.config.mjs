@@ -1,25 +1,42 @@
 import fs from "fs";
 import typescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
+// import replace from "@rollup/plugin-replace";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { dts } from "rollup-plugin-dts";
 
 const pkg = JSON.parse(await fs.promises.readFile("./package.json"));
+const version = pkg.version;
 
-const hasSourceMap = "production" !== process.env.BUILD;
-const banner = `/*!
-* document-scanner @version ${pkg.version} (${new Date().toISOString()})
-*/`;
+fs.rmSync("dist", { recursive: true, force: true });
+// fs.cpSync("public", "dist", { recursive: true });
+
+const strProduct = "Dynamsoft Document Scanner JS Edition Bundle";
 
 const terser_format = {
+  // this func is run by eval in worker, so can't use variable outside
   comments: function (node, comment) {
     const text = comment.value;
     const type = comment.type;
     if (type == "comment2") {
-      return /@product|@version|@fileoverview/.test(text);
+      // multiline comment
+      const strProduct = "Dynamsoft Document Scanner JS Edition Bundle";
+      const regDyComment = new RegExp(String.raw`@product\s${strProduct}`, "i");
+      return regDyComment.test(text);
     }
   },
 };
+
+const banner = `/*!
+* Dynamsoft JavaScript Library
+* @product ${strProduct}
+* @website http://www.dynamsoft.com
+* @copyright Copyright ${new Date().getUTCFullYear()}, Dynamsoft Corporation
+* @author Dynamsoft
+* @version ${version}
+* @fileoverview Dynamsoft JavaScript Library for Capture Vision
+* More info on DDS JS: https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/
+*/`;
 
 const plugin_terser_es6 = terser({ ecma: 6, format: terser_format });
 const plugin_terser_es5 = terser({ ecma: 5, format: terser_format });
@@ -31,110 +48,117 @@ const copyFiles = () => ({
   },
 });
 
-export default async () => {
-  fs.rmSync("dist", { recursive: true, force: true });
-
-  return [
-    // UMD bundle
-    {
-      input: "src/DocumentScanner.ts",
-      plugins: [
-        nodeResolve({
-          browser: true,
-          preferBuiltins: false,
-        }),
-        typescript({
-          tsconfig: "./tsconfig.json",
-          declaration: true,
-          declarationDir: "dist/types",
-        }),
-        plugin_terser_es5,
-        copyFiles(),
-        {
-          writeBundle(options, bundle) {
-            let txt = fs
-              .readFileSync("dist/document-scanner.js", { encoding: "utf8" })
-              .replace(/Dynamsoft=\{\}/, "Dynamsoft=t.Dynamsoft||{}");
-            fs.writeFileSync("dist/document-scanner.js", txt);
-          },
+export default [
+  {
+    input: "src/dds.bundle.ts",
+    plugins: [
+      nodeResolve({ browser: true }),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        declaration: false,
+        declarationDir: undefined,
+      }),
+      plugin_terser_es5,
+      copyFiles(),
+      {
+        // https://rollupjs.org/guide/en/#writebundle
+        writeBundle(options, bundle) {
+          let txt = fs
+            .readFileSync("dist/dds.bundle.js", { encoding: "utf8" })
+            .replace(/Dynamsoft=\{\}/, "Dynamsoft=t.Dynamsoft||{}");
+          fs.writeFileSync("dist/dds.bundle.js", txt);
         },
-      ],
-      output: [
-        {
-          file: "dist/document-scanner.js",
-          format: "umd",
-          name: "DocumentScanner",
-          exports: "default",
-          banner,
-          sourcemap: hasSourceMap,
+      },
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.js",
+        format: "umd",
+        name: "Dynamsoft",
+        banner: banner,
+        exports: "named",
+      },
+    ],
+  },
+  {
+    input: "src/dds.bundle.esm.ts",
+    plugins: [
+      nodeResolve({ browser: true }),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        declaration: false,
+        declarationDir: undefined,
+      }),
+      plugin_terser_es6,
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.mjs",
+        format: "es",
+        banner: banner,
+        exports: "named",
+      },
+    ],
+  },
+  {
+    input: "src/dds.no-content-bundle.esm.ts",
+    plugins: [
+      typescript({
+        tsconfig: "./tsconfig.json",
+      }),
+      plugin_terser_es6,
+      copyFiles(),
+    ],
+    output: [
+      {
+        file: "dist/dds.no-content-bundle.esm.js",
+        format: "es",
+        banner: banner,
+        exports: "named",
+      },
+    ],
+  },
+  {
+    input: "dist/types/dds.bundle.d.ts",
+    plugins: [
+      dts(),
+      {
+        // https://rollupjs.org/guide/en/#writebundle
+        writeBundle(options, bundle) {
+          // change `export { type A }` to `export { A }`,
+          // so project use old typescript still works.
+          let txt = fs.readFileSync("dist/dds.bundle.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
+          fs.writeFileSync("dist/dds.bundle.d.ts", txt);
         },
-      ],
-    },
-    // ESM bundle
-    {
-      input: "src/DocumentScanner.ts",
-      plugins: [
-        nodeResolve({
-          browser: true,
-          preferBuiltins: false,
-        }),
-        typescript({
-          tsconfig: "./tsconfig.json",
-          sourceMap: hasSourceMap,
-        }),
-        plugin_terser_es6,
-        copyFiles(),
-      ],
-      output: [
-        {
-          file: "dist/document-scanner.mjs",
-          format: "es",
-          exports: "default",
-          banner,
-          sourcemap: hasSourceMap,
-          plugins: [
-            {
-              writeBundle() {
-                fs.cpSync("dist/document-scanner.mjs", "dist/document-scanner.esm.js");
-              },
-            },
-          ],
+      },
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.d.ts",
+        format: "es",
+      },
+    ],
+  },
+  {
+    input: "dist/types/dds.bundle.esm.d.ts",
+    plugins: [
+      dts(),
+      {
+        // https://rollupjs.org/guide/en/#writebundle
+        writeBundle(options, bundle) {
+          fs.rmSync("dist/types", { recursive: true, force: true });
+          // change `export { type A }` to `export { A }`,
+          // so project use old typescript still works.
+          let txt = fs.readFileSync("dist/dds.bundle.esm.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
+          fs.writeFileSync("dist/dds.bundle.esm.d.ts", txt);
         },
-      ],
-    },
-    // TypeScript declarations
-    {
-      input: "dist/types/DocumentScanner.d.ts",
-      plugins: [
-        dts(),
-        {
-          writeBundle(options, bundle) {
-            // Create index.d.ts for both CJS and ESM
-            const dtsContent = fs.readFileSync("dist/document-scanner.d.ts", "utf8").replace(/([{,]) type /g, "$1 ");
-
-            // Create dist/types directory if it doesn't exist
-            if (!fs.existsSync("dist/types")) {
-              fs.mkdirSync("dist/types", { recursive: true });
-            }
-
-            // Write ESM .d.ts
-            fs.writeFileSync("dist/types/index.d.ts", dtsContent);
-
-            // Write CJS .d.ts
-            fs.writeFileSync("dist/types/index.d.cts", dtsContent);
-
-            // Clean up intermediate files
-            fs.unlinkSync("dist/document-scanner.d.ts");
-            fs.rmSync("dist/types/src", { recursive: true, force: true });
-          },
-        },
-      ],
-      output: [
-        {
-          file: "dist/document-scanner.d.ts",
-          format: "es",
-        },
-      ],
-    },
-  ];
-};
+      },
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.esm.d.ts",
+        format: "es",
+      },
+    ],
+  },
+];

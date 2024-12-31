@@ -1,25 +1,25 @@
 {
   "name": "dynamsoft-document-scanner",
-  "version": "10.2.1007",
+  "version": "1.0.1000",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/document-scanner.js",
-  "module": "./dist/document-scanner.esm.js",
+  "main": "./dist/dds.bundle.js",
+  "module": "./dist/dds.no-content-bundle.esm.js",
   "files": [
     "/dist",
     "/LICENSE"
   ],
-  "sideEffects": false,
+  "sideEffects": true,
   "exports": {
-    ".": {
-      "types": {
-        "require": "./dist/types/index.d.cts",
-        "import": "./dist/types/index.d.ts"
-      },
-      "import": "./dist/document-scanner.bundle.mjs",
-      "require": "./dist/document-scanner.bundle.js"
+    "import": {
+      "types": "./dist/dds.bundle.esm.d.ts",
+      "default": "./dist/dds.no-content-bundle.esm.js"
+    },
+    "require": {
+      "types": "./dist/dds.bundle.d.ts",
+      "default": "./dist/dds.bundle.js"
     }
   },
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/dds.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c",

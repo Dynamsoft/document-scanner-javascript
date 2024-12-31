@@ -6,13 +6,11 @@ import DocumentNormalizerView, { DocumentNormalizerViewConfig } from "./views/Do
 import DocumentScannerView, { DocumentScanResult, EnumResultStatusCode } from "./views/DocumentScannerView";
 import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
 
-import "dynamsoft-document-normalizer";
-
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
 
 // Interfaces
-interface UtilizedTemplateNames {
+export interface UtilizedTemplateNames {
   detect: string;
   normalize: string;
 }
