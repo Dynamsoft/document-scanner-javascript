@@ -1,10 +1,10 @@
 import { DDV } from "dynamsoft-document-viewer";
 import { LibraryView, LibraryViewConfig } from "./views/LibraryView";
-import MobileDocumentScanner, { MobileDocumentScannerConfig } from "dynamsoft-mobile-document-scanner";
+import { DocumentScannerConfig, EnumResultStatusCode, DocumentScanner } from "dynamsoft-document-scanner";
 import { LicenseManager } from "dynamsoft-license";
 import { PageView, PageViewConfig } from "./views/PageView";
 import { DocumentView, DocumentViewConfig } from "./views/DocumentView";
-import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
+import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { TransferMode, TransferView, TransferViewConfig } from "./views/TransferView";
 import { showInfoDialog } from "./views/utils";
 
@@ -21,7 +21,7 @@ interface MWCView {
   isVisible: boolean;
 }
 
-interface MobileWebCaptureConfig extends MobileDocumentScannerConfig {
+export interface MobileWebCaptureConfig extends DocumentScannerConfig {
   libraryViewConfig?: LibraryViewConfig;
   documentViewConfig?: DocumentViewConfig;
   pageViewConfig?: PageViewConfig;
@@ -29,12 +29,12 @@ interface MobileWebCaptureConfig extends MobileDocumentScannerConfig {
   exportConfig?: ExportConfig;
 }
 
-type Status = "success" | "failed";
+export type UploadStatus = "success" | "failed";
 
 export type UploadedDocument = {
   fileName: string;
   downloadUrl: string;
-  status: Status;
+  status: UploadStatus;
   uploadTime?: string;
 };
 
@@ -44,7 +44,8 @@ export interface ExportConfig {
   deleteFromServer?: (doc: UploadedDocument) => void;
 }
 
-class MobileWebCapture extends MobileDocumentScanner {
+class MobileWebCapture {
+  private documentScanner: DocumentScanner;
   private mwcViews: Record<EnumMWCViews, MWCView>;
 
   private currentView: EnumMWCViews = null;
@@ -64,7 +65,8 @@ class MobileWebCapture extends MobileDocumentScanner {
       transferViewConfig,
       ...baseConfig
     } = config;
-    super({ license, ...baseConfig });
+
+    this.documentScanner = new DocumentScanner({ license, ...baseConfig });
 
     if (license) {
       LicenseManager.initLicense(license, true);
@@ -130,7 +132,7 @@ class MobileWebCapture extends MobileDocumentScanner {
     }
 
     try {
-      const MobileDocumentScanner = await super.initialize();
+      const MobileDocumentScanner = await this.documentScanner.initialize();
 
       // Preload DDV Resource
       await DDV.Core.loadWasm();
@@ -205,9 +207,9 @@ class MobileWebCapture extends MobileDocumentScanner {
     this.mwcViews[this.currentView].instance?.setVisible?.(false);
 
     try {
-      const result = await this.startImageCapture();
+      const result = await this.documentScanner.launch();
       // Return to library view after successful capture
-      if (result.success) {
+      if (result?.status.code !== EnumResultStatusCode.FAILED) {
         const blob = await (result.normalizedImageResult as NormalizedImageResultItem).toBlob("image/png");
 
         if (sourceView === EnumMWCViews.Library) {
@@ -344,7 +346,7 @@ class MobileWebCapture extends MobileDocumentScanner {
       // }
     });
 
-    super.dispose();
+    this.documentScanner.dispose();
 
     this.isInitialized = false;
   }

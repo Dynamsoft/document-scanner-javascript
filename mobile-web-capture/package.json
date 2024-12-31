@@ -1,26 +1,25 @@
 {
   "name": "dynamsoft-mobile-web-capture",
-  "version": "10.2.1007",
+  "version": "1.0.1000",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/mobile-web-capture.js",
-  "module": "./dist/mobile-web-capture.esm.js",
+  "main": "./dist/mwc.bundle.js",
+  "module": "./dist/mwc.no-content-bundle.esm.js",
   "files": [
     "/dist",
-    "/LICENSE",
-    "/mds"
+    "/LICENSE"
   ],
-  "sideEffects": false,
+  "sideEffects": true,
   "exports": {
-    ".": {
-      "types": {
-        "require": "./dist/types/index.d.cts",
-        "import": "./dist/types/index.d.ts"
-      },
-      "import": "./dist/mobile-web-capture.esm.js",
-      "require": "./dist/mobile-web-capture.js"
+    "import": {
+      "types": "./dist/mwc.bundle.esm.d.ts",
+      "default": "./dist/mwc.no-content-bundle.esm.js"
+    },
+    "require": {
+      "types": "./dist/mwc.bundle.d.ts",
+      "default": "./dist/mwc.bundle.js"
     }
   },
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/mwc.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
@@ -32,7 +31,7 @@
     "url": "git+https://github.com/ TO DO"
   },
   "keywords": [
-    "barcode",
+    "document scanning",
     "js",
     "javascript"
   ],
@@ -46,19 +45,16 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "rollup-plugin-dts": "^6.1.1",
     "@types/node": "^20.11.6",
     "rollup": "^4.9.5",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "dynamsoft-camera-enhancer": "4.1.0-beta-202410310121",
     "dynamsoft-capture-vision-bundle": "2.4.2200",
-    "dynamsoft-document-viewer": "2.1.0",
-    "dynamsoft-mobile-document-scanner": "file:./mds"
-  },
-  "bundledDependencies": [
-    "dynamsoft-capture-vision-bundle",
-    "dynamsoft-document-viewer",
-    "dynamsoft-mobile-document-scanner"
-  ]
+    "dynamsoft-document-scanner": "file:./dds",
+    "dynamsoft-document-viewer": "2.1.0"
+  }
 }
