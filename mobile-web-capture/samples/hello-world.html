@@ -218,6 +218,7 @@
           homepageContainer.style.display = "none";
           await mwc.launch("library");
         } catch (error) {
+          homepageContainer.style.display = "flex";
           console.error("Capture failed:", error);
         }
       });

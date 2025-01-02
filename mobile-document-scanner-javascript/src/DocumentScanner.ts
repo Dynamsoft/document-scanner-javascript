@@ -100,25 +100,29 @@ class DocumentScanner {
       };
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
-      console.error("Initialization Failed:", errMsg);
-      alert("Initialization Failed");
+      throw new Error(`DDS Initialization Failed: ${errMsg}`);
     }
   }
 
   private async initializeResources(): Promise<void> {
-    LicenseManager.initLicense(this.config?.license || "", true);
+    try {
+      LicenseManager.initLicense(this.config?.license || "", true);
 
-    //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
-    CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
-    CoreModule.engineResourcePaths.dce =
-      "https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/";
+      //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
+      CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
+      CoreModule.engineResourcePaths.dce =
+        "https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/";
 
-    // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
-    CoreModule.loadWasm(["DDN"]);
+      // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
+      CoreModule.loadWasm(["DDN"]);
 
-    this.resources.cameraView = await CameraView.createInstance(this.config.cameraEnhancerUIPath);
-    this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
-    this.resources.cvRouter = await CaptureVisionRouter.createInstance();
+      this.resources.cameraView = await CameraView.createInstance(this.config.cameraEnhancerUIPath);
+      this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
+      this.resources.cvRouter = await CaptureVisionRouter.createInstance();
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      throw new Error(`Resource Initialization Failed: ${errMsg}`);
+    }
   }
 
   dispose(): void {

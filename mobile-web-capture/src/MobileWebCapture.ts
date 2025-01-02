@@ -153,6 +153,7 @@ class MobileWebCapture {
       let errMsg = ex?.message || ex;
       console.error("Initialization Failed:", errMsg);
       alert("Initialization Failed");
+      throw new Error(`Initialization Failed: ${errMsg}`);
     }
   }
 
@@ -194,11 +195,16 @@ class MobileWebCapture {
   }
 
   async launch(view: EnumMWCViews) {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
+    try {
+      if (!this.isInitialized) {
+        await this.initialize();
+      }
 
-    this.switchView(view || EnumMWCViews.Library);
+      this.switchView(view || EnumMWCViews.Library);
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      throw new Error(`Launch MWC Failed: ${errMsg}`);
+    }
   }
 
   private async handleCameraCapture(sourceView: EnumMWCViews) {
