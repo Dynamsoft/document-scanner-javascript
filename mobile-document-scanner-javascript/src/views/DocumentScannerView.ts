@@ -104,6 +104,14 @@ export default class DocumentScannerView {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
       alert(errMsg);
+      this.closeCamera();
+      const result = {
+        status: {
+          code: EnumResultStatusCode.FAILED,
+          message: "DDS Init error",
+        },
+      };
+      this.currentScanResolver(result);
     }
   }
 
@@ -258,6 +266,14 @@ export default class DocumentScannerView {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
       alert(errMsg);
+      this.closeCamera();
+      const result = {
+        status: {
+          code: EnumResultStatusCode.FAILED,
+          message: "DDS Open Camera Error",
+        },
+      };
+      this.currentScanResolver(result);
     }
   }
 
@@ -345,6 +361,7 @@ export default class DocumentScannerView {
       console.error(errMsg);
       alert(errMsg);
 
+      this.closeCamera();
       const result = {
         status: {
           code: EnumResultStatusCode.FAILED,
@@ -394,28 +411,41 @@ export default class DocumentScannerView {
   }
 
   async launch(): Promise<DocumentScanResult> {
-    await this.initialize();
+    try {
+      await this.initialize();
 
-    const { cvRouter, cameraEnhancer } = this.resources;
+      const { cvRouter, cameraEnhancer } = this.resources;
 
-    return new Promise(async (resolve) => {
-      this.currentScanResolver = resolve;
-      /* Defines the result receiver to scan front side of license.*/
+      return new Promise(async (resolve) => {
+        this.currentScanResolver = resolve;
+        /* Defines the result receiver to scan front side of license.*/
 
-      // Start capturing
-      await this.openCamera();
+        // Start capturing
+        await this.openCamera();
 
-      if (this.boundsDetectionEnabled) {
-        await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
-      }
+        if (this.boundsDetectionEnabled) {
+          await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+        }
 
-      // By default, cameraEnhancer captures grayscale images to optimize performance.
-      // To capture RGB Images, we set the Pixel Format to EnumImagePixelFormat.IPF_ABGR_8888
-      cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
+        // By default, cameraEnhancer captures grayscale images to optimize performance.
+        // To capture RGB Images, we set the Pixel Format to EnumImagePixelFormat.IPF_ABGR_8888
+        cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
 
-      // Reset frameCount
-      this.frameCount = 0;
-    });
+        // Reset frameCount
+        this.frameCount = 0;
+      });
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.error("DDS Launch error: ", errMsg);
+      this.closeCamera();
+      const result = {
+        status: {
+          code: EnumResultStatusCode.FAILED,
+          message: "DDS Launch error",
+        },
+      };
+      this.currentScanResolver(result);
+    }
   }
 
   async normalizeImage(

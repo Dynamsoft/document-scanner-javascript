@@ -9,10 +9,11 @@
     />
     <meta name="keywords" content="camera based quadrilateral detection and normalization" />
     <title>Detect the boundary of a document and normalize it</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.4.2200/dist/dcv.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.4.2200/dist/dcv.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/dce.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.css" />
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.js"></script>
+    <script src="../dds/dds.bundle.js"></script>
     <script src="../dist/mwc.bundle.js"></script>
   </head>
 
@@ -127,7 +128,7 @@
       };
 
       // Initialize MWC
-      const mwc = new Dynamsoft.MobileWebCapture({
+      const mwc = new MobileWebCapture({
         license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
         cameraViewContainer: cameraViewContainer,
         scanResultViewConfig: {

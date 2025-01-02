@@ -208,8 +208,9 @@ class MobileWebCapture {
 
     try {
       const result = await this.documentScanner.launch();
+
       // Return to library view after successful capture
-      if (result?.status.code !== EnumResultStatusCode.FAILED) {
+      if (result?.status.code === EnumResultStatusCode.SUCCESS) {
         const blob = await (result.normalizedImageResult as NormalizedImageResultItem).toBlob("image/png");
 
         if (sourceView === EnumMWCViews.Library) {

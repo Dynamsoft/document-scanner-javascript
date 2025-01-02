@@ -65,15 +65,6 @@ class DocumentScanner {
       },
     };
 
-    if (config.license) {
-      LicenseManager.initLicense(config.license, true);
-
-      // Currently if no license is provided, uses trial license
-
-      // TODO remove if not needed Recalculate the scan region when the window size changes TODO
-      // window.addEventListener("resize", this.handleResize.bind(this));
-    }
-
     if (!config.cameraViewContainer) {
       throw new Error("Please create a Camera View Container element");
     }
@@ -115,6 +106,8 @@ class DocumentScanner {
   }
 
   private async initializeResources(): Promise<void> {
+    LicenseManager.initLicense(this.config?.license || "", true);
+
     //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
     CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
     CoreModule.engineResourcePaths.dce =

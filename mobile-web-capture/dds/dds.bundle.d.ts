@@ -192,6 +192,7 @@ declare const DDS: {
     DocumentNormalizerView: typeof DocumentNormalizerView;
     DocumentScannerView: typeof DocumentScannerView;
     ScanResultView: typeof ScanResultView;
+    EnumResultStatusCode: typeof EnumResultStatusCode;
 };
 
 export { DDS, DocumentNormalizerView, DocumentNormalizerViewConfig, DocumentScanResult, DocumentScanner, DocumentScannerConfig, DocumentScannerView, EnumResultStatusCode, ScanResultView, ScanResultViewConfig, SharedResources, UtilizedTemplateNames };

@@ -8,6 +8,6 @@ export * from "dynamsoft-capture-vision-router";
 export * from "dynamsoft-camera-enhancer";
 export { PlayCallbackInfo, VideoDeviceInfo } from "dynamsoft-camera-enhancer";
 export * from "dynamsoft-document-normalizer";
-export * from "dynamsoft-document-viewer";
 export * from "dynamsoft-document-scanner";
+export * from "dynamsoft-document-viewer";
 export * from "./index";

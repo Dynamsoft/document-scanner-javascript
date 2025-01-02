@@ -9,8 +9,6 @@
     />
     <meta name="keywords" content="camera based quadrilateral detection and normalization" />
     <title>Detect the boundary of a document and normalize it</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.4.2200/dist/dcv.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/dce.js"></script> -->
     <script src="../dist/dds.bundle.js"></script>
   </head>
 
@@ -49,25 +47,25 @@
         },
       });
 
-      const { scannerView, normalizerView, scanResultView } = await mds.initialize();
+      // const { scannerView, normalizerView, scanResultView } = await mds.initialize();
 
       // Add results
-      let result = null;
-      startDetectingBtn.addEventListener("click", async () => {
-        result = await scannerView.launch();
-        normalizedResult.append(result.normalizedImageResult.toCanvas());
-      });
+      // let result = null;
+      // startDetectingBtn.addEventListener("click", async () => {
+      //   result = await scannerView.launch();
+      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
+      // });
 
-      startPreviewBtn.addEventListener("click", async () => {
-        result = await scanResultView.launch();
-        normalizedResult.append(result.normalizedImageResult.toCanvas());
-      });
+      // startPreviewBtn.addEventListener("click", async () => {
+      //   result = await scanResultView.launch();
+      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
+      // });
 
-      startNormalizerBtn.addEventListener("click", async () => {
-        result = await normalizerView.launch();
+      // startNormalizerBtn.addEventListener("click", async () => {
+      //   result = await normalizerView.launch();
 
-        normalizedResult.append(result.toCanvas());
-      });
+      //   normalizedResult.append(result.toCanvas());
+      // });
 
       startWorkflowBtn.addEventListener("click", async () => {
         try {
