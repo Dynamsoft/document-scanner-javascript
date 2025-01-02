@@ -205,6 +205,7 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .mwc-document-thumbnail svg {

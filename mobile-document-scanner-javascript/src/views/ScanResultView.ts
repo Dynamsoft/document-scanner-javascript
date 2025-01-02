@@ -282,6 +282,7 @@ export default class ScanResultView {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        minHeight: "0",
       });
 
       // Add preview image
