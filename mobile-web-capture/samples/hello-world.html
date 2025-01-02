@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="quadrilateral detection and normalization" />
+    <title>Mobile Web Capture Demo | Dynamsoft</title>
     <meta
       name="description"
-      content="Quickly detect document boundaries from a live camera stream and crop the document out before normalizing it further through perspective correction, deskewing, and more."
+      content="Mobile Web Capture demo enables capturing document images via mobile browsers and it organizes captured images into documents, with each document encompassing one or more pages."
     />
-    <meta name="keywords" content="camera based quadrilateral detection and normalization" />
-    <title>Detect the boundary of a document and normalize it</title>
     <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.4.2200/dist/dcv.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/dce.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.css" />
@@ -18,42 +19,63 @@
   </head>
 
   <body>
-    <h1 style="font-size: 1.5em">Detect the boundary of a document and normalize it</h1>
-    <!-- <button id="start-detecting">Start Scanning</button>
-    <button id="start-preview">Start Preview</button>
-    <button id="start-normalizer">Start Normalizer</button>
-    <button id="start-core-workflow">Start Capturing Image</button>
-    <button id="start-library">Start Library</button> -->
-    <button id="start-mwc">Start MWC</button>
-
-    <div id="camera-view-container" style="margin-top: 10px; height: 80vh; display: none"></div>
-    <div id="preview-view-container" style="display: none; height: 80vh"></div>
-    <div id="normalizer-view-container" style="display: none; height: 80vh"></div>
-    <div id="library-view-container" style="height: 80vh"></div>
-    <div id="document-view-container" style="height: 80vh"></div>
-    <div id="page-view-container" style="height: 80vh"></div>
-    <div id="transfer-view-container" style="height: 80vh"></div>
-    <div id="normalized-result"></div>
+    <div class="info-header">
+      <span>MOBILE WEB CAPTURE</span>
+      <span
+        >This demo demonstrates a wide range of functionalities achievable through Mobile Web Capture solution, which
+        include real-time detection of document</span
+      >
+      <span
+        >boundaries using the camera for capturing document images, editing and adjusting the captured images, managing
+        multiple documents, and so on.</span
+      >
+    </div>
+    <div id="app">
+      <div id="homepage">
+        <img src="./assets/homepage-img.svg" alt="homepage-img" />
+        <a href="https://www.dynamsoft.com/" target="_blank">
+          <img src="./assets/dynamsoftLogo.svg" alt="logo" />
+        </a>
+        <span class="guide-title">MOBILE WEB CAPTURE</span>
+        <div class="guide-textBox" style="display: flex">
+          <span>Capture document from cameras</span>
+          <span>in mobile browsers</span>
+        </div>
+        <div class="start-mwc-btn">Get Started</div>
+      </div>
+      <!-- ↓  Required elements for MWC -->
+      <div id="camera-view-container" style="display: none; height: 100%"></div>
+      <div id="preview-view-container" style="display: none; height: 100%"></div>
+      <div id="normalizer-view-container" style="display: none; height: 100%"></div>
+      <div id="library-view-container" style="display: none; height: 100%; background-color: white"></div>
+      <div id="document-view-container" style="display: none; height: 100%; background-color: white"></div>
+      <div id="page-view-container" style="display: none; height: 100%; background-color: white"></div>
+      <div id="transfer-view-container" style="display: none; height: 100%; background-color: white"></div>
+      <!-- ↑  Required elements for MWC -->
+    </div>
+    <div class="info-footer">
+      <span>
+        © 2003 – 2024 Dynamsoft. All rights reserved.
+        <a href="https://www.dynamsoft.com/privacy-statement/" target="_blank">Privacy Statement</a>
+        / <a href="https://www.dynamsoft.com/sitemap/" target="_blank">Site Map.</a>
+      </span>
+    </div>
 
     <script type="module">
-      // Page Elements
+      // DDS Elements
       const cameraViewContainer = document.querySelector("#camera-view-container");
       const normalizerViewContainer = document.querySelector("#normalizer-view-container");
       const previewContainer = document.querySelector("#preview-view-container");
-
-      // const startDetectingBtn = document.querySelector("#start-detecting");
-      // const startPreviewBtn = document.querySelector("#start-preview");
-      // const startNormalizerBtn = document.querySelector("#start-normalizer");
-      // const startWorkflowBtn = document.querySelector("#start-core-workflow");
-
+      // MWC Elements
       const libraryContainer = document.querySelector("#library-view-container");
       const documentContainer = document.querySelector("#document-view-container");
       const pageContainer = document.querySelector("#page-view-container");
       const transferPageContainer = document.querySelector("#transfer-view-container");
 
-      const startMWCbtn = document.querySelector("#start-mwc");
-
-      const normalizedResult = document.querySelector("#normalized-result");
+      // Homepage Element
+      const homepageContainer = document.querySelector("#homepage");
+      // Start MWC btn
+      const startMWCbtn = document.querySelector(".start-mwc-btn");
 
       const uploadToServer = async (fileName, blob) => {
         try {
@@ -193,6 +215,7 @@
 
       startMWCbtn.addEventListener("click", async () => {
         try {
+          homepageContainer.style.display = "none";
           await mwc.launch("library");
         } catch (error) {
           console.error("Capture failed:", error);
@@ -200,4 +223,162 @@
       });
     </script>
   </body>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-direction: column;
+      font-family: Verdana;
+
+      background: transparent linear-gradient(207deg, #ffffff 0%, #f8f6f2 58%, #ede0d1 100%) 0% 0% no-repeat padding-box;
+    }
+
+    span {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+    }
+
+    div {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    @media only screen and (max-width: 376px) and (max-height: 611px) {
+      #app {
+        width: 100%;
+        height: 100%;
+        position: absolute !important;
+        left: 0px;
+        top: 0px;
+      }
+
+      #homepage {
+        background: linear-gradient(to bottom, white, #f8f6f2, #ede0d1);
+      }
+    }
+
+    @media only screen and (max-width: 1024px) {
+      #app {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        min-width: 340px;
+        min-height: 605px;
+      }
+
+      .info-header,
+      .info-footer {
+        display: none !important;
+      }
+    }
+
+    @media only screen and (min-width: 1025px) and (min-height: 701px) {
+      #app {
+        width: 380px;
+        height: 700px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+    }
+
+    @media only screen and (min-width: 1025px) and (max-height: 700px) {
+      #app {
+        width: 380px;
+        height: 700px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+
+      .info-header,
+      .info-footer {
+        display: none !important;
+      }
+    }
+
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 14px;
+      color: #606060;
+      height: 100px;
+      padding-top: 10px;
+    }
+
+    .info-header span {
+      margin-bottom: 5px;
+      cursor: auto;
+      user-select: all;
+      -webkit-user-select: all;
+    }
+
+    .info-header span:first-of-type {
+      font-size: 24px;
+      font-weight: 600;
+      color: #323234;
+      margin-bottom: 9px;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .info-footer {
+      font-size: 14px;
+      color: #606060;
+    }
+
+    /* Home page */
+
+    #homepage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    #homepage > img:first-child {
+      margin-bottom: 60px;
+      max-width: 348px;
+      width: 100%;
+    }
+
+    .guide-title {
+      font-size: 28px;
+      margin-top: 16px;
+    }
+
+    .guide-textBox {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 3px;
+      color: #323234;
+    }
+
+    .start-mwc-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 250px;
+      height: 54px;
+      font-size: 24px;
+      border-radius: 27px;
+      margin-top: 30px;
+      background: #323234;
+      cursor: pointer;
+      color: white;
+    }
+  </style>
 </html>
