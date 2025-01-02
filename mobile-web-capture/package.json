@@ -52,8 +52,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dynamsoft-camera-enhancer": "4.1.0-beta-202410310121",
-    "dynamsoft-capture-vision-bundle": "2.4.2200",
+    "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225",
     "dynamsoft-document-scanner": "file:./dds",
     "dynamsoft-document-viewer": "2.1.0"
   }

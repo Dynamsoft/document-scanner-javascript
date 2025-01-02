@@ -110,8 +110,6 @@ class DocumentScanner {
 
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
       CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
-      CoreModule.engineResourcePaths.dce =
-        "https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.1.0-beta-202410310121/dist/";
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
