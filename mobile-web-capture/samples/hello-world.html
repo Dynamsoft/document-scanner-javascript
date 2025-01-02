@@ -19,12 +19,12 @@
 
   <body>
     <h1 style="font-size: 1.5em">Detect the boundary of a document and normalize it</h1>
-    <button id="start-detecting">Start Scanning</button>
+    <!-- <button id="start-detecting">Start Scanning</button>
     <button id="start-preview">Start Preview</button>
     <button id="start-normalizer">Start Normalizer</button>
     <button id="start-core-workflow">Start Capturing Image</button>
-    <button id="start-library">Start Library</button>
-    <button id="start-page">Start Page View</button>
+    <button id="start-library">Start Library</button> -->
+    <button id="start-mwc">Start MWC</button>
 
     <div id="camera-view-container" style="margin-top: 10px; height: 80vh; display: none"></div>
     <div id="preview-view-container" style="display: none; height: 80vh"></div>
@@ -41,18 +41,17 @@
       const normalizerViewContainer = document.querySelector("#normalizer-view-container");
       const previewContainer = document.querySelector("#preview-view-container");
 
-      const startDetectingBtn = document.querySelector("#start-detecting");
-      const startPreviewBtn = document.querySelector("#start-preview");
-      const startNormalizerBtn = document.querySelector("#start-normalizer");
-      const startWorkflowBtn = document.querySelector("#start-core-workflow");
+      // const startDetectingBtn = document.querySelector("#start-detecting");
+      // const startPreviewBtn = document.querySelector("#start-preview");
+      // const startNormalizerBtn = document.querySelector("#start-normalizer");
+      // const startWorkflowBtn = document.querySelector("#start-core-workflow");
 
       const libraryContainer = document.querySelector("#library-view-container");
       const documentContainer = document.querySelector("#document-view-container");
       const pageContainer = document.querySelector("#page-view-container");
       const transferPageContainer = document.querySelector("#transfer-view-container");
 
-      const startLibraryBtn = document.querySelector("#start-library");
-      const startPageBtn = document.querySelector("#start-page");
+      const startMWCbtn = document.querySelector("#start-mwc");
 
       const normalizedResult = document.querySelector("#normalized-result");
 
@@ -158,41 +157,41 @@
           deleteFromServer,
         },
       });
-      const { scannerView, normalizerView, scanResultView } = await mwc.initialize();
+      // const { scannerView, normalizerView, scanResultView } = await mwc.initialize();
 
-      // Add results
-      let result = null;
-      startDetectingBtn.addEventListener("click", async () => {
-        result = await scannerView.scanImage();
-        normalizedResult.append(result.normalizedImageResult.toCanvas());
-      });
+      // // Add results
+      // let result = null;
+      // startDetectingBtn.addEventListener("click", async () => {
+      //   result = await scannerView.scanImage();
+      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
+      // });
 
-      startPreviewBtn.addEventListener("click", async () => {
-        result = await scanResultView.showPreview();
-        normalizedResult.append(result.normalizedImageResult.toCanvas());
-      });
+      // startPreviewBtn.addEventListener("click", async () => {
+      //   result = await scanResultView.showPreview();
+      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
+      // });
 
-      startNormalizerBtn.addEventListener("click", async () => {
-        result = await normalizerView.showEditor();
+      // startNormalizerBtn.addEventListener("click", async () => {
+      //   result = await normalizerView.showEditor();
 
-        normalizedResult.append(result.toCanvas());
-      });
+      //   normalizedResult.append(result.toCanvas());
+      // });
 
-      startWorkflowBtn.addEventListener("click", async () => {
-        try {
-          const result = await mwc.startImageCapture();
-          console.log("Capture completed:", result);
+      // startWorkflowBtn.addEventListener("click", async () => {
+      //   try {
+      //     const result = await mwc.startImageCapture();
+      //     console.log("Capture completed:", result);
 
-          if (result.success) {
-            const normalizedImage = result.normalizedImageResult;
-            normalizedResult.append(normalizedImage.toCanvas());
-          }
-        } catch (error) {
-          console.error("Capture failed:", error);
-        }
-      });
+      //     if (result.success) {
+      //       const normalizedImage = result.normalizedImageResult;
+      //       normalizedResult.append(normalizedImage.toCanvas());
+      //     }
+      //   } catch (error) {
+      //     console.error("Capture failed:", error);
+      //   }
+      // });
 
-      startPageBtn.addEventListener("click", async () => {
+      startMWCbtn.addEventListener("click", async () => {
         try {
           await mwc.launch("library");
         } catch (error) {

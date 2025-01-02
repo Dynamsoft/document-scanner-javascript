@@ -14,10 +14,10 @@
 
   <body>
     <h1 style="font-size: 1.5em">Detect the boundary of a document and normalize it</h1>
-    <button id="start-detecting">Start Scanning</button>
+    <!-- <button id="start-detecting">Start Scanning</button>
     <button id="start-preview">Start Preview</button>
-    <button id="start-normalizer">Start Normalizer</button>
-    <button id="start-core-workflow">Start Capturing Image</button>
+    <button id="start-normalizer">Start Normalizer</button> -->
+    <button id="start-core-workflow">Start Scanning Documents</button>
     <div id="camera-view-container" style="margin-top: 10px; height: 80vh; display: none"></div>
     <div id="preview-view-container" style="display: none; height: 80vh"></div>
     <div id="normalizer-view-container" style="display: none; height: 80vh"></div>
@@ -28,9 +28,9 @@
       const normalizerViewContainer = document.querySelector("#normalizer-view-container");
       const previewContainer = document.querySelector("#preview-view-container");
 
-      const startDetectingBtn = document.querySelector("#start-detecting");
-      const startPreviewBtn = document.querySelector("#start-preview");
-      const startNormalizerBtn = document.querySelector("#start-normalizer");
+      // const startDetectingBtn = document.querySelector("#start-detecting");
+      // const startPreviewBtn = document.querySelector("#start-preview");
+      // const startNormalizerBtn = document.querySelector("#start-normalizer");
       const startWorkflowBtn = document.querySelector("#start-core-workflow");
 
       const normalizedResult = document.querySelector("#normalized-result");

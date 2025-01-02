@@ -54,7 +54,7 @@ class MobileWebCapture {
 
   private uploadedFiles: UploadedDocument[] = [];
 
-  constructor(config: MobileWebCaptureConfig) {
+  constructor(private config: MobileWebCaptureConfig) {
     // Pass the MobileDocumentScannerConfig portion to super
     const {
       libraryViewConfig,
@@ -67,13 +67,6 @@ class MobileWebCapture {
     } = config;
 
     this.documentScanner = new DocumentScanner({ license, ...baseConfig });
-
-    if (license) {
-      LicenseManager.initLicense(license, true);
-      DDV.Core.license = license;
-      DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
-      // Currently if no license is provided, uses trial license
-    }
 
     // Set up views object to keep track of the visibility of each views
     this.mwcViews = {
@@ -132,6 +125,11 @@ class MobileWebCapture {
     }
 
     try {
+      // Currently if no license is provided, uses trial license
+      LicenseManager.initLicense(this.config?.license || "", true);
+      DDV.Core.license = this.config?.license || "";
+      DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
+
       const MobileDocumentScanner = await this.documentScanner.initialize();
 
       // Preload DDV Resource
