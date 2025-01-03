@@ -13,7 +13,7 @@ const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",
 };
-const DEFAULT_CONTAINER_HEIGHT = "50vh";
+const DEFAULT_CONTAINER_HEIGHT = "100vh";
 
 export interface DocumentScannerConfig {
   license?: string;

@@ -413,7 +413,7 @@ export default class DocumentCorrectionView {
 const DEFAULT_CORRECTION_CONTROLS_STYLE = `
 .mwc-document-correction-controls {
   display: flex;
-  height: 6rem;
+  height: 8rem;
   background-color: #323234;
   align-items: center;
   font-size: 12px;
@@ -448,8 +448,8 @@ const DEFAULT_CORRECTION_CONTROLS_STYLE = `
 
 .mwc-document-correction-control-icon svg {
   padding-top: 0.5rem;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 `;
 

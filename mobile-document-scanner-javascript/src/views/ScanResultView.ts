@@ -324,7 +324,7 @@ export default class ScanResultView {
 const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE = `
 .mwc-scan-result-view-controls {
   display: flex;
-  height: 6rem;
+  height: 8rem;
   background-color: #323234;
   align-items: center;
   font-size: 12px;
@@ -359,8 +359,8 @@ const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE = `
 
 .mwc-scan-result-view-control-icon svg {
   padding-top: 0.5rem;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   fill: #fe8e14;
 }
 `;
