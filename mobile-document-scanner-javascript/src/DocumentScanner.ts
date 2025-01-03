@@ -9,10 +9,16 @@ import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from 
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
+const DEFAULT_TEMPLATE_NAMES = {
+  detect: "DetectDocumentBoundaries_Default",
+  normalize: "NormalizeDocument_Default",
+};
+const DEFAULT_CONTAINER_HEIGHT = "50vh";
 
 export interface DocumentScannerConfig {
   license?: string;
-  scannerViewConfig: DocumentScannerViewConfig;
+  container?: HTMLElement | string;
+  scannerViewConfig?: DocumentScannerViewConfig;
   scanResultViewConfig?: ScanResultViewConfig;
   correctionViewConfig?: DocumentCorrectionViewConfig;
   utilizedTemplateNames?: UtilizedTemplateNames;
@@ -34,39 +40,91 @@ class DocumentScanner {
   private resources: Partial<SharedResources> = {};
   private isCapturing = false;
 
+  private shouldCreateDefaultContainer(): boolean {
+    return (
+      !this.config.container &&
+      !this.config.scannerViewConfig?.container &&
+      !this.config.scanResultViewConfig?.container &&
+      !this.config.correctionViewConfig?.container
+    );
+  }
+
+  private createDefaultDDSContainer(): HTMLElement {
+    const container = document.createElement("div");
+    container.className = "dds-main-container";
+    Object.assign(container.style, {
+      height: DEFAULT_CONTAINER_HEIGHT,
+      width: "100%",
+    });
+    document.body.append(container);
+    return container;
+  }
+
+  private getContainer(containerConfig: string | HTMLElement): HTMLElement | null {
+    if (typeof containerConfig === "string") {
+      return document.querySelector(containerConfig);
+    }
+    return containerConfig instanceof HTMLElement ? containerConfig : null;
+  }
+
+  private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
+    const views = ["scanner", "correction", "scan-result"];
+    mainContainer.textContent = ""; // Clear container
+
+    return views.reduce((containers, view) => {
+      const viewContainer = document.createElement("div");
+      viewContainer.className = `dds-${view}-view-container`;
+
+      Object.assign(viewContainer.style, {
+        height: "100%",
+        width: "100%",
+        display: "none",
+      });
+
+      mainContainer.append(viewContainer);
+      containers[view] = viewContainer;
+      return containers;
+    }, {} as Record<string, HTMLElement>);
+  }
+
   constructor(private config: DocumentScannerConfig) {
+    // If users provide container through DDS, create the containers for them
+    this.config.container = this.shouldCreateDefaultContainer()
+      ? this.createDefaultDDSContainer()
+      : this.config.container;
+
+    const viewContainers = this.config.container
+      ? this.createViewContainers(this.getContainer(this.config.container))
+      : {};
+
     this.config = {
-      license: config.license || "",
+      license: config.license || "YOUR_LICENSE_HERE",
       scannerViewConfig: {
+        container: viewContainers["scanner"] || config.scannerViewConfig?.container || null,
         templateFilePath: config.scannerViewConfig?.templateFilePath || null,
         cameraEnhancerUIPath: config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
-        cameraViewContainer: config.scannerViewConfig?.cameraViewContainer || null,
         consecutiveResultFramesBeforeNormalization:
           config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 30,
         utilizedTemplateNames: {
-          detect: config.utilizedTemplateNames?.detect || "DetectDocumentBoundaries_Default",
-          normalize: config.utilizedTemplateNames?.normalize || "NormalizeDocument_Default",
+          detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+          normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
         },
       },
       scanResultViewConfig: {
-        container: config.scanResultViewConfig?.container || null,
+        container: viewContainers["scan-result"] || config.scanResultViewConfig?.container || null,
         controls: config.scanResultViewConfig?.controls,
         onContinue: config.scanResultViewConfig?.onContinue,
       },
       correctionViewConfig: {
-        container: config.correctionViewConfig?.container || null,
+        container: viewContainers["correction"] || config.correctionViewConfig?.container || null,
         controls: config.correctionViewConfig?.controls,
         onFinish: config.correctionViewConfig?.onFinish,
         utilizedTemplateNames: {
-          detect: config.utilizedTemplateNames?.detect || "DetectDocumentBoundaries_Default",
-          normalize: config.utilizedTemplateNames?.normalize || "NormalizeDocument_Default",
+          detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+          normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
         },
       },
     };
-
-    if (!config.scannerViewConfig?.cameraViewContainer) {
-      throw new Error("Please create a Camera View Container element");
-    }
   }
 
   async initialize(): Promise<{

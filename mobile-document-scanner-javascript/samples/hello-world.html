@@ -3,59 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Quickly detect document boundaries from a live camera stream and crop the document out before normalizing it further through perspective correction, deskewing, and more."
-    />
-    <meta name="keywords" content="camera based quadrilateral detection and normalization" />
-    <title>Detect the boundary of a document and normalize it</title>
+    <title>Dynamsoft Document Scanner Demo</title>
     <script src="../dist/dds.bundle.js"></script>
   </head>
 
   <body>
-    <h1 style="font-size: 1.5em">Detect the boundary of a document and normalize it</h1>
-    <button id="start-core-workflow">Start Scanning Documents</button>
-    <div id="camera-view-container" style="margin-top: 10px; height: 80vh; display: none"></div>
-    <div id="scan-result-view-container" style="display: none; height: 80vh"></div>
-    <div id="correction-view-container" style="display: none; height: 80vh"></div>
     <div id="results"></div>
     <script type="module">
-      // Page Elements
-      const cameraViewContainer = document.querySelector("#camera-view-container");
-      const correctionViewContainer = document.querySelector("#scan-result-view-container");
-      const scanResultViewContainer = document.querySelector("#correction-view-container");
-
-      const startDDSBtn = document.querySelector("#start-core-workflow");
-
       const resultContainer = document.querySelector("#results");
 
-      // Initialize DDS
       const DDS = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY",
-        scannerViewConfig: {
-          cameraViewContainer: cameraViewContainer,
-        },
-        scanResultViewConfig: {
-          container: scanResultViewContainer,
-        },
-        correctionViewConfig: {
-          container: correctionViewContainer,
-        },
       });
-
-      startDDSBtn.addEventListener("click", async () => {
-        try {
-          const result = await DDS.launch();
-          console.log("Capture completed:", result);
-
-          if (result.status.code === 0) {
-            const correctedImg = result.correctedImageResult;
-            resultContainer.append(correctedImg.toCanvas());
-          }
-        } catch (error) {
-          console.error("Capture failed:", error);
-        }
-      });
+      const result = await DDS.launch();
+      resultContainer.append(result.correctedImageResult.toCanvas());
     </script>
   </body>
 </html>

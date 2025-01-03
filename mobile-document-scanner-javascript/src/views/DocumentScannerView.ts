@@ -12,7 +12,7 @@ import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from 
 export interface DocumentScannerViewConfig {
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
-  cameraViewContainer: HTMLElement;
+  container: HTMLElement;
   consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
@@ -106,7 +106,7 @@ export default class DocumentScannerView {
   }
 
   private async initializeElements() {
-    const DCEContainer = this.config.cameraViewContainer.children[this.config.cameraViewContainer.children.length - 1];
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) {
       throw new Error("Shadow root not found");
@@ -170,7 +170,7 @@ export default class DocumentScannerView {
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
-    const DCEContainer = this.config.cameraViewContainer.children[this.config.cameraViewContainer.children.length - 1];
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
     const container = DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection") as HTMLElement;
@@ -201,7 +201,7 @@ export default class DocumentScannerView {
   }
 
   async toggleAutoCapture(mode?: boolean) {
-    const DCEContainer = this.config.cameraViewContainer.children[this.config.cameraViewContainer.children.length - 1];
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
 
@@ -232,12 +232,12 @@ export default class DocumentScannerView {
     try {
       const { cameraEnhancer, cameraView } = this.resources;
 
-      this.config.cameraViewContainer.style.display = "block";
+      this.config.container.style.display = "block";
 
       if (!cameraEnhancer.isOpen()) {
         const currentCameraView = cameraView.getUIElement();
         if (!currentCameraView.parentElement) {
-          this.config.cameraViewContainer.append(currentCameraView);
+          this.config.container.append(currentCameraView);
         }
 
         await cameraEnhancer.open();
@@ -270,10 +270,10 @@ export default class DocumentScannerView {
   async closeCamera(): Promise<void> {
     const { cameraEnhancer, cameraView } = this.resources;
 
-    this.config.cameraViewContainer.style.display = "none";
+    this.config.container.style.display = "none";
 
     if (cameraView.getUIElement().parentElement) {
-      this.config.cameraViewContainer.removeChild(cameraView.getUIElement());
+      this.config.container.removeChild(cameraView.getUIElement());
     }
 
     await cameraEnhancer.close();
