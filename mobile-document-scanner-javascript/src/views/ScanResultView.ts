@@ -1,13 +1,14 @@
-import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
-import DocumentScannerView, { DocumentScanResult, EnumResultStatusCode } from "./DocumentScannerView";
+import { SharedResources } from "../DocumentScanner";
+import DocumentScannerView from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { bindControlButton } from "./utils";
-import DocumentNormalizerView from "./DocumentNormalizerView";
+import DocumentCorrectionView from "./DocumentCorrectionView";
 import { MWC_ICONS } from "./utils/icons";
+import { DocumentScanResult, EnumResultStatusCode } from "./utils/types";
 
-interface ScanResultViewControls {
+export interface ScanResultViewControls {
   exportBtn?: HTMLElement | string;
-  normalizeBtn?: HTMLElement | string;
+  correctionBtn?: HTMLElement | string;
   retakeBtn?: HTMLElement | string;
   continueBtn?: HTMLElement | string;
   useDefaultControls?: boolean;
@@ -28,16 +29,16 @@ export default class ScanResultView {
 
   constructor(
     private resources: SharedResources,
-    private config: DocumentScannerConfig,
-    private scanner: DocumentScannerView,
-    private normalizerView: DocumentNormalizerView
+    private config: ScanResultViewConfig,
+    private scannerView: DocumentScannerView,
+    private correctionView: DocumentCorrectionView
   ) {}
 
   async launch(): Promise<DocumentScanResult> {
     try {
-      this.config.scanResultViewConfig.container.textContent = "";
+      this.config.container.textContent = "";
       await this.initialize();
-      this.config.scanResultViewConfig.container.style.display = "flex";
+      this.config.container.style.display = "flex";
 
       // Return promise that resolves when user clicks continue
       return new Promise((resolve) => {
@@ -53,15 +54,15 @@ export default class ScanResultView {
   private async handleExport() {
     try {
       const { result } = this.resources;
-      if (!result?.normalizedImageResult) {
+      if (!result?.correctedImageResult) {
         throw new Error("No image to export");
       }
 
-      if (this.config.scanResultViewConfig.onExport) {
-        await this.config.scanResultViewConfig.onExport(result);
+      if (this.config?.onExport) {
+        await this.config.onExport(result);
       } else {
         // Convert to canvas and then to blob
-        const blob = await (result.normalizedImageResult as NormalizedImageResultItem).toBlob("image/png");
+        const blob = await (result.correctedImageResult as NormalizedImageResultItem).toBlob("image/png");
 
         // Create download link
         const url = URL.createObjectURL(blob);
@@ -85,26 +86,26 @@ export default class ScanResultView {
 
   private async handleNormalize() {
     try {
-      this.hidePreview();
-      const result = await this.normalizerView.launch();
+      this.hideView();
+      const result = await this.correctionView.launch();
 
-      // After normalization is complete, show preview again with updated image
-      if (result.normalizedImageResult) {
-        // Update the shared resources with new normalized result
+      // After normalization is complete, show scan result view again with updated image
+      if (result.correctedImageResult) {
+        // Update the shared resources with new corrected result
         if (this.resources.onResultUpdated) {
           this.resources.onResultUpdated({
             ...this.resources.result,
-            normalizedImageResult: result.normalizedImageResult,
+            correctedImageResult: result.correctedImageResult,
           });
         }
 
-        // Clear current preview and reinitialize with new image
+        // Clear current scan result view and reinitialize with new image
         this.dispose(true); // true = preserve resolver
         await this.initialize();
-        this.config.scanResultViewConfig.container.style.display = "flex";
+        this.config.container.style.display = "flex";
       }
     } catch (error) {
-      console.error("Error in normalize handler:", error);
+      console.error("ScanResultView - Handle Correction View Error:", error);
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
@@ -120,8 +121,8 @@ export default class ScanResultView {
 
   private async handleRetake() {
     try {
-      this.hidePreview();
-      const result = await this.scanner.launch();
+      this.hideView();
+      const result = await this.scannerView.launch();
 
       if (this.currentScanResultViewResolver && result?.status?.code === EnumResultStatusCode.FAILED) {
         this.currentScanResultViewResolver(result);
@@ -140,7 +141,7 @@ export default class ScanResultView {
 
       this.dispose(true);
       await this.initialize();
-      this.config.scanResultViewConfig.container.style.display = "flex";
+      this.config.container.style.display = "flex";
     } catch (error) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
@@ -158,8 +159,8 @@ export default class ScanResultView {
 
   private async handleContinue() {
     try {
-      if (this.config.scanResultViewConfig?.onContinue) {
-        await this.config.scanResultViewConfig.onContinue(this.resources.result);
+      if (this.config?.onContinue) {
+        await this.config.onContinue(this.resources.result);
       }
 
       // Resolve with current result
@@ -169,7 +170,7 @@ export default class ScanResultView {
 
       // Clean up
       this.dispose();
-      this.hidePreview();
+      this.hideView();
     } catch (error) {
       console.error("Error in continue handler:", error);
       // Make sure to resolve with error if something goes wrong
@@ -188,19 +189,19 @@ export default class ScanResultView {
   private createDefaultControls(): HTMLElement {
     // Create style
     const styleSheet = document.createElement("style");
-    styleSheet.textContent = DEFAULT_PREVIEW_CONTROLS_STYLE;
+    styleSheet.textContent = DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE;
     document.head.appendChild(styleSheet);
 
     const container = document.createElement("div");
-    container.className = "mwc-preview-controls";
+    container.className = "mwc-scan-result-view-controls";
     container.innerHTML = `
-      ${DEFAULT_PREVIEW_CONTROLS_HTML}
+      ${DEFAULT_SCAN_RESULT_VIEW_CONTROLS_HTML}
     `;
     return container;
   }
 
-  private setupPreviewControls() {
-    const { container, controls } = this.config.scanResultViewConfig;
+  private setupScanResultViewControls() {
+    const { container, controls } = this.config;
 
     try {
       if (!controls || controls.useDefaultControls) {
@@ -219,8 +220,8 @@ export default class ScanResultView {
 
         this.controls = {
           exportBtn: bindControlButton(controls?.exportBtn, children[0] as HTMLElement, () => this.handleExport()),
-          normalizeBtn: bindControlButton(
-            controls?.normalizeBtn,
+          correctionBtn: bindControlButton(
+            controls?.correctionBtn,
             children[1] as HTMLElement,
             async () => await this.handleNormalize()
           ),
@@ -237,20 +238,20 @@ export default class ScanResultView {
         };
       } else {
         // Custom controls
-        if (!controls.exportBtn || !controls.normalizeBtn || !controls.retakeBtn || !controls.continueBtn) {
+        if (!controls.exportBtn || !controls.correctionBtn || !controls.retakeBtn || !controls.continueBtn) {
           throw new Error("All custom buttons must be provided when not using default controls");
         }
 
         this.controls = {
           exportBtn: bindControlButton(controls.exportBtn, null, () => this.handleExport()),
-          normalizeBtn: bindControlButton(controls.normalizeBtn, null, async () => await this.handleNormalize()),
+          correctionBtn: bindControlButton(controls.correctionBtn, null, async () => await this.handleNormalize()),
           retakeBtn: bindControlButton(controls.retakeBtn, null, async () => await this.handleRetake()),
           continueBtn: bindControlButton(controls.continueBtn, null, async () => await this.handleContinue()),
         };
       }
     } catch (error) {
-      console.error("Error setting up preview controls:", error);
-      throw new Error(`Failed to setup preview controls: ${error.message}`);
+      console.error("Error setting up scan result view controls:", error);
+      throw new Error(`Failed to setup scan result view controls: ${error.message}`);
     }
   }
 
@@ -260,12 +261,12 @@ export default class ScanResultView {
         throw Error("Captured image is missing. Please capture an image first!");
       }
 
-      if (!this.config.scanResultViewConfig.container) {
-        throw new Error("Please create a Preview Container element");
+      if (!this.config.container) {
+        throw new Error("Please create a Scan Result View Container element");
       }
 
       // Add basic styling to container
-      Object.assign(this.config.scanResultViewConfig.container.style, {
+      Object.assign(this.config.container.style, {
         display: "flex",
         width: "100%",
         backgroundColor: "#575757",
@@ -274,9 +275,9 @@ export default class ScanResultView {
         alignItems: "center",
       });
 
-      // Create and add preview image container
-      const previewImageContainer = document.createElement("div");
-      Object.assign(previewImageContainer.style, {
+      // Create and add scan result view image container
+      const scanResultViewImageContainer = document.createElement("div");
+      Object.assign(scanResultViewImageContainer.style, {
         width: "100%",
         height: "100%",
         display: "flex",
@@ -285,19 +286,19 @@ export default class ScanResultView {
         minHeight: "0",
       });
 
-      // Add preview image
-      const previewImage = (this.resources.result.normalizedImageResult as NormalizedImageResultItem)?.toCanvas();
-      Object.assign(previewImage.style, {
+      // Add scan result image
+      const scanResultImg = (this.resources.result.correctedImageResult as NormalizedImageResultItem)?.toCanvas();
+      Object.assign(scanResultImg.style, {
         maxWidth: "100%",
         maxHeight: "100%",
         objectFit: "contain",
       });
 
-      previewImageContainer.appendChild(previewImage);
-      this.config.scanResultViewConfig.container.appendChild(previewImageContainer);
+      scanResultViewImageContainer.appendChild(scanResultImg);
+      this.config.container.appendChild(scanResultViewImageContainer);
 
       // Set up controls
-      this.setupPreviewControls();
+      this.setupScanResultViewControls();
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -305,13 +306,13 @@ export default class ScanResultView {
     }
   }
 
-  hidePreview(): void {
-    this.config.scanResultViewConfig.container.style.display = "none";
+  hideView(): void {
+    this.config.container.style.display = "none";
   }
 
   dispose(preserveResolver: boolean = false): void {
     // Clean up the container
-    this.config.scanResultViewConfig.container.textContent = "";
+    this.config.container.textContent = "";
 
     // Clear resolver only if not preserving
     if (!preserveResolver) {
@@ -320,8 +321,8 @@ export default class ScanResultView {
   }
 }
 
-const DEFAULT_PREVIEW_CONTROLS_STYLE = `
-.mwc-preview-controls {
+const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE = `
+.mwc-scan-result-view-controls {
   display: flex;
   height: 6rem;
   background-color: #323234;
@@ -332,7 +333,7 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
   width: 100%;
 }
 
-.mwc-preview-control-btn {
+.mwc-scan-result-view-control-btn {
   background-color: #323234;
   color: white;
   cursor: pointer;
@@ -347,16 +348,16 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
   user-select: none;
 }
 
-.mwc-preview-control-btn div:last-child {
+.mwc-scan-result-view-control-btn div:last-child {
   padding-bottom: 0.5rem;
 }
 
-.mwc-preview-control-btn.continue {
+.mwc-scan-result-view-control-btn.continue {
   background-color: #000000;
   color: #fe8e14;
 }
 
-.mwc-preview-control-icon svg {
+.mwc-scan-result-view-control-icon svg {
   padding-top: 0.5rem;
   width: 24px;
   height: 24px;
@@ -364,21 +365,21 @@ const DEFAULT_PREVIEW_CONTROLS_STYLE = `
 }
 `;
 
-const DEFAULT_PREVIEW_CONTROLS_HTML = `
-  <div class="mwc-preview-control-btn">
-    <div class="mwc-preview-control-icon">${MWC_ICONS.export}</div>
+const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_HTML = `
+  <div class="mwc-scan-result-view-control-btn">
+    <div class="mwc-scan-result-view-control-icon">${MWC_ICONS.export}</div>
     <div>Export Image</div>
   </div>
-  <div class="mwc-preview-control-btn">
-    <div class="mwc-preview-control-icon">${MWC_ICONS.normalize}</div>
+  <div class="mwc-scan-result-view-control-btn">
+    <div class="mwc-scan-result-view-control-icon">${MWC_ICONS.normalize}</div>
     <div>Normalize</div>
   </div>
-  <div class="mwc-preview-control-btn">
-    <div class="mwc-preview-control-icon">${MWC_ICONS.retake}</div>
+  <div class="mwc-scan-result-view-control-btn">
+    <div class="mwc-scan-result-view-control-icon">${MWC_ICONS.retake}</div>
     <div>Re-take</div>
   </div>
-  <div class="mwc-preview-control-btn continue">
-    <div class="mwc-preview-control-icon">${MWC_ICONS.continue}</div>
+  <div class="mwc-scan-result-view-control-btn continue">
+    <div class="mwc-scan-result-view-control-icon">${MWC_ICONS.continue}</div>
     <div>Continue</div>
   </div>
 `;

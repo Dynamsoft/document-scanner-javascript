@@ -1,44 +1,46 @@
 import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core";
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
-import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
+import { SharedResources } from "../DocumentScanner";
 import { bindControlButton } from "./utils";
-import { DocumentScanResult, EnumResultStatusCode } from "./DocumentScannerView";
 import { MWC_ICONS } from "./utils/icons";
+import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
-interface DocumentNormalizerViewControls {
-  fullImageBtn?: HTMLElement | string; // Can be element or selector
+
+export interface DocumentCorrectionViewControls {
+  fullImageBtn?: HTMLElement | string;
   autoBoundsBtn?: HTMLElement | string;
   finishBtn?: HTMLElement | string;
   containerStyle?: Partial<CSSStyleDeclaration>; // Optional styling
 }
 
-export interface DocumentNormalizerViewConfig {
+export interface DocumentCorrectionViewConfig {
   container: HTMLElement;
-  controls: DocumentNormalizerViewControls;
+  controls: DocumentCorrectionViewControls;
+  utilizedTemplateNames: UtilizedTemplateNames;
   onFinish?: (result: DocumentScanResult) => void;
 }
 
-export default class DocumentNormalizerView {
+export default class DocumentCorrectionView {
   private imageEditorView: ImageEditorView = null;
   private layer: DrawingLayer = null;
-  private controls: DocumentNormalizerViewControls;
-  private currentNormalizerResolver?: (result: DocumentScanResult) => void;
+  private controls: DocumentCorrectionViewControls;
+  private currentCorrectionResolver?: (result: DocumentScanResult) => void;
 
-  constructor(private resources: SharedResources, private config: DocumentScannerConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {}
 
   async initialize(): Promise<void> {
     if (!this.resources.result) {
       throw Error("Captured image is missing. Please capture an image first!");
     }
 
-    if (!this.config.documentNormalizerViewConfig.container) {
-      throw new Error("Please create an Normalizer View Container element");
+    if (!this.config.container) {
+      throw new Error("Please create an Correction View Container element");
     }
 
     // Add basic styling to container
-    Object.assign(this.config.documentNormalizerViewConfig.container.style, {
+    Object.assign(this.config.container.style, {
       display: "flex",
       width: "100%",
       "background-color": "#575757",
@@ -47,14 +49,14 @@ export default class DocumentNormalizerView {
       "align-items": "center",
     });
 
-    // Add normalizer
+    // Add image editor view from DCE to correct documents
     const imageEditorViewElement = document.createElement("div");
     Object.assign(imageEditorViewElement.style, {
       width: "100%",
       height: "100%",
     });
 
-    this.config.documentNormalizerViewConfig.container.appendChild(imageEditorViewElement);
+    this.config.container.appendChild(imageEditorViewElement);
 
     this.imageEditorView = await ImageEditorView.createInstance(imageEditorViewElement);
     this.layer = this.imageEditorView.createDrawingLayer();
@@ -62,7 +64,7 @@ export default class DocumentNormalizerView {
 
     this.setupDrawingLayerStyle(); // Set style for drawing layer
     this.setupInitialDetectedQuad();
-    this.setupNormalizerControls();
+    this.setupCorrectionControls();
     this.setupQuadConstraints();
   }
 
@@ -198,19 +200,19 @@ export default class DocumentNormalizerView {
   private createDefaultControls(): HTMLElement {
     // Create style
     const styleSheet = document.createElement("style");
-    styleSheet.textContent = DEFAULT_NORMALIZER_CONTROLS_STYLE;
+    styleSheet.textContent = DEFAULT_CORRECTION_CONTROLS_STYLE;
     document.head.appendChild(styleSheet);
 
     const container = document.createElement("div");
-    container.className = "mwc-image-normalizer-controls";
+    container.className = "mwc-document-correction-controls";
     container.innerHTML = `
-      ${DEFAULT_NORMALIZER_CONTROLS_HTML}
+      ${DEFAULT_CORRECTION_CONTROLS_HTML}
     `;
     return container;
   }
 
-  private setupNormalizerControls() {
-    const { container, controls } = this.config.documentNormalizerViewConfig;
+  private setupCorrectionControls() {
+    const { container, controls } = this.config;
 
     try {
       if (!controls) {
@@ -236,7 +238,7 @@ export default class DocumentNormalizerView {
             this.setBoundaryAutomatically()
           ),
           finishBtn: bindControlButton(controls?.finishBtn, controlContainer.children[2] as HTMLElement, async () =>
-            this.confirmNormalization()
+            this.confirmCorrection()
           ),
         };
       } else {
@@ -249,12 +251,12 @@ export default class DocumentNormalizerView {
         this.controls = {
           fullImageBtn: bindControlButton(controls.fullImageBtn, null, () => this.setFullImageBoundary()),
           autoBoundsBtn: bindControlButton(controls.autoBoundsBtn, null, () => this.setBoundaryAutomatically()),
-          finishBtn: bindControlButton(controls.finishBtn, null, async () => this.confirmNormalization()),
+          finishBtn: bindControlButton(controls.finishBtn, null, async () => this.confirmCorrection()),
         };
       }
     } catch (error) {
-      console.error("Error setting up normalizer controls:", error);
-      throw new Error(`Failed to setup normalizer controls: ${error.message}`);
+      console.error("Error setting up correction view controls:", error);
+      throw new Error(`Failed to setup correction view controls: ${error.message}`);
     }
   }
 
@@ -296,68 +298,68 @@ export default class DocumentNormalizerView {
     }
   }
 
-  async confirmNormalization() {
+  async confirmCorrection() {
     const drawingItem = this.layer.getDrawingItems()[0] as QuadDrawingItem;
     if (!drawingItem) {
       throw new Error("No quad drawing item found");
     }
     const quad = drawingItem.getQuad();
-    const normalizedImage = await this.normalizeImage(quad?.points);
-    if (normalizedImage) {
+    const correctedImg = await this.normalizeImage(quad?.points);
+    if (correctedImg) {
       const updatedResult = {
         ...this.resources.result,
-        normalizedImageResult: normalizedImage,
+        correctedImageResult: correctedImg,
         detectedQuadrilateral: quad,
       };
 
       if (this.resources.onResultUpdated) {
-        // Update the result with new normalized image and quad
+        // Update the result with new corrected image and quad
         this.resources.onResultUpdated(updatedResult);
       }
 
       // Call onFinish callback if provided
-      if (this.config.documentNormalizerViewConfig?.onFinish) {
-        this.config.documentNormalizerViewConfig.onFinish(updatedResult);
+      if (this.config?.onFinish) {
+        this.config.onFinish(updatedResult);
       }
 
-      // Resolve the promise with normalized image
-      if (this.currentNormalizerResolver) {
-        this.currentNormalizerResolver(updatedResult);
+      // Resolve the promise with corrected image
+      if (this.currentCorrectionResolver) {
+        this.currentCorrectionResolver(updatedResult);
       }
     } else {
-      if (this.currentNormalizerResolver) {
-        this.currentNormalizerResolver(this.resources.result);
+      if (this.currentCorrectionResolver) {
+        this.currentCorrectionResolver(this.resources.result);
       }
     }
 
     // Clean up and hide
     this.dispose();
-    this.hideEditor();
+    this.hideView();
   }
 
   async launch(): Promise<DocumentScanResult> {
     try {
-      if (!this.resources.result?.normalizedImageResult) {
+      if (!this.resources.result?.correctedImageResult) {
         return {
           status: {
             code: EnumResultStatusCode.FAILED,
-            message: "No image available for normalization",
+            message: "No image available for correction",
           },
         };
       }
 
-      this.config.documentNormalizerViewConfig.container.textContent = "";
+      this.config.container.textContent = "";
       await this.initialize();
-      this.config.documentNormalizerViewConfig.container.style.display = "flex";
+      this.config.container.style.display = "flex";
 
       // Return promise that resolves when user clicks finish
       return new Promise((resolve) => {
-        this.currentNormalizerResolver = resolve;
+        this.currentCorrectionResolver = resolve;
       });
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
-      if (!this.resources.result?.normalizedImageResult) {
+      if (!this.resources.result?.correctedImageResult) {
         return {
           status: {
             code: EnumResultStatusCode.FAILED,
@@ -368,10 +370,15 @@ export default class DocumentNormalizerView {
     }
   }
 
-  hideEditor(): void {
-    this.config.documentNormalizerViewConfig.container.style.display = "none";
+  hideView(): void {
+    this.config.container.style.display = "none";
   }
 
+  /**
+   * Normalize an image with DDN given a set of points
+   * @param points - points provided by either users or DDN's detect quad
+   * @returns normalized image by DDN
+   */
   async normalizeImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem> {
     const { cvRouter } = this.resources;
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
@@ -379,14 +386,14 @@ export default class DocumentNormalizerView {
     settings.roi.points = points;
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
-    const normalizedResult = await cvRouter.capture(
+    const result = await cvRouter.capture(
       this.resources.result.originalImageResult,
       this.config.utilizedTemplateNames.normalize
     );
 
-    // If normalized result found
-    if (normalizedResult?.normalizedImageResultItems?.[0]) {
-      return normalizedResult.normalizedImageResultItems[0];
+    // If normalized result found by DDN
+    if (result?.normalizedImageResultItems?.[0]) {
+      return result.normalizedImageResultItems[0];
     }
   }
 
@@ -396,15 +403,15 @@ export default class DocumentNormalizerView {
     this.layer = null;
 
     // Clean up the container
-    this.config.documentNormalizerViewConfig.container.textContent = "";
+    this.config.container.textContent = "";
 
     // Clear resolver
-    this.currentNormalizerResolver = undefined;
+    this.currentCorrectionResolver = undefined;
   }
 }
 
-const DEFAULT_NORMALIZER_CONTROLS_STYLE = `
-.mwc-image-normalizer-controls {
+const DEFAULT_CORRECTION_CONTROLS_STYLE = `
+.mwc-document-correction-controls {
   display: flex;
   height: 6rem;
   background-color: #323234;
@@ -415,7 +422,7 @@ const DEFAULT_NORMALIZER_CONTROLS_STYLE = `
   width: 100%;
 }
 
-.mwc-image-normalizer-control-btn {
+.mwc-document-correction-control-btn {
   background-color: #323234;
   color: white;
   cursor: pointer;
@@ -430,33 +437,33 @@ const DEFAULT_NORMALIZER_CONTROLS_STYLE = `
   user-select: none;
 }
 
-.mwc-image-normalizer-control-btn div:last-child {
+.mwc-document-correction-control-btn div:last-child {
   padding-bottom: 0.5rem;
 }
 
-.mwc-image-normalizer-control-btn.finish {
+.mwc-document-correction-control-btn.finish {
   background-color: #000000;
   color: #fe8e14;
 }
 
-.mwc-image-normalizer-control-icon svg {
+.mwc-document-correction-control-icon svg {
   padding-top: 0.5rem;
   width: 24px;
   height: 24px;
 }
 `;
 
-const DEFAULT_NORMALIZER_CONTROLS_HTML = `
-  <div class="mwc-image-normalizer-control-btn">
-    <div class="mwc-image-normalizer-control-icon">${MWC_ICONS.fullImage}</div>
+const DEFAULT_CORRECTION_CONTROLS_HTML = `
+  <div class="mwc-document-correction-control-btn">
+    <div class="mwc-document-correction-control-icon">${MWC_ICONS.fullImage}</div>
     <div>Full Image</div>
   </div>
-  <div class="mwc-image-normalizer-control-btn">
-    <div class="mwc-image-normalizer-control-icon">${MWC_ICONS.autoBounds}</div>
+  <div class="mwc-document-correction-control-btn">
+    <div class="mwc-document-correction-control-icon">${MWC_ICONS.autoBounds}</div>
     <div>Auto Bounds Detection</div>
   </div>
-  <div class="mwc-image-normalizer-control-btn finish">
-    <div class="mwc-image-normalizer-control-icon">${MWC_ICONS.finish}</div>
+  <div class="mwc-document-correction-control-btn finish">
+    <div class="mwc-document-correction-control-icon">${MWC_ICONS.finish}</div>
     <div>Finish</div>
   </div>
 `;

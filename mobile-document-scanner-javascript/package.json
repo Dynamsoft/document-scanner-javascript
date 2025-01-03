@@ -53,5 +53,8 @@
   },
   "dependencies": {
     "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225"
-  }
+  },
+  "bundledDependencies": [
+    "dynamsoft-capture-vision-bundle"
+  ]
 }

@@ -2,8 +2,6 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
-    //"lib": ["DOM","ES2015"],
-    //"strict": true,
     "outDir": "dist",
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -12,11 +10,9 @@
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "declarationDir": "./types",
+    "declarationDir": "./dist/types",
     "noImplicitAny": true,
     "resolveJsonModule": true
-    // "types": ["node"],
-    // "removeComments": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**"]

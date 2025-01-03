@@ -14,67 +14,43 @@
 
   <body>
     <h1 style="font-size: 1.5em">Detect the boundary of a document and normalize it</h1>
-    <!-- <button id="start-detecting">Start Scanning</button>
-    <button id="start-preview">Start Preview</button>
-    <button id="start-normalizer">Start Normalizer</button> -->
     <button id="start-core-workflow">Start Scanning Documents</button>
     <div id="camera-view-container" style="margin-top: 10px; height: 80vh; display: none"></div>
-    <div id="preview-view-container" style="display: none; height: 80vh"></div>
-    <div id="normalizer-view-container" style="display: none; height: 80vh"></div>
-    <div id="normalized-result"></div>
+    <div id="scan-result-view-container" style="display: none; height: 80vh"></div>
+    <div id="correction-view-container" style="display: none; height: 80vh"></div>
+    <div id="results"></div>
     <script type="module">
       // Page Elements
       const cameraViewContainer = document.querySelector("#camera-view-container");
-      const normalizerViewContainer = document.querySelector("#normalizer-view-container");
-      const previewContainer = document.querySelector("#preview-view-container");
+      const correctionViewContainer = document.querySelector("#scan-result-view-container");
+      const scanResultViewContainer = document.querySelector("#correction-view-container");
 
-      // const startDetectingBtn = document.querySelector("#start-detecting");
-      // const startPreviewBtn = document.querySelector("#start-preview");
-      // const startNormalizerBtn = document.querySelector("#start-normalizer");
-      const startWorkflowBtn = document.querySelector("#start-core-workflow");
+      const startDDSBtn = document.querySelector("#start-core-workflow");
 
-      const normalizedResult = document.querySelector("#normalized-result");
+      const resultContainer = document.querySelector("#results");
 
-      // Initialize mds
-      const mds = new Dynamsoft.DocumentScanner({
-        license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
-        cameraViewContainer: cameraViewContainer,
-        scanResultViewConfig: {
-          container: previewContainer,
+      // Initialize DDS
+      const DDS = new Dynamsoft.DocumentScanner({
+        license: "YOUR_LICENSE_KEY",
+        scannerViewConfig: {
+          cameraViewContainer: cameraViewContainer,
         },
-        documentNormalizerViewConfig: {
-          container: normalizerViewContainer,
+        scanResultViewConfig: {
+          container: scanResultViewContainer,
+        },
+        correctionViewConfig: {
+          container: correctionViewContainer,
         },
       });
 
-      // const { scannerView, normalizerView, scanResultView } = await mds.initialize();
-
-      // Add results
-      // let result = null;
-      // startDetectingBtn.addEventListener("click", async () => {
-      //   result = await scannerView.launch();
-      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
-      // });
-
-      // startPreviewBtn.addEventListener("click", async () => {
-      //   result = await scanResultView.launch();
-      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
-      // });
-
-      // startNormalizerBtn.addEventListener("click", async () => {
-      //   result = await normalizerView.launch();
-
-      //   normalizedResult.append(result.toCanvas());
-      // });
-
-      startWorkflowBtn.addEventListener("click", async () => {
+      startDDSBtn.addEventListener("click", async () => {
         try {
-          const result = await mds.launch();
+          const result = await DDS.launch();
           console.log("Capture completed:", result);
 
           if (result.status.code === 0) {
-            const normalizedImage = result.normalizedImageResult;
-            normalizedResult.append(normalizedImage.toCanvas());
+            const correctedImg = result.correctedImageResult;
+            resultContainer.append(correctedImg.toCanvas());
           }
         } catch (error) {
           console.error("Capture failed:", error);

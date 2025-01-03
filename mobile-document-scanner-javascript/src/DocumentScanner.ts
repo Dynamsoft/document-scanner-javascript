@@ -2,27 +2,19 @@ import { LicenseManager } from "dynamsoft-license";
 import { CoreModule } from "dynamsoft-core";
 import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
 import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
-import DocumentNormalizerView, { DocumentNormalizerViewConfig } from "./views/DocumentNormalizerView";
-import DocumentScannerView, { DocumentScanResult, EnumResultStatusCode } from "./views/DocumentScannerView";
+import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
+import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
+import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./views/utils/types";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
 
-// Interfaces
-export interface UtilizedTemplateNames {
-  detect: string;
-  normalize: string;
-}
-
 export interface DocumentScannerConfig {
   license?: string;
-  templateFilePath?: string;
-  cameraEnhancerUIPath?: string;
-  cameraViewContainer: HTMLElement;
+  scannerViewConfig: DocumentScannerViewConfig;
   scanResultViewConfig?: ScanResultViewConfig;
-  documentNormalizerViewConfig?: DocumentNormalizerViewConfig;
-  consecutiveResultFramesBeforeNormalization?: number;
+  correctionViewConfig?: DocumentCorrectionViewConfig;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
 
@@ -38,41 +30,48 @@ export interface SharedResources {
 class DocumentScanner {
   private scannerView?: DocumentScannerView;
   private scanResultView?: ScanResultView;
-  private normalizerView?: DocumentNormalizerView;
+  private correctionView?: DocumentCorrectionView;
   private resources: Partial<SharedResources> = {};
   private isCapturing = false;
 
   constructor(private config: DocumentScannerConfig) {
     this.config = {
       license: config.license || "",
-      templateFilePath: config.templateFilePath || null,
-      cameraEnhancerUIPath: config.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
-      cameraViewContainer: config.cameraViewContainer || null,
+      scannerViewConfig: {
+        templateFilePath: config.scannerViewConfig?.templateFilePath || null,
+        cameraEnhancerUIPath: config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
+        cameraViewContainer: config.scannerViewConfig?.cameraViewContainer || null,
+        consecutiveResultFramesBeforeNormalization:
+          config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 30,
+        utilizedTemplateNames: {
+          detect: config.utilizedTemplateNames?.detect || "DetectDocumentBoundaries_Default",
+          normalize: config.utilizedTemplateNames?.normalize || "NormalizeDocument_Default",
+        },
+      },
       scanResultViewConfig: {
         container: config.scanResultViewConfig?.container || null,
         controls: config.scanResultViewConfig?.controls,
         onContinue: config.scanResultViewConfig?.onContinue,
       },
-      documentNormalizerViewConfig: {
-        container: config.documentNormalizerViewConfig?.container || null,
-        controls: config.documentNormalizerViewConfig?.controls,
-        onFinish: config.documentNormalizerViewConfig?.onFinish,
-      },
-      consecutiveResultFramesBeforeNormalization: config.consecutiveResultFramesBeforeNormalization || 30,
-      utilizedTemplateNames: {
-        detect: config.utilizedTemplateNames?.detect || "DetectDocumentBoundaries_Default",
-        normalize: config.utilizedTemplateNames?.normalize || "NormalizeDocument_Default",
+      correctionViewConfig: {
+        container: config.correctionViewConfig?.container || null,
+        controls: config.correctionViewConfig?.controls,
+        onFinish: config.correctionViewConfig?.onFinish,
+        utilizedTemplateNames: {
+          detect: config.utilizedTemplateNames?.detect || "DetectDocumentBoundaries_Default",
+          normalize: config.utilizedTemplateNames?.normalize || "NormalizeDocument_Default",
+        },
       },
     };
 
-    if (!config.cameraViewContainer) {
+    if (!config.scannerViewConfig?.cameraViewContainer) {
       throw new Error("Please create a Camera View Container element");
     }
   }
 
   async initialize(): Promise<{
     scannerView: DocumentScannerView;
-    normalizerView: DocumentNormalizerView;
+    correctionView: DocumentCorrectionView;
     scanResultView: ScanResultView;
   }> {
     try {
@@ -85,10 +84,15 @@ class DocumentScanner {
       };
 
       // Create components
-      this.scannerView = new DocumentScannerView(this.resources, this.config);
-      this.normalizerView = new DocumentNormalizerView(this.resources, this.config);
-      // Create preview with references to scanner and normalizer
-      this.scanResultView = new ScanResultView(this.resources, this.config, this.scannerView, this.normalizerView);
+      this.scannerView = new DocumentScannerView(this.resources, this.config.scannerViewConfig);
+      this.correctionView = new DocumentCorrectionView(this.resources, this.config.correctionViewConfig);
+      // Create scan result view with references to scanner view and correction view
+      this.scanResultView = new ScanResultView(
+        this.resources,
+        this.config.scanResultViewConfig,
+        this.scannerView,
+        this.correctionView
+      );
 
       // Initialize components
       await this.scannerView.initialize();
@@ -96,7 +100,7 @@ class DocumentScanner {
       return {
         scannerView: this.scannerView,
         scanResultView: this.scanResultView,
-        normalizerView: this.normalizerView,
+        correctionView: this.correctionView,
       };
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
@@ -114,7 +118,7 @@ class DocumentScanner {
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
 
-      this.resources.cameraView = await CameraView.createInstance(this.config.cameraEnhancerUIPath);
+      this.resources.cameraView = await CameraView.createInstance(this.config.scannerViewConfig?.cameraEnhancerUIPath);
       this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
       this.resources.cvRouter = await CaptureVisionRouter.createInstance();
     } catch (ex: any) {
@@ -125,7 +129,7 @@ class DocumentScanner {
 
   dispose(): void {
     this.scanResultView?.dispose();
-    this.normalizerView?.dispose();
+    this.correctionView?.dispose();
     this.resources.cameraEnhancer?.close();
     this.resources.cvRouter?.dispose();
     this.resources.result = null;
@@ -136,7 +140,7 @@ class DocumentScanner {
    * Starts the complete Image capture flow:
    * 1. Initializes camera and scanning
    * 2. Captures the Image
-   * 3. Shows preview with options to edit/normalize
+   * 3. Shows preview with options to correct (normalize)
    * @returns Promise that resolves with the final scan results
    */
   async launch(): Promise<DocumentScanResult> {
@@ -149,11 +153,11 @@ class DocumentScanner {
       this.isCapturing = true;
 
       // Initialize components if not already done
-      if (!this.scannerView || !this.scanResultView || !this.normalizerView) {
+      if (!this.scannerView || !this.scanResultView || !this.correctionView) {
         const components = await this.initialize();
         this.scannerView = components.scannerView;
         this.scanResultView = components.scanResultView;
-        this.normalizerView = components.normalizerView;
+        this.correctionView = components.correctionView;
       }
 
       // Start scanning process
@@ -204,11 +208,11 @@ class DocumentScanner {
       // Close camera if open
       await this.scannerView?.closeCamera();
 
-      // Hide preview if showing
-      this.scanResultView?.hidePreview();
+      // Hide scan result view if showing
+      this.scanResultView?.hideView();
 
-      // Hide normalizer if showing
-      this.normalizerView?.hideEditor();
+      // Hide correction view if showing
+      this.correctionView?.hideView();
 
       // Reset state
       this.isCapturing = false;

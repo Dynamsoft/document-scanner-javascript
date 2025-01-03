@@ -1,5 +1,4 @@
 import {
-  DSImageData,
   EnumCapturedResultItemType,
   EnumImagePixelFormat,
   OriginalImageResultItem,
@@ -7,24 +6,15 @@ import {
 } from "dynamsoft-core";
 import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
-import { DocumentScannerConfig, SharedResources } from "../DocumentScanner";
+import { SharedResources } from "../DocumentScanner";
+import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
 
-export enum EnumResultStatusCode {
-  SUCCESS = 0,
-  CANCELLED = 1,
-  FAILED = 2,
-}
-
-type ResultStatus = {
-  code: EnumResultStatusCode;
-  message?: string;
-};
-
-export interface DocumentScanResult {
-  status: ResultStatus;
-  normalizedImageResult?: NormalizedImageResultItem | DSImageData;
-  originalImageResult?: OriginalImageResultItem["imageData"];
-  detectedQuadrilateral?: Quadrilateral;
+export interface DocumentScannerViewConfig {
+  templateFilePath?: string;
+  cameraEnhancerUIPath?: string;
+  cameraViewContainer: HTMLElement;
+  consecutiveResultFramesBeforeNormalization?: number;
+  utilizedTemplateNames?: UtilizedTemplateNames;
 }
 
 interface DCEElements {
@@ -61,7 +51,7 @@ export default class DocumentScannerView {
   // Scan Resolve
   private currentScanResolver?: (result: DocumentScanResult) => void;
 
-  constructor(private resources: SharedResources, private config: DocumentScannerConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {}
 
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -313,7 +303,7 @@ export default class DocumentScannerView {
       this.originalImageData = shouldUseLatestFrame ? cameraEnhancer.fetchImage() : this.originalImageData;
 
       // Reset captured items if not using bounds detection
-      let normalizedImageResult = null;
+      let correctedImageResult = null;
       let detectedQuadrilateral: Quadrilateral = null;
       if (shouldUseLatestFrame) {
         this.capturedResultItems = [];
@@ -335,8 +325,8 @@ export default class DocumentScannerView {
         )?.location;
       }
 
-      // Retrieve normalized image result
-      normalizedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
+      // Retrieve corrected image result
+      correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       // Clean up camera and capture
       this.closeCamera();
@@ -347,7 +337,7 @@ export default class DocumentScannerView {
           message: "Success",
         },
         originalImageResult: this.originalImageData,
-        normalizedImageResult,
+        correctedImageResult,
         detectedQuadrilateral,
       };
 
@@ -385,8 +375,13 @@ export default class DocumentScannerView {
     }
   }
 
+  /**
+   * Normalize an image with DDN given a set of points
+   * @param points - points provided by either users or DDN's detect quad
+   * @returns normalized image by DDN
+   */
   private async handleAutoCaptureMode(result: CapturedResult) {
-    /** If "Normalize Automatically" is checked, the library uses the document boundaries found in consecutive
+    /** If "Auto Capture" is checked, the library uses the document boundaries found in consecutive
      * image frames to decide whether conditions are suitable for automatic normalization.
      */
     if (result.items.length <= 1) {
@@ -459,10 +454,10 @@ export default class DocumentScannerView {
     settings.roi.points = points;
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
-    const normalizedResult = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
+    const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
     // If normalized result found
-    if (normalizedResult?.normalizedImageResultItems?.[0]) {
-      return normalizedResult.normalizedImageResultItems[0];
+    if (result?.normalizedImageResultItems?.[0]) {
+      return result.normalizedImageResultItems[0];
     }
   }
 }
