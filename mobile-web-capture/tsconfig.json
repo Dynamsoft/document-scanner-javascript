@@ -6,7 +6,7 @@
     },
     "target": "es2017",
     "module": "esnext",
-    "outDir": "dist",
+    "outDir": "dds",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,

@@ -8,6 +8,8 @@ import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { TransferMode, TransferView, TransferViewConfig } from "./views/TransferView";
 import { showInfoDialog } from "./views/utils";
 
+const DEFAULT_CONTAINER_HEIGHT = "100vh";
+
 enum EnumMWCViews {
   Library = "library",
   Page = "page",
@@ -21,7 +23,8 @@ interface MWCView {
   isVisible: boolean;
 }
 
-export interface MobileWebCaptureConfig extends DocumentScannerConfig {
+export interface MobileWebCaptureConfig extends Omit<DocumentScannerConfig, "container"> {
+  container: HTMLElement | string;
   libraryViewConfig?: LibraryViewConfig;
   documentViewConfig?: DocumentViewConfig;
   pageViewConfig?: PageViewConfig;
@@ -54,8 +57,62 @@ class MobileWebCapture {
 
   private uploadedFiles: UploadedDocument[] = [];
 
+  private shouldCreateDefaultContainer(): boolean {
+    const hasNoMainContainer = !this.config.container;
+
+    const hasAnyMissingViewContainer =
+      // DDV related views
+      !this.config.libraryViewConfig?.container ||
+      !this.config.documentViewConfig?.container ||
+      !this.config.pageViewConfig?.container ||
+      !this.config.transferViewConfig?.container ||
+      // DDS related views
+      !this.config.scannerViewConfig?.container ||
+      !this.config.scanResultViewConfig?.container ||
+      !this.config.correctionViewConfig?.container;
+
+    return hasNoMainContainer && hasAnyMissingViewContainer;
+  }
+
+  private createDefaultMWCContainer(): HTMLElement {
+    const container = document.createElement("div");
+    container.className = "mwc-main-container";
+    Object.assign(container.style, {
+      height: DEFAULT_CONTAINER_HEIGHT,
+      width: "100%",
+    });
+    document.body.append(container);
+    return container;
+  }
+
+  private getContainer(containerConfig: string | HTMLElement): HTMLElement | null {
+    if (typeof containerConfig === "string") {
+      return document.querySelector(containerConfig);
+    }
+    return containerConfig instanceof HTMLElement ? containerConfig : null;
+  }
+
+  private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
+    const views = ["scanner", "correction", "scan-result", "library", "document", "page", "transfer"];
+    mainContainer.textContent = ""; // Clear container
+
+    return views.reduce((containers, view) => {
+      const viewContainer = document.createElement("div");
+      viewContainer.className = `mwc-${view}-view-container`;
+
+      Object.assign(viewContainer.style, {
+        height: "100%",
+        width: "100%",
+        display: "none",
+      });
+
+      mainContainer.append(viewContainer);
+      containers[view] = viewContainer;
+      return containers;
+    }, {} as Record<string, HTMLElement>);
+  }
+
   constructor(private config: MobileWebCaptureConfig) {
-    // Pass the MobileDocumentScannerConfig portion to super
     const {
       libraryViewConfig,
       documentViewConfig,
@@ -63,16 +120,41 @@ class MobileWebCapture {
       license,
       exportConfig,
       transferViewConfig,
-      ...baseConfig
+      container,
+      ...baseConfig // DDS Config
     } = config;
 
-    this.documentScanner = new DocumentScanner({ license, ...baseConfig });
+    // If users provide container through DDS, create the containers for them
+    this.config.container = this.shouldCreateDefaultContainer()
+      ? this.createDefaultMWCContainer()
+      : this.config.container;
+
+    const viewContainers = this.config.container
+      ? this.createViewContainers(this.getContainer(this.config.container))
+      : {};
+
+    this.documentScanner = new DocumentScanner({
+      license,
+      ...baseConfig,
+      scannerViewConfig: {
+        ...baseConfig?.scannerViewConfig,
+        container: viewContainers["scanner"] || baseConfig.scannerViewConfig?.container,
+      },
+      scanResultViewConfig: {
+        ...baseConfig?.scanResultViewConfig,
+        container: viewContainers["scan-result"] || baseConfig.scanResultViewConfig?.container,
+      },
+      correctionViewConfig: {
+        ...baseConfig?.correctionViewConfig,
+        container: viewContainers["correction"] || baseConfig.correctionViewConfig?.container,
+      },
+    });
 
     // Set up views object to keep track of the visibility of each views
     this.mwcViews = {
       [EnumMWCViews.Library]: {
         config: {
-          container: libraryViewConfig.container,
+          container: viewContainers["library"] || libraryViewConfig.container,
           onCameraCapture: () => this.handleCameraCapture(EnumMWCViews.Library),
           onGalleryImport: () => this.handleGalleryImport(EnumMWCViews.Library),
           onDocumentClick: (docId) => this.handleDocumentClick(docId),
@@ -84,7 +166,7 @@ class MobileWebCapture {
       },
       [EnumMWCViews.Document]: {
         config: {
-          container: documentViewConfig.container,
+          container: viewContainers["document"] || documentViewConfig.container,
           onCameraCapture: () => this.handleCameraCapture(EnumMWCViews.Document),
           onGalleryImport: () => this.handleGalleryImport(EnumMWCViews.Document),
           onLibraryClick: () => this.switchView(EnumMWCViews.Library),
@@ -98,7 +180,7 @@ class MobileWebCapture {
       },
       [EnumMWCViews.Page]: {
         config: {
-          container: pageViewConfig.container,
+          container: viewContainers["page"] || pageViewConfig.container,
           onDocumentClick: () => this.switchView(EnumMWCViews.Document),
           onAddPage: () => this.handleCameraCapture(EnumMWCViews.Document),
           exportConfig,
@@ -109,7 +191,7 @@ class MobileWebCapture {
       },
       [EnumMWCViews.Transfer]: {
         config: {
-          container: transferViewConfig.container,
+          container: viewContainers["transfer"] || transferViewConfig.container,
           onConfirmTransfer: (mode) => this.handleTransferPageConfirm(mode),
           onCancelTransfer: () => this.handleTransferPageCancel(),
         },
@@ -215,7 +297,7 @@ class MobileWebCapture {
 
       // Return to library view after successful capture
       if (result?.status.code === EnumResultStatusCode.SUCCESS) {
-        const blob = await (result.normalizedImageResult as NormalizedImageResultItem).toBlob("image/png");
+        const blob = await (result.correctedImageResult as NormalizedImageResultItem).toBlob("image/png");
 
         if (sourceView === EnumMWCViews.Library) {
           // Create new document when capturing from Library view

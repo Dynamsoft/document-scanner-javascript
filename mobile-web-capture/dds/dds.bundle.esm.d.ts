@@ -10,6 +10,10 @@ import { NormalizedImageResultItem } from 'dynamsoft-document-normalizer';
 export * from 'dynamsoft-document-normalizer';
 export * from 'dynamsoft-utility';
 
+interface UtilizedTemplateNames {
+    detect: string;
+    normalize: string;
+}
 declare enum EnumResultStatusCode {
     SUCCESS = 0,
     CANCELLED = 1,
@@ -21,9 +25,59 @@ type ResultStatus = {
 };
 interface DocumentScanResult {
     status: ResultStatus;
-    normalizedImageResult?: NormalizedImageResultItem | DSImageData;
+    correctedImageResult?: NormalizedImageResultItem | DSImageData;
     originalImageResult?: OriginalImageResultItem["imageData"];
     detectedQuadrilateral?: Quadrilateral;
+}
+
+interface DocumentCorrectionViewControls {
+    fullImageBtn?: HTMLElement | string;
+    autoBoundsBtn?: HTMLElement | string;
+    finishBtn?: HTMLElement | string;
+    containerStyle?: Partial<CSSStyleDeclaration>;
+}
+interface DocumentCorrectionViewConfig {
+    container: HTMLElement;
+    controls: DocumentCorrectionViewControls;
+    utilizedTemplateNames: UtilizedTemplateNames;
+    onFinish?: (result: DocumentScanResult) => void;
+}
+declare class DocumentCorrectionView {
+    private resources;
+    private config;
+    private imageEditorView;
+    private layer;
+    private controls;
+    private currentCorrectionResolver?;
+    constructor(resources: SharedResources, config: DocumentCorrectionViewConfig);
+    initialize(): Promise<void>;
+    private setupDrawingLayerStyle;
+    private setupQuadConstraints;
+    private getCanvasBounds;
+    private addQuadToLayer;
+    private setupInitialDetectedQuad;
+    private createDefaultControls;
+    private setupCorrectionControls;
+    setFullImageBoundary(): void;
+    setBoundaryAutomatically(): Promise<void>;
+    confirmCorrection(): Promise<void>;
+    launch(): Promise<DocumentScanResult>;
+    hideView(): void;
+    /**
+     * Normalize an image with DDN given a set of points
+     * @param points - points provided by either users or DDN's detect quad
+     * @returns normalized image by DDN
+     */
+    normalizeImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem>;
+    dispose(): void;
+}
+
+interface DocumentScannerViewConfig {
+    templateFilePath?: string;
+    cameraEnhancerUIPath?: string;
+    container: HTMLElement;
+    consecutiveResultFramesBeforeNormalization?: number;
+    utilizedTemplateNames?: UtilizedTemplateNames;
 }
 declare class DocumentScannerView {
     private resources;
@@ -37,7 +91,7 @@ declare class DocumentScannerView {
     private initializedDCE;
     private DCE_ELEMENTS;
     private currentScanResolver?;
-    constructor(resources: SharedResources, config: DocumentScannerConfig);
+    constructor(resources: SharedResources, config: DocumentScannerViewConfig);
     initialize(): Promise<void>;
     private initializeElements;
     private assignDCEClickEvents;
@@ -50,50 +104,19 @@ declare class DocumentScannerView {
     stopCapturing(): void;
     takePhoto(): Promise<void>;
     handleBoundsDetection(result: CapturedResult): Promise<void>;
+    /**
+     * Normalize an image with DDN given a set of points
+     * @param points - points provided by either users or DDN's detect quad
+     * @returns normalized image by DDN
+     */
     private handleAutoCaptureMode;
     launch(): Promise<DocumentScanResult>;
     normalizeImage(points: Quadrilateral["points"], originalImageData: OriginalImageResultItem["imageData"]): Promise<NormalizedImageResultItem>;
 }
 
-interface DocumentNormalizerViewControls {
-    fullImageBtn?: HTMLElement | string;
-    autoBoundsBtn?: HTMLElement | string;
-    finishBtn?: HTMLElement | string;
-    containerStyle?: Partial<CSSStyleDeclaration>;
-}
-interface DocumentNormalizerViewConfig {
-    container: HTMLElement;
-    controls: DocumentNormalizerViewControls;
-    onFinish?: (result: DocumentScanResult) => void;
-}
-declare class DocumentNormalizerView {
-    private resources;
-    private config;
-    private imageEditorView;
-    private layer;
-    private controls;
-    private currentNormalizerResolver?;
-    constructor(resources: SharedResources, config: DocumentScannerConfig);
-    initialize(): Promise<void>;
-    private setupDrawingLayerStyle;
-    private setupQuadConstraints;
-    private getCanvasBounds;
-    private addQuadToLayer;
-    private setupInitialDetectedQuad;
-    private createDefaultControls;
-    private setupNormalizerControls;
-    setFullImageBoundary(): void;
-    setBoundaryAutomatically(): Promise<void>;
-    confirmNormalization(): Promise<void>;
-    launch(): Promise<DocumentScanResult>;
-    hideEditor(): void;
-    normalizeImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem>;
-    dispose(): void;
-}
-
 interface ScanResultViewControls {
     exportBtn?: HTMLElement | string;
-    normalizeBtn?: HTMLElement | string;
+    correctionBtn?: HTMLElement | string;
     retakeBtn?: HTMLElement | string;
     continueBtn?: HTMLElement | string;
     useDefaultControls?: boolean;
@@ -108,36 +131,30 @@ interface ScanResultViewConfig {
 declare class ScanResultView {
     private resources;
     private config;
-    private scanner;
-    private normalizerView;
+    private scannerView;
+    private correctionView;
     private container;
     private controls;
     private currentScanResultViewResolver?;
-    constructor(resources: SharedResources, config: DocumentScannerConfig, scanner: DocumentScannerView, normalizerView: DocumentNormalizerView);
+    constructor(resources: SharedResources, config: ScanResultViewConfig, scannerView: DocumentScannerView, correctionView: DocumentCorrectionView);
     launch(): Promise<DocumentScanResult>;
     private handleExport;
     private handleNormalize;
     private handleRetake;
     private handleContinue;
     private createDefaultControls;
-    private setupPreviewControls;
+    private setupScanResultViewControls;
     initialize(): Promise<void>;
-    hidePreview(): void;
+    hideView(): void;
     dispose(preserveResolver?: boolean): void;
 }
 
-interface UtilizedTemplateNames {
-    detect: string;
-    normalize: string;
-}
 interface DocumentScannerConfig {
     license?: string;
-    templateFilePath?: string;
-    cameraEnhancerUIPath?: string;
-    cameraViewContainer: HTMLElement;
+    container?: HTMLElement | string;
+    scannerViewConfig?: DocumentScannerViewConfig;
     scanResultViewConfig?: ScanResultViewConfig;
-    documentNormalizerViewConfig?: DocumentNormalizerViewConfig;
-    consecutiveResultFramesBeforeNormalization?: number;
+    correctionViewConfig?: DocumentCorrectionViewConfig;
     utilizedTemplateNames?: UtilizedTemplateNames;
 }
 interface SharedResources {
@@ -151,13 +168,17 @@ declare class DocumentScanner {
     private config;
     private scannerView?;
     private scanResultView?;
-    private normalizerView?;
+    private correctionView?;
     private resources;
     private isCapturing;
+    private shouldCreateDefaultContainer;
+    private createDefaultDDSContainer;
+    private getContainer;
+    private createViewContainers;
     constructor(config: DocumentScannerConfig);
     initialize(): Promise<{
         scannerView: DocumentScannerView;
-        normalizerView: DocumentNormalizerView;
+        correctionView: DocumentCorrectionView;
         scanResultView: ScanResultView;
     }>;
     private initializeResources;
@@ -166,7 +187,7 @@ declare class DocumentScanner {
      * Starts the complete Image capture flow:
      * 1. Initializes camera and scanning
      * 2. Captures the Image
-     * 3. Shows preview with options to edit/normalize
+     * 3. Shows preview with options to correct (normalize)
      * @returns Promise that resolves with the final scan results
      */
     launch(): Promise<DocumentScanResult>;
@@ -182,10 +203,10 @@ declare class DocumentScanner {
 
 declare const DDS: {
     DocumentScanner: typeof DocumentScanner;
-    DocumentNormalizerView: typeof DocumentNormalizerView;
+    DocumentNormalizerView: typeof DocumentCorrectionView;
     DocumentScannerView: typeof DocumentScannerView;
     ScanResultView: typeof ScanResultView;
     EnumResultStatusCode: typeof EnumResultStatusCode;
 };
 
-export { DDS, DocumentNormalizerView, DocumentNormalizerViewConfig, DocumentScanResult, DocumentScanner, DocumentScannerConfig, DocumentScannerView, EnumResultStatusCode, ScanResultView, ScanResultViewConfig, SharedResources, UtilizedTemplateNames };
+export { DDS, DocumentCorrectionViewConfig, DocumentCorrectionViewControls, DocumentCorrectionView as DocumentNormalizerView, DocumentScanResult, DocumentScanner, DocumentScannerConfig, DocumentScannerView, DocumentScannerViewConfig, EnumResultStatusCode, ResultStatus, ScanResultView, ScanResultViewConfig, ScanResultViewControls, SharedResources, UtilizedTemplateNames };

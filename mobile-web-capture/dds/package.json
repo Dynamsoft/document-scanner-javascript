@@ -1,0 +1,60 @@
+{
+  "name": "dynamsoft-document-scanner",
+  "version": "1.0.1000",
+  "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
+  "main": "./dist/dds.bundle.js",
+  "module": "./dist/dds.no-content-bundle.esm.js",
+  "files": [
+    "/dist",
+    "/LICENSE"
+  ],
+  "sideEffects": true,
+  "exports": {
+    "import": {
+      "types": "./dist/dds.bundle.esm.d.ts",
+      "default": "./dist/dds.no-content-bundle.esm.js"
+    },
+    "require": {
+      "types": "./dist/dds.bundle.d.ts",
+      "default": "./dist/dds.bundle.js"
+    }
+  },
+  "types": "./dist/dds.bundle.esm.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:production": "rollup -c --environment BUILD:production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ TO DO"
+  },
+  "keywords": [
+    "document scanning",
+    "js",
+    "javascript"
+  ],
+  "author": "Dynamsoft",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/ TO DO"
+  },
+  "homepage": "https://www.dynamsoft.com",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup-plugin-dts": "^6.1.1",
+    "@types/node": "^20.11.6",
+    "rollup": "^4.9.5",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225"
+  },
+  "bundledDependencies": [
+    "dynamsoft-capture-vision-bundle"
+  ]
+}
