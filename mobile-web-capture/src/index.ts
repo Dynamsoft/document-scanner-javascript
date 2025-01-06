@@ -12,7 +12,8 @@ export const MWC = {
   TransferView,
 };
 
-export type { MobileWebCaptureConfig, UploadedDocument, ExportConfig, UploadStatus } from "./MobileWebCapture";
+export type { UploadedDocument, ExportConfig, UploadStatus } from "./views/utils/types";
+export type { MobileWebCaptureConfig } from "./MobileWebCapture";
 export type { LibraryViewConfig } from "./views/LibraryView";
 export type { DocumentViewConfig } from "./views/DocumentView";
 export type { PageViewConfig } from "./views/PageView";

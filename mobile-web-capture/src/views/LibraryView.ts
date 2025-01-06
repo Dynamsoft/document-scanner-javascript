@@ -4,9 +4,8 @@ import { showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
 import { DocumentView } from "./DocumentView";
 import { DocumentHistoryItem } from "./components/DocumentHistoryItem";
-import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
+import { ExportConfig, UploadedDocument } from "./utils/types";
 import { showModal } from "./components/Modal";
-import { TransferItem } from "./components/TransferItem";
 
 export interface LibraryViewConfig {
   container: HTMLElement;

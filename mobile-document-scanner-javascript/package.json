@@ -2,24 +2,24 @@
   "name": "dynamsoft-document-scanner",
   "version": "1.0.1000",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/dds.bundle.js",
-  "module": "./dist/dds.no-content-bundle.esm.js",
+  "main": "./dds.bundle.js",
+  "module": "./dds.bundle.mjs",
   "files": [
-    "/dist",
-    "/LICENSE"
+    "/LICENSE",
+    "API Reference.url"
   ],
   "sideEffects": true,
   "exports": {
     "import": {
-      "types": "./dist/dds.bundle.esm.d.ts",
-      "default": "./dist/dds.no-content-bundle.esm.js"
+      "types": "./dds.bundle.esm.d.ts",
+      "default": "./dds.bundle.mjs"
     },
     "require": {
-      "types": "./dist/dds.bundle.d.ts",
-      "default": "./dist/dds.bundle.js"
+      "types": "./dds.bundle.d.ts",
+      "default": "./dds.bundle.js"
     }
   },
-  "types": "./dist/dds.bundle.esm.d.ts",
+  "types": "./dds.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
@@ -49,12 +49,7 @@
     "@types/node": "^20.11.6",
     "rollup": "^4.9.5",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
+    "typescript": "^5.3.3",
     "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225"
-  },
-  "bundledDependencies": [
-    "dynamsoft-capture-vision-bundle"
-  ]
+  }
 }

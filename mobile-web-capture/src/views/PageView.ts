@@ -2,7 +2,7 @@ import { DDV, DisplayModeEnum, EditViewer, UiConfig } from "dynamsoft-document-v
 import { mobileEditViewerUiConfig, mobileTopBarChildrenConfig } from "./utils/uiConfig";
 import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
-import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
+import { ExportConfig, UploadedDocument } from "./utils/types";
 
 export interface PageViewConfig {
   container: HTMLElement;

@@ -1,12 +1,12 @@
 import { DDV } from "dynamsoft-document-viewer";
 import { LibraryView, LibraryViewConfig } from "./views/LibraryView";
 import { DocumentScannerConfig, EnumResultStatusCode, DocumentScanner } from "dynamsoft-document-scanner";
-import { LicenseManager } from "dynamsoft-license";
 import { PageView, PageViewConfig } from "./views/PageView";
 import { DocumentView, DocumentViewConfig } from "./views/DocumentView";
 import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { TransferMode, TransferView, TransferViewConfig } from "./views/TransferView";
 import { showInfoDialog } from "./views/utils";
+import { ExportConfig, UploadedDocument } from "./views/utils/types";
 
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
@@ -30,21 +30,6 @@ export interface MobileWebCaptureConfig extends Omit<DocumentScannerConfig, "con
   pageViewConfig?: PageViewConfig;
   transferViewConfig?: TransferViewConfig;
   exportConfig?: ExportConfig;
-}
-
-export type UploadStatus = "success" | "failed";
-
-export type UploadedDocument = {
-  fileName: string;
-  downloadUrl: string;
-  status: UploadStatus;
-  uploadTime?: string;
-};
-
-export interface ExportConfig {
-  uploadToServer?: (fileName: string, blob: Blob) => void | UploadedDocument;
-  downloadFromServer?: (doc: UploadedDocument) => void;
-  deleteFromServer?: (doc: UploadedDocument) => void;
 }
 
 class MobileWebCapture {
@@ -211,7 +196,7 @@ class MobileWebCapture {
 
     try {
       // Currently if no license is provided, uses trial license
-      LicenseManager.initLicense(this.config?.license || "", true);
+      // LicenseManager.initLicense(this.config?.license || "", true);
       DDV.Core.license = this.config?.license || "";
       DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
 

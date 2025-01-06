@@ -45,6 +45,7 @@ const copyFiles = () => ({
   name: "copy-files",
   writeBundle() {
     fs.copyFileSync("src/document-scanner.ui.html", "dist/document-scanner.ui.html");
+    fs.copyFileSync("package.json", "dist/package.json");
   },
 });
 
@@ -95,28 +96,6 @@ export default [
     output: [
       {
         file: "dist/dds.bundle.mjs",
-        format: "es",
-        banner: banner,
-        exports: "named",
-        sourcemap: true,
-      },
-    ],
-  },
-  {
-    input: "src/dds.no-content-bundle.esm.ts",
-    plugins: [
-      nodeResolve({ browser: true }),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: true,
-        sourceMap: true,
-      }),
-      plugin_terser_es6,
-      copyFiles(),
-    ],
-    output: [
-      {
-        file: "dist/dds.no-content-bundle.esm.js",
         format: "es",
         banner: banner,
         exports: "named",

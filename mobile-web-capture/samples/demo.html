@@ -10,10 +10,7 @@
       name="description"
       content="Mobile Web Capture demo enables capturing document images via mobile browsers and it organizes captured images into documents, with each document encompassing one or more pages."
     />
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.6.1000-beta-202412302225/dist/dcv.bundle.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.css" />
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.js"></script>
-    <script src="../dds/dds.bundle.js"></script>
     <script src="../dist/mwc.bundle.js"></script>
   </head>
 
@@ -148,7 +145,7 @@
       };
 
       // Initialize MWC
-      const mwc = new MobileWebCapture({
+      const mwc = new Dynamsoft.MobileWebCapture({
         license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
         scannerViewConfig: {
           container: cameraViewContainer,
@@ -180,39 +177,6 @@
           deleteFromServer,
         },
       });
-      // const { scannerView, normalizerView, scanResultView } = await mwc.initialize();
-
-      // // Add results
-      // let result = null;
-      // startDetectingBtn.addEventListener("click", async () => {
-      //   result = await scannerView.scanImage();
-      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
-      // });
-
-      // startPreviewBtn.addEventListener("click", async () => {
-      //   result = await scanResultView.showPreview();
-      //   normalizedResult.append(result.normalizedImageResult.toCanvas());
-      // });
-
-      // startNormalizerBtn.addEventListener("click", async () => {
-      //   result = await normalizerView.showEditor();
-
-      //   normalizedResult.append(result.toCanvas());
-      // });
-
-      // startWorkflowBtn.addEventListener("click", async () => {
-      //   try {
-      //     const result = await mwc.startImageCapture();
-      //     console.log("Capture completed:", result);
-
-      //     if (result.success) {
-      //       const normalizedImage = result.normalizedImageResult;
-      //       normalizedResult.append(normalizedImage.toCanvas());
-      //     }
-      //   } catch (error) {
-      //     console.error("Capture failed:", error);
-      //   }
-      // });
 
       startMWCbtn.addEventListener("click", async () => {
         try {

@@ -1,4 +1,4 @@
-import { UploadedDocument } from "src/MobileWebCapture";
+import { UploadedDocument } from "../utils/types";
 import { formatTicks } from "../utils";
 import { MWC_ICONS } from "../utils/icons";
 

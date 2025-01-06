@@ -4,19 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mobile Web Capture - Hello World</title>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@2.6.1000-beta-202412302225/dist/dcv.bundle.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.css" />
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/ddv.js"></script>
-    <script src="../dds/dds.bundle.js"></script>
     <script src="../dist/mwc.bundle.js"></script>
   </head>
 
   <body>
-    <div id="results"></div>
     <script type="module">
-      const resultContainer = document.querySelector("#results");
-
-      const MWC = new MobileWebCapture({
+      const MWC = new Dynamsoft.MobileWebCapture({
         license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9",
       });
       await MWC.launch();

@@ -2,8 +2,8 @@
   "name": "dynamsoft-mobile-web-capture",
   "version": "1.0.1000",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
-  "main": "./dist/mwc.bundle.js",
-  "module": "./dist/mwc.no-content-bundle.esm.js",
+  "main": "./mwc.bundle.js",
+  "module": "./mwc.bundle.mjs",
   "files": [
     "/dist",
     "/LICENSE"
@@ -11,15 +11,15 @@
   "sideEffects": true,
   "exports": {
     "import": {
-      "types": "./dist/mwc.bundle.esm.d.ts",
-      "default": "./dist/mwc.no-content-bundle.esm.js"
+      "types": "./mwc.bundle.esm.d.ts",
+      "default": "./mwc.bundle.mjs"
     },
     "require": {
-      "types": "./dist/mwc.bundle.d.ts",
-      "default": "./dist/mwc.bundle.js"
+      "types": "./mwc.bundle.d.ts",
+      "default": "./mwc.bundle.js"
     }
   },
-  "types": "./dist/mwc.bundle.esm.d.ts",
+  "types": "./mwc.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
@@ -49,10 +49,7 @@
     "@types/node": "^20.11.6",
     "rollup": "^4.9.5",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225",
+    "typescript": "^5.3.3",
     "dynamsoft-document-scanner": "file:./dds",
     "dynamsoft-document-viewer": "2.1.0"
   }

@@ -1,7 +1,7 @@
 import { BrowseViewer, DDV, IDocument } from "dynamsoft-document-viewer";
 import { isMobile, showInfoDialog } from "./utils";
 import { MWC_ICONS } from "./utils/icons";
-import { ExportConfig, UploadedDocument } from "src/MobileWebCapture";
+import { ExportConfig, UploadedDocument } from "./utils/types";
 import { showModal } from "./components/Modal";
 import { TransferMode } from "./TransferView";
 
