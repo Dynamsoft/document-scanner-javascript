@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamsoft Document Scanner Demo</title>
+    <script src="../dist/dds.bundle.js"></script>
+  </head>
+
+  <body>
+    <div id="results"></div>
+    <script type="module">
+      const resultContainer = document.querySelector("#results");
+
+      const DDS = new Dynamsoft.DocumentScanner({
+        license: "YOUR_LICENSE_KEY",
+      });
+      const result = await DDS.launch();
+      resultContainer.append(result.correctedImageResult.toCanvas());
+    </script>
+  </body>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</html>
