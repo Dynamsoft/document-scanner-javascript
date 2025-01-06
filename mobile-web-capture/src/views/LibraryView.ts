@@ -153,7 +153,7 @@ export class LibraryView {
   private exitSelectionMode() {
     this.isSelectionMode = false;
     this.headerSelectionContainer.style.display = "none";
-    this.headerTitleContainer.textContent = this.isHistoryView ? "History" : "Library";
+    this.headerTitleContainer.textContent = this.isHistoryView ? "Upload History" : "Library";
 
     this.docItems.forEach((item) => {
       item.setSelectMode(false);
@@ -249,7 +249,7 @@ export class LibraryView {
     this.isHistoryView = show;
 
     // Toggle header title
-    this.headerTitleContainer.textContent = show ? "History" : "Library";
+    this.headerTitleContainer.textContent = show ? "Upload History" : "Library";
 
     // Toggle content
     if (show) {
