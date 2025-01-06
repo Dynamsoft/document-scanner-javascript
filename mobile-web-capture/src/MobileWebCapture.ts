@@ -8,7 +8,7 @@ import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { TransferMode, TransferView, TransferViewConfig } from "./views/TransferView";
 import { showInfoDialog } from "./views/utils";
 
-const DEFAULT_CONTAINER_HEIGHT = "100vh";
+const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 enum EnumMWCViews {
   Library = "library",
@@ -80,6 +80,9 @@ class MobileWebCapture {
     Object.assign(container.style, {
       height: DEFAULT_CONTAINER_HEIGHT,
       width: "100%",
+      position: "absolute",
+      left: 0,
+      top: 0,
     });
     document.body.append(container);
     return container;

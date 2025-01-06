@@ -285,11 +285,6 @@ export class DocumentView {
     this.copyToBtn.classList.toggle("disabled", !hasSelection);
     this.moveToBtn.classList.toggle("disabled", !hasSelection);
     this.deleteBtn.classList.toggle("disabled", !hasSelection);
-
-    // Update button click handlers
-    [this.copyToBtn, this.moveToBtn, this.deleteBtn].forEach((btn) => {
-      btn.style.pointerEvents = hasSelection ? "auto" : "none";
-    });
   }
 
   private toggleSelectionMode(show?: boolean) {
@@ -319,6 +314,11 @@ export class DocumentView {
   }
 
   private handleTransferPage(mode: TransferMode) {
+    if (mode === "copy" && this.copyToBtn.classList.contains("disabled")) {
+      return;
+    } else if (mode === "move" && this.moveToBtn.classList.contains("disabled")) {
+      return;
+    }
     const currentDoc = this.browseViewer.currentDocument;
     const selectedIndex = this.browseViewer.getSelectedPageIndices();
 
@@ -336,6 +336,10 @@ export class DocumentView {
   }
 
   private handleDelete() {
+    if (this.deleteBtn.classList.contains("disabled")) {
+      return;
+    }
+
     const selectedIndex = this.browseViewer.getSelectedPageIndices();
     if (selectedIndex.length > 0) {
       this.browseViewer.currentDocument.deletePages(selectedIndex);
@@ -447,12 +451,10 @@ gap: 8px;
 font-family: Verdana;
 font-size: 18px;
 user-select: none;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  
-  max-width: 100%;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+max-width: 100%;
 }
 
 .mwc-document-view-header-rename-btn {
@@ -485,7 +487,7 @@ stroke: black;
 }
 
 .mwc-document-view-content-empty svg {
-  width: 300px;
+  width: 200px;
   height: auto;
 }
 
@@ -541,7 +543,6 @@ stroke: black;
 }
 
 .mwc-document-view-control-btn.disabled {
-  background-color: #323234;
   cursor: not-allowed;
 }
 

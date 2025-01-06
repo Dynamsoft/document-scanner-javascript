@@ -48,6 +48,8 @@ export class PageView {
 
     // Set title
     DDV.Elements.setDisplayTextConfig({
+      Undo: "Undo",
+      Redo: "Redo",
       SelectAnnotation: "Select",
       EraseAnnotation: "Eraser",
       RectAnnotation: "Rect",
@@ -455,6 +457,10 @@ const DEFAULT_PAGE_VIEW_STYLE = `
 .mwc-annotation-mode-bar::-webkit-scrollbar-track {
   border-radius: 0px;
   background-color: rgb(241,241,241);
+}
+
+.ddv-undo-page, .ddv-redo-page {
+  flex-direction: column;
 }
 `;
 

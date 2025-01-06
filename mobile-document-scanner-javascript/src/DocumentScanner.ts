@@ -13,7 +13,7 @@ const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",
 };
-const DEFAULT_CONTAINER_HEIGHT = "100vh";
+const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 export interface DocumentScannerConfig {
   license?: string;
@@ -55,6 +55,9 @@ class DocumentScanner {
     Object.assign(container.style, {
       height: DEFAULT_CONTAINER_HEIGHT,
       width: "100%",
+      position: "absolute",
+      left: 0,
+      top: 0,
     });
     document.body.append(container);
     return container;
@@ -76,6 +79,9 @@ class DocumentScanner {
       viewContainer.className = `dds-${view}-view-container`;
 
       Object.assign(viewContainer.style, {
+        position: "static",
+        left: 0,
+        top: 0,
         height: "100%",
         width: "100%",
         display: "none",

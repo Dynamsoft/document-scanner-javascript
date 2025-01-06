@@ -225,5 +225,6 @@ const DEFAULT_DOCUMENT_ITEM_STYLE = `
   accent-color: #FE8E14;
   width: 24px;
   height: 24px;
+  justify-self: end;
 }
 `;

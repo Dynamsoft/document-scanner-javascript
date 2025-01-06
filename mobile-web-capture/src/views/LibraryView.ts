@@ -291,11 +291,9 @@ export class LibraryView {
 
     this.printBtn.classList.toggle("selected", isSingleSelection);
     this.printBtn.classList.toggle("disabled", !isSingleSelection);
-    this.printBtn.setAttribute("disabled", isSingleSelection ? "false" : "true");
 
     if (!this.config?.exportConfig?.uploadToServer) {
       this.printBtn.classList.add("disabled");
-      this.printBtn.setAttribute("disabled", "true");
     }
   }
 
@@ -476,6 +474,10 @@ export class LibraryView {
       return;
     }
 
+    if (this.printBtn.classList.contains("disabled")) {
+      return;
+    }
+
     const docUid = this.checkedDocUids[0];
     const doc = DDV.documentManager.getDocument(docUid);
 
@@ -631,8 +633,8 @@ user-select: none;
   user-select: none;
 }
 
-.mwc-document-view-content-empty svg {
-  width: 300px;
+.mwc-library-content-empty svg {
+  width: 200px;
   height: auto;
 }
 
@@ -679,7 +681,6 @@ user-select: none;
 }
 
 .mwc-library-control-btn.disabled {
-  background-color: #323234;
   cursor: not-allowed;
 }
 
