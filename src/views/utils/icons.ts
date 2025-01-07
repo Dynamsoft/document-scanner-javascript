@@ -1,4 +1,4 @@
-export const MWC_ICONS = {
+export const DDS_ICONS = {
   fullImage: `
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 25 25">
   <defs>

@@ -3,14 +3,7 @@ export function bindControlButton(
   defaultButton: HTMLElement | null,
   handler: () => void
 ): HTMLElement {
-  let button: HTMLElement | null = null;
-
-  // Try to get custom button
-  if (typeof customButton === "string") {
-    button = document.querySelector(customButton);
-  } else if (customButton instanceof HTMLElement) {
-    button = customButton;
-  }
+  let button = getElement(customButton);
 
   // Fall back to default if no custom button found
   if (!button && defaultButton) {
@@ -22,4 +15,11 @@ export function bindControlButton(
 
   button.addEventListener("click", handler);
   return button;
+}
+
+export function getElement(element: string | HTMLElement): HTMLElement | null {
+  if (typeof element === "string") {
+    return document.querySelector(element);
+  }
+  return element instanceof HTMLElement ? element : null;
 }

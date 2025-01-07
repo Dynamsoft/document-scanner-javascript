@@ -45,7 +45,6 @@ const copyFiles = () => ({
   name: "copy-files",
   writeBundle() {
     fs.copyFileSync("src/document-scanner.ui.html", "dist/document-scanner.ui.html");
-    fs.copyFileSync("package.json", "dist/package.json");
   },
 });
 

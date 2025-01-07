@@ -3,7 +3,7 @@ import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } f
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
 import { bindControlButton } from "./utils";
-import { MWC_ICONS } from "./utils/icons";
+import { DDS_ICONS } from "./utils/icons";
 import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
@@ -204,7 +204,7 @@ export default class DocumentCorrectionView {
     document.head.appendChild(styleSheet);
 
     const container = document.createElement("div");
-    container.className = "mwc-document-correction-controls";
+    container.className = "dds-document-correction-controls";
     container.innerHTML = `
       ${DEFAULT_CORRECTION_CONTROLS_HTML}
     `;
@@ -411,7 +411,7 @@ export default class DocumentCorrectionView {
 }
 
 const DEFAULT_CORRECTION_CONTROLS_STYLE = `
-.mwc-document-correction-controls {
+.dds-document-correction-controls {
   display: flex;
   height: 8rem;
   background-color: #323234;
@@ -422,7 +422,7 @@ const DEFAULT_CORRECTION_CONTROLS_STYLE = `
   width: 100%;
 }
 
-.mwc-document-correction-control-btn {
+.dds-document-correction-control-btn {
   background-color: #323234;
   color: white;
   cursor: pointer;
@@ -437,16 +437,16 @@ const DEFAULT_CORRECTION_CONTROLS_STYLE = `
   user-select: none;
 }
 
-.mwc-document-correction-control-btn div:last-child {
+.dds-document-correction-control-btn div:last-child {
   padding-bottom: 0.5rem;
 }
 
-.mwc-document-correction-control-btn.finish {
+.dds-document-correction-control-btn.finish {
   background-color: #000000;
   color: #fe8e14;
 }
 
-.mwc-document-correction-control-icon svg {
+.dds-document-correction-control-icon svg {
   padding-top: 0.5rem;
   width: 32px;
   height: 32px;
@@ -454,16 +454,16 @@ const DEFAULT_CORRECTION_CONTROLS_STYLE = `
 `;
 
 const DEFAULT_CORRECTION_CONTROLS_HTML = `
-  <div class="mwc-document-correction-control-btn">
-    <div class="mwc-document-correction-control-icon">${MWC_ICONS.fullImage}</div>
+  <div class="dds-document-correction-control-btn">
+    <div class="dds-document-correction-control-icon">${DDS_ICONS.fullImage}</div>
     <div>Full Image</div>
   </div>
-  <div class="mwc-document-correction-control-btn">
-    <div class="mwc-document-correction-control-icon">${MWC_ICONS.autoBounds}</div>
+  <div class="dds-document-correction-control-btn">
+    <div class="dds-document-correction-control-icon">${DDS_ICONS.autoBounds}</div>
     <div>Auto Bounds Detection</div>
   </div>
-  <div class="mwc-document-correction-control-btn finish">
-    <div class="mwc-document-correction-control-icon">${MWC_ICONS.finish}</div>
+  <div class="dds-document-correction-control-btn finish">
+    <div class="dds-document-correction-control-icon">${DDS_ICONS.finish}</div>
     <div>Finish</div>
   </div>
 `;
