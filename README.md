@@ -1,23 +1,28 @@
-## Running the sample
+## Running the Sample
 
-We make use of the web server that comes with [Express](https://expressjs.com/).
+### Steps to Run the Sample
 
-* Install dependencies
+1. **Install Dependencies**  
+   Install all necessary dependencies by running:  
+   ```bash
+   npm install
+   ```
 
-Run the following script to install all dependencies.
+2. **Build the Project**  
+   Build the project to prepare it for execution:  
+   ```bash
+   npm run build
+   ```
 
-`npm run build`
+3. **Start the Server**  
+   The server logic is defined in `index.js`. Start the server by running:  
+   ```bash
+   npm run serve
+   ```
 
-`npm install`
+### Notes on the Test Server (Development Only)
 
-* Start the server
+This sample uses the web server provided by Express (https://expressjs.com/). It is intended solely for local development and testing purposes, and it lacks production-grade features like advanced security, scalability, and detailed logging.
 
-We defined the web server logic in the file "index.js". To start it, run the following script:
-
-`npm run serve`
-
-Note that we have used self-signed certificates to enable SSL on the port 3000.
-
-Additionally, you're able to access the application through mobile/network access by using the Network URL shown in the console.
-
-Make sure your device is on the same network as the server.
+- The server is configured to run on **"localhost"** using port `3000` and on your computer's **local IP address** using port `3001` with SSL enabled via self-signed certificates.
+- To access the application from a mobile device or another computer on your network, use your computer's **local IP address** and ensure the device is connected to the same Local Area Network (LAN).

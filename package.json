@@ -24,7 +24,7 @@
   "types": "./dist/dds.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
-    "serve": "node samples/index.js",
+    "serve": "node dev-server/index.js",
     "build": "rollup -c",
     "build:production": "rollup -c --environment BUILD:production"
   },

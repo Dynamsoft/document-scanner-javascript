@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "fs";
+import http from "http";
 import https from "https";
 import cors from "cors";
 import path from "path";
@@ -30,10 +31,14 @@ app.use(
 );
 
 app.use((req, res, next) => {
-  if (!req.secure) {
-    return res.redirect(["https://", req.get("Host"), req.url].join(""));
+  const host = req.get("Host"); // Get the host name from the request
+
+  // Skip redirection if the host is 'localhost'
+  if (!req.secure && host !== "localhost:3000") {
+    return res.redirect(["https://", host, req.url].join(""));
   }
-  next();
+
+  next(); // Proceed to the next middleware or route
 });
 
 // Serve static files
@@ -41,26 +46,39 @@ app.use("/dist", express.static(distPath));
 
 // Routes
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/demo.html"));
+  res.sendFile(path.join(__dirname, "../samples/demo.html"));
 });
 
 app.get("/demo", (req, res) => {
-  res.sendFile(path.join(__dirname, "/demo.html"));
+  res.sendFile(path.join(__dirname, "../samples/demo.html"));
 });
 
 app.get("/hello-world", (req, res) => {
-  res.sendFile(path.join(__dirname, "/hello-world.html"));
+  res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
-const httpsServer = https.createServer(
-  {
-    key: fs.readFileSync(path.join(__dirname, "pem/key.pem")),
-    cert: fs.readFileSync(path.join(__dirname, "pem/cert.pem")),
-  },
-  app
-);
+let httpPort = 3000;
+let httpsPort = 3001;
 
-let httpsPort = 3000;
+// HTTPS server configuration
+const httpsOptions = {
+  key: fs.readFileSync(path.join(__dirname, "pem/key.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "pem/cert.pem")),
+};
+
+// Create HTTPS server
+const httpsServer = https.createServer(httpsOptions, app);
+
+// Create HTTP server
+const httpServer = http.createServer(app);
+
+// Start the servers
+httpServer.listen(httpPort, () => {
+  console.log("\n\x1b[1m Dynamsoft Document Scanner Sample\x1b[0m\n");
+  console.log("\x1b[36m Access URLs:\x1b[0m");
+  console.log("\x1b[90m-------------------\x1b[0m");
+  console.log("\x1b[32m Local:\x1b[0m    http://localhost:" + httpPort + "/");
+});
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
   const networkInterfaces = os.networkInterfaces();
@@ -73,13 +91,9 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
     });
   });
 
-  console.log("\n\x1b[1m Dynamsoft Document Scanner Sample\x1b[0m\n");
-
-  console.log("\x1b[36m Access URLs:\x1b[0m");
-  console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[32m Local:\x1b[0m    https://localhost:" + httpsPort + "/");
-  console.log("\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/\n");
-
+  console.log(
+    "\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/\n"
+  );
   console.log("\x1b[36m Available Pages:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   console.log("\x1b[33m Demo:\x1b[0m        /demo");
