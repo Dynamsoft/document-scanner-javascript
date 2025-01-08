@@ -1,5 +1,5 @@
 {
-  "name": "dynamsoft-document-scanner-trial",
+  "name": "dynamsoft-document-scanner-trial-beta",
   "version": "1.0.0-beta-202501070922",
   "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
   "main": "./dist/dds.bundle.js",
