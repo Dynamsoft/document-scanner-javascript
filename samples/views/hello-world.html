@@ -4,9 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner Demo</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial"></script> -->
-    <script src="../dist/dds.bundle.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial-beta"></script>
     <style>
       html,
       body {
@@ -31,9 +29,11 @@
         license: "YOUR_LICENSE_KEY",
       });
       (async () => {
+        // Launch the scanner and wait for the result
         const result = await documentScanner.launch();
         console.log(result);
 
+        // Clear the result container and display the scanned result as a canvas
         if (result?.correctedImageResult) {
           resultContainer.innerHTML = ""; // Clear placeholder content
           const canvas = result.correctedImageResult.toCanvas();

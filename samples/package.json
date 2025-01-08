@@ -1,0 +1,15 @@
+{
+  "name": "dynamsoft-document-scanner-sample",
+  "version": "1.0.0",
+  "description": "Dynamsoft Document Scanner sample",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
