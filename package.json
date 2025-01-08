@@ -51,6 +51,6 @@
     "rollup": "^4.9.5",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "dynamsoft-capture-vision-bundle": "2.6.1000-beta-202412302225"
+    "dynamsoft-capture-vision-bundle": "2.6.1000"
   }
 }
