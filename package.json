@@ -5,6 +5,7 @@
   "main": "./dist/dds.bundle.js",
   "module": "./dist/dds.bundle.mjs",
   "files": [
+    "/samples",
     "/dist",
     "/LICENSE",
     "API Reference.url"
@@ -23,9 +24,9 @@
   "types": "./dist/dds.bundle.esm.d.ts",
   "type": "module",
   "scripts": {
+    "serve": "node samples/index.js",
     "build": "rollup -c",
-    "build:production": "rollup -c --environment BUILD:production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:production": "rollup -c --environment BUILD:production"
   },
   "repository": {
     "type": "git",
@@ -46,11 +47,13 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "rollup-plugin-dts": "^6.1.1",
     "@types/node": "^20.11.6",
+    "dynamsoft-capture-vision-bundle": "2.6.1000",
     "rollup": "^4.9.5",
+    "rollup-plugin-dts": "^6.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "dynamsoft-capture-vision-bundle": "2.6.1000"
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
   }
 }
