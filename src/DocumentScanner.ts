@@ -9,7 +9,8 @@ import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from 
 import { getElement } from "./views/utils";
 
 // Default DCE UI path
-const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
+const DEFAULT_DCE_UI_PATH =
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial@latest/dist/document-scanner.ui.html";
 const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",

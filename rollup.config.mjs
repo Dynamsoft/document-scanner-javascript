@@ -41,13 +41,6 @@ const banner = `/*!
 const plugin_terser_es6 = terser({ ecma: 6, format: terser_format });
 const plugin_terser_es5 = terser({ ecma: 5, format: terser_format });
 
-const copyFiles = () => ({
-  name: "copy-files",
-  writeBundle() {
-    fs.copyFileSync("src/document-scanner.ui.html", "dist/document-scanner.ui.html");
-  },
-});
-
 export default [
   {
     input: "src/dds.bundle.ts",
@@ -59,7 +52,6 @@ export default [
         sourceMap: true,
       }),
       plugin_terser_es5,
-      copyFiles(),
       {
         // https://rollupjs.org/guide/en/#writebundle
         writeBundle(options, bundle) {
