@@ -32,7 +32,6 @@ export interface SharedResources {
   cameraView?: CameraView;
   result?: DocumentScanResult;
   onResultUpdated?: (result: DocumentScanResult) => void;
-  _parentScanner?: DocumentScanner;
 }
 
 // Main class

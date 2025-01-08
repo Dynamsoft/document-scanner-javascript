@@ -171,11 +171,6 @@ export default class ScanResultView {
       // Clean up
       this.hideView();
       this.dispose();
-
-      // if (this.resources && this.resources._parentScanner) {
-      //   // If clicking the close button, remove the view altogether
-      //   this.resources._parentScanner.dispose();
-      // }
     } catch (error) {
       console.error("Error in continue handler:", error);
       // Make sure to resolve with error if something goes wrong
