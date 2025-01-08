@@ -473,28 +473,13 @@ export default class DocumentScannerView {
     originalImageData: OriginalImageResultItem["imageData"]
   ): Promise<NormalizedImageResultItem> {
     const { cvRouter, cameraEnhancer } = this.resources;
-    // Start timing for settings operations
-    const settingsStartTime = performance.now();
+
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
-    const getSimplifiedSetitngs = performance.now();
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;
-    // Time the updateSettings specifically
-    const updateSettingsStartTime = performance.now();
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
-    const updateSettingsEndTime = performance.now();
-    const settingsEndTime = performance.now();
-    // Start timing for capture operation
-    const captureStartTime = performance.now();
+
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
-    const captureEndTime = performance.now();
-    // Calculate and log timings
-    console.log("🕒 Timing Breakdown:");
-    console.log(`├─ Total Settings Time: ${(settingsEndTime - settingsStartTime).toFixed(2)}ms`);
-    console.log(`│  └─ getSimplifiedSettings: ${(getSimplifiedSetitngs - settingsStartTime).toFixed(2)}ms`);
-    console.log(`│  └─ updateSettings: ${(updateSettingsEndTime - updateSettingsStartTime).toFixed(2)}ms`);
-    console.log(`└─ Capture Time: ${(captureEndTime - captureStartTime).toFixed(2)}ms`);
-    console.log(`Total Operation Time: ${(captureEndTime - settingsStartTime).toFixed(2)}ms`);
     // If normalized result found
     if (result?.normalizedImageResultItems?.[0]) {
       return result.normalizedImageResultItems[0];
