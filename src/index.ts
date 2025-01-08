@@ -3,6 +3,13 @@ import DocumentNormalizerView from "./views/DocumentCorrectionView";
 import DocumentScannerView from "./views/DocumentScannerView";
 import ScanResultView from "./views/ScanResultView";
 import { EnumResultStatusCode } from "./views/utils/types";
+import {
+  PlayCallbackInfo,
+  Point,
+  Rect,
+  VideoDeviceInfo,
+  NormalizedImageResultItem,
+} from "dynamsoft-capture-vision-bundle";
 
 export const DDS = {
   DocumentScanner,
@@ -12,6 +19,7 @@ export const DDS = {
   EnumResultStatusCode,
 };
 
+export type { NormalizedImageResultItem, PlayCallbackInfo, Point, Rect, VideoDeviceInfo };
 export type { DocumentScannerConfig, SharedResources } from "./DocumentScanner";
 export type { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 export type { DocumentCorrectionViewConfig, DocumentCorrectionViewControls } from "./views/DocumentCorrectionView";
