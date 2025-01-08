@@ -8,7 +8,7 @@ import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
 import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
-import { DEFAULT_LOADING_SCREEN_STYLE, hideLoadingScreen, showLoadingScreen } from "./utils/LoadingScreen";
+import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 
 export interface DocumentScannerViewConfig {
   templateFilePath?: string;
@@ -52,18 +52,21 @@ export default class DocumentScannerView {
   // Scan Resolve
   private currentScanResolver?: (result: DocumentScanResult) => void;
 
-  private loadingElement: HTMLElement | null = null;
+  private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
 
-  private showLoading() {
-    this.loadingElement = showLoadingScreen(this.config.container);
+  private showScannerLoadingOverlay(message?: string) {
+    this.loadingScreen = showLoadingScreen(this.config.container, { message });
     this.config.container.style.display = "block";
   }
 
-  private hideLoading() {
-    if (this.loadingElement) {
-      hideLoadingScreen(this.loadingElement);
-      this.loadingElement = null;
-      this.config.container.style.display = "none";
+  private hideScannerLoadingOverlay(hideContainer: boolean = false) {
+    if (this.loadingScreen) {
+      this.loadingScreen.hide();
+      this.loadingScreen = null;
+
+      if (hideContainer) {
+        this.config.container.style.display = "none";
+      }
     }
   }
 
@@ -250,6 +253,8 @@ export default class DocumentScannerView {
 
   async openCamera(): Promise<void> {
     try {
+      this.showScannerLoadingOverlay("Initializing camera...");
+
       const { cameraEnhancer, cameraView } = this.resources;
 
       this.config.container.style.display = "block";
@@ -284,6 +289,8 @@ export default class DocumentScannerView {
         },
       };
       this.currentScanResolver(result);
+    } finally {
+      this.hideScannerLoadingOverlay();
     }
   }
 
@@ -349,13 +356,13 @@ export default class DocumentScannerView {
       this.closeCamera();
 
       // Show loading screen
-      this.showLoading();
+      this.showScannerLoadingOverlay("Processing image...");
 
       // Retrieve corrected image result
       correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       // Hide loading screen
-      this.hideLoading();
+      this.hideScannerLoadingOverlay(true);
 
       const result = {
         status: {
