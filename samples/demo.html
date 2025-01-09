@@ -65,7 +65,9 @@
     <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
     <button id="start-scan" class="scanner-button">Start Scanning</button>
     <div id="results">
-      <p style="color: #666; font-size: 1rem; text-align: center">Scan a document to see the results here.</p>
+      <p style="color: #666; font-size: 1rem; text-align: center">
+        Scan a document to see the results here.
+      </p>
     </div>
 
     <script type="module">
@@ -75,8 +77,7 @@
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
-        license:
-          "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjM0ODEwLXIxNzM2Mjk4NjI1IiwibWFpblNlcnZlclVSTCI6Imh0dHBzOi8vbWx0cy5keW5hbXNvZnQuY29tLyIsIm9yZ2FuaXphdGlvbklEIjoiMjM0ODEwIiwic3RhbmRieVNlcnZlclVSTCI6Imh0dHBzOi8vc2x0cy5keW5hbXNvZnQuY29tLyIsImNoZWNrQ29kZSI6MTc4MzcwMDY2MX0=",
+        license: "YOUR_LICENSE_KEY"
       });
 
       // Function to initialize and launch the scanner
@@ -96,7 +97,8 @@
             const canvas = result.correctedImageResult.toCanvas();
             resultContainer.appendChild(canvas);
           } else {
-            resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+            resultContainer.innerHTML =
+              "<p>No image scanned. Please try again.</p>";
           }
         } catch (error) {
           // Handle errors

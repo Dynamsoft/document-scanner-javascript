@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamsoft Document Scanner Demo</title>
+    <title>Dynamsoft Document Scanner - Hello World</title>
     <script src="../dist/dds.bundle.js"></script>
     <style>
       html,
@@ -28,9 +28,10 @@
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
-        license:
-          "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjM0ODEwLXIxNzM2Mjk4NjI1IiwibWFpblNlcnZlclVSTCI6Imh0dHBzOi8vbWx0cy5keW5hbXNvZnQuY29tLyIsIm9yZ2FuaXphdGlvbklEIjoiMjM0ODEwIiwic3RhbmRieVNlcnZlclVSTCI6Imh0dHBzOi8vc2x0cy5keW5hbXNvZnQuY29tLyIsImNoZWNrQ29kZSI6MTc4MzcwMDY2MX0=",
-        correctionViewConfig: { container: document.querySelector("#container2") },
+        license: "YOUR_LICENSE_KEY",
+        correctionViewConfig: {
+          container: document.querySelector("#container2"),
+        },
       });
       (async () => {
         // Launch the scanner and wait for the result
@@ -43,7 +44,8 @@
           const canvas = result.correctedImageResult.toCanvas();
           resultContainer.appendChild(canvas);
         } else {
-          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+          resultContainer.innerHTML =
+            "<p>No image scanned. Please try again.</p>";
         }
       })();
     </script>
