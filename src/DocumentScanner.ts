@@ -15,7 +15,7 @@ const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",
 };
-const DEFAULT_CONTAINER_HEIGHT = "100vh";
+const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 export interface DocumentScannerConfig {
   license?: string;
@@ -43,12 +43,13 @@ class DocumentScanner {
   private isCapturing = false;
 
   private shouldCreateDefaultContainer(): boolean {
-    return (
-      !this.config.container &&
-      !this.config.scannerViewConfig?.container &&
-      !this.config.scanResultViewConfig?.container &&
-      !this.config.correctionViewConfig?.container
+    const hasNoMainContainer = !this.config.container;
+    const hasNoViewContainers = !(
+      this.config.scannerViewConfig?.container ||
+      this.config.scanResultViewConfig?.container ||
+      this.config.correctionViewConfig?.container
     );
+    return hasNoMainContainer && hasNoViewContainers;
   }
 
   private createDefaultDDSContainer(): HTMLElement {
@@ -68,9 +69,28 @@ class DocumentScanner {
     return container;
   }
 
+  private hasAnyViewConfig(): boolean {
+    return !!(
+      this.config.scannerViewConfig?.container ||
+      this.config.scanResultViewConfig?.container ||
+      this.config.correctionViewConfig?.container
+    );
+  }
+
   private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
-    const views = ["scanner", "correction", "scan-result"];
-    mainContainer.textContent = ""; // Clear container
+    const views: string[] = [];
+
+    if (this.config.container || !this.config.scannerViewConfig?.container) {
+      // If main container provided or no specific view containers, create all views
+      views.push("scanner", "correction", "scan-result");
+    } else {
+      // Only create containers for specifically configured views
+      if (this.config.scannerViewConfig?.container) views.push("scanner");
+      if (this.config.correctionViewConfig?.container) views.push("correction");
+      if (this.config.scanResultViewConfig?.container) views.push("scan-result");
+    }
+
+    mainContainer.textContent = "";
 
     return views.reduce((containers, view) => {
       const viewContainer = document.createElement("div");
@@ -92,7 +112,6 @@ class DocumentScanner {
   constructor(private config: DocumentScannerConfig) {}
 
   async initializeConfig() {
-    // If users provide container through DDS, create the containers for them
     if (this.shouldCreateDefaultContainer()) {
       this.config.container = this.createDefaultDDSContainer();
     } else if (this.config.container) {
@@ -101,71 +120,92 @@ class DocumentScanner {
 
     const viewContainers = this.config.container ? this.createViewContainers(getElement(this.config.container)) : {};
 
-    Object.assign(this.config, {
+    // Base configuration
+    const baseConfig = {
       license: this.config.license || "YOUR_LICENSE_HERE",
-      scannerViewConfig: {
-        container: viewContainers["scanner"] || this.config.scannerViewConfig?.container || null,
-        templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
-        cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
-        consecutiveResultFramesBeforeNormalization:
-          this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 30,
-        utilizedTemplateNames: {
-          detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
-          normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
-        },
+      utilizedTemplateNames: {
+        detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+        normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
       },
-      scanResultViewConfig: {
-        container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
-        controls: this.config.scanResultViewConfig?.controls,
-        onContinue: this.config.scanResultViewConfig?.onContinue,
-      },
-      correctionViewConfig: {
-        container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
-        controls: this.config.correctionViewConfig?.controls,
-        onFinish: this.config.correctionViewConfig?.onFinish,
-        utilizedTemplateNames: {
-          detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
-          normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
-        },
-      },
+    };
+
+    // Only initialize configs for views that should exist
+    const shouldInitScanner = this.config.container || this.config.scannerViewConfig?.container;
+    const shouldInitCorrection = this.config.container || this.config.correctionViewConfig?.container;
+    const shouldInitResult = this.config.container || this.config.scanResultViewConfig?.container;
+
+    Object.assign(this.config, {
+      ...baseConfig,
+      scannerViewConfig: shouldInitScanner
+        ? {
+            container: viewContainers["scanner"] || this.config.scannerViewConfig?.container || null,
+            templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
+            cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
+            consecutiveResultFramesBeforeNormalization:
+              this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 30,
+            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+          }
+        : undefined,
+      correctionViewConfig: shouldInitCorrection
+        ? {
+            container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
+            controls: this.config.correctionViewConfig?.controls,
+            onFinish: this.config.correctionViewConfig?.onFinish,
+            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+          }
+        : undefined,
+      scanResultViewConfig: shouldInitResult
+        ? {
+            container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
+            controls: this.config.scanResultViewConfig?.controls,
+            onContinue: this.config.scanResultViewConfig?.onContinue,
+          }
+        : undefined,
     });
   }
 
   async initialize(): Promise<{
-    scannerView: DocumentScannerView;
-    correctionView: DocumentCorrectionView;
-    scanResultView: ScanResultView;
+    scannerView?: DocumentScannerView;
+    correctionView?: DocumentCorrectionView;
+    scanResultView?: ScanResultView;
   }> {
     try {
-      this.initializeConfig();
-
-      // Initialize shared resources
+      await this.initializeConfig();
       await this.initializeResources();
 
-      // Setup Result Updating
       this.resources.onResultUpdated = (result) => {
         this.resources.result = result;
       };
 
-      // Create components
-      this.scannerView = new DocumentScannerView(this.resources, this.config.scannerViewConfig);
-      this.correctionView = new DocumentCorrectionView(this.resources, this.config.correctionViewConfig);
-      // Create scan result view with references to scanner view and correction view
-      this.scanResultView = new ScanResultView(
-        this.resources,
-        this.config.scanResultViewConfig,
-        this.scannerView,
-        this.correctionView
-      );
+      const components: {
+        scannerView?: DocumentScannerView;
+        correctionView?: DocumentCorrectionView;
+        scanResultView?: ScanResultView;
+      } = {};
 
-      // Initialize components
-      await this.scannerView.initialize();
+      // Only initialize components that are configured
+      if (this.config.scannerViewConfig) {
+        this.scannerView = new DocumentScannerView(this.resources, this.config.scannerViewConfig);
+        components.scannerView = this.scannerView;
+        await this.scannerView.initialize();
+      }
 
-      return {
-        scannerView: this.scannerView,
-        scanResultView: this.scanResultView,
-        correctionView: this.correctionView,
-      };
+      if (this.config.correctionViewConfig) {
+        this.correctionView = new DocumentCorrectionView(this.resources, this.config.correctionViewConfig);
+        components.correctionView = this.correctionView;
+      }
+
+      if (this.config.scanResultViewConfig) {
+        this.scanResultView = new ScanResultView(
+          this.resources,
+          this.config.scanResultViewConfig,
+          this.scannerView,
+          this.correctionView
+        );
+        components.scanResultView = this.scanResultView;
+      }
+
+      return components;
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       throw new Error(`DDS Initialization Failed: ${errMsg}`);
@@ -192,65 +232,137 @@ class DocumentScanner {
   }
 
   dispose(): void {
-    this.scanResultView?.dispose();
-    this.correctionView?.dispose();
-    this.scanResultView = null;
-    this.correctionView = null;
+    if (this.scanResultView) {
+      this.scanResultView.dispose();
+      this.scanResultView = null;
+    }
+
+    if (this.correctionView) {
+      this.correctionView.dispose();
+      this.correctionView = null;
+    }
+
     this.scannerView = null;
 
-    this.resources.cameraEnhancer?.dispose();
-    this.resources.cvRouter?.dispose();
-    this.resources.result = null;
-
-    if (this.config.container) {
-      getElement(this.config.container).style.display = "none";
+    // Dispose resources
+    if (this.resources.cameraEnhancer) {
+      this.resources.cameraEnhancer.dispose();
+      this.resources.cameraEnhancer = null;
     }
+
+    if (this.resources.cameraView) {
+      this.resources.cameraView.dispose();
+      this.resources.cameraView = null;
+    }
+
+    if (this.resources.cvRouter) {
+      this.resources.cvRouter.dispose();
+      this.resources.cvRouter = null;
+    }
+
+    this.resources.result = null;
+    this.resources.onResultUpdated = null;
+
+    // Hide and clean containers
+    const cleanContainer = (container?: HTMLElement | string) => {
+      const element = getElement(container);
+      if (element) {
+        element.style.display = "none";
+        element.textContent = "";
+      }
+    };
+
+    cleanContainer(this.config.container);
+    cleanContainer(this.config.scannerViewConfig?.container);
+    cleanContainer(this.config.correctionViewConfig?.container);
+    cleanContainer(this.config.scanResultViewConfig?.container);
   }
 
   // Workflow
   /**
-   * Starts the complete Image capture flow:
-   * 1. Initializes camera and scanning
-   * 2. Captures the Image
-   * 3. Shows preview with options to correct (normalize)
-   * @returns Promise that resolves with the final scan results
+   * Launches the document scanning process.
+   *
+   * The flow varies based on which view containers are configured:
+   *
+   * 1. All views present (scanner, correction, scanResult):
+   *    - Flow: Scanner -> ScanResult (correction available in ScanResult)
+   *
+   * 2. Only scanner + scanResult:
+   *    - Flow: Scanner -> ScanResult
+   *
+   * 3. Only scanner + correction:
+   *    - Flow: Scanner -> Correction
+   *
+   * 4. Only correction:
+   *    - Flow: Correction (uses existing result if available)
+   *
+   * 5. Only scanResult:
+   *    - Flow: ScanResult (uses existing result if available)
+   *
+   * 6. Only scanner:
+   *    - Flow: Scanner (returns scan result)
+   *
+   * @returns Promise<DocumentScanResult> - Resolves with the scan result which includes:
+   *  - status: Success/Failed/Cancelled
+   *  - originalImageResult: Original captured image (if scanner used)
+   *  - correctedImageResult: Normalized image (if correction performed)
+   *  - detectedQuadrilateral: Document boundaries
+   *
+   * @throws Error if a capture session is already in progress
    */
   async launch(): Promise<DocumentScanResult> {
-    // Prevent multiple capture sessions
     if (this.isCapturing) {
       throw new Error("Capture session already in progress");
     }
 
     try {
       this.isCapturing = true;
-
-      // InitializeInitialize components if not already done
       const components = await this.initialize();
-      this.scannerView = components.scannerView;
-      this.scanResultView = components.scanResultView;
-      this.correctionView = components.correctionView;
 
-      // Show container if exist
       if (this.config.container) {
         getElement(this.config.container).style.display = "block";
       }
 
-      // Start scanning process
-      const scanResult = await this.scannerView.launch();
-
-      if (scanResult?.status.code !== EnumResultStatusCode.SUCCESS) {
-        return {
-          status: {
-            code: scanResult?.status.code,
-            message: scanResult?.status.message || "Failed to capture image",
-          },
-        };
+      // Handle direct correction view
+      if (!components.scannerView && components.correctionView && this.resources.result) {
+        return await components.correctionView.launch();
       }
 
-      // Show scanResultView with the captured result
-      const scanResultView = await this.scanResultView.launch();
+      // Handle direct scan result view
+      if (!components.scannerView && components.scanResultView && this.resources.result) {
+        return await components.scanResultView.launch();
+      }
 
-      return scanResultView;
+      // Scanner view is required if no existing result
+      if (!components.scannerView && !this.resources.result) {
+        throw new Error("Scanner view is required when no previous result exists");
+      }
+
+      // If scanner view exists, start with scanning
+      if (components.scannerView) {
+        const scanResult = await components.scannerView.launch();
+
+        if (scanResult?.status.code !== EnumResultStatusCode.SUCCESS) {
+          return {
+            status: {
+              code: scanResult?.status.code,
+              message: scanResult?.status.message || "Failed to capture image",
+            },
+          };
+        }
+      }
+
+      // Determine next view in flow
+      if (components.correctionView && !components.scanResultView) {
+        // Scanner -> Correction or direct Correction
+        return await components.correctionView.launch();
+      } else if (components.scanResultView) {
+        // Scanner -> ScanResult or direct ScanResult
+        return await components.scanResultView.launch();
+      }
+
+      // If no additional views, return current result
+      return this.resources.result;
     } catch (error) {
       console.error("Document capture flow failed:", error?.message || error);
       return {

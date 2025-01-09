@@ -399,11 +399,15 @@ export default class DocumentCorrectionView {
 
   dispose(): void {
     // Clean up resources
-    this.imageEditorView?.dispose();
+    if (this.imageEditorView?.dispose) {
+      this.imageEditorView.dispose();
+    }
     this.layer = null;
 
     // Clean up the container
-    this.config.container.textContent = "";
+    if (this.config?.container) {
+      this.config.container.textContent = "";
+    }
 
     // Clear resolver
     this.currentCorrectionResolver = undefined;
