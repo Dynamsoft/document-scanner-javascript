@@ -91,9 +91,7 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
     });
   });
 
-  console.log(
-    "\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/\n"
-  );
+  console.log("\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/\n");
   console.log("\x1b[36m Available Pages:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   console.log("\x1b[33m Demo:\x1b[0m        /demo");

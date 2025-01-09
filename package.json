@@ -5,6 +5,7 @@
   "main": "./dist/dds.bundle.js",
   "module": "./dist/dds.bundle.mjs",
   "files": [
+    "/dev-server",
     "/samples",
     "/dist",
     "/LICENSE",
