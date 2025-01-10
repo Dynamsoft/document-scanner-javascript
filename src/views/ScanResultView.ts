@@ -1,30 +1,28 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { bindControlButton } from "./utils";
+import { createControls } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { DocumentScanResult, EnumResultStatusCode } from "./utils/types";
+import { ControlButton, DocumentScanResult, EnumResultStatusCode } from "./utils/types";
 
-export interface ScanResultViewControls {
-  exportBtn?: HTMLElement | string;
-  correctionBtn?: HTMLElement | string;
-  retakeBtn?: HTMLElement | string;
-  continueBtn?: HTMLElement | string;
-  useDefaultControls?: boolean;
+export interface ScanResultViewControlIcons {
+  exportBtn?: Pick<ControlButton, "icon" | "text">;
+  correctImageBtn?: Pick<ControlButton, "icon" | "text">;
+  retakeBtn?: Pick<ControlButton, "icon" | "text">;
+  completeBtn?: Pick<ControlButton, "icon" | "text">;
   containerStyle?: Partial<CSSStyleDeclaration>;
 }
 
 export interface ScanResultViewConfig {
   container: HTMLElement;
-  controls: ScanResultViewControls;
-  onContinue?: (result: DocumentScanResult) => Promise<void>;
+  controlIcons: ScanResultViewControlIcons;
+  onComplete?: (result: DocumentScanResult) => Promise<void>;
   onExport?: (result: DocumentScanResult) => Promise<void>;
 }
 
 export default class ScanResultView {
   private container: HTMLElement;
-  private controls: ScanResultViewControls;
   private currentScanResultViewResolver?: (result: DocumentScanResult) => void;
 
   constructor(
@@ -40,7 +38,7 @@ export default class ScanResultView {
       await this.initialize();
       this.config.container.style.display = "flex";
 
-      // Return promise that resolves when user clicks continue
+      // Return promise that resolves when user clicks complete
       return new Promise((resolve) => {
         this.currentScanResultViewResolver = resolve;
       });
@@ -84,7 +82,7 @@ export default class ScanResultView {
     }
   }
 
-  private async handleNormalize() {
+  private async handleCorrectImage() {
     try {
       this.hideView();
       const result = await this.correctionView.launch();
@@ -157,10 +155,10 @@ export default class ScanResultView {
     }
   }
 
-  private async handleContinue() {
+  private async handleComplete() {
     try {
-      if (this.config?.onContinue) {
-        await this.config.onContinue(this.resources.result);
+      if (this.config?.onComplete) {
+        await this.config.onComplete(this.resources.result);
       }
 
       // Resolve with current result
@@ -172,7 +170,7 @@ export default class ScanResultView {
       this.hideView();
       this.dispose();
     } catch (error) {
-      console.error("Error in continue handler:", error);
+      console.error("Error in complete handler:", error);
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
@@ -186,69 +184,39 @@ export default class ScanResultView {
     }
   }
 
-  private createDefaultControls(): HTMLElement {
-    // Create style
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE;
-    document.head.appendChild(styleSheet);
+  private createControls(): HTMLElement {
+    const { controlIcons } = this.config;
 
-    const container = document.createElement("div");
-    container.className = "dds-scan-result-view-controls";
-    container.innerHTML = `
-      ${DEFAULT_SCAN_RESULT_VIEW_CONTROLS_HTML}
-    `;
-    return container;
+    const buttons: ControlButton[] = [
+      {
+        icon: controlIcons?.exportBtn?.icon || DDS_ICONS.export,
+        text: controlIcons?.exportBtn?.text || "Export Image",
+        onClick: () => this.handleExport(),
+      },
+      {
+        icon: controlIcons?.correctImageBtn?.icon || DDS_ICONS.normalize,
+        text: controlIcons?.correctImageBtn?.text || "Correct Image",
+        onClick: () => this.handleCorrectImage(),
+      },
+      {
+        icon: controlIcons?.retakeBtn?.icon || DDS_ICONS.retake,
+        text: controlIcons?.retakeBtn?.text || "Re-take",
+        onClick: () => this.handleRetake(),
+      },
+      {
+        icon: controlIcons?.completeBtn?.icon || DDS_ICONS.complete,
+        text: controlIcons?.completeBtn?.text || "Complete",
+        onClick: () => this.handleComplete(),
+      },
+    ];
+
+    return createControls(buttons, controlIcons?.containerStyle);
   }
 
   private setupScanResultViewControls() {
-    const { container, controls } = this.config;
-
     try {
-      if (!controls || controls.useDefaultControls) {
-        const controlContainer = this.createDefaultControls();
-
-        if (controls?.containerStyle) {
-          Object.assign(controlContainer.style, controls.containerStyle);
-        }
-
-        container.appendChild(controlContainer);
-
-        const children = controlContainer.children;
-        if (children.length < 4) {
-          throw new Error("Default controls container missing required elements");
-        }
-
-        this.controls = {
-          exportBtn: bindControlButton(controls?.exportBtn, children[0] as HTMLElement, () => this.handleExport()),
-          correctionBtn: bindControlButton(
-            controls?.correctionBtn,
-            children[1] as HTMLElement,
-            async () => await this.handleNormalize()
-          ),
-          retakeBtn: bindControlButton(
-            controls?.retakeBtn,
-            children[2] as HTMLElement,
-            async () => await this.handleRetake()
-          ),
-          continueBtn: bindControlButton(
-            controls?.continueBtn,
-            children[3] as HTMLElement,
-            async () => await this.handleContinue()
-          ),
-        };
-      } else {
-        // Custom controls
-        if (!controls.exportBtn || !controls.correctionBtn || !controls.retakeBtn || !controls.continueBtn) {
-          throw new Error("All custom buttons must be provided when not using default controls");
-        }
-
-        this.controls = {
-          exportBtn: bindControlButton(controls.exportBtn, null, () => this.handleExport()),
-          correctionBtn: bindControlButton(controls.correctionBtn, null, async () => await this.handleNormalize()),
-          retakeBtn: bindControlButton(controls.retakeBtn, null, async () => await this.handleRetake()),
-          continueBtn: bindControlButton(controls.continueBtn, null, async () => await this.handleContinue()),
-        };
-      }
+      const controlContainer = this.createControls();
+      this.config.container.appendChild(controlContainer);
     } catch (error) {
       console.error("Error setting up scan result view controls:", error);
       throw new Error(`Failed to setup scan result view controls: ${error.message}`);
@@ -320,66 +288,3 @@ export default class ScanResultView {
     }
   }
 }
-
-const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_STYLE = `
-.dds-scan-result-view-controls {
-  display: flex;
-  height: 8rem;
-  background-color: #323234;
-  align-items: center;
-  font-size: 12px;
-  font-family: Verdana;
-  color: white;
-  width: 100%;
-}
-
-.dds-scan-result-view-control-btn {
-  background-color: #323234;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  gap: 0.5rem;
-  text-align: center;
-  user-select: none;
-}
-
-.dds-scan-result-view-control-btn div:last-child {
-  padding-bottom: 0.5rem;
-}
-
-.dds-scan-result-view-control-btn.continue {
-  background-color: #000000;
-  color: #fe8e14;
-}
-
-.dds-scan-result-view-control-icon svg {
-  padding-top: 0.5rem;
-  width: 32px;
-  height: 32px;
-  fill: #fe8e14;
-}
-`;
-
-const DEFAULT_SCAN_RESULT_VIEW_CONTROLS_HTML = `
-  <div class="dds-scan-result-view-control-btn">
-    <div class="dds-scan-result-view-control-icon">${DDS_ICONS.export}</div>
-    <div>Export Image</div>
-  </div>
-  <div class="dds-scan-result-view-control-btn">
-    <div class="dds-scan-result-view-control-icon">${DDS_ICONS.normalize}</div>
-    <div>Normalize</div>
-  </div>
-  <div class="dds-scan-result-view-control-btn">
-    <div class="dds-scan-result-view-control-icon">${DDS_ICONS.retake}</div>
-    <div>Re-take</div>
-  </div>
-  <div class="dds-scan-result-view-control-btn continue">
-    <div class="dds-scan-result-view-control-icon">${DDS_ICONS.continue}</div>
-    <div>Continue</div>
-  </div>
-`;

@@ -24,3 +24,9 @@ export interface DocumentScanResult {
   originalImageResult?: OriginalImageResultItem["imageData"];
   detectedQuadrilateral?: Quadrilateral;
 }
+
+export interface ControlButton {
+  icon: string;
+  text: string;
+  onClick?: () => void | Promise<void>;
+}

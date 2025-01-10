@@ -2,22 +2,22 @@ import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { bindControlButton } from "./utils";
+import { createControls } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
-import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
+import { ControlButton, DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
 
-export interface DocumentCorrectionViewControls {
-  fullImageBtn?: HTMLElement | string;
-  autoBoundsBtn?: HTMLElement | string;
-  finishBtn?: HTMLElement | string;
+export interface DocumentCorrectionViewControlIcons {
+  fullImageBtn?: Pick<ControlButton, "icon" | "text">;
+  autoBoundsBtn?: Pick<ControlButton, "icon" | "text">;
+  finishBtn?: Pick<ControlButton, "icon" | "text">;
   containerStyle?: Partial<CSSStyleDeclaration>; // Optional styling
 }
 
 export interface DocumentCorrectionViewConfig {
   container: HTMLElement;
-  controls: DocumentCorrectionViewControls;
+  controlIcons: DocumentCorrectionViewControlIcons;
   utilizedTemplateNames: UtilizedTemplateNames;
   onFinish?: (result: DocumentScanResult) => void;
 }
@@ -25,7 +25,6 @@ export interface DocumentCorrectionViewConfig {
 export default class DocumentCorrectionView {
   private imageEditorView: ImageEditorView = null;
   private layer: DrawingLayer = null;
-  private controls: DocumentCorrectionViewControls;
   private currentCorrectionResolver?: (result: DocumentScanResult) => void;
 
   constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {}
@@ -197,66 +196,37 @@ export default class DocumentCorrectionView {
     this.addQuadToLayer(quad);
   }
 
-  private createDefaultControls(): HTMLElement {
-    // Create style
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = DEFAULT_CORRECTION_CONTROLS_STYLE;
-    document.head.appendChild(styleSheet);
+  private createControls(): HTMLElement {
+    const { controlIcons } = this.config;
 
-    const container = document.createElement("div");
-    container.className = "dds-document-correction-controls";
-    container.innerHTML = `
-      ${DEFAULT_CORRECTION_CONTROLS_HTML}
-    `;
-    return container;
+    const buttons: ControlButton[] = [
+      {
+        icon: controlIcons?.fullImageBtn?.icon || DDS_ICONS.fullImage,
+        text: controlIcons?.fullImageBtn?.text || "Full Image",
+        onClick: () => this.setFullImageBoundary(),
+      },
+      {
+        icon: controlIcons?.autoBoundsBtn?.icon || DDS_ICONS.autoBounds,
+        text: controlIcons?.autoBoundsBtn?.text || "Edge Detection",
+        onClick: () => this.setBoundaryAutomatically(),
+      },
+      {
+        icon: controlIcons?.finishBtn?.icon || DDS_ICONS.finish,
+        text: controlIcons?.finishBtn?.text || "Apply Correction",
+        onClick: () => this.confirmCorrection(),
+      },
+    ];
+
+    return createControls(buttons, controlIcons?.containerStyle);
   }
 
   private setupCorrectionControls() {
-    const { container, controls } = this.config;
-
     try {
-      if (!controls) {
-        const controlContainer = this.createDefaultControls();
-        // Apply custom styles if provided
-        if (controls?.containerStyle) {
-          Object.assign(controlContainer.style, controls.containerStyle);
-        }
-
-        // Append controls to container
-        container.appendChild(controlContainer);
-
-        // Ensure we have the expected children
-        if (controlContainer.children.length < 3) {
-          throw new Error("Default controls container missing required elements");
-        }
-
-        this.controls = {
-          fullImageBtn: bindControlButton(controls?.fullImageBtn, controlContainer.children[0] as HTMLElement, () =>
-            this.setFullImageBoundary()
-          ),
-          autoBoundsBtn: bindControlButton(controls?.autoBoundsBtn, controlContainer.children[1] as HTMLElement, () =>
-            this.setBoundaryAutomatically()
-          ),
-          finishBtn: bindControlButton(controls?.finishBtn, controlContainer.children[2] as HTMLElement, async () =>
-            this.confirmCorrection()
-          ),
-        };
-      } else {
-        // Verify all required custom buttons are provided
-        if (!controls.fullImageBtn || !controls.autoBoundsBtn || !controls.finishBtn) {
-          throw new Error("All custom buttons must be provided when not using default controls");
-        }
-
-        // Bind custom buttons
-        this.controls = {
-          fullImageBtn: bindControlButton(controls.fullImageBtn, null, () => this.setFullImageBoundary()),
-          autoBoundsBtn: bindControlButton(controls.autoBoundsBtn, null, () => this.setBoundaryAutomatically()),
-          finishBtn: bindControlButton(controls.finishBtn, null, async () => this.confirmCorrection()),
-        };
-      }
+      const controlContainer = this.createControls();
+      this.config.container.appendChild(controlContainer);
     } catch (error) {
-      console.error("Error setting up correction view controls:", error);
-      throw new Error(`Failed to setup correction view controls: ${error.message}`);
+      console.error("Error setting up correction controls:", error);
+      throw new Error(`Failed to setup correction controls: ${error.message}`);
     }
   }
 
@@ -304,7 +274,7 @@ export default class DocumentCorrectionView {
       throw new Error("No quad drawing item found");
     }
     const quad = drawingItem.getQuad();
-    const correctedImg = await this.normalizeImage(quad?.points);
+    const correctedImg = await this.correctImage(quad?.points);
     if (correctedImg) {
       const updatedResult = {
         ...this.resources.result,
@@ -379,7 +349,7 @@ export default class DocumentCorrectionView {
    * @param points - points provided by either users or DDN's detect quad
    * @returns normalized image by DDN
    */
-  async normalizeImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem> {
+  async correctImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem> {
     const { cvRouter } = this.resources;
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
     settings.roiMeasuredInPercentage = false;
@@ -413,61 +383,3 @@ export default class DocumentCorrectionView {
     this.currentCorrectionResolver = undefined;
   }
 }
-
-const DEFAULT_CORRECTION_CONTROLS_STYLE = `
-.dds-document-correction-controls {
-  display: flex;
-  height: 8rem;
-  background-color: #323234;
-  align-items: center;
-  font-size: 12px;
-  font-family: Verdana;
-  color: white;
-  width: 100%;
-}
-
-.dds-document-correction-control-btn {
-  background-color: #323234;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  gap: 0.5rem;
-  text-align: center;
-  user-select: none;
-}
-
-.dds-document-correction-control-btn div:last-child {
-  padding-bottom: 0.5rem;
-}
-
-.dds-document-correction-control-btn.finish {
-  background-color: #000000;
-  color: #fe8e14;
-}
-
-.dds-document-correction-control-icon svg {
-  padding-top: 0.5rem;
-  width: 32px;
-  height: 32px;
-}
-`;
-
-const DEFAULT_CORRECTION_CONTROLS_HTML = `
-  <div class="dds-document-correction-control-btn">
-    <div class="dds-document-correction-control-icon">${DDS_ICONS.fullImage}</div>
-    <div>Full Image</div>
-  </div>
-  <div class="dds-document-correction-control-btn">
-    <div class="dds-document-correction-control-icon">${DDS_ICONS.autoBounds}</div>
-    <div>Auto Bounds Detection</div>
-  </div>
-  <div class="dds-document-correction-control-btn finish">
-    <div class="dds-document-correction-control-icon">${DDS_ICONS.finish}</div>
-    <div>Finish</div>
-  </div>
-`;

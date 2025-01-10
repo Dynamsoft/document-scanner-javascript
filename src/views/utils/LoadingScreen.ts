@@ -79,15 +79,6 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
   };
 }
 
-export function hideLoadingScreen(loadingElement: HTMLElement) {
-  if (loadingElement && loadingElement.parentNode) {
-    loadingElement.classList.add("fade-out");
-    setTimeout(() => {
-      loadingElement.parentNode?.removeChild(loadingElement);
-    }, 200);
-  }
-}
-
 export const DEFAULT_LOADING_SCREEN_STYLE = `
   .dds-loading-screen {
     position: absolute;

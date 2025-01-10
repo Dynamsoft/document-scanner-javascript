@@ -47,12 +47,12 @@ export const DDS_ICONS = {
   finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
   <defs>
     <clipPath id="finishclip-path">
-      <rect id="Rectangle_2775" data-name="Rectangle 2775" width="24" height="24" fill="#fe8e14"/>
+      <rect id="Rectangle_2775" data-name="Rectangle 2775" width="24" height="24" fill="currentColor"/>
     </clipPath>
   </defs>
   <g id="Group_584" data-name="Group 584" clip-path="url(#finishclip-path)">
-    <path id="Path_1526" data-name="Path 1526" d="M17.6,6.7l-6.691,9.081L6.313,12.11a.5.5,0,0,0-.625.781l5,4a.508.508,0,0,0,.378.1.493.493,0,0,0,.337-.2l7-9.5A.5.5,0,1,0,17.6,6.7" fill="#fe8e14"/>
-    <path id="Path_1527" data-name="Path 1527" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0m0,23A11,11,0,1,1,23,12,11.013,11.013,0,0,1,12,23" fill="#fe8e14"/>
+    <path id="Path_1526" data-name="Path 1526" d="M17.6,6.7l-6.691,9.081L6.313,12.11a.5.5,0,0,0-.625.781l5,4a.508.508,0,0,0,.378.1.493.493,0,0,0,.337-.2l7-9.5A.5.5,0,1,0,17.6,6.7" fill="currentColor"/>
+    <path id="Path_1527" data-name="Path 1527" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0m0,23A11,11,0,1,1,23,12,11.013,11.013,0,0,1,12,23" fill="currentColor"/>
   </g>
 </svg>
 `,
@@ -102,7 +102,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  continue: `
+  complete: `
 <svg id="continue" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
 <defs>
 <clipPath id="continueclip-path">

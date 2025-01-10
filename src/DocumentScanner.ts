@@ -9,8 +9,8 @@ import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from 
 import { getElement } from "./views/utils";
 
 // Default DCE UI path
-const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial@latest/dist/document-scanner.ui.html";
+const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
+//"https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial@latest/dist/document-scanner.ui.html";
 const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",
@@ -149,7 +149,6 @@ class DocumentScanner {
       correctionViewConfig: shouldInitCorrection
         ? {
             container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
-            controls: this.config.correctionViewConfig?.controls,
             onFinish: this.config.correctionViewConfig?.onFinish,
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
@@ -157,8 +156,7 @@ class DocumentScanner {
       scanResultViewConfig: shouldInitResult
         ? {
             container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
-            controls: this.config.scanResultViewConfig?.controls,
-            onContinue: this.config.scanResultViewConfig?.onContinue,
+            onComplete: this.config.scanResultViewConfig?.onComplete,
           }
         : undefined,
     });
