@@ -231,8 +231,12 @@ export default class DocumentScannerView {
     const container = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture") as HTMLElement;
     const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture-on") as HTMLElement;
     const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture-off") as HTMLElement;
+    const takePhotoBtn = DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo") as HTMLElement;
+    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
+      ".dce-loading-auto-capture-container"
+    ) as HTMLElement;
 
-    if (!onIcon || !offIcon) return;
+    if (!onIcon || !offIcon || !takePhotoBtn || !loadingAutoCapture) return;
 
     const newAutoCaptureState = mode !== undefined ? mode : !this.autoCaptureEnabled;
 
@@ -247,8 +251,13 @@ export default class DocumentScannerView {
     offIcon.style.display = this.autoCaptureEnabled ? "none" : "block";
     onIcon.style.display = this.autoCaptureEnabled ? "block" : "none";
 
+    // Toggle display of take photo button and loading animation
+    takePhotoBtn.style.display = newAutoCaptureState ? "none" : "flex";
+    loadingAutoCapture.style.display = newAutoCaptureState ? "flex" : "none";
+
     // Reset frameCount whenever we toggle the auto capture
     this.frameCount = 0;
+    this.updateLoadingProgress(this.frameCount);
   }
 
   async openCamera(): Promise<void> {
@@ -408,6 +417,17 @@ export default class DocumentScannerView {
     }
   }
 
+  private updateLoadingProgress(progress: number) {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    if (!DCEContainer?.shadowRoot) return;
+
+    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture") as HTMLElement;
+    if (!loadingAutoCapture) return;
+
+    // Update the progress for the conic gradient
+    loadingAutoCapture.style.setProperty("--progress", `${progress}%`);
+  }
+
   /**
    * Normalize an image with DDN given a set of points
    * @param points - points provided by either users or DDN's detect quad
@@ -419,10 +439,17 @@ export default class DocumentScannerView {
      */
     if (result.items.length <= 1) {
       this.frameCount = 0;
+      this.updateLoadingProgress(0);
       return;
     }
 
     this.frameCount++;
+    const progress = Math.min(
+      100,
+      Math.round((this.frameCount / this.config.consecutiveResultFramesBeforeNormalization) * 100)
+    );
+    this.updateLoadingProgress(progress);
+
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
      * "getting document boundary detected for 30 consecutive frames".
