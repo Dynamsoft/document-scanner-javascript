@@ -613,14 +613,14 @@
     }
 
     .dce-subfooter {
-      bottom: 8rem;
-      height: 6rem;
+      position: absolute;
+      bottom: 6rem;
+      height: 4rem;
       width: 100%;
-      background-color: #323234;
+      background-color: rgba(0, 0, 0, 0.6);
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-evenly;
-      border-bottom: 1px solid gray;
     }
 
     .dce-mn-auto-capture {
@@ -670,10 +670,11 @@
     }
 
     .dce-footer {
+      position: absolute;
       bottom: 0;
-      height: 8rem;
+      height: 6rem;
       width: 100%;
-      background-color: #323234;
+      background-color: rgba(0, 0, 0, 0.6);
       display: flex;
       align-items: center;
       justify-content: space-evenly;
@@ -724,7 +725,7 @@
       height: calc(100% - 12px);
       top: 6px;
       left: 6px;
-      background: #323234;
+      background-color: black;
       border-radius: 50%;
     }
 
