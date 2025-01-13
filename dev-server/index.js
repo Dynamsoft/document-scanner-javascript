@@ -82,16 +82,20 @@ httpServer.listen(httpPort, () => {
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
   const networkInterfaces = os.networkInterfaces();
-  let localIP;
+  const ipv4Addresses = [];
   Object.keys(networkInterfaces).forEach((interfaceName) => {
     networkInterfaces[interfaceName].forEach((iface) => {
       if (iface.family === "IPv4" && !iface.internal) {
-        localIP = iface.address;
+        ipv4Addresses.push(iface.address);
       }
     });
   });
 
-  console.log("\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/\n");
+  ipv4Addresses.forEach((localIP) => {
+    console.log(
+      "\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/"
+    );
+  });
   console.log("\x1b[36m Available Pages:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   console.log("\x1b[33m Demo:\x1b[0m        /demo");
