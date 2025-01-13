@@ -500,7 +500,7 @@ export default class DocumentScannerView {
       correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       // Hide loading screen
-      this.hideScannerLoadingOverlay(false);
+      this.hideScannerLoadingOverlay(true);
 
       const result = {
         status: {
