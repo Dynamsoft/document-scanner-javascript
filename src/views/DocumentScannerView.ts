@@ -255,21 +255,33 @@ export default class DocumentScannerView {
       // Convert file to blob
       const { blob, width, height } = await this.fileToBlob(file);
 
-      this.originalImageData = (
-        (await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect))
-          .items[0] as OriginalImageResultItem
-      )?.imageData;
+      this.capturedResultItems = (
+        await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)
+      ).items;
+      this.originalImageData = (this.capturedResultItems[0] as OriginalImageResultItem)?.imageData;
 
-      // Create default quadrilateral for the whole image
-      const detectedQuadrilateral = {
-        points: [
-          { x: 0, y: 0 },
-          { x: width, y: 0 },
-          { x: width, y: height },
-          { x: 0, y: height },
-        ],
-        area: width * height,
-      } as Quadrilateral;
+      // Reset captured items if not using bounds detection
+      let detectedQuadrilateral: Quadrilateral = null;
+      if (this.capturedResultItems?.length <= 1) {
+        this.capturedResultItems = [];
+        const { width, height } = this.originalImageData;
+        detectedQuadrilateral = {
+          points: [
+            { x: 0, y: 0 },
+            { x: width, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height },
+          ],
+          area: height * width,
+        } as Quadrilateral;
+      } else {
+        detectedQuadrilateral = (
+          this.capturedResultItems.find(
+            (item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD
+          ) as DetectedQuadResultItem
+        )?.location;
+      }
+
       const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       const result = {
@@ -278,7 +290,7 @@ export default class DocumentScannerView {
           message: "Success",
         },
         originalImageResult: this.originalImageData,
-        correctedImageResult: correctedImageResult,
+        correctedImageResult,
         detectedQuadrilateral,
       };
 
