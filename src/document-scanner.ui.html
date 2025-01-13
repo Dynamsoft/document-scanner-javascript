@@ -3,12 +3,87 @@
     <div class="dce-macro-use-mobile-native-like-ui" style="display: none">
       <div class="dce-header">
         <div class="dce-mn-resolution-box" title="camera settings">720p</div>
+        <div class="dce-mn-select-camera-icon" title="Select Camera or Resolution">
+          <svg
+            id="video-resolution"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="36"
+            height="21"
+            viewBox="0 0 36 21"
+          >
+            <defs>
+              <clipPath id="video-resolutionclip-path">
+                <rect id="Rectangle_2800" data-name="Rectangle 2800" width="36" height="21" fill="none" />
+              </clipPath>
+            </defs>
+            <g id="Group_613" data-name="Group 613" clip-path="url(#video-resolutionclip-path)">
+              <path
+                id="Path_1574"
+                data-name="Path 1574"
+                d="M2.023,20.5A1.53,1.53,0,0,1,.5,18.963h0V2.039A1.531,1.531,0,0,1,2.023.5H21.811a1.531,1.531,0,0,1,1.522,1.539V18.962A1.53,1.53,0,0,1,21.811,20.5Z"
+                transform="translate(-0.005)"
+                fill="none"
+                stroke="#fff"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+              />
+              <path
+                id="Path_1575"
+                data-name="Path 1575"
+                d="M35.787,16.473a1.531,1.531,0,0,1-1.524,1.538,1.512,1.512,0,0,1-.679-.162L27.5,14.772a1.542,1.542,0,0,1-.842-1.375V7.606A1.541,1.541,0,0,1,27.5,6.23l6.089-3.081a1.516,1.516,0,0,1,2.042.69,1.555,1.555,0,0,1,.16.686Z"
+                transform="translate(-0.282)"
+                fill="none"
+                stroke="#fff"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+              />
+              <path
+                id="Path_1576"
+                data-name="Path 1576"
+                d="M10.252,9.829H6.719V4.8H5.651V16.146H6.719V10.628h3.533v5.518h1.054V4.8H10.252Z"
+                transform="translate(-0.06)"
+                fill="#fff"
+              />
+              <path
+                id="Path_1577"
+                data-name="Path 1577"
+                d="M15.791,4.8h-2.44V16.147h2.536c2.246,0,2.952-1.387,2.952-3.5V8.134c0-2-.721-3.333-3.048-3.333m1.968,7.676c0,1.652-.167,2.871-1.941,2.871H14.4V5.627h1.372c1.677,0,1.983.925,1.983,2.62Z"
+                transform="translate(-0.141)"
+                fill="#fff"
+              />
+            </g>
+          </svg>
+          <svg
+            class="dce-mn-select-camera-down-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="6.5"
+            height="4.008"
+            viewBox="0 0 6.5 4.008"
+          >
+            <g id="arrow-down" transform="translate(1145.886 -1660.582) rotate(90)">
+              <path
+                id="Path_75"
+                data-name="Path 75"
+                d="M1661.34,1145.886l3.25-3.25-3.25-3.25-.758.758,2.492,2.492-2.492,2.492Z"
+                transform="translate(0)"
+                fill="currentColor"
+              />
+            </g>
+          </svg>
+        </div>
         <div class="dce-mn-camera-and-resolution-settings">
-          <div class="dce-mn-cameras">
-            <div class="dce-mn-camera-option" data-device-id="">example camera</div>
+          <div class="dce-mn-camera-container">
+            <div style="font-size: 12px; color: white; margin: 12px">Select Camera</div>
+            <div class="dce-mn-cameras">
+              <div class="dce-mn-camera-option" data-device-id="">example camera</div>
+            </div>
           </div>
           <div class="dce-mn-camera-and-resolution-bar"></div>
           <div class="dce-mn-resolutions">
+            <div style="font-size: 12px; color: white; margin: 12px">Resolution</div>
             <div class="dce-mn-resolution-option" data-width="640" data-height="480">480P</div>
             <div class="dce-mn-resolution-option" data-width="1080" data-height="720">720P</div>
             <div class="dce-mn-resolution-option" data-width="1920" data-height="1080">1080P</div>
@@ -587,7 +662,23 @@
       stroke: white;
     }
 
+    .dce-mn-select-camera-icon {
+      position: absolute;
+      left: 12px;
+      box-sizing: border-box;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .dce-mn-select-camera-down-icon {
+      color: white;
+    }
+
     .dce-mn-resolution-box {
+      display: none;
       position: absolute;
       width: max(5vmin, 40px);
       left: 12px;

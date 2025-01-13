@@ -19,6 +19,7 @@ export interface DocumentScannerViewConfig {
 }
 
 interface DCEElements {
+  selectCameraBtn: HTMLElement | null;
   closeScannerBtn: HTMLElement | null;
   takePhotoBtn: HTMLElement | null;
   boundsDetectionBtn: HTMLElement | null;
@@ -43,6 +44,7 @@ export default class DocumentScannerView {
 
   // Elements
   private DCE_ELEMENTS: DCEElements = {
+    selectCameraBtn: null,
     closeScannerBtn: null,
     takePhotoBtn: null,
     boundsDetectionBtn: null,
@@ -136,6 +138,7 @@ export default class DocumentScannerView {
     }
 
     this.DCE_ELEMENTS = {
+      selectCameraBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-select-camera-icon"),
       closeScannerBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-close"),
       takePhotoBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo"),
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
@@ -144,8 +147,8 @@ export default class DocumentScannerView {
 
     await this.toggleBoundsDetection(this.boundsDetectionEnabled);
     await this.toggleAutoCapture(this.autoCaptureEnabled);
-    this.assignDCEClickEvents();
 
+    this.assignDCEClickEvents();
     this.initializedDCE = true;
   }
 
@@ -177,6 +180,15 @@ export default class DocumentScannerView {
     );
 
     this.DCE_ELEMENTS.closeScannerBtn.addEventListener("click", async () => await this.handleCloseBtn(), eventOptions);
+
+    this.DCE_ELEMENTS.selectCameraBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+        this.toggleSelectCameraBox();
+      },
+      eventOptions
+    );
   }
 
   async handleCloseBtn() {
@@ -190,6 +202,15 @@ export default class DocumentScannerView {
         },
       });
     }
+  }
+
+  private toggleSelectCameraBox() {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    if (!DCEContainer?.shadowRoot) return;
+
+    const settingsBox = DCEContainer.shadowRoot.querySelector(".dce-mn-resolution-box") as HTMLElement;
+
+    settingsBox.click();
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
