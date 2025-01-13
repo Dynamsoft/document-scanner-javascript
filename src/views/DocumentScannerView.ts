@@ -1,4 +1,5 @@
 import {
+  DSImageData,
   EnumCapturedResultItemType,
   EnumImagePixelFormat,
   OriginalImageResultItem,
@@ -20,6 +21,7 @@ export interface DocumentScannerViewConfig {
 
 interface DCEElements {
   selectCameraBtn: HTMLElement | null;
+  uploadImageBtn: HTMLElement | null;
   closeScannerBtn: HTMLElement | null;
   takePhotoBtn: HTMLElement | null;
   boundsDetectionBtn: HTMLElement | null;
@@ -45,6 +47,7 @@ export default class DocumentScannerView {
   // Elements
   private DCE_ELEMENTS: DCEElements = {
     selectCameraBtn: null,
+    uploadImageBtn: null,
     closeScannerBtn: null,
     takePhotoBtn: null,
     boundsDetectionBtn: null,
@@ -139,6 +142,7 @@ export default class DocumentScannerView {
 
     this.DCE_ELEMENTS = {
       selectCameraBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-select-camera-icon"),
+      uploadImageBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-upload-image-icon"),
       closeScannerBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-close"),
       takePhotoBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo"),
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
@@ -189,6 +193,14 @@ export default class DocumentScannerView {
       },
       eventOptions
     );
+
+    this.DCE_ELEMENTS.uploadImageBtn.addEventListener(
+      "click",
+      (event) => {
+        this.uploadImage();
+      },
+      eventOptions
+    );
   }
 
   async handleCloseBtn() {
@@ -211,6 +223,102 @@ export default class DocumentScannerView {
     const settingsBox = DCEContainer.shadowRoot.querySelector(".dce-mn-resolution-box") as HTMLElement;
 
     settingsBox.click();
+  }
+
+  private uploadImage() {
+    // Create hidden file input
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.style.display = "none";
+    document.body.appendChild(input);
+
+    // Handle file selection
+    input.onchange = async (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        this.showScannerLoadingOverlay("Processing image...");
+        this.closeCamera();
+
+        // Convert file to blob
+        const { blob, width, height } = await this.fileToBlob(file);
+
+        this.originalImageData = (
+          (await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect))
+            .items[0] as OriginalImageResultItem
+        )?.imageData;
+
+        // Create default quadrilateral for the whole image
+        const detectedQuadrilateral = {
+          points: [
+            { x: 0, y: 0 },
+            { x: width, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height },
+          ],
+          area: width * height,
+        } as Quadrilateral;
+        const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
+
+        const result = {
+          status: {
+            code: EnumResultStatusCode.SUCCESS,
+            message: "Success",
+          },
+          originalImageResult: this.originalImageData,
+          correctedImageResult: correctedImageResult,
+          detectedQuadrilateral,
+        };
+
+        // Emit result through shared resources
+        this.resources.onResultUpdated?.(result);
+
+        // Resolve scan promise
+        this.currentScanResolver(result);
+      } catch (ex: any) {
+        let errMsg = ex?.message || ex;
+        console.error(errMsg);
+        alert(errMsg);
+        this.closeCamera();
+
+        const result = {
+          status: {
+            code: EnumResultStatusCode.FAILED,
+            message: "Error processing uploaded image",
+          },
+        };
+        this.currentScanResolver(result);
+      } finally {
+        document.body.removeChild(input);
+        this.hideScannerLoadingOverlay(true);
+      }
+    };
+
+    input.click();
+  }
+
+  private async fileToBlob(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve({ blob, width: img.width, height: img.height });
+          } else {
+            reject(new Error("Failed to create blob"));
+          }
+        }, file.type);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
@@ -392,7 +500,7 @@ export default class DocumentScannerView {
       correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       // Hide loading screen
-      this.hideScannerLoadingOverlay(true);
+      this.hideScannerLoadingOverlay(false);
 
       const result = {
         status: {
