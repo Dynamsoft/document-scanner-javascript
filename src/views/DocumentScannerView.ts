@@ -362,6 +362,7 @@ export default class DocumentScannerView {
     const { cvRouter } = this.resources;
 
     this.boundsDetectionEnabled = newBoundsDetectionState;
+    container.style.color = this.boundsDetectionEnabled ? "#fe814a" : "#fff";
     offIcon.style.display = this.boundsDetectionEnabled ? "none" : "block";
     onIcon.style.display = this.boundsDetectionEnabled ? "block" : "none";
 
@@ -396,6 +397,7 @@ export default class DocumentScannerView {
     }
 
     this.autoCaptureEnabled = newAutoCaptureState;
+    container.style.color = this.autoCaptureEnabled ? "#fe814a" : "#fff";
     offIcon.style.display = this.autoCaptureEnabled ? "none" : "block";
     onIcon.style.display = this.autoCaptureEnabled ? "block" : "none";
 
