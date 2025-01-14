@@ -4,7 +4,7 @@ import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { createControls } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { ControlButton, DocumentScanResult, EnumResultStatusCode } from "./utils/types";
+import { ControlButton, DocumentScanResult, EnumResultStatus } from "./utils/types";
 
 export interface ScanResultViewControlIcons {
   exportBtn?: Pick<ControlButton, "icon" | "text">;
@@ -108,7 +108,7 @@ export default class ScanResultView {
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
           status: {
-            code: EnumResultStatusCode.FAILED,
+            code: EnumResultStatus.RS_FAILED,
             message: error?.message || error,
           },
         });
@@ -122,7 +122,7 @@ export default class ScanResultView {
       this.hideView();
       const result = await this.scannerView.launch();
 
-      if (this.currentScanResultViewResolver && result?.status?.code === EnumResultStatusCode.FAILED) {
+      if (this.currentScanResultViewResolver && result?.status?.code === EnumResultStatus.RS_FAILED) {
         this.currentScanResultViewResolver(result);
 
         return;
@@ -130,9 +130,9 @@ export default class ScanResultView {
 
       // Handle success case
       if (this.resources.onResultUpdated) {
-        if (result?.status.code === EnumResultStatusCode.CANCELLED) {
+        if (result?.status.code === EnumResultStatus.RS_CANCELLED) {
           this.resources.onResultUpdated(this.resources.result);
-        } else if (result?.status.code === EnumResultStatusCode.SUCCESS) {
+        } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
           this.resources.onResultUpdated(result);
         }
       }
@@ -146,7 +146,7 @@ export default class ScanResultView {
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
           status: {
-            code: EnumResultStatusCode.FAILED,
+            code: EnumResultStatus.RS_FAILED,
             message: error?.message || error,
           },
         });
@@ -175,7 +175,7 @@ export default class ScanResultView {
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
           status: {
-            code: EnumResultStatusCode.FAILED,
+            code: EnumResultStatus.RS_FAILED,
             message: error?.message || error,
           },
         });

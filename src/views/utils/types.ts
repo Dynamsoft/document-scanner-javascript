@@ -7,14 +7,14 @@ export interface UtilizedTemplateNames {
   normalize: string;
 }
 
-export enum EnumResultStatusCode {
-  SUCCESS = 0,
-  CANCELLED = 1,
-  FAILED = 2,
+export enum EnumResultStatus {
+  RS_SUCCESS = 0,
+  RS_CANCELLED = 1,
+  RS_FAILED = 2,
 }
 
 export type ResultStatus = {
-  code: EnumResultStatusCode;
+  code: EnumResultStatus;
   message?: string;
 };
 

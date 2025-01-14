@@ -5,7 +5,7 @@ import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
-import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./views/utils/types";
+import { DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./views/utils/types";
 import { getElement } from "./views/utils";
 
 // Default DCE UI path
@@ -340,7 +340,7 @@ class DocumentScanner {
       if (components.scannerView) {
         const scanResult = await components.scannerView.launch();
 
-        if (scanResult?.status.code !== EnumResultStatusCode.SUCCESS) {
+        if (scanResult?.status.code !== EnumResultStatus.RS_SUCCESS) {
           return {
             status: {
               code: scanResult?.status.code,
@@ -365,7 +365,7 @@ class DocumentScanner {
       console.error("Document capture flow failed:", error?.message || error);
       return {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: `Document capture flow failed. ${error?.message || error}`,
         },
       };

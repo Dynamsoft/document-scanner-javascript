@@ -2,7 +2,7 @@ import DocumentScanner from "./DocumentScanner";
 import DocumentNormalizerView from "./views/DocumentCorrectionView";
 import DocumentScannerView from "./views/DocumentScannerView";
 import ScanResultView from "./views/ScanResultView";
-import { EnumResultStatusCode } from "./views/utils/types";
+import { EnumResultStatus } from "./views/utils/types";
 import {
   PlayCallbackInfo,
   Point,
@@ -16,7 +16,7 @@ export const DDS = {
   DocumentNormalizerView,
   DocumentScannerView,
   ScanResultView,
-  EnumResultStatusCode,
+  EnumResultStatus,
 };
 
 export type { NormalizedImageResultItem, PlayCallbackInfo, Point, Rect, VideoDeviceInfo };
@@ -26,6 +26,6 @@ export type { DocumentCorrectionViewConfig, DocumentCorrectionViewControlIcons }
 export type { ScanResultViewConfig, ScanResultViewControlIcons } from "./views/ScanResultView";
 export type { DocumentScanResult, UtilizedTemplateNames, ResultStatus, ControlButton } from "./views/utils/types";
 
-export { DocumentScanner, DocumentNormalizerView, DocumentScannerView, ScanResultView, EnumResultStatusCode };
+export { DocumentScanner, DocumentNormalizerView, DocumentScannerView, ScanResultView, EnumResultStatus };
 
 export default DDS;

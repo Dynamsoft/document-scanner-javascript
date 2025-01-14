@@ -4,7 +4,7 @@ import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-doc
 import { SharedResources } from "../DocumentScanner";
 import { createControls } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
-import { ControlButton, DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
+import { ControlButton, DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
 
@@ -312,7 +312,7 @@ export default class DocumentCorrectionView {
       if (!this.resources.result?.correctedImageResult) {
         return {
           status: {
-            code: EnumResultStatusCode.FAILED,
+            code: EnumResultStatus.RS_FAILED,
             message: "No image available for correction",
           },
         };
@@ -332,7 +332,7 @@ export default class DocumentCorrectionView {
       if (!this.resources.result?.correctedImageResult) {
         return {
           status: {
-            code: EnumResultStatusCode.FAILED,
+            code: EnumResultStatus.RS_FAILED,
             message: errMsg,
           },
         };
