@@ -8,7 +8,7 @@ import {
 import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { DocumentScanResult, EnumResultStatusCode, UtilizedTemplateNames } from "./utils/types";
+import { DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 
 export interface DocumentScannerViewConfig {
@@ -125,7 +125,7 @@ export default class DocumentScannerView {
       this.closeCamera();
       const result = {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: "DDS Init error",
         },
       };
@@ -203,7 +203,7 @@ export default class DocumentScannerView {
     if (this.currentScanResolver) {
       this.currentScanResolver({
         status: {
-          code: EnumResultStatusCode.CANCELLED,
+          code: EnumResultStatus.RS_CANCELLED,
           message: "Cancelled",
         },
       });
@@ -286,7 +286,7 @@ export default class DocumentScannerView {
 
       const result = {
         status: {
-          code: EnumResultStatusCode.SUCCESS,
+          code: EnumResultStatus.RS_SUCCESS,
           message: "Success",
         },
         originalImageResult: this.originalImageData,
@@ -310,7 +310,7 @@ export default class DocumentScannerView {
 
       const result = {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: "Error processing uploaded image",
         },
       };
@@ -441,7 +441,7 @@ export default class DocumentScannerView {
       this.closeCamera();
       const result = {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: "DDS Open Camera Error",
         },
       };
@@ -523,7 +523,7 @@ export default class DocumentScannerView {
 
       const result = {
         status: {
-          code: EnumResultStatusCode.SUCCESS,
+          code: EnumResultStatus.RS_SUCCESS,
           message: "Success",
         },
         originalImageResult: this.originalImageData,
@@ -544,7 +544,7 @@ export default class DocumentScannerView {
       this.closeCamera();
       const result = {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: "Error capturing image",
         },
       };
@@ -642,7 +642,7 @@ export default class DocumentScannerView {
       this.closeCamera();
       const result = {
         status: {
-          code: EnumResultStatusCode.FAILED,
+          code: EnumResultStatus.RS_FAILED,
           message: "DDS Launch error",
         },
       };
