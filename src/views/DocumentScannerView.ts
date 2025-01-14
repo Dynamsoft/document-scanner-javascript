@@ -153,6 +153,7 @@ export default class DocumentScannerView {
     await this.toggleAutoCapture(this.autoCaptureEnabled);
 
     this.assignDCEClickEvents();
+
     this.initializedDCE = true;
   }
 
@@ -210,11 +211,70 @@ export default class DocumentScannerView {
     }
   }
 
+  private attachOptionClickListeners() {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    if (!DCEContainer?.shadowRoot) return;
+
+    const settingsContainer = DCEContainer.shadowRoot.querySelector(
+      ".dce-mn-camera-and-resolution-settings"
+    ) as HTMLElement;
+
+    const cameraOptions = DCEContainer.shadowRoot.querySelectorAll(".dce-mn-camera-option");
+    const resolutionOptions = DCEContainer.shadowRoot.querySelectorAll(".dce-mn-resolution-option");
+
+    // Add click handlers to all options
+    [...cameraOptions, ...resolutionOptions].forEach((option) => {
+      option.addEventListener("click", () => {
+        if (settingsContainer.style.display !== "none") {
+          this.toggleSelectCameraBox();
+        }
+      });
+    });
+  }
+
+  private highlightCameraAndResolutionOption() {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    if (!DCEContainer?.shadowRoot) return;
+
+    const settingsContainer = DCEContainer.shadowRoot.querySelector(
+      ".dce-mn-camera-and-resolution-settings"
+    ) as HTMLElement;
+    const cameraOptions = settingsContainer.querySelectorAll(".dce-mn-camera-option");
+    const resOptions = settingsContainer.querySelectorAll(".dce-mn-resolution-option");
+
+    const selectedCamera = this.resources.cameraEnhancer.getSelectedCamera();
+    const selectedResolution = this.resources.cameraEnhancer.getResolution();
+
+    cameraOptions.forEach((options) => {
+      const o = options as HTMLElement;
+      if (o.getAttribute("data-davice-id") === selectedCamera?.deviceId) {
+        o.style.border = "2px solid #fe814a";
+      } else {
+        o.style.border = "none";
+      }
+    });
+
+    resOptions.forEach((options) => {
+      const o = options as HTMLElement;
+      if (o.getAttribute("data-height") === `${selectedResolution.height}`) {
+        o.style.border = "2px solid #fe814a";
+      } else {
+        o.style.border = "none";
+      }
+    });
+  }
+
   private toggleSelectCameraBox() {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
     const settingsBox = DCEContainer.shadowRoot.querySelector(".dce-mn-resolution-box") as HTMLElement;
+
+    // Highlight current camera and resolution
+    this.highlightCameraAndResolutionOption();
+
+    // Attach highlighting camera and resolution options on option click
+    this.attachOptionClickListeners();
 
     settingsBox.click();
   }
