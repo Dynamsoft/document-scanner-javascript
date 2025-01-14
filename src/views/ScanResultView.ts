@@ -10,14 +10,14 @@ export interface ScanResultViewControlIcons {
   exportBtn?: Pick<ControlButton, "icon" | "text">;
   correctImageBtn?: Pick<ControlButton, "icon" | "text">;
   retakeBtn?: Pick<ControlButton, "icon" | "text">;
-  completeBtn?: Pick<ControlButton, "icon" | "text">;
+  doneBtn?: Pick<ControlButton, "icon" | "text">;
   containerStyle?: Partial<CSSStyleDeclaration>;
 }
 
 export interface ScanResultViewConfig {
   container: HTMLElement;
   controlIcons: ScanResultViewControlIcons;
-  onComplete?: (result: DocumentScanResult) => Promise<void>;
+  onDone?: (result: DocumentScanResult) => Promise<void>;
   onExport?: (result: DocumentScanResult) => Promise<void>;
 }
 
@@ -38,7 +38,7 @@ export default class ScanResultView {
       await this.initialize();
       this.config.container.style.display = "flex";
 
-      // Return promise that resolves when user clicks complete
+      // Return promise that resolves when user clicks done
       return new Promise((resolve) => {
         this.currentScanResultViewResolver = resolve;
       });
@@ -155,10 +155,10 @@ export default class ScanResultView {
     }
   }
 
-  private async handleComplete() {
+  private async handleDone() {
     try {
-      if (this.config?.onComplete) {
-        await this.config.onComplete(this.resources.result);
+      if (this.config?.onDone) {
+        await this.config.onDone(this.resources.result);
       }
 
       // Resolve with current result
@@ -170,7 +170,7 @@ export default class ScanResultView {
       this.hideView();
       this.dispose();
     } catch (error) {
-      console.error("Error in complete handler:", error);
+      console.error("Error in done handler:", error);
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({
@@ -190,12 +190,12 @@ export default class ScanResultView {
     const buttons: ControlButton[] = [
       {
         icon: controlIcons?.exportBtn?.icon || DDS_ICONS.export,
-        text: controlIcons?.exportBtn?.text || "Export Image",
+        text: controlIcons?.exportBtn?.text || "Export",
         onClick: () => this.handleExport(),
       },
       {
         icon: controlIcons?.correctImageBtn?.icon || DDS_ICONS.normalize,
-        text: controlIcons?.correctImageBtn?.text || "Correct Image",
+        text: controlIcons?.correctImageBtn?.text || "Correction",
         onClick: () => this.handleCorrectImage(),
       },
       {
@@ -204,9 +204,9 @@ export default class ScanResultView {
         onClick: () => this.handleRetake(),
       },
       {
-        icon: controlIcons?.completeBtn?.icon || DDS_ICONS.complete,
-        text: controlIcons?.completeBtn?.text || "Complete",
-        onClick: () => this.handleComplete(),
+        icon: controlIcons?.doneBtn?.icon || DDS_ICONS.complete,
+        text: controlIcons?.doneBtn?.text || "Done",
+        onClick: () => this.handleDone(),
       },
     ];
 

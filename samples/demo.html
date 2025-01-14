@@ -15,7 +15,7 @@
         background-color: #f9f9f9;
       }
 
-      h1 {
+      h1,h2 {
         text-align: center;
         margin: 20px 0;
       }
@@ -30,6 +30,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-direction: column;
       }
 
       #results canvas {
@@ -42,7 +43,7 @@
         display: block;
         margin: 20px auto;
         padding: 10px 20px;
-        background-color: #007bff;
+        background-color: #fe814a;
         color: white;
         border: none;
         border-radius: 5px;
@@ -51,7 +52,7 @@
       }
 
       .scanner-button:hover {
-        background-color: #0056b3;
+        opacity: 0.8;
       }
 
       .scanner-button:disabled {
@@ -63,15 +64,21 @@
 
   <body>
     <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
-    <button id="start-scan" class="scanner-button">Start Scanning</button>
-    <div id="results">
-      <p style="color: #666; font-size: 1rem; text-align: center">Scan a document to see the results here.</p>
+    <div id="container">
+      <div id="results">
+        <div id="placeholder-content">
+          <h2>No Document Scanned</h3>
+          <p style="color: #666; font-size: 1rem; text-align: center">Scan a document to see the results here.</p>
+        </div>
+        <button id="scan-button" class="scanner-button">Start New Scan</button>
+      </div>
     </div>
 
     <script type="module">
       // Button and results container references
-      const scanButton = document.getElementById("start-scan");
+      const scanButton = document.getElementById("scan-button");
       const resultContainer = document.getElementById("results");
+      const placeholderContent = document.getElementById("placeholder-content")
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
@@ -96,20 +103,24 @@
             resultContainer.innerHTML = ""; // Clear placeholder content
             const canvas = result.correctedImageResult.toCanvas();
             resultContainer.appendChild(canvas);
+
+            scanButton.remove();
+            document.querySelector('#container').appendChild(scanButton);
+
           } else {
-            resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+            placeholderContent.innerHTML = "<p>No image scanned. Please try again.</p>";
           }
         } catch (error) {
           // Handle errors
           console.error("Error during document scanning:", error);
-          resultContainer.innerHTML = `
+          placeholderContent.innerHTML = `
             <p style="color: red; text-align: center;">
               An error occurred while scanning the document. Please check the console for details.
             </p>`;
         } finally {
           // Re-enable the button after scanning
           scanButton.disabled = false;
-          scanButton.innerText = "Start Scanning";
+          scanButton.innerText = "Start New Scan";
         }
       }
 

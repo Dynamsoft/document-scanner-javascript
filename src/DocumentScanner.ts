@@ -156,7 +156,7 @@ class DocumentScanner {
       scanResultViewConfig: shouldInitResult
         ? {
             container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
-            onComplete: this.config.scanResultViewConfig?.onComplete,
+            onDone: this.config.scanResultViewConfig?.onDone,
           }
         : undefined,
     });
