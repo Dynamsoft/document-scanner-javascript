@@ -72,6 +72,33 @@ const httpsServer = https.createServer(httpsOptions, app);
 // Create HTTP server
 const httpServer = http.createServer(app);
 
+// Add error handlers before starting servers
+httpServer.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`\x1b[31mError: Port ${httpPort} is already in use\x1b[0m`);
+    console.log("\nTo fix this, you can:");
+    console.log(`1. Update the port manually by changing \x1b[33mhttpPort\x1b[0m in the code`);
+    console.log(`2. Close any other applications using port ${httpPort}`);
+    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
+  } else {
+    console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
+  }
+  process.exit(1);
+});
+
+httpsServer.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`\x1b[31mError: Port ${httpsPort} is already in use\x1b[0m`);
+    console.log("\nTo fix this, you can:");
+    console.log(`1. Update the port manually by changing \x1b[33mhttpsPort\x1b[0m in the code`);
+    console.log(`2. Close any other applications using port ${httpsPort}`);
+    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
+  } else {
+    console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
+  }
+  process.exit(1);
+});
+
 // Start the servers
 httpServer.listen(httpPort, () => {
   console.log("\n\x1b[1m Dynamsoft Document Scanner Sample\x1b[0m\n");
@@ -92,9 +119,7 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   });
 
   ipv4Addresses.forEach((localIP) => {
-    console.log(
-      "\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/"
-    );
+    console.log("\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/");
   });
   console.log("\x1b[36m Available Pages:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
