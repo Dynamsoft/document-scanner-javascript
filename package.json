@@ -1,7 +1,7 @@
 {
-  "name": "dynamsoft-document-scanner-dds-beta",
-  "version": "2.0.0-beta-202501070922",
-  "description": "A wrapper for dynamsoft-capture-vision-javascript. Easier to use.",
+  "name": "dynamsoft-document-scanner-beta",
+  "version": "1.0.0-beta-202501070922",
+  "description": "A wrapper for dynamsoft-capture-vision-javascript 2.6.1000.",
   "main": "./dist/dds.bundle.js",
   "module": "./dist/dds.bundle.mjs",
   "files": [
@@ -38,7 +38,16 @@
     "js",
     "javascript"
   ],
-  "author": "Dynamsoft",
+  "author": {
+    "name": "Dynamsoft",
+    "url": "https://www.dynamsoft.com"
+  },
+  "maintainers": [
+    {
+      "name": "Dynamsoft",
+      "email": "support@dynamsoft.com"
+    }
+  ],
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/ TO DO"
@@ -56,5 +65,9 @@
     "typescript": "^5.3.3",
     "cors": "^2.8.5",
     "express": "^4.21.2"
+  },
+  "publishConfig": {
+    "registry": "https://npm.scannerproxy.com:802/",
+    "tag": "latest"
   }
 }

@@ -34,7 +34,7 @@ const banner = `/*!
 * @copyright Copyright ${new Date().getUTCFullYear()}, Dynamsoft Corporation
 * @author Dynamsoft
 * @version ${version}
-* @fileoverview Dynamsoft JavaScript Library for Capture Vision
+* @fileoverview Dynamsoft JavaScript Library for Capture Vision. Uses Dynamsoft Capture Vision Bundle v2.6.1000
 * More info on DDS JS: https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/
 */`;
 
