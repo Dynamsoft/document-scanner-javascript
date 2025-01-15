@@ -69,11 +69,6 @@ export default class ScanResultView {
 
   private async handleShare() {
     try {
-      // Check if Web Share API is supported
-      if (!navigator.share) {
-        throw new Error("Web Share API is not supported in this browser");
-      }
-
       const { result } = this.resources;
 
       // Validate input
@@ -87,23 +82,33 @@ export default class ScanResultView {
         throw new Error("Failed to convert image to blob");
       }
 
-      // Create file object for sharing
+      // For Windows, we'll create a download fallback if sharing isn't supported
       const file = new File([blob], `document-${Date.now()}.png`, {
-        type: "image/png",
+        type: blob.type,
       });
 
-      // Share the file
-      await navigator.share({
-        files: [file],
-        title: "Shared Image",
-        text: "Dynamsoft Document Scanner - Shared Image",
-      });
+      // Try Web Share API first
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Dynamsoft Document Scanner Shared Image",
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
 
-      return true; // Indicate success
+      return true;
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
-      console.error("Error sharing image:", errMsg);
-      alert(`Error sharing image: ${errMsg}`); // Re-throw to allow caller to handle the error
+      console.error("Error handling image:", errMsg);
+      alert(`Error handling image: ${errMsg}`);
     }
   }
 
