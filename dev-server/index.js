@@ -30,17 +30,6 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  const host = req.get("Host"); // Get the host name from the request
-
-  // Skip redirection if the host is 'localhost'
-  if (!req.secure && host !== "localhost:3000") {
-    return res.redirect(["https://", host, req.url].join(""));
-  }
-
-  next(); // Proceed to the next middleware or route
-});
-
 // Serve static files
 app.use("/dist", express.static(distPath));
 
@@ -57,8 +46,22 @@ app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
-let httpPort = 3000;
-let httpsPort = 3001;
+let httpPort = 3002;
+let httpsPort = 3003;
+
+// redirect handling
+app.use((req, res, next) => {
+  const host = req.get("Host"); // Get the host name from the request
+
+  // Skip redirection if it's localhost with the correct HTTP port
+  if (!req.secure && host !== `localhost:${httpPort}`) {
+    // Replace the HTTP port with HTTPS port in the host
+    const httpsHost = host.replace(`:${httpPort}`, `:${httpsPort}`);
+    return res.redirect(["https://", httpsHost, req.url].join(""));
+  }
+
+  next(); // Proceed to the next middleware or route
+});
 
 // HTTPS server configuration
 const httpsOptions = {
