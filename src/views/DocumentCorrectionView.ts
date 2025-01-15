@@ -10,7 +10,7 @@ const DEFAULT_CORNER_SIZE = 60;
 
 export interface DocumentCorrectionViewControlIcons {
   fullImageBtn?: Pick<ControlButton, "icon" | "text">;
-  autoBoundsBtn?: Pick<ControlButton, "icon" | "text">;
+  detectBordersBtn?: Pick<ControlButton, "icon" | "text">;
   applyBtn?: Pick<ControlButton, "icon" | "text">;
   containerStyle?: Partial<CSSStyleDeclaration>; // Optional styling
 }
@@ -206,8 +206,8 @@ export default class DocumentCorrectionView {
         onClick: () => this.setFullImageBoundary(),
       },
       {
-        icon: controlIcons?.autoBoundsBtn?.icon || DDS_ICONS.autoBounds,
-        text: controlIcons?.autoBoundsBtn?.text || "Edge Detection",
+        icon: controlIcons?.detectBordersBtn?.icon || DDS_ICONS.autoBounds,
+        text: controlIcons?.detectBordersBtn?.text || "Detect Borders",
         onClick: () => this.setBoundaryAutomatically(),
       },
       {
