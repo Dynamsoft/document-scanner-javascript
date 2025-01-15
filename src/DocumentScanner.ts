@@ -138,6 +138,7 @@ class DocumentScanner {
       ...baseConfig,
       scannerViewConfig: shouldInitScanner
         ? {
+            ...this.config.scannerViewConfig,
             container: viewContainers["scanner"] || this.config.scannerViewConfig?.container || null,
             templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
             cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
@@ -148,15 +149,14 @@ class DocumentScanner {
         : undefined,
       correctionViewConfig: shouldInitCorrection
         ? {
+            ...this.config.correctionViewConfig,
             container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
-            onFinish: this.config.correctionViewConfig?.onFinish,
-            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
       scanResultViewConfig: shouldInitResult
         ? {
+            ...this.config.scanResultViewConfig,
             container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
-            onDone: this.config.scanResultViewConfig?.onDone,
           }
         : undefined,
     });

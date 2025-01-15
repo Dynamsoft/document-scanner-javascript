@@ -7,7 +7,7 @@ import { DDS_ICONS } from "./utils/icons";
 import { ControlButton, DocumentScanResult, EnumResultStatus } from "./utils/types";
 
 export interface ScanResultViewControlIcons {
-  exportBtn?: Pick<ControlButton, "icon" | "text">;
+  uploadBtn?: Pick<ControlButton, "icon" | "text">;
   correctImageBtn?: Pick<ControlButton, "icon" | "text">;
   retakeBtn?: Pick<ControlButton, "icon" | "text">;
   doneBtn?: Pick<ControlButton, "icon" | "text">;
@@ -18,7 +18,7 @@ export interface ScanResultViewConfig {
   container: HTMLElement;
   controlIcons: ScanResultViewControlIcons;
   onDone?: (result: DocumentScanResult) => Promise<void>;
-  onExport?: (result: DocumentScanResult) => Promise<void>;
+  onUpload?: (result: DocumentScanResult) => Promise<void>;
 }
 
 export default class ScanResultView {
@@ -49,36 +49,61 @@ export default class ScanResultView {
     }
   }
 
-  private async handleExport() {
+  private async handleUploadAndShareBtn() {
     try {
       const { result } = this.resources;
       if (!result?.correctedImageResult) {
-        throw new Error("No image to export");
+        throw new Error("No image to upload");
       }
 
-      if (this.config?.onExport) {
-        await this.config.onExport(result);
+      if (this.config?.onUpload) {
+        await this.config.onUpload(result);
       } else {
-        // Convert to canvas and then to blob
-        const blob = await (result.correctedImageResult as NormalizedImageResultItem).toBlob("image/png");
-
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `document-${Date.now()}.png`;
-
-        // Trigger download
-        document.body.appendChild(a);
-        a.click();
-
-        // Cleanup
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        await this.handleShare();
       }
     } catch (error) {
-      console.error("Error exporting:", error);
-      alert("Failed to export");
+      console.error("Error on upload/share:", error);
+      alert("Failed");
+    }
+  }
+
+  private async handleShare() {
+    try {
+      // Check if Web Share API is supported
+      if (!navigator.share) {
+        throw new Error("Web Share API is not supported in this browser");
+      }
+
+      const { result } = this.resources;
+
+      // Validate input
+      if (!result?.correctedImageResult) {
+        throw new Error("No image result provided");
+      }
+
+      // Convert to blob
+      const blob = await (result.correctedImageResult as NormalizedImageResultItem).toBlob("image/png");
+      if (!blob) {
+        throw new Error("Failed to convert image to blob");
+      }
+
+      // Create file object for sharing
+      const file = new File([blob], `document-${Date.now()}.png`, {
+        type: "image/png",
+      });
+
+      // Share the file
+      await navigator.share({
+        files: [file],
+        title: "Shared Image",
+        text: "Dynamsoft Document Scanner - Shared Image",
+      });
+
+      return true; // Indicate success
+    } catch (ex: any) {
+      let errMsg = ex?.message || ex;
+      console.error("Error sharing image:", errMsg);
+      alert(`Error sharing image: ${errMsg}`); // Re-throw to allow caller to handle the error
     }
   }
 
@@ -185,13 +210,13 @@ export default class ScanResultView {
   }
 
   private createControls(): HTMLElement {
-    const { controlIcons } = this.config;
+    const { controlIcons, onUpload } = this.config;
 
     const buttons: ControlButton[] = [
       {
-        icon: controlIcons?.exportBtn?.icon || DDS_ICONS.export,
-        text: controlIcons?.exportBtn?.text || "Export",
-        onClick: () => this.handleExport(),
+        icon: controlIcons?.uploadBtn?.icon || onUpload ? DDS_ICONS.upload : DDS_ICONS.share,
+        text: controlIcons?.uploadBtn?.text || onUpload ? "Upload" : "Share",
+        onClick: () => this.handleUploadAndShareBtn(),
       },
       {
         icon: controlIcons?.correctImageBtn?.icon || DDS_ICONS.normalize,

@@ -56,17 +56,30 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  export: `<svg id="export-image" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28" height="24" viewBox="0 0 28 24">
-<defs>
-  <clipPath id="exportImageclip-path">
-    <rect id="Rectangle_2771" data-name="Rectangle 2771" width="28" height="24" fill="#fff"/>
-  </clipPath>
-</defs>
-<g id="Group_576" data-name="Group 576" clip-path="url(#exportImageclip-path)">
-  <path id="Path_1508" data-name="Path 1508" d="M23.043,18.684a.545.545,0,0,0-.546.546v3.679H1.091V5.806h4.9a.546.546,0,1,0,0-1.091H.545A.545.545,0,0,0,0,5.261V23.454A.545.545,0,0,0,.545,24h22.5a.545.545,0,0,0,.545-.546V19.23a.545.545,0,0,0-.545-.546" fill="#fff"/>
-  <path id="Path_1509" data-name="Path 1509" d="M27.852,8.681,19.864.173a.544.544,0,0,0-.942.372V4.957C5.88,6.261,5.517,17.278,5.514,17.39a.546.546,0,0,0,.363.524.523.523,0,0,0,.183.032.543.543,0,0,0,.428-.208c5.011-6.366,10.948-5.778,12.538-5.481v4.21a.547.547,0,0,0,.329.5.552.552,0,0,0,.59-.1l7.883-7.414a.543.543,0,0,0,.024-.77M20.117,15.2V11.819a.547.547,0,0,0-.4-.526c-.071-.019-6.923-1.828-12.87,4.37C7.517,12.646,10.037,6.747,19.51,6a.546.546,0,0,0,.5-.544V1.924L26.684,9.03Z" fill="#fff"/>
-</g>
+  upload: `<svg id="upload" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="clip-pathuploadupload">
+      <rect id="Rectangle_2744" data-name="Rectangle 2744" width="24" height="24" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="Group_541" data-name="Group 541" clip-path="url(#clip-pathuploadupload)">
+    <path id="Path_1472" data-name="Path 1472" d="M23.491,9.892a.507.507,0,0,0-.509.505V22.108a.87.87,0,0,1-.851.882H1.877a.874.874,0,0,1-.86-.89V10.4A.509.509,0,0,0,0,10.4V22.092A1.888,1.888,0,0,0,1.869,24h20.27A1.886,1.886,0,0,0,24,22.1V10.4a.507.507,0,0,0-.509-.505" fill="#fff"/>
+    <path id="Path_1473" data-name="Path 1473" d="M12.358.146A.438.438,0,0,0,12.272.09a.5.5,0,0,0-.078-.051A.521.521,0,0,0,12,0h0a.169.169,0,0,0-.024,0,.539.539,0,0,0-.168.033.521.521,0,0,0-.17.113L7.346,4.37a.5.5,0,0,0,0,.714.512.512,0,0,0,.72,0L11.49,1.717v16.5a.509.509,0,0,0,1.017,0V1.715l3.429,3.373a.513.513,0,0,0,.72,0,.5.5,0,0,0,0-.715Z" fill="#fff"/>
+  </g>
 </svg>
+`,
+  share: `
+<svg id="share" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="clip-pathshare">
+      <rect id="Rectangle_2770" data-name="Rectangle 2770" width="24" height="24" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="Group_574" data-name="Group 574" clip-path="url(#clip-pathshare)">
+    <path id="Path_1507" data-name="Path 1507" d="M19.489,15.009h0c-.008,0-.014,0-.022,0a4.465,4.465,0,0,0-3.749,2.052l-7-3.5a4.482,4.482,0,0,0,0-3.1l7-3.5a4.466,4.466,0,0,0,3.771,2.053l.018,0A4.516,4.516,0,1,0,15.282,6.06L8.257,9.574a4.49,4.49,0,1,0-4.793,6.814,4.548,4.548,0,0,0,1.043.122,4.468,4.468,0,0,0,3.755-2.056l7.018,3.511a4.485,4.485,0,1,0,4.209-2.956M17.13,1.914a3.508,3.508,0,1,1,2.366,6.1h-.01l-.011,0a3.476,3.476,0,0,1-3.112-1.932l0-.006a3.525,3.525,0,0,1,.769-4.162M3.693,15.415a3.5,3.5,0,1,1,3.931-4.967v0a3.47,3.47,0,0,1,0,3.119l0,0a3.479,3.479,0,0,1-3.931,1.842m17.636,7.066a3.5,3.5,0,0,1-4.971-4.53l0,0a3.477,3.477,0,0,1,3.126-1.936l.011,0a3.5,3.5,0,0,1,1.831,6.472" fill="#fff"/>
+  </g>
+</svg>
+
 `,
   normalize: `<svg id="normalize" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="24" viewBox="0 0 19 24">
 <defs>
