@@ -4,7 +4,13 @@ import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-doc
 import { SharedResources } from "../DocumentScanner";
 import { createControls } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
-import { ControlButton, DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
+import {
+  ControlButton,
+  DEFAULT_TEMPLATE_NAMES,
+  DocumentScanResult,
+  EnumResultStatus,
+  UtilizedTemplateNames,
+} from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
 
@@ -17,8 +23,9 @@ export interface DocumentCorrectionViewControlIcons {
 
 export interface DocumentCorrectionViewConfig {
   container: HTMLElement;
-  controlIcons: DocumentCorrectionViewControlIcons;
-  utilizedTemplateNames: UtilizedTemplateNames;
+  controlIcons?: DocumentCorrectionViewControlIcons;
+  templateFilePath?: string;
+  utilizedTemplateNames?: UtilizedTemplateNames;
   onFinish?: (result: DocumentScanResult) => void;
 }
 
@@ -27,7 +34,12 @@ export default class DocumentCorrectionView {
   private layer: DrawingLayer = null;
   private currentCorrectionResolver?: (result: DocumentScanResult) => void;
 
-  constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {
+    this.config.utilizedTemplateNames = {
+      detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+      normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
+    };
+  }
 
   async initialize(): Promise<void> {
     if (!this.resources.result) {
@@ -252,6 +264,14 @@ export default class DocumentCorrectionView {
 
   async setBoundaryAutomatically() {
     // Auto detect bounds
+    if (this.config.templateFilePath) {
+      await this.resources.cvRouter.initSettings(this.config.templateFilePath);
+    } else {
+      let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
+      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+    }
+
     const result = await this.resources.cvRouter.capture(
       this.resources.result.originalImageResult,
       "DetectDocumentBoundaries_Default"
@@ -351,6 +371,11 @@ export default class DocumentCorrectionView {
    */
   async correctImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem> {
     const { cvRouter } = this.resources;
+
+    if (this.config.templateFilePath) {
+      await this.resources.cvRouter.initSettings(this.config.templateFilePath);
+    }
+
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;

@@ -5,16 +5,17 @@ import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
-import { DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./views/utils/types";
+import {
+  DEFAULT_TEMPLATE_NAMES,
+  DocumentScanResult,
+  EnumResultStatus,
+  UtilizedTemplateNames,
+} from "./views/utils/types";
 import { getElement } from "./views/utils";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
 //"https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial@latest/dist/document-scanner.ui.html";
-const DEFAULT_TEMPLATE_NAMES = {
-  detect: "DetectDocumentBoundaries_Default",
-  normalize: "NormalizeDocument_Default",
-};
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 export interface DocumentScannerConfig {
@@ -122,7 +123,7 @@ class DocumentScanner {
 
     // Base configuration
     const baseConfig = {
-      license: this.config.license || "YOUR_LICENSE_HERE",
+      license: this.config.license || "YOUR_LICENSE_KEY_HERE",
       utilizedTemplateNames: {
         detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
         normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
@@ -151,6 +152,7 @@ class DocumentScanner {
         ? {
             ...this.config.correctionViewConfig,
             container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
+            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
       scanResultViewConfig: shouldInitResult

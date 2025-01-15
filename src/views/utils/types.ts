@@ -1,6 +1,11 @@
 import { DSImageData, OriginalImageResultItem, Quadrilateral } from "dynamsoft-core";
 import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 
+export const DEFAULT_TEMPLATE_NAMES = {
+  detect: "DetectDocumentBoundaries_Default",
+  normalize: "NormalizeDocument_Default",
+};
+
 // Common types
 export interface UtilizedTemplateNames {
   detect: string;

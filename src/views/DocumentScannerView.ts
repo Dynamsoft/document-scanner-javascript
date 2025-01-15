@@ -8,7 +8,7 @@ import {
 import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
+import { DEFAULT_TEMPLATE_NAMES, DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 
 export interface DocumentScannerViewConfig {
@@ -75,7 +75,12 @@ export default class DocumentScannerView {
     }
   }
 
-  constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {}
+  constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
+    this.config.utilizedTemplateNames = {
+      detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+      normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
+    };
+  }
 
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -319,28 +324,16 @@ export default class DocumentScannerView {
         await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)
       ).items;
       this.originalImageData = (this.capturedResultItems[0] as OriginalImageResultItem)?.imageData;
-
-      // Reset captured items if not using bounds detection
-      let detectedQuadrilateral: Quadrilateral = null;
-      if (this.capturedResultItems?.length <= 1) {
-        this.capturedResultItems = [];
-        const { width, height } = this.originalImageData;
-        detectedQuadrilateral = {
-          points: [
-            { x: 0, y: 0 },
-            { x: width, y: 0 },
-            { x: width, y: height },
-            { x: 0, y: height },
-          ],
-          area: height * width,
-        } as Quadrilateral;
-      } else {
-        detectedQuadrilateral = (
-          this.capturedResultItems.find(
-            (item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD
-          ) as DetectedQuadResultItem
-        )?.location;
-      }
+      this.capturedResultItems = [];
+      const detectedQuadrilateral = {
+        points: [
+          { x: 0, y: 0 },
+          { x: width, y: 0 },
+          { x: width, y: height },
+          { x: 0, y: height },
+        ],
+        area: height * width,
+      } as Quadrilateral;
 
       const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
