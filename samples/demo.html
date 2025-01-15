@@ -15,7 +15,8 @@
         background-color: #f9f9f9;
       }
 
-      h1,h2 {
+      h1,
+      h2 {
         text-align: center;
         margin: 20px 0;
       }
@@ -34,8 +35,9 @@
       }
 
       #results canvas {
-        max-width: 100%;
-        height: auto;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
         border: 1px solid #ddd;
       }
 
@@ -67,7 +69,7 @@
     <div id="container">
       <div id="results">
         <div id="placeholder-content">
-          <h2>No Document Scanned</h3>
+          <h2>No Document Scanned</h2>
           <p style="color: #666; font-size: 1rem; text-align: center">Scan a document to see the results here.</p>
         </div>
         <button id="scan-button" class="scanner-button">Start New Scan</button>
@@ -78,7 +80,7 @@
       // Button and results container references
       const scanButton = document.getElementById("scan-button");
       const resultContainer = document.getElementById("results");
-      const placeholderContent = document.getElementById("placeholder-content")
+      const placeholderContent = document.getElementById("placeholder-content");
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
@@ -105,8 +107,7 @@
             resultContainer.appendChild(canvas);
 
             scanButton.remove();
-            document.querySelector('#container').appendChild(scanButton);
-
+            document.querySelector("#container").appendChild(scanButton);
           } else {
             placeholderContent.innerHTML = "<p>No image scanned. Please try again.</p>";
           }
