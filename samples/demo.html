@@ -1,132 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamsoft Document Scanner Demo</title>
+    <title>Dynamsoft Document Scanner</title>
     <script src="../dist/dds.bundle.js"></script>
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-      }
-
-      h1,
-      h2 {
-        text-align: center;
-        margin: 20px 0;
-      }
-
-      #results {
-        margin: 20px auto;
-        max-width: 90%;
-        padding: 10px;
-        border: 2px dashed #ccc;
-        background-color: #fff;
-        height: 75vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-      }
-
-      #results canvas {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border: 1px solid #ddd;
-      }
-
-      .scanner-button {
-        display: block;
-        margin: 20px auto;
-        padding: 10px 20px;
-        background-color: #fe814a;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-
-      .scanner-button:hover {
-        opacity: 0.8;
-      }
-
-      .scanner-button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-      }
-    </style>
+    <link rel="stylesheet" href="./css/index.css" />
   </head>
-
   <body>
-    <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
-    <div id="container">
-      <div id="results">
-        <div id="placeholder-content">
-          <h2>No Document Scanned</h2>
-          <p style="color: #666; font-size: 1rem; text-align: center">Scan a document to see the results here.</p>
-        </div>
-        <button id="scan-button" class="scanner-button">Start New Scan</button>
-      </div>
-    </div>
+    <!-- Logo -->
+    <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
+      <img class="logo" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
+    </a>
 
-    <script type="module">
-      // Button and results container references
-      const scanButton = document.getElementById("scan-button");
-      const resultContainer = document.getElementById("results");
-      const placeholderContent = document.getElementById("placeholder-content");
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">Dynamsoft Document Scanner</h1>
+      <p class="description">
+        Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
+        corrected scan. <a class="description-link" href="https://www.dynamsoft.com/todo" target="_blank">See more.</a>
+      </p>
+    </header>
+
+    <!-- Main content -->
+    <main class="container">
+      <div class="scanner-area">
+        <div class="preview-area" id="preview">
+          <div class="placeholder-text">
+            <img class="mobile-qr" src="./assets/qr-code.svg" />
+            <div class="placeholder-text-1">Scan to Open on Mobile</div>
+            <div class="placeholder-text-2">
+              <span class="or">or</span> <span class="click">click</span>
+              <b style="color: #fe814a">Start New Scan</b> to scan a new document and view it here
+            </div>
+          </div>
+        </div>
+        <div class="button-container">
+          <button id="scanButton" class="scan-button">Start New Scan</button>
+          <button id="shareButton" class="share-button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            Share
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">Powered by Dynamsoft</footer>
+
+    <script>
+      // Button and container references
+      const scanButton = document.getElementById("scanButton");
+      const shareButton = document.getElementById("shareButton");
+      const previewArea = document.getElementById("preview");
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
-        //license: "YOUR_LICENSE_KEY_HERE",
         license:
           "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjM0ODEwLXIxNzM2Mjk4NjI1IiwibWFpblNlcnZlclVSTCI6Imh0dHBzOi8vbWx0cy5keW5hbXNvZnQuY29tLyIsIm9yZ2FuaXphdGlvbklEIjoiMjM0ODEwIiwic3RhbmRieVNlcnZlclVSTCI6Imh0dHBzOi8vc2x0cy5keW5hbXNvZnQuY29tLyIsImNoZWNrQ29kZSI6MTc4MzcwMDY2MX0=",
       });
 
-      // Function to initialize and launch the scanner
-      async function launchScanner() {
+      // Function to handle scanning
+      async function handleScan() {
         try {
-          // Disable the button to prevent multiple launches
           scanButton.disabled = true;
-          scanButton.innerText = "Scanning...";
+          scanButton.classList.add("scanning");
+          scanButton.textContent = "Scanning...";
 
-          // Launch the scanner and wait for the result
           const result = await documentScanner.launch();
-          console.log(result);
 
-          // Clear the result container and display the scanned result as a canvas
           if (result?.correctedImageResult) {
-            resultContainer.innerHTML = ""; // Clear placeholder content
+            previewArea.innerHTML = "";
             const canvas = result.correctedImageResult.toCanvas();
-            resultContainer.appendChild(canvas);
-
-            scanButton.remove();
-            document.querySelector("#container").appendChild(scanButton);
+            canvas.style.objectFit = "contain";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            previewArea.appendChild(canvas);
+            shareButton.style.display = "flex";
           } else {
-            placeholderContent.innerHTML = "<p>No image scanned. Please try again.</p>";
+            previewArea.innerHTML = '<div class="placeholder-text">No image scanned. Please try again.</div>';
+            shareButton.style.display = "none";
           }
         } catch (error) {
-          // Handle errors
           console.error("Error during document scanning:", error);
-          placeholderContent.innerHTML = `
-            <p style="color: red; text-align: center;">
-              An error occurred while scanning the document. Please check the console for details.
-            </p>`;
+          previewArea.innerHTML =
+            '<div class="placeholder-text" style="color: #ef4444;">An error occurred while scanning. Please try again.</div>';
         } finally {
-          // Re-enable the button after scanning
           scanButton.disabled = false;
-          scanButton.innerText = "Start New Scan";
+          scanButton.classList.remove("scanning");
+          scanButton.textContent = "Start New Scan";
         }
       }
 
-      // Attach the click event listener to the button
-      scanButton.addEventListener("click", launchScanner);
+      // Function to handle sharing
+      async function handleShare() {
+        try {
+          const canvas = previewArea.querySelector("canvas");
+          if (canvas) {
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+            const file = new File([blob], `${Date.now()}.png`, { type: "image/png" });
+
+            if (navigator.share) {
+              await navigator.share({
+                files: [file],
+                title: "Dynamsoft Document Scanner Scanned Document",
+                url: "",
+              });
+            } else {
+              // Fallback for browsers that don't support sharing
+              const link = document.createElement("a");
+              link.download = `${Date.now()}.png`;
+              link.href = canvas.toDataURL();
+              link.click();
+            }
+          }
+        } catch (error) {
+          console.error("Error sharing document:", error);
+        }
+      }
+
+      // Event listeners
+      scanButton.addEventListener("click", handleScan);
+      shareButton.addEventListener("click", handleShare);
     </script>
   </body>
 </html>
