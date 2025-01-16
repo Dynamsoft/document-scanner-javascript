@@ -237,11 +237,13 @@ export default class ScanResultView {
         icon: controlIcons?.correctImageBtn?.icon || DDS_ICONS.normalize,
         text: controlIcons?.correctImageBtn?.text || "Correction",
         onClick: () => this.handleCorrectImage(),
+        disabled: !this.correctionView,
       },
       {
         icon: controlIcons?.retakeBtn?.icon || DDS_ICONS.retake,
         text: controlIcons?.retakeBtn?.text || "Re-take",
         onClick: () => this.handleRetake(),
+        disabled: !this.scannerView,
       },
       {
         icon: controlIcons?.doneBtn?.icon || DDS_ICONS.complete,

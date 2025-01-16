@@ -34,4 +34,5 @@ export interface ControlButton {
   icon: string;
   text: string;
   onClick?: () => void | Promise<void>;
+  disabled?: boolean;
 }

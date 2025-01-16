@@ -34,6 +34,12 @@ const DEFAULT_CONTROLS_STYLE = `
     user-select: none;
   }
 
+  .dds-control-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: default;
+  }
+
   .dds-control-icon-wrapper {
     flex: 0.75;
     display: flex;
@@ -79,6 +85,11 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
     const buttonEl = document.createElement("div");
     buttonEl.className = "dds-control-btn";
 
+    // Add disabled class if button is disabled
+    if (button.disabled) {
+      buttonEl.classList.add("disabled");
+    }
+
     buttonEl.innerHTML = `
       <div class="dds-control-icon-wrapper">
         <div class="dds-control-icon">${button.icon}</div>
@@ -86,7 +97,7 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
       <div class="dds-control-text">${button.text}</div>
     `;
 
-    if (button.onClick) {
+    if (button.onClick && !button.disabled) {
       buttonEl.addEventListener("click", button.onClick);
     }
 
