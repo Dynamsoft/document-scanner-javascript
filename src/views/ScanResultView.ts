@@ -114,6 +114,11 @@ export default class ScanResultView {
 
   private async handleCorrectImage() {
     try {
+      if (!this.correctionView) {
+        console.error("Correction View not initialized");
+        return;
+      }
+
       this.hideView();
       const result = await this.correctionView.launch();
 
@@ -149,6 +154,11 @@ export default class ScanResultView {
 
   private async handleRetake() {
     try {
+      if (!this.scannerView) {
+        console.error("Correction View not initialized");
+        return;
+      }
+
       this.hideView();
       const result = await this.scannerView.launch();
 
@@ -243,16 +253,6 @@ export default class ScanResultView {
     return createControls(buttons, controlIcons?.containerStyle);
   }
 
-  private setupScanResultViewControls() {
-    try {
-      const controlContainer = this.createControls();
-      this.config.container.appendChild(controlContainer);
-    } catch (error) {
-      console.error("Error setting up scan result view controls:", error);
-      throw new Error(`Failed to setup scan result view controls: ${error.message}`);
-    }
-  }
-
   async initialize(): Promise<void> {
     try {
       if (!this.resources.result) {
@@ -263,10 +263,12 @@ export default class ScanResultView {
         throw new Error("Please create a Scan Result View Container element");
       }
 
-      // Add basic styling to container
-      Object.assign(this.config.container.style, {
+      // Create a wrapper div that preserves container dimensions
+      const resultViewWrapper = document.createElement("div");
+      Object.assign(resultViewWrapper.style, {
         display: "flex",
         width: "100%",
+        height: "100%",
         backgroundColor: "#575757",
         fontSize: "12px",
         flexDirection: "column",
@@ -293,10 +295,13 @@ export default class ScanResultView {
       });
 
       scanResultViewImageContainer.appendChild(scanResultImg);
-      this.config.container.appendChild(scanResultViewImageContainer);
+      resultViewWrapper.appendChild(scanResultViewImageContainer);
 
       // Set up controls
-      this.setupScanResultViewControls();
+      const controlContainer = this.createControls();
+      resultViewWrapper.appendChild(controlContainer);
+
+      this.config.container.appendChild(resultViewWrapper);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);

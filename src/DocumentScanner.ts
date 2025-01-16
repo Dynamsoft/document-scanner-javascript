@@ -70,14 +70,6 @@ class DocumentScanner {
     return container;
   }
 
-  private hasAnyViewConfig(): boolean {
-    return !!(
-      this.config.scannerViewConfig?.container ||
-      this.config.scanResultViewConfig?.container ||
-      this.config.correctionViewConfig?.container
-    );
-  }
-
   private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
     const views: string[] = [];
 

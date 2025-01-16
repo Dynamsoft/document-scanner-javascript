@@ -50,14 +50,16 @@ export default class DocumentCorrectionView {
       throw new Error("Please create an Correction View Container element");
     }
 
-    // Add basic styling to container
-    Object.assign(this.config.container.style, {
+    // Create a wrapper div that preserves container dimensions
+    const correctionViewWrapper = document.createElement("div");
+    Object.assign(correctionViewWrapper.style, {
       display: "flex",
       width: "100%",
-      "background-color": "#575757",
-      "font-size": "12px",
-      "flex-direction": "column",
-      "align-items": "center",
+      height: "100%",
+      backgroundColor: "#575757",
+      fontSize: "12px",
+      flexDirection: "column",
+      alignItems: "center",
     });
 
     // Add image editor view from DCE to correct documents
@@ -67,7 +69,8 @@ export default class DocumentCorrectionView {
       height: "100%",
     });
 
-    this.config.container.appendChild(imageEditorViewElement);
+    correctionViewWrapper.appendChild(imageEditorViewElement);
+    this.config.container.appendChild(correctionViewWrapper);
 
     this.imageEditorView = await ImageEditorView.createInstance(imageEditorViewElement);
     this.layer = this.imageEditorView.createDrawingLayer();
@@ -235,7 +238,10 @@ export default class DocumentCorrectionView {
   private setupCorrectionControls() {
     try {
       const controlContainer = this.createControls();
-      this.config.container.appendChild(controlContainer);
+      const wrapper = this.config.container.firstElementChild as HTMLElement;
+      if (wrapper) {
+        wrapper.appendChild(controlContainer);
+      }
     } catch (error) {
       console.error("Error setting up correction controls:", error);
       throw new Error(`Failed to setup correction controls: ${error.message}`);
