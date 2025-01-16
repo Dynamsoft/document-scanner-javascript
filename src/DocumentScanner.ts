@@ -136,7 +136,7 @@ class DocumentScanner {
             templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
             cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
             consecutiveResultFramesBeforeNormalization:
-              this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 30,
+              this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 15,
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
