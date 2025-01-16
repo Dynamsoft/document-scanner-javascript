@@ -8,61 +8,65 @@
     <link rel="stylesheet" href="./css/index.css" />
   </head>
   <body>
-    <!-- Logo -->
-    <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
-      <img class="logo" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
-    </a>
+    <div class="col1">
+      <!-- Logo -->
+      <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
+        <img class="logo" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
+      </a>
 
-    <!-- Header -->
-    <header class="header">
-      <h1 class="title">Dynamsoft Document Scanner</h1>
-      <p class="description">
-        Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
-        corrected scan. <a class="description-link" href="https://www.dynamsoft.com/todo" target="_blank">See more.</a>
-      </p>
-    </header>
-
-    <!-- Main content -->
-    <main class="container">
-      <div class="scanner-area">
-        <div class="preview-area" id="preview">
-          <div class="placeholder-text">
-            <img class="mobile-qr" src="./assets/qr-code.svg" />
-            <div class="placeholder-text-1">Scan to Open on Mobile</div>
-            <div class="placeholder-text-2">
-              <span class="or">or</span> <span class="click">click</span>
-              <b style="color: #fe814a">Start New Scan</b> to scan a new document and view it here
+      <!-- Header -->
+      <header class="header">
+        <h1 class="title">Dynamsoft Document Scanner</h1>
+        <p class="description">
+          Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
+          corrected scan.
+          <a class="description-link" href="https://www.dynamsoft.com/todo" target="_blank">See more.</a>
+        </p>
+      </header>
+    </div>
+    <div class="col2">
+      <!-- Main content -->
+      <main class="container">
+        <div class="scanner-area">
+          <div class="preview-area" id="preview">
+            <div class="placeholder-text">
+              <img class="mobile-qr" src="./assets/qr-code.svg" />
+              <div class="placeholder-text-1">Scan to Open on Mobile</div>
+              <div class="placeholder-text-2">
+                <span class="or">or</span> <span class="click">click</span> <b>Start New Scan</b> to scan a new document
+                and view it here
+              </div>
             </div>
           </div>
+          <div class="button-container">
+            <button id="scanButton" class="scan-button">Start New Scan</button>
+            <button id="shareButton" class="share-button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              Share
+            </button>
+          </div>
         </div>
-        <div class="button-container">
-          <button id="scanButton" class="scan-button">Start New Scan</button>
-          <button id="shareButton" class="share-button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="18" cy="5" r="3" />
-              <circle cx="6" cy="12" r="3" />
-              <circle cx="18" cy="19" r="3" />
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-            </svg>
-            Share
-          </button>
-        </div>
-      </div>
-    </main>
+      </main>
 
-    <!-- Footer -->
-    <footer class="footer">Powered by Dynamsoft</footer>
+      <!-- Footer -->
+      <footer class="footer">Powered by Dynamsoft</footer>
+    </div>
 
     <script>
       // Button and container references
