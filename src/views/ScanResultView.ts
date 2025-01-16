@@ -229,8 +229,8 @@ export default class ScanResultView {
 
     const buttons: ControlButton[] = [
       {
-        icon: controlIcons?.uploadBtn?.icon || onUpload ? DDS_ICONS.upload : DDS_ICONS.share,
-        text: controlIcons?.uploadBtn?.text || onUpload ? "Upload" : "Share",
+        icon: controlIcons?.uploadBtn?.icon || (onUpload ? DDS_ICONS.upload : DDS_ICONS.share),
+        text: controlIcons?.uploadBtn?.text || (onUpload ? "Upload" : "Share"),
         onClick: () => this.handleUploadAndShareBtn(),
       },
       {
