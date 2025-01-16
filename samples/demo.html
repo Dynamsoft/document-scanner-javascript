@@ -134,8 +134,13 @@
               link.click();
             }
           }
-        } catch (error) {
-          console.error("Error sharing document:", error);
+        } catch (ex) {
+          // Only show error if it's not a user cancellation
+          if (ex.name !== "AbortError") {
+            let errMsg = ex?.message || ex;
+            console.error("Error sharing image:", errMsg);
+            alert(`Error sharing image: ${errMsg}`);
+          }
         }
       }
 

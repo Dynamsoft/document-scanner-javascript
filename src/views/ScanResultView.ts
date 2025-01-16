@@ -106,9 +106,12 @@ export default class ScanResultView {
 
       return true;
     } catch (ex: any) {
-      let errMsg = ex?.message || ex;
-      console.error("Error handling image:", errMsg);
-      alert(`Error handling image: ${errMsg}`);
+      // Only show error if it's not a user cancellation
+      if (ex.name !== "AbortError") {
+        let errMsg = ex?.message || ex;
+        console.error("Error sharing image:", errMsg);
+        alert(`Error sharing image: ${errMsg}`);
+      }
     }
   }
 
