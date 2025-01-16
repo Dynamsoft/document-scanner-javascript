@@ -62,6 +62,7 @@ export default class DocumentScannerView {
   private showScannerLoadingOverlay(message?: string) {
     this.loadingScreen = showLoadingScreen(this.config.container, { message });
     this.config.container.style.display = "block";
+    this.config.container.style.position = "relative";
   }
 
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
