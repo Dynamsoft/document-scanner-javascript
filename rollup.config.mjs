@@ -48,7 +48,26 @@ const copyFiles = () => ({
   },
 });
 
+const external = [
+  "dynamsoft-core",
+  "dynamsoft-license",
+  "dynamsoft-capture-vision-router",
+  "dynamsoft-camera-enhancer",
+  "dynamsoft-document-normalizer",
+  "dynamsoft-utility",
+];
+
+const globals = {
+  "dynamsoft-core": "Dynamsoft.Core",
+  "dynamsoft-license": "Dynamsoft.License",
+  "dynamsoft-capture-vision-router": "Dynamsoft.CVR",
+  "dynamsoft-camera-enhancer": "Dynamsoft.DCE",
+  "dynamsoft-document-normalizer": "Dynamsoft.DDN",
+  "dynamsoft-utility": "Dynamsoft.Utility",
+};
+
 export default [
+  // 1. Full bundle with all dependencies included (no externals)
   {
     input: "src/dds.bundle.ts",
     plugins: [
@@ -81,6 +100,7 @@ export default [
       },
     ],
   },
+  // 2. DDS ESM bundles for different use cases
   {
     input: "src/dds.bundle.esm.ts",
     plugins: [
@@ -102,6 +122,72 @@ export default [
       },
     ],
   },
+  // 3. Standard bundle with external dependencies
+  {
+    input: "src/dds.ts",
+    external,
+    plugins: [
+      typescript({
+        tsconfig: "./tsconfig.json",
+        declaration: true,
+      }),
+      plugin_terser_es5,
+    ],
+    output: [
+      {
+        file: "dist/dds.js",
+        format: "umd",
+        name: "Dynamsoft",
+        globals,
+        banner: banner,
+        exports: "named",
+        sourcemap: true,
+        extend: true,
+      },
+    ],
+  },
+  // 2. DDS ESM for different use cases
+
+  {
+    input: "src/dds.ts",
+    external,
+    plugins: [
+      typescript({
+        tsconfig: "./tsconfig.json",
+      }),
+      plugin_terser_es6,
+    ],
+    output: [
+      {
+        file: "dist/dds.mjs",
+        format: "es",
+        banner: banner,
+        exports: "named",
+        sourcemap: true,
+      },
+    ],
+  },
+
+  {
+    input: "src/dds.no-content-bundle.esm.ts",
+    external,
+    plugins: [
+      typescript({
+        tsconfig: "./tsconfig.json",
+      }),
+      plugin_terser_es6,
+    ],
+    output: [
+      {
+        file: "dist/dds.no-content-bundle.esm.js",
+        format: "es",
+        banner: banner,
+        exports: "named",
+        sourcemap: true,
+      },
+    ],
+  },
+
   {
     input: "dist/types/dds.bundle.d.ts",
     plugins: [
@@ -123,6 +209,7 @@ export default [
       },
     ],
   },
+  // 3. Type definitions (same as before)
   {
     input: "dist/types/dds.bundle.esm.d.ts",
     plugins: [

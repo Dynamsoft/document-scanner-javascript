@@ -1,6 +1,6 @@
-// DDS bundled together with DCV Bundle.
-// Use this bundle to allow users to use DDS without installing DCV bundle as dependencies
-// Used for  <script type="module">
+// For framework like vue/react,
+// the package is only a empty shell,
+// relink directly to specific packages.
 
 export * as Core from "dynamsoft-core";
 export * as License from "dynamsoft-license";

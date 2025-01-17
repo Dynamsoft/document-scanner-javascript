@@ -2,8 +2,8 @@
   "name": "dynamsoft-document-scanner-beta",
   "version": "1.0.2-beta-202501070922",
   "description": "A wrapper for dynamsoft-capture-vision-javascript 2.6.1000.",
-  "main": "./dist/dds.bundle.js",
-  "module": "./dist/dds.bundle.mjs",
+  "main": "./dist/dds.js",
+  "module": "./dist/dds.no-content-bundle.mjs",
   "files": [
     "/dev-server",
     "/samples",
@@ -22,7 +22,7 @@
       "default": "./dist/dds.bundle.js"
     }
   },
-  "types": "./dist/dds.bundle.esm.d.ts",
+  "types": "./dist/dds.esm.d.ts",
   "type": "module",
   "scripts": {
     "serve": "node dev-server/index.js",
@@ -58,13 +58,15 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.6",
-    "dynamsoft-capture-vision-bundle": "2.6.1000",
     "rollup": "^4.9.5",
     "rollup-plugin-dts": "^6.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
     "cors": "^2.8.5",
     "express": "^4.21.2"
+  },
+  "dependencies": {
+    "dynamsoft-capture-vision-bundle": "2.6.1000"
   },
   "publishConfig": {
     "registry": "https://npm.scannerproxy.com:802/",
