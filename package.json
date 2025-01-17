@@ -1,9 +1,7 @@
 {
   "name": "dynamsoft-document-scanner-beta",
-  "version": "1.0.3-beta-202501070922",
+  "version": "1.0.5-beta-202501070922",
   "description": "A wrapper for dynamsoft-capture-vision-javascript 2.6.1000.",
-  "main": "./dist/dds.js",
-  "module": "./dist/dds.no-content-bundle.mjs",
   "files": [
     "/dev-server",
     "/samples",
@@ -12,17 +10,19 @@
     "API Reference.url"
   ],
   "sideEffects": true,
+  "main": "./dist/dds.js",
+  "module": "./dist/dds.no-content-bundle.esm.js",
+  "types": "./dist/dds.d.ts",
   "exports": {
     "import": {
-      "types": "./dist/dds.bundle.esm.d.ts",
-      "default": "./dist/dds.bundle.mjs"
+      "types": "./dist/dds.esm.d.ts",
+      "default": "./dist/dds.no-content-bundle.esm.js"
     },
     "require": {
-      "types": "./dist/dds.bundle.d.ts",
-      "default": "./dist/dds.bundle.js"
+      "types": "./dist/dds.d.ts",
+      "default": "./dist/dds.js"
     }
   },
-  "types": "./dist/dds.esm.d.ts",
   "type": "module",
   "scripts": {
     "serve": "node dev-server/index.js",

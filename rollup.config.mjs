@@ -100,29 +100,7 @@ export default [
       },
     ],
   },
-  // 2. DDS ESM bundles for different use cases
-  {
-    input: "src/dds.bundle.esm.ts",
-    plugins: [
-      nodeResolve({ browser: true }),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: true,
-        sourceMap: true,
-      }),
-      plugin_terser_es6,
-    ],
-    output: [
-      {
-        file: "dist/dds.bundle.mjs",
-        format: "es",
-        banner: banner,
-        exports: "named",
-        sourcemap: true,
-      },
-    ],
-  },
-  // 3. Standard bundle with external dependencies
+  // 2. Standard UMD bundle with external dependencies
   {
     input: "src/dds.ts",
     external,
@@ -146,8 +124,29 @@ export default [
       },
     ],
   },
-  // 2. DDS ESM for different use cases
-
+  // 3. ESM bundles with dependencies
+  {
+    input: "src/dds.bundle.esm.ts",
+    plugins: [
+      nodeResolve({ browser: true }),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        declaration: true,
+        sourceMap: true,
+      }),
+      plugin_terser_es6,
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.mjs",
+        format: "es",
+        banner: banner,
+        exports: "named",
+        sourcemap: true,
+      },
+    ],
+  },
+  // 4. ESM with external dependencies
   {
     input: "src/dds.ts",
     external,
@@ -167,7 +166,7 @@ export default [
       },
     ],
   },
-
+  // 5. No-content ESM bundle
   {
     input: "src/dds.no-content-bundle.esm.ts",
     external,
@@ -188,28 +187,28 @@ export default [
     ],
   },
 
+  // 6. Type declarations for CommonJS/UMD
   {
-    input: "dist/types/dds.bundle.d.ts",
+    input: "src/dds.ts",
+    external,
     plugins: [
       dts(),
       {
-        // https://rollupjs.org/guide/en/#writebundle
         writeBundle(options, bundle) {
-          // change `export { type A }` to `export { A }`,
-          // so project use old typescript still works.
-          let txt = fs.readFileSync("dist/dds.bundle.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
-          fs.writeFileSync("dist/dds.bundle.d.ts", txt);
+          let txt = fs.readFileSync("dist/dds.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
+          fs.writeFileSync("dist/dds.d.ts", txt);
         },
       },
     ],
     output: [
       {
-        file: "dist/dds.bundle.d.ts",
+        file: "dist/dds.d.ts",
         format: "es",
       },
     ],
   },
-  // 3. Type definitions (same as before)
+
+  // 7. Type declarations for ESM
   {
     input: "dist/types/dds.bundle.esm.d.ts",
     plugins: [
