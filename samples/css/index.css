@@ -165,6 +165,10 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
   display: none;
+}
+
+.share-button div {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
 }
@@ -173,9 +177,9 @@ body {
   background-color: #374151;
 }
 
-.share-button svg {
-  width: 1.25rem;
-  height: 1.25rem;
+.share-button div svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Footer styles */

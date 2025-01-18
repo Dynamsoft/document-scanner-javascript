@@ -128,4 +128,17 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
+  download: `
+  <svg id="download" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+    <defs>
+      <clipPath id="downloadclip-path">
+        <rect id="Rectangle_2741" data-name="Rectangle 2741" width="24" height="24" fill="#fff"/>
+      </clipPath>
+    </defs>
+    <g id="Group_535" data-name="Group 535" clip-path="url(#downloadclip-path)">
+      <path id="Path_1463" data-name="Path 1463" d="M23.491,9.892a.507.507,0,0,0-.509.505V22.108a.87.87,0,0,1-.851.882H1.877a.874.874,0,0,1-.86-.89V10.4A.509.509,0,0,0,0,10.4V22.092A1.888,1.888,0,0,0,1.869,24h20.27A1.886,1.886,0,0,0,24,22.1V10.4a.507.507,0,0,0-.509-.505" fill="#fff"/>
+      <path id="Path_1464" data-name="Path 1464" d="M11.64,18.578a.438.438,0,0,0,.086.056.5.5,0,0,0,.078.051.521.521,0,0,0,.194.039h0a.17.17,0,0,0,.024-.005.539.539,0,0,0,.168-.033.521.521,0,0,0,.17-.113l4.291-4.219a.5.5,0,0,0,0-.714.512.512,0,0,0-.72,0l-3.428,3.371V.5A.509.509,0,0,0,11.49.5v16.5L8.062,13.636a.513.513,0,0,0-.72,0,.5.5,0,0,0,0,.715Z" fill="#fff"/>
+    </g>
+  </svg>
+`,
 };

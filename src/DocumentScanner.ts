@@ -157,9 +157,12 @@ class DocumentScanner {
   }
 
   async initialize(): Promise<{
-    scannerView?: DocumentScannerView;
-    correctionView?: DocumentCorrectionView;
-    scanResultView?: ScanResultView;
+    resources: SharedResources;
+    components: {
+      scannerView?: DocumentScannerView;
+      correctionView?: DocumentCorrectionView;
+      scanResultView?: ScanResultView;
+    };
   }> {
     try {
       await this.initializeConfig();
@@ -197,7 +200,7 @@ class DocumentScanner {
         components.scanResultView = this.scanResultView;
       }
 
-      return components;
+      return { resources: this.resources, components };
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       throw new Error(`DDS Initialization Failed: ${errMsg}`);
@@ -309,7 +312,7 @@ class DocumentScanner {
 
     try {
       this.isCapturing = true;
-      const components = await this.initialize();
+      const { components } = await this.initialize();
 
       if (this.config.container) {
         getElement(this.config.container).style.display = "block";

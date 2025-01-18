@@ -230,10 +230,17 @@ export default class ScanResultView {
   private createControls(): HTMLElement {
     const { controlIcons, onUpload } = this.config;
 
+    // Check if share is possible
+    const testImageBlob = new Blob(["mock-png-data"], { type: "image/png" });
+    const testFile = new File([testImageBlob], "test.png", { type: "image/png" });
+    const canShare = "share" in navigator && navigator.canShare({ files: [testFile] });
+
     const buttons: ControlButton[] = [
       {
-        icon: controlIcons?.uploadBtn?.icon || (onUpload ? DDS_ICONS.upload : DDS_ICONS.share),
-        text: controlIcons?.uploadBtn?.text || (onUpload ? "Upload" : "Share"),
+        icon:
+          controlIcons?.uploadBtn?.icon ||
+          (onUpload ? DDS_ICONS.upload : canShare ? DDS_ICONS.share : DDS_ICONS.download),
+        text: controlIcons?.uploadBtn?.text || (onUpload ? "Upload" : canShare ? "Share" : "Download"),
         onClick: () => this.handleUploadAndShareBtn(),
       },
       {
