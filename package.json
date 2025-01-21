@@ -1,10 +1,8 @@
 {
   "name": "dynamsoft-document-scanner-beta",
-  "version": "1.0.9-beta-202501070922",
+  "version": "1.0.10-beta-202501070922",
   "description": "A wrapper for dynamsoft-capture-vision-javascript 2.6.1000.",
   "files": [
-    "/dev-server",
-    "/samples",
     "/dist",
     "/LICENSE",
     "API Reference.url"
