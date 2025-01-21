@@ -568,7 +568,29 @@
           </svg>
         </div>
         <div class="dce-loading-auto-capture-container" title="Loading Auto Capture">
-          <div class="dce-loading-auto-capture"></div>
+          <svg class="dce-loading-auto-capture-circle" viewBox="0 0 36 36">
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              stroke="rgba(254, 142, 20, 0.2)"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <circle
+              class="dce-loading-auto-capture-progress"
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              stroke="#fe8e14"
+              stroke-width="3"
+              stroke-dasharray="100.53096491487338"
+              stroke-dashoffset="100.53096491487338"
+              stroke-linecap="round"
+            />
+          </svg>
         </div>
       </div>
       <div class="dce-mn-zoom">- <span>1.0X</span> -</div>
@@ -901,45 +923,24 @@
       opacity: 0.9;
     }
 
-    .dce-loading-auto-capture {
-      pointer-events: none;
-      width: 56px;
-      height: 56px;
-      border-radius: 100%;
-      position: relative;
-      background: transparent;
-    }
-
-    .dce-loading-auto-capture::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: conic-gradient(#fe8e14 var(--progress, 0%), transparent var(--progress, 0%));
-      transition: all 0.2s ease;
-    }
-
-    .dce-loading-auto-capture::after {
-      content: "";
-      position: absolute;
-      width: calc(100% - 12px);
-      height: calc(100% - 12px);
-      top: 6px;
-      left: 6px;
-      background-color: black;
-      border-radius: 50%;
-    }
-
     .dce-loading-auto-capture-container {
       width: 70px;
       height: 70px;
-      border-radius: 50%;
       position: relative;
       pointer-events: none;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .dce-loading-auto-capture-circle {
+      width: 56px;
+      height: 56px;
+      transform: rotate(-90deg);
+    }
+
+    .dce-loading-auto-capture-progress {
+      transition: stroke-dashoffset 0.2s ease;
     }
 
     .dce-loading-auto-capture-container::before {

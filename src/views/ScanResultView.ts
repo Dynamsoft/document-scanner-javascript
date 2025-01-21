@@ -15,7 +15,7 @@ export interface ScanResultViewControlIcons {
 }
 
 export interface ScanResultViewConfig {
-  container: HTMLElement;
+  container?: HTMLElement;
   controlIcons?: ScanResultViewControlIcons;
   onDone?: (result: DocumentScanResult) => Promise<void>;
   onUpload?: (result: DocumentScanResult) => Promise<void>;

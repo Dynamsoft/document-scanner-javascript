@@ -22,7 +22,7 @@ export interface DocumentCorrectionViewControlIcons {
 }
 
 export interface DocumentCorrectionViewConfig {
-  container: HTMLElement;
+  container?: HTMLElement;
   controlIcons?: DocumentCorrectionViewControlIcons;
   templateFilePath?: string;
   utilizedTemplateNames?: UtilizedTemplateNames;

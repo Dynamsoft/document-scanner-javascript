@@ -14,7 +14,7 @@ import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/Loading
 export interface DocumentScannerViewConfig {
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
-  container: HTMLElement;
+  container?: HTMLElement;
   consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
@@ -614,7 +614,9 @@ export default class DocumentScannerView {
 
     if (!result.items?.length) return;
 
-    const originalImage = result.items.filter((item) => item.type === 1) as OriginalImageResultItem[];
+    const originalImage = result.items.filter(
+      (item) => item.type === EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE
+    ) as OriginalImageResultItem[];
     this.originalImageData = originalImage.length && originalImage[0].imageData;
 
     if (this.autoCaptureEnabled) {
@@ -626,13 +628,16 @@ export default class DocumentScannerView {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
-    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture") as HTMLElement;
-    if (!loadingAutoCapture) return;
+    const progressPath = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture-progress") as SVGPathElement;
+    if (!progressPath) return;
 
-    // Update the progress for the conic gradient
-    loadingAutoCapture.style.setProperty("--progress", `${progress}%`);
+    // The circumference of the circle (2 * PI * r)
+    const circumference = 100.53096491487338; // 2 * Math.PI * 16
+
+    // Calculate the stroke dash offset based on progress
+    const dashOffset = ((100 - progress) / 100) * circumference;
+    progressPath.style.strokeDashoffset = String(dashOffset);
   }
-
   /**
    * Normalize an image with DDN given a set of points
    * @param points - points provided by either users or DDN's detect quad

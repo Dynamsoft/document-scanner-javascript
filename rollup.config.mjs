@@ -9,7 +9,6 @@ const pkg = JSON.parse(await fs.promises.readFile("./package.json"));
 const version = pkg.version;
 
 fs.rmSync("dist", { recursive: true, force: true });
-// fs.cpSync("public", "dist", { recursive: true });
 
 const strProduct = "Dynamsoft Document Scanner JS Edition Bundle";
 
@@ -67,7 +66,7 @@ const globals = {
 };
 
 export default [
-  // 1. Full bundle with all dependencies included (no externals)
+  // 1. Full bundle
   {
     input: "src/dds.bundle.ts",
     plugins: [
@@ -75,12 +74,11 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
-        sourceMap: true,
+        sourceMap: false,
       }),
       plugin_terser_es5,
       copyFiles(),
       {
-        // https://rollupjs.org/guide/en/#writebundle
         writeBundle(options, bundle) {
           let txt = fs
             .readFileSync("dist/dds.bundle.js", { encoding: "utf8" })
@@ -96,11 +94,11 @@ export default [
         name: "Dynamsoft",
         banner: banner,
         exports: "named",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
   },
-  // 2. Standard UMD bundle with external dependencies
+  // 2. Standard UMD bundle
   {
     input: "src/dds.ts",
     external,
@@ -108,6 +106,7 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
+        sourceMap: false,
       }),
       plugin_terser_es5,
     ],
@@ -119,12 +118,12 @@ export default [
         globals,
         banner: banner,
         exports: "named",
-        sourcemap: true,
+        sourcemap: false,
         extend: true,
       },
     ],
   },
-  // 3. ESM bundles with dependencies
+  // 3. ESM bundle
   {
     input: "src/dds.bundle.esm.ts",
     plugins: [
@@ -132,7 +131,7 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
-        sourceMap: true,
+        sourceMap: false,
       }),
       plugin_terser_es6,
     ],
@@ -142,17 +141,18 @@ export default [
         format: "es",
         banner: banner,
         exports: "named",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
   },
-  // 4. ESM with external dependencies
+  // 4. ESM with externals
   {
     input: "src/dds.ts",
     external,
     plugins: [
       typescript({
         tsconfig: "./tsconfig.json",
+        sourceMap: false,
       }),
       plugin_terser_es6,
     ],
@@ -162,17 +162,18 @@ export default [
         format: "es",
         banner: banner,
         exports: "named",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
   },
-  // 5. No-content ESM bundle
+  // 5. No-content ESM
   {
     input: "src/dds.no-content-bundle.esm.ts",
     external,
     plugins: [
       typescript({
         tsconfig: "./tsconfig.json",
+        sourceMap: false,
       }),
       plugin_terser_es6,
     ],
@@ -182,11 +183,10 @@ export default [
         format: "es",
         banner: banner,
         exports: "named",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
   },
-
   // 6. Type declarations for CommonJS/UMD
   {
     input: "src/dds.ts",
@@ -207,7 +207,6 @@ export default [
       },
     ],
   },
-
   // 7. Type declarations for ESM
   {
     input: "dist/types/dds.bundle.esm.d.ts",
