@@ -20,90 +20,94 @@
         <p class="description">
           Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
           corrected scan.
-          <a class="description-link" href="https://www.dynamsoft.com/todo" target="_blank">Learn more.</a>
+          <a
+            class="description-link"
+            href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html"
+            target="_blank"
+            >Learn more.</a
+          >
         </p>
       </header>
     </div>
     <div class="col2">
       <!-- Main content -->
-      <main class="container">
-        <div class="scanner-area">
-          <div class="preview-area" id="preview">
-            <div class="placeholder-text">
-              <img class="mobile-qr" src="./assets/qr-code.svg" />
-              <div class="placeholder-text-1">Scan to Open on Mobile</div>
-              <div class="placeholder-text-2">
-                <span class="or">or</span> <span class="click">click</span> <b>Start New Scan</b> to scan a new document
-                and view it here
-              </div>
+      <div class="scanner-area">
+        <div class="scanner-area-header">
+          <div></div>
+          <button id="shareButton" class="share-button disabled">
+            <div class="download-icon">
+              <svg
+                id="download"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <defs>
+                  <clipPath id="downloadclip-path">
+                    <rect id="Rectangle_2741" data-name="Rectangle 2741" width="24" height="24" fill="#fff" />
+                  </clipPath>
+                </defs>
+                <g id="Group_535" data-name="Group 535" clip-path="url(#downloadclip-path)">
+                  <path
+                    id="Path_1463"
+                    data-name="Path 1463"
+                    d="M23.491,9.892a.507.507,0,0,0-.509.505V22.108a.87.87,0,0,1-.851.882H1.877a.874.874,0,0,1-.86-.89V10.4A.509.509,0,0,0,0,10.4V22.092A1.888,1.888,0,0,0,1.869,24h20.27A1.886,1.886,0,0,0,24,22.1V10.4a.507.507,0,0,0-.509-.505"
+                    fill="#fff"
+                  />
+                  <path
+                    id="Path_1464"
+                    data-name="Path 1464"
+                    d="M11.64,18.578a.438.438,0,0,0,.086.056.5.5,0,0,0,.078.051.521.521,0,0,0,.194.039h0a.17.17,0,0,0,.024-.005.539.539,0,0,0,.168-.033.521.521,0,0,0,.17-.113l4.291-4.219a.5.5,0,0,0,0-.714.512.512,0,0,0-.72,0l-3.428,3.371V.5A.509.509,0,0,0,11.49.5v16.5L8.062,13.636a.513.513,0,0,0-.72,0,.5.5,0,0,0,0,.715Z"
+                    fill="#fff"
+                  />
+                </g>
+              </svg>
+              Download
+            </div>
+            <div class="share-icon">
+              <svg
+                id="share"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <defs>
+                  <clipPath id="clip-pathshare">
+                    <rect id="Rectangle_2770" data-name="Rectangle 2770" width="24" height="24" fill="#fff" />
+                  </clipPath>
+                </defs>
+                <g id="Group_574" data-name="Group 574" clip-path="url(#clip-pathshare)">
+                  <path
+                    id="Path_1507"
+                    data-name="Path 1507"
+                    d="M19.489,15.009h0c-.008,0-.014,0-.022,0a4.465,4.465,0,0,0-3.749,2.052l-7-3.5a4.482,4.482,0,0,0,0-3.1l7-3.5a4.466,4.466,0,0,0,3.771,2.053l.018,0A4.516,4.516,0,1,0,15.282,6.06L8.257,9.574a4.49,4.49,0,1,0-4.793,6.814,4.548,4.548,0,0,0,1.043.122,4.468,4.468,0,0,0,3.755-2.056l7.018,3.511a4.485,4.485,0,1,0,4.209-2.956M17.13,1.914a3.508,3.508,0,1,1,2.366,6.1h-.01l-.011,0a3.476,3.476,0,0,1-3.112-1.932l0-.006a3.525,3.525,0,0,1,.769-4.162M3.693,15.415a3.5,3.5,0,1,1,3.931-4.967v0a3.47,3.47,0,0,1,0,3.119l0,0a3.479,3.479,0,0,1-3.931,1.842m17.636,7.066a3.5,3.5,0,0,1-4.971-4.53l0,0a3.477,3.477,0,0,1,3.126-1.936l.011,0a3.5,3.5,0,0,1,1.831,6.472"
+                    fill="#fff"
+                  />
+                </g>
+              </svg>
+              Share
+            </div>
+          </button>
+        </div>
+        <div class="preview-area" id="preview">
+          <div class="placeholder-text">
+            <img class="mobile-qr" src="./assets/qr-code.svg" />
+            <div class="placeholder-text-1">Scan to Open on Mobile</div>
+            <div class="placeholder-text-2">
+              <span class="or">or</span> <span class="click">click</span> <b>Start New Scan</b> to scan a new document
+              and view it here
             </div>
           </div>
-          <div class="button-container">
-            <button id="scanButton" class="scan-button">Start New Scan</button>
-            <button id="shareButton" class="share-button">
-              <div class="download-icon">
-                <svg
-                  id="download"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                >
-                  <defs>
-                    <clipPath id="downloadclip-path">
-                      <rect id="Rectangle_2741" data-name="Rectangle 2741" width="24" height="24" fill="#fff" />
-                    </clipPath>
-                  </defs>
-                  <g id="Group_535" data-name="Group 535" clip-path="url(#downloadclip-path)">
-                    <path
-                      id="Path_1463"
-                      data-name="Path 1463"
-                      d="M23.491,9.892a.507.507,0,0,0-.509.505V22.108a.87.87,0,0,1-.851.882H1.877a.874.874,0,0,1-.86-.89V10.4A.509.509,0,0,0,0,10.4V22.092A1.888,1.888,0,0,0,1.869,24h20.27A1.886,1.886,0,0,0,24,22.1V10.4a.507.507,0,0,0-.509-.505"
-                      fill="#fff"
-                    />
-                    <path
-                      id="Path_1464"
-                      data-name="Path 1464"
-                      d="M11.64,18.578a.438.438,0,0,0,.086.056.5.5,0,0,0,.078.051.521.521,0,0,0,.194.039h0a.17.17,0,0,0,.024-.005.539.539,0,0,0,.168-.033.521.521,0,0,0,.17-.113l4.291-4.219a.5.5,0,0,0,0-.714.512.512,0,0,0-.72,0l-3.428,3.371V.5A.509.509,0,0,0,11.49.5v16.5L8.062,13.636a.513.513,0,0,0-.72,0,.5.5,0,0,0,0,.715Z"
-                      fill="#fff"
-                    />
-                  </g>
-                </svg>
-                Download
-              </div>
-              <div class="share-icon">
-                <svg
-                  id="share"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                >
-                  <defs>
-                    <clipPath id="clip-pathshare">
-                      <rect id="Rectangle_2770" data-name="Rectangle 2770" width="24" height="24" fill="#fff" />
-                    </clipPath>
-                  </defs>
-                  <g id="Group_574" data-name="Group 574" clip-path="url(#clip-pathshare)">
-                    <path
-                      id="Path_1507"
-                      data-name="Path 1507"
-                      d="M19.489,15.009h0c-.008,0-.014,0-.022,0a4.465,4.465,0,0,0-3.749,2.052l-7-3.5a4.482,4.482,0,0,0,0-3.1l7-3.5a4.466,4.466,0,0,0,3.771,2.053l.018,0A4.516,4.516,0,1,0,15.282,6.06L8.257,9.574a4.49,4.49,0,1,0-4.793,6.814,4.548,4.548,0,0,0,1.043.122,4.468,4.468,0,0,0,3.755-2.056l7.018,3.511a4.485,4.485,0,1,0,4.209-2.956M17.13,1.914a3.508,3.508,0,1,1,2.366,6.1h-.01l-.011,0a3.476,3.476,0,0,1-3.112-1.932l0-.006a3.525,3.525,0,0,1,.769-4.162M3.693,15.415a3.5,3.5,0,1,1,3.931-4.967v0a3.47,3.47,0,0,1,0,3.119l0,0a3.479,3.479,0,0,1-3.931,1.842m17.636,7.066a3.5,3.5,0,0,1-4.971-4.53l0,0a3.477,3.477,0,0,1,3.126-1.936l.011,0a3.5,3.5,0,0,1,1.831,6.472"
-                      fill="#fff"
-                    />
-                  </g>
-                </svg>
-                Share
-              </div>
-            </button>
-          </div>
         </div>
-      </main>
-
-      <!-- Footer -->
-      <footer class="footer">Powered by Dynamsoft</footer>
+        <div class="button-container">
+          <div class="powered-by-msg">Powered by Dynamsoft</div>
+          <button id="scanButton" class="scan-button">Start New Scan</button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -144,10 +148,10 @@
             canvas.style.width = "100%";
             canvas.style.height = "100%";
             previewArea.appendChild(canvas);
-            shareButton.style.display = "flex";
+            shareButton.classList.remove("disabled");
           } else {
             previewArea.innerHTML = '<div class="placeholder-text">No image scanned. Please try again.</div>';
-            shareButton.style.display = "none";
+            shareButton.classList.add("disabled");
           }
         } catch (error) {
           console.error("Error during document scanning:", error);
