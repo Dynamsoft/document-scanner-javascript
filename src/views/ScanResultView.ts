@@ -239,7 +239,7 @@ export default class ScanResultView {
       {
         icon:
           controlIcons?.uploadBtn?.icon ||
-          (onUpload ? DDS_ICONS.upload : canShare ? DDS_ICONS.share : DDS_ICONS.download),
+          (onUpload ? DDS_ICONS.upload : canShare ? DDS_ICONS.share : DDS_ICONS.downloadPNG),
         text: controlIcons?.uploadBtn?.text || (onUpload ? "Upload" : canShare ? "Share" : "Download"),
         onClick: () => this.handleUploadAndShareBtn(),
       },

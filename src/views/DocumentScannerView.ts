@@ -320,12 +320,13 @@ export default class DocumentScannerView {
       this.closeCamera(false);
 
       // Convert file to blob
-      const { blob, width, height } = await this.fileToBlob(file);
+      const { blob } = await this.fileToBlob(file);
 
       this.capturedResultItems = (
         await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)
       ).items;
       this.originalImageData = (this.capturedResultItems[0] as OriginalImageResultItem)?.imageData;
+      const { width, height } = this.originalImageData;
       this.capturedResultItems = [];
       const detectedQuadrilateral = {
         points: [
