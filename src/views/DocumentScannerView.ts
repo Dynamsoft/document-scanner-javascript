@@ -26,17 +26,24 @@ interface DCEElements {
   closeScannerBtn: HTMLElement | null;
   takePhotoBtn: HTMLElement | null;
   boundsDetectionBtn: HTMLElement | null;
-  autoCaptureBtn: HTMLElement | null;
+  smartCaptureBtn: HTMLElement | null;
+  tipsMessage: HTMLElement | null;
+}
+
+enum TipsBackgroudColor {
+  DEFAULT = "rgba(100, 100, 100, 0.5)",
+  ERROR = "rgba(255, 100, 100, 0.5)",
 }
 
 // Implementation
 export default class DocumentScannerView {
   // Capture Mode
   private boundsDetectionEnabled: boolean = false;
-  private autoCaptureEnabled: boolean = false;
+  private smartCaptureEnabled: boolean = false;
 
-  // Used for Auto Capture Mode - use crossVerificationStatus
+  // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
+  private smartCaptureTimeout: NodeJS.Timeout | null = null;
 
   // Used for ImageEditorView (In NornalizerView)
   private capturedResultItems: CapturedResult["items"] = [];
@@ -52,7 +59,8 @@ export default class DocumentScannerView {
     closeScannerBtn: null,
     takePhotoBtn: null,
     boundsDetectionBtn: null,
-    autoCaptureBtn: null,
+    smartCaptureBtn: null,
+    tipsMessage: null,
   };
 
   // Scan Resolve
@@ -108,7 +116,7 @@ export default class DocumentScannerView {
       // Set cameraEnhancer as input for CaptureVisionRouter
       cvRouter.setInput(cameraEnhancer);
 
-      // Add filter for Auto capture
+      // Add filter for smart capture
       const filter = new MultiFrameResultCrossFilter();
       filter.enableResultCrossVerification(EnumCapturedResultItemType.CRIT_DETECTED_QUAD, true);
       filter.enableResultDeduplication(EnumCapturedResultItemType.CRIT_DETECTED_QUAD, true);
@@ -127,8 +135,8 @@ export default class DocumentScannerView {
       resultReceiver.onCapturedResultReceived = (result) => this.handleBoundsDetection(result);
       await cvRouter.addResultReceiver(resultReceiver);
 
-      // Set default value for autoCapture and boundsDetection modes
-      this.autoCaptureEnabled = false;
+      // Set default value for smartCapture and boundsDetection modes
+      this.smartCaptureEnabled = false;
       this.boundsDetectionEnabled = true;
 
       this.initialized = true;
@@ -160,11 +168,12 @@ export default class DocumentScannerView {
       closeScannerBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-close"),
       takePhotoBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo"),
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
-      autoCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture"),
+      smartCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture"),
+      tipsMessage: DCEContainer.shadowRoot.querySelector(".dce-mn-tips-msg"),
     };
 
     await this.toggleBoundsDetection(this.boundsDetectionEnabled);
-    await this.toggleAutoCapture(this.autoCaptureEnabled);
+    await this.toggleSmartCapture(this.smartCaptureEnabled);
 
     this.assignDCEClickEvents();
 
@@ -181,7 +190,7 @@ export default class DocumentScannerView {
 
     this.takePhoto = this.takePhoto.bind(this);
     this.toggleBoundsDetection = this.toggleBoundsDetection.bind(this);
-    this.toggleAutoCapture = this.toggleAutoCapture.bind(this);
+    this.toggleSmartCapture = this.toggleSmartCapture.bind(this);
     this.closeCamera = this.closeCamera.bind(this);
 
     this.DCE_ELEMENTS.takePhotoBtn.addEventListener("click", this.takePhoto, eventOptions);
@@ -192,9 +201,9 @@ export default class DocumentScannerView {
       eventOptions
     );
 
-    this.DCE_ELEMENTS.autoCaptureBtn.addEventListener(
+    this.DCE_ELEMENTS.smartCaptureBtn.addEventListener(
       "click",
-      async () => await this.toggleAutoCapture(),
+      async () => await this.toggleSmartCapture(),
       eventOptions
     );
 
@@ -417,9 +426,9 @@ export default class DocumentScannerView {
 
     const newBoundsDetectionState = enabled !== undefined ? enabled : !this.boundsDetectionEnabled;
 
-    // If we're turning off bounds detection, ensure auto capture is turned off
+    // If we're turning off bounds detection, ensure smart capture is turned off
     if (!newBoundsDetectionState) {
-      await this.toggleAutoCapture(false);
+      await this.toggleSmartCapture(false);
     }
 
     const { cvRouter } = this.resources;
@@ -436,14 +445,14 @@ export default class DocumentScannerView {
     }
   }
 
-  async toggleAutoCapture(mode?: boolean) {
+  async toggleSmartCapture(mode?: boolean) {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
 
-    const container = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture") as HTMLElement;
-    const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture-on") as HTMLElement;
-    const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-capture-off") as HTMLElement;
+    const container = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture") as HTMLElement;
+    const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-on") as HTMLElement;
+    const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-off") as HTMLElement;
     const takePhotoBtn = DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo") as HTMLElement;
     const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
       ".dce-loading-auto-capture-container"
@@ -451,26 +460,66 @@ export default class DocumentScannerView {
 
     if (!onIcon || !offIcon || !takePhotoBtn || !loadingAutoCapture) return;
 
-    const newAutoCaptureState = mode !== undefined ? mode : !this.autoCaptureEnabled;
+    const newSmartCaptureState = mode !== undefined ? mode : !this.smartCaptureEnabled;
 
     // If trying to turn on auto capture, ensure bounds detection is on
-    if (newAutoCaptureState && !this.boundsDetectionEnabled) {
+    if (newSmartCaptureState && !this.boundsDetectionEnabled) {
       // Turn on bouds detection first
       await this.toggleBoundsDetection(true);
     }
 
-    this.autoCaptureEnabled = newAutoCaptureState;
-    container.style.color = this.autoCaptureEnabled ? "#fe814a" : "#fff";
-    offIcon.style.display = this.autoCaptureEnabled ? "none" : "block";
-    onIcon.style.display = this.autoCaptureEnabled ? "block" : "none";
+    this.smartCaptureEnabled = newSmartCaptureState;
+    container.style.color = this.smartCaptureEnabled ? "#fe814a" : "#fff";
+    offIcon.style.display = this.smartCaptureEnabled ? "none" : "block";
+    onIcon.style.display = this.smartCaptureEnabled ? "block" : "none";
 
     // Toggle display of take photo button and loading animation
-    takePhotoBtn.style.display = newAutoCaptureState ? "none" : "flex";
-    loadingAutoCapture.style.display = newAutoCaptureState ? "flex" : "none";
+    takePhotoBtn.style.display = newSmartCaptureState ? "none" : "flex";
+    loadingAutoCapture.style.display = newSmartCaptureState ? "flex" : "none";
 
-    // Reset crossVerificationCount whenever we toggle the auto capture
+    // Reset crossVerificationCount whenever we toggle the smart capture
     this.crossVerificationCount = 0;
     // this.updateLoadingProgress(this.crossVerificationCount);
+
+    // Clear any existing timeout
+    if (this.smartCaptureTimeout) {
+      clearTimeout(this.smartCaptureTimeout);
+      this.smartCaptureTimeout = null;
+    }
+
+    // Show tips message and set timeout if auto capture is enabled
+    if (this.smartCaptureEnabled) {
+      this.toggleShowTipsMessage("Keep camera steady with a contrasting background", TipsBackgroudColor.DEFAULT, true);
+
+      // Set timeout for 15 seconds
+      this.smartCaptureTimeout = setTimeout(async () => {
+        // If still in auto capture mode after 15 seconds
+        if (this.smartCaptureTimeout) {
+          await this.toggleSmartCapture(false);
+          this.toggleShowTipsMessage(
+            "Failed to auto capture. Please take photo manually",
+            TipsBackgroudColor.ERROR,
+            true
+          );
+          setTimeout(() => this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false), 5000); // Hide message after 5 seconds
+        }
+      }, 15000);
+    } else {
+      this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false);
+    }
+  }
+
+  private toggleShowTipsMessage(
+    message: string,
+    bgColor: TipsBackgroudColor = TipsBackgroudColor.DEFAULT,
+    show?: boolean
+  ) {
+    this.DCE_ELEMENTS.tipsMessage.textContent = message;
+
+    (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.display =
+      show || (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.display === "none" ? "flex" : "none";
+
+    (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.background = bgColor;
   }
 
   async openCamera(): Promise<void> {
@@ -495,7 +544,7 @@ export default class DocumentScannerView {
         // cvRouter start capture? TODO
       }
 
-      // Assign boundsDetection, autoCapture, and takePhoto element
+      // Assign boundsDetection, smartCapture, and takePhoto element
       if (!this.initializedDCE) {
         await this.initializeElements();
       }
@@ -627,8 +676,8 @@ export default class DocumentScannerView {
     ) as OriginalImageResultItem[];
     this.originalImageData = originalImage.length && originalImage[0].imageData;
 
-    if (this.autoCaptureEnabled) {
-      this.handleAutoCaptureMode(result);
+    if (this.smartCaptureEnabled) {
+      this.handleSmartCaptureMode(result);
     }
   }
 
@@ -651,8 +700,8 @@ export default class DocumentScannerView {
    * @param points - points provided by either users or DDN's detect quad
    * @returns normalized image by DDN
    */
-  private async handleAutoCaptureMode(result: CapturedResult) {
-    /** If "Auto Capture" is checked, the library uses the document boundaries found in consecutive
+  private async handleSmartCaptureMode(result: CapturedResult) {
+    /** If "Smart Capture" or "Auto Crop" is checked, the library uses the document boundaries found in consecutive
      * cross verified frames to decide whether conditions are suitable for automatic normalization.
      */
     if (result.items.length <= 1) {
@@ -671,7 +720,7 @@ export default class DocumentScannerView {
      */
     if (this.crossVerificationCount >= 2) {
       this.crossVerificationCount = 0;
-      await this.toggleAutoCapture(false); // turn off auto capture
+      await this.toggleSmartCapture(false); // turn off auto capture
 
       await this.takePhoto();
     }
