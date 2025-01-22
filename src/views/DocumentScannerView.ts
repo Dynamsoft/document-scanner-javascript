@@ -7,6 +7,7 @@ import {
 } from "dynamsoft-core";
 import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { MultiFrameResultCrossFilter } from "dynamsoft-utility";
 import { SharedResources } from "../DocumentScanner";
 import { DEFAULT_TEMPLATE_NAMES, DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
@@ -34,8 +35,8 @@ export default class DocumentScannerView {
   private boundsDetectionEnabled: boolean = false;
   private autoCaptureEnabled: boolean = false;
 
-  // Used for Auto Capture Mode
-  private frameCount: number;
+  // Used for Auto Capture Mode - use crossVerificationStatus
+  private crossVerificationCount: number;
 
   // Used for ImageEditorView (In NornalizerView)
   private capturedResultItems: CapturedResult["items"] = [];
@@ -106,6 +107,12 @@ export default class DocumentScannerView {
 
       // Set cameraEnhancer as input for CaptureVisionRouter
       cvRouter.setInput(cameraEnhancer);
+
+      // Add filter for Auto capture
+      const filter = new MultiFrameResultCrossFilter();
+      filter.enableResultCrossVerification(EnumCapturedResultItemType.CRIT_DETECTED_QUAD, true);
+      filter.enableResultDeduplication(EnumCapturedResultItemType.CRIT_DETECTED_QUAD, true);
+      await cvRouter.addResultFilter(filter);
 
       // Initialize the template parameters for DL scanning4
       if (this.config.templateFilePath) {
@@ -461,9 +468,9 @@ export default class DocumentScannerView {
     takePhotoBtn.style.display = newAutoCaptureState ? "none" : "flex";
     loadingAutoCapture.style.display = newAutoCaptureState ? "flex" : "none";
 
-    // Reset frameCount whenever we toggle the auto capture
-    this.frameCount = 0;
-    this.updateLoadingProgress(this.frameCount);
+    // Reset crossVerificationCount whenever we toggle the auto capture
+    this.crossVerificationCount = 0;
+    // this.updateLoadingProgress(this.crossVerificationCount);
   }
 
   async openCamera(): Promise<void> {
@@ -625,20 +632,20 @@ export default class DocumentScannerView {
     }
   }
 
-  private updateLoadingProgress(progress: number) {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
-    if (!DCEContainer?.shadowRoot) return;
+  // private updateLoadingProgress(progress: number) {
+  //   const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+  //   if (!DCEContainer?.shadowRoot) return;
 
-    const progressPath = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture-progress") as SVGPathElement;
-    if (!progressPath) return;
+  //   const progressPath = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture-progress") as SVGPathElement;
+  //   if (!progressPath) return;
 
-    // The circumference of the circle (2 * PI * r)
-    const circumference = 100.53096491487338; // 2 * Math.PI * 16
+  //   // The circumference of the circle (2 * PI * r)
+  //   const circumference = 100.53096491487338; // 2 * Math.PI * 16
 
-    // Calculate the stroke dash offset based on progress
-    const dashOffset = ((100 - progress) / 100) * circumference;
-    progressPath.style.strokeDashoffset = String(dashOffset);
-  }
+  //   // Calculate the stroke dash offset based on progress
+  //   const dashOffset = ((100 - progress) / 100) * circumference;
+  //   progressPath.style.strokeDashoffset = String(dashOffset);
+  // }
   /**
    * Normalize an image with DDN given a set of points
    * @param points - points provided by either users or DDN's detect quad
@@ -649,17 +656,14 @@ export default class DocumentScannerView {
      * image frames to decide whether conditions are suitable for automatic normalization.
      */
     if (result.items.length <= 1) {
-      this.frameCount = 0;
-      this.updateLoadingProgress(0);
+      this.crossVerificationCount = 0;
+      // this.updateLoadingProgress(0);
       return;
     }
 
-    this.frameCount++;
-    const progress = Math.min(
-      100,
-      Math.round((this.frameCount / this.config.consecutiveResultFramesBeforeNormalization) * 100)
-    );
-    this.updateLoadingProgress(progress);
+    if ((result.detectedQuadResultItems[0] as any).crossVerificationStatus === 1) this.crossVerificationCount++;
+    // const progress = Math.min(100, Math.round((this.crossVerificationCount / 2) * 100));
+    // this.updateLoadingProgress(progress);
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
@@ -668,8 +672,8 @@ export default class DocumentScannerView {
      * NOTE that this condition will not be valid should you add a CapturedResultFilter
      * with ResultDeduplication enabled.
      */
-    if (this.frameCount >= this.config.consecutiveResultFramesBeforeNormalization) {
-      this.frameCount = 0;
+    if (this.crossVerificationCount >= 2) {
+      this.crossVerificationCount = 0;
       await this.toggleAutoCapture(false); // turn off auto capture
 
       await this.takePhoto();
@@ -697,7 +701,7 @@ export default class DocumentScannerView {
         cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
 
         // Reset frameCount
-        this.frameCount = 0;
+        this.crossVerificationCount = 0;
       });
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
