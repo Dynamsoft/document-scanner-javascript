@@ -16,7 +16,7 @@ export interface DocumentScannerViewConfig {
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
   container?: HTMLElement;
-  consecutiveResultFramesBeforeNormalization?: number;
+  // consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
 
@@ -82,7 +82,7 @@ export default class DocumentScannerView {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
       normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
     };
-    this.config.consecutiveResultFramesBeforeNormalization = config.consecutiveResultFramesBeforeNormalization || 15;
+    // this.config.consecutiveResultFramesBeforeNormalization = config.consecutiveResultFramesBeforeNormalization || 15;
   }
 
   async initialize(): Promise<void> {
@@ -653,7 +653,7 @@ export default class DocumentScannerView {
    */
   private async handleAutoCaptureMode(result: CapturedResult) {
     /** If "Auto Capture" is checked, the library uses the document boundaries found in consecutive
-     * image frames to decide whether conditions are suitable for automatic normalization.
+     * cross verified frames to decide whether conditions are suitable for automatic normalization.
      */
     if (result.items.length <= 1) {
       this.crossVerificationCount = 0;
@@ -667,10 +667,7 @@ export default class DocumentScannerView {
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
-     * "getting document boundary detected for 30 consecutive frames".
-     *
-     * NOTE that this condition will not be valid should you add a CapturedResultFilter
-     * with ResultDeduplication enabled.
+     * "getting document boundary detected after 2 cross verified reuslts".
      */
     if (this.crossVerificationCount >= 2) {
       this.crossVerificationCount = 0;
@@ -700,7 +697,7 @@ export default class DocumentScannerView {
         // To capture RGB Images, we set the Pixel Format to EnumImagePixelFormat.IPF_ABGR_8888
         cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
 
-        // Reset frameCount
+        // Reset crossVerificationCount
         this.crossVerificationCount = 0;
       });
     } catch (ex: any) {

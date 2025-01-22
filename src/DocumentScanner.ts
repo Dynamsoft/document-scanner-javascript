@@ -135,8 +135,8 @@ class DocumentScanner {
             container: viewContainers["scanner"] || this.config.scannerViewConfig?.container || null,
             templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
             cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
-            consecutiveResultFramesBeforeNormalization:
-              this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 15,
+            // consecutiveResultFramesBeforeNormalization:
+            //   this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 15,
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
