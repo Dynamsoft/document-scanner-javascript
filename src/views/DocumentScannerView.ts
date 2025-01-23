@@ -470,6 +470,26 @@ export default class DocumentScannerView {
     }
   }
 
+  private setAutoCaptureTimeout() {
+    if (this.autoCaptureTimeout) {
+      clearTimeout(this.autoCaptureTimeout);
+    }
+
+    this.toggleShowTipsMessage("Keep camera steady with a contrasting background", TipsBackgroudColor.DEFAULT, true);
+
+    this.autoCaptureTimeout = setTimeout(async () => {
+      if (this.autoCaptureTimeout) {
+        await this.toggleSmartCapture(false); // This will also toggle off auto crop
+        this.toggleShowTipsMessage(
+          "Failed to auto capture. Please take photo manually",
+          TipsBackgroudColor.ERROR,
+          true
+        );
+        setTimeout(() => this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false), 5000);
+      }
+    }, 15000);
+  }
+
   async toggleSmartCapture(mode?: boolean) {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
 
@@ -518,22 +538,8 @@ export default class DocumentScannerView {
     }
 
     // Show tips message and set timeout if auto capture is enabled
-    if (this.smartCaptureEnabled) {
-      this.toggleShowTipsMessage("Keep camera steady with a contrasting background", TipsBackgroudColor.DEFAULT, true);
-
-      // Set timeout for 15 seconds
-      this.autoCaptureTimeout = setTimeout(async () => {
-        // If still in auto capture mode after 15 seconds
-        if (this.autoCaptureTimeout) {
-          await this.toggleSmartCapture(false);
-          this.toggleShowTipsMessage(
-            "Failed to auto capture. Please take photo manually",
-            TipsBackgroudColor.ERROR,
-            true
-          );
-          setTimeout(() => this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false), 5000); // Hide message after 5 seconds
-        }
-      }, 15000);
+    if (this.smartCaptureEnabled && !this.autoCropEnabled) {
+      this.setAutoCaptureTimeout();
     } else {
       this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false);
     }
@@ -563,6 +569,11 @@ export default class DocumentScannerView {
     container.style.color = this.autoCropEnabled ? "#fe814a" : "#fff";
     offIcon.style.display = this.autoCropEnabled ? "none" : "block";
     onIcon.style.display = this.autoCropEnabled ? "block" : "none";
+
+    // Reset smart capture timeout whenever auto crop state changes
+    if (this.smartCaptureEnabled || this.autoCropEnabled) {
+      this.setAutoCaptureTimeout();
+    }
   }
 
   private toggleShowTipsMessage(
@@ -688,6 +699,10 @@ export default class DocumentScannerView {
         )?.location;
       }
 
+      const flowType = this.getFlowType();
+      // turn off smart capture (and also auto crop) before closin camera
+      await this.toggleSmartCapture(false);
+
       // Clean up camera and capture
       this.closeCamera();
 
@@ -708,7 +723,7 @@ export default class DocumentScannerView {
         originalImageResult: this.originalImageData,
         correctedImageResult,
         detectedQuadrilateral,
-        _flowType: this.getFlowType(),
+        _flowType: flowType,
       };
 
       // Emit result through shared resources
@@ -789,8 +804,6 @@ export default class DocumentScannerView {
       this.crossVerificationCount = 0;
 
       await this.takePhoto();
-
-      await this.toggleSmartCapture(false); // turn off smart capture (and also auto crop)
     }
   }
 
