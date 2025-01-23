@@ -18,6 +18,13 @@ export enum EnumResultStatus {
   RS_FAILED = 2,
 }
 
+export enum EnumFlowType {
+  MANUAL = "manual",
+  SMART_CAPTURE = "smartCapture",
+  AUTO_CROP = "autoCrop",
+  UPLOADED_IMAGE = "uploadedImage",
+}
+
 export type ResultStatus = {
   code: EnumResultStatus;
   message?: string;
@@ -28,6 +35,7 @@ export interface DocumentScanResult {
   correctedImageResult?: NormalizedImageResultItem | DSImageData;
   originalImageResult?: OriginalImageResultItem["imageData"];
   detectedQuadrilateral?: Quadrilateral;
+  _flowType?: EnumFlowType;
 }
 
 export interface ControlButton {

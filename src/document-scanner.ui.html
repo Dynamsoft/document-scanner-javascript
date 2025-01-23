@@ -589,7 +589,7 @@
             </g>
           </svg>
           <svg
-            class="dce-mn-auto-capture-on"
+            class="dce-mn-auto-crop-on"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             width="20"
@@ -618,7 +618,7 @@
             </g>
           </svg>
           <svg
-            class="dce-mn-auto-capture-off"
+            class="dce-mn-auto-crop-off"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             width="20"
@@ -657,6 +657,7 @@
       </div>
       <div class="dce-footer">
         <div class="dce-mn-take-photo" title="Take Photo">
+          <div class="dce-loading-auto-capture-animation"></div>
           <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70">
             <g id="capture" transform="translate(-49 -577)">
               <circle
@@ -680,7 +681,7 @@
             </g>
           </svg>
         </div>
-        <div class="dce-loading-auto-capture-container" title="Loading Auto Capture">
+        <!-- <div class="dce-loading-auto-capture-container" title="Loading Auto Capture">
           <svg class="dce-loading-auto-capture-circle" viewBox="0 0 36 36">
             <circle
               cx="18"
@@ -704,7 +705,7 @@
               stroke-linecap="round"
             />
           </svg>
-        </div>
+        </div> -->
       </div>
       <div class="dce-mn-zoom">- <span>1.0X</span> -</div>
       <div class="dce-mn-tips">
@@ -1044,6 +1045,7 @@
       cursor: pointer;
       display: flex;
       align-items: center;
+      position: relative;
       justify-content: center;
     }
 
@@ -1056,7 +1058,21 @@
       opacity: 0.9;
     }
 
-    .dce-loading-auto-capture-container {
+    .dce-loading-auto-capture-animation {
+      position: absolute;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      border-width: 4px;
+      border-style: solid;
+      border-top-color: #fe8e14;
+      border-right-color: #fe8e14;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+      animation: rotate 1.5s linear infinite;
+    }
+
+    /* .dce-loading-auto-capture-container {
       width: 60px;
       height: 60px;
       position: relative;
@@ -1089,7 +1105,7 @@
       border-bottom-color: rgba(254, 142, 20, 0.3);
       border-left-color: rgba(254, 142, 20, 0.3);
       animation: rotate 1.5s linear infinite;
-    }
+    } */
 
     @keyframes rotate {
       0% {

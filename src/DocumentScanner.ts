@@ -11,7 +11,7 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
 } from "./views/utils/types";
-import { getElement } from "./views/utils";
+import { getElement, shouldCorrectImage } from "./views/utils";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
@@ -273,37 +273,40 @@ class DocumentScanner {
     cleanContainer(this.config.scanResultViewConfig?.container);
   }
 
-  // Workflow
   /**
    * Launches the document scanning process.
    *
-   * The flow varies based on which view containers are configured:
+   * Flow paths based on which view containers are configured and the capture method:
    *
-   * 1. All views present (scanner, correction, scanResult):
-   *    - Flow: Scanner -> ScanResult (correction available in ScanResult)
+   * View Container Configurations
+   * 1. All views present (Scanner, Correction, ScanResult)
+   *    Flow:
+   *      A. Auto-capture paths:
+   *         - Smart Capture: Scanner -> Correction -> ScanResult
+   *         - Auto Crop: Scanner -> ScanResult
    *
-   * 2. Only scanner + scanResult:
-   *    - Flow: Scanner -> ScanResult
+   *      B. Manual paths:
+   *         - Upload Image: Scanner -> Correction -> ScanResult
+   *         - Manual Capture: Scanner -> ScanResult
+   * 2. Scanner + ScanResult
+   *    Flow: Scanner -> ScanResult
    *
-   * 3. Only scanner + correction:
-   *    - Flow: Scanner -> Correction
+   * 3. Scanner + Correction
+   *    Flow: Scanner -> Correction
    *
-   * 4. Only correction:
-   *    - Flow: Correction (uses existing result if available)
+   * 4. Special cases:
+   *    - Only Scanner available: Returns scan result directly
+   *    - Only Correction available + existing result: Goes to Correction
+   *    - Only ScanResult available + existing result: Goes to ScanResult
    *
-   * 5. Only scanResult:
-   *    - Flow: ScanResult (uses existing result if available)
-   *
-   * 6. Only scanner:
-   *    - Flow: Scanner (returns scan result)
-   *
-   * @returns Promise<DocumentScanResult> - Resolves with the scan result which includes:
-   *  - status: Success/Failed/Cancelled
-   *  - originalImageResult: Original captured image (if scanner used)
-   *  - correctedImageResult: Normalized image (if correction performed)
+   * @returns Promise<DocumentScanResult> containing:
+   *  - status: Success/Failed/Cancelled with message
+   *  - originalImageResult: Raw captured image
+   *  - correctedImageResult: Normalized image (if correction applied)
    *  - detectedQuadrilateral: Document boundaries
+   *  - _flowType: Internal routing flag for different capture methods
    *
-   * @throws Error if a capture session is already in progress
+   * @throws Error if capture session already running
    */
   async launch(): Promise<DocumentScanResult> {
     if (this.isCapturing) {
@@ -318,14 +321,10 @@ class DocumentScanner {
         getElement(this.config.container).style.display = "block";
       }
 
-      // Handle direct correction view
-      if (!components.scannerView && components.correctionView && this.resources.result) {
-        return await components.correctionView.launch();
-      }
-
-      // Handle direct scan result view
-      if (!components.scannerView && components.scanResultView && this.resources.result) {
-        return await components.scanResultView.launch();
+      // Special case handling for direct views with existing results
+      if (!components.scannerView && this.resources.result) {
+        if (components.correctionView) return await components.correctionView.launch();
+        if (components.scanResultView) return await components.scanResultView.launch();
       }
 
       // Scanner view is required if no existing result
@@ -333,7 +332,7 @@ class DocumentScanner {
         throw new Error("Scanner view is required when no previous result exists");
       }
 
-      // If scanner view exists, start with scanning
+      // Main Flow
       if (components.scannerView) {
         const scanResult = await components.scannerView.launch();
 
@@ -345,15 +344,22 @@ class DocumentScanner {
             },
           };
         }
-      }
 
-      // Determine next view in flow
-      if (components.correctionView && !components.scanResultView) {
-        // Scanner -> Correction or direct Correction
-        return await components.correctionView.launch();
-      } else if (components.scanResultView) {
-        // Scanner -> ScanResult or direct ScanResult
-        return await components.scanResultView.launch();
+        // Route based on capture method
+        if (components.correctionView && components.scanResultView) {
+          if (shouldCorrectImage(scanResult._flowType)) {
+            await components.correctionView.launch();
+            return await components.scanResultView.launch();
+          }
+        }
+
+        // Default routing
+        if (components.correctionView && !components.scanResultView) {
+          return await components.correctionView.launch();
+        }
+        if (components.scanResultView) {
+          return await components.scanResultView.launch();
+        }
       }
 
       // If no additional views, return current result

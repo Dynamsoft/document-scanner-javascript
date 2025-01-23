@@ -1,5 +1,4 @@
 import {
-  DSImageData,
   EnumCapturedResultItemType,
   EnumImagePixelFormat,
   OriginalImageResultItem,
@@ -9,7 +8,13 @@ import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { MultiFrameResultCrossFilter } from "dynamsoft-utility";
 import { SharedResources } from "../DocumentScanner";
-import { DEFAULT_TEMPLATE_NAMES, DocumentScanResult, EnumResultStatus, UtilizedTemplateNames } from "./utils/types";
+import {
+  DEFAULT_TEMPLATE_NAMES,
+  DocumentScanResult,
+  EnumFlowType,
+  EnumResultStatus,
+  UtilizedTemplateNames,
+} from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 
 export interface DocumentScannerViewConfig {
@@ -27,6 +32,7 @@ interface DCEElements {
   takePhotoBtn: HTMLElement | null;
   boundsDetectionBtn: HTMLElement | null;
   smartCaptureBtn: HTMLElement | null;
+  autoCropBtn: HTMLElement | null;
   tipsMessage: HTMLElement | null;
 }
 
@@ -40,10 +46,11 @@ export default class DocumentScannerView {
   // Capture Mode
   private boundsDetectionEnabled: boolean = false;
   private smartCaptureEnabled: boolean = false;
+  private autoCropEnabled: boolean = false;
 
   // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
-  private smartCaptureTimeout: NodeJS.Timeout | null = null;
+  private autoCaptureTimeout: NodeJS.Timeout | null = null;
 
   // Used for ImageEditorView (In NornalizerView)
   private capturedResultItems: CapturedResult["items"] = [];
@@ -60,6 +67,7 @@ export default class DocumentScannerView {
     takePhotoBtn: null,
     boundsDetectionBtn: null,
     smartCaptureBtn: null,
+    autoCropBtn: null,
     tipsMessage: null,
   };
 
@@ -169,11 +177,13 @@ export default class DocumentScannerView {
       takePhotoBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo"),
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
       smartCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture"),
+      autoCropBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop"),
       tipsMessage: DCEContainer.shadowRoot.querySelector(".dce-mn-tips-msg"),
     };
 
     await this.toggleBoundsDetection(this.boundsDetectionEnabled);
     await this.toggleSmartCapture(this.smartCaptureEnabled);
+    await this.toggleAutoCrop(this.autoCropEnabled);
 
     this.assignDCEClickEvents();
 
@@ -191,6 +201,7 @@ export default class DocumentScannerView {
     this.takePhoto = this.takePhoto.bind(this);
     this.toggleBoundsDetection = this.toggleBoundsDetection.bind(this);
     this.toggleSmartCapture = this.toggleSmartCapture.bind(this);
+    this.toggleAutoCrop = this.toggleAutoCrop.bind(this);
     this.closeCamera = this.closeCamera.bind(this);
 
     this.DCE_ELEMENTS.takePhotoBtn.addEventListener("click", this.takePhoto, eventOptions);
@@ -206,6 +217,8 @@ export default class DocumentScannerView {
       async () => await this.toggleSmartCapture(),
       eventOptions
     );
+
+    this.DCE_ELEMENTS.autoCropBtn.addEventListener("click", async () => await this.toggleAutoCrop(), eventOptions);
 
     this.DCE_ELEMENTS.closeScannerBtn.addEventListener("click", async () => await this.handleCloseBtn(), eventOptions);
 
@@ -342,18 +355,28 @@ export default class DocumentScannerView {
         await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)
       ).items;
       this.originalImageData = (this.capturedResultItems[0] as OriginalImageResultItem)?.imageData;
-      const { width, height } = this.originalImageData;
-      this.capturedResultItems = [];
-      const detectedQuadrilateral = {
-        points: [
-          { x: 0, y: 0 },
-          { x: width, y: 0 },
-          { x: width, y: height },
-          { x: 0, y: height },
-        ],
-        area: height * width,
-      } as Quadrilateral;
 
+      // Reset captured items if not using bounds detection
+      let detectedQuadrilateral: Quadrilateral = null;
+      if (this.capturedResultItems?.length <= 1) {
+        this.capturedResultItems = [];
+        const { width, height } = this.originalImageData;
+        detectedQuadrilateral = {
+          points: [
+            { x: 0, y: 0 },
+            { x: width, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height },
+          ],
+          area: height * width,
+        } as Quadrilateral;
+      } else {
+        detectedQuadrilateral = (
+          this.capturedResultItems.find(
+            (item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD
+          ) as DetectedQuadResultItem
+        )?.location;
+      }
       const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       const result = {
@@ -364,6 +387,7 @@ export default class DocumentScannerView {
         originalImageResult: this.originalImageData,
         correctedImageResult,
         detectedQuadrilateral,
+        _flowType: EnumFlowType.UPLOADED_IMAGE,
       };
 
       // Emit result through shared resources
@@ -429,6 +453,7 @@ export default class DocumentScannerView {
     // If we're turning off bounds detection, ensure smart capture is turned off
     if (!newBoundsDetectionState) {
       await this.toggleSmartCapture(false);
+      await this.toggleSmartCapture(false);
     }
 
     const { cvRouter } = this.resources;
@@ -454,8 +479,9 @@ export default class DocumentScannerView {
     const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-on") as HTMLElement;
     const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-off") as HTMLElement;
     const takePhotoBtn = DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo") as HTMLElement;
+    const takePhotoIcon = takePhotoBtn.querySelector("svg");
     const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
-      ".dce-loading-auto-capture-container"
+      ".dce-loading-auto-capture-animation"
     ) as HTMLElement;
 
     if (!onIcon || !offIcon || !takePhotoBtn || !loadingAutoCapture) return;
@@ -463,9 +489,11 @@ export default class DocumentScannerView {
     const newSmartCaptureState = mode !== undefined ? mode : !this.smartCaptureEnabled;
 
     // If trying to turn on auto capture, ensure bounds detection is on
+    // If turning off auto capture, ensure auto crop is off
     if (newSmartCaptureState && !this.boundsDetectionEnabled) {
-      // Turn on bouds detection first
       await this.toggleBoundsDetection(true);
+    } else if (!newSmartCaptureState) {
+      await this.toggleAutoCrop(false);
     }
 
     this.smartCaptureEnabled = newSmartCaptureState;
@@ -474,7 +502,9 @@ export default class DocumentScannerView {
     onIcon.style.display = this.smartCaptureEnabled ? "block" : "none";
 
     // Toggle display of take photo button and loading animation
-    takePhotoBtn.style.display = newSmartCaptureState ? "none" : "flex";
+    takePhotoIcon.style.opacity = newSmartCaptureState ? "0.4" : "1";
+    takePhotoBtn.style.pointerEvents = newSmartCaptureState ? "none" : "auto";
+
     loadingAutoCapture.style.display = newSmartCaptureState ? "flex" : "none";
 
     // Reset crossVerificationCount whenever we toggle the smart capture
@@ -482,9 +512,9 @@ export default class DocumentScannerView {
     // this.updateLoadingProgress(this.crossVerificationCount);
 
     // Clear any existing timeout
-    if (this.smartCaptureTimeout) {
-      clearTimeout(this.smartCaptureTimeout);
-      this.smartCaptureTimeout = null;
+    if (this.autoCaptureTimeout) {
+      clearTimeout(this.autoCaptureTimeout);
+      this.autoCaptureTimeout = null;
     }
 
     // Show tips message and set timeout if auto capture is enabled
@@ -492,9 +522,9 @@ export default class DocumentScannerView {
       this.toggleShowTipsMessage("Keep camera steady with a contrasting background", TipsBackgroudColor.DEFAULT, true);
 
       // Set timeout for 15 seconds
-      this.smartCaptureTimeout = setTimeout(async () => {
+      this.autoCaptureTimeout = setTimeout(async () => {
         // If still in auto capture mode after 15 seconds
-        if (this.smartCaptureTimeout) {
+        if (this.autoCaptureTimeout) {
           await this.toggleSmartCapture(false);
           this.toggleShowTipsMessage(
             "Failed to auto capture. Please take photo manually",
@@ -507,6 +537,32 @@ export default class DocumentScannerView {
     } else {
       this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false);
     }
+  }
+
+  async toggleAutoCrop(mode?: boolean) {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+
+    if (!DCEContainer?.shadowRoot) return;
+
+    const container = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop") as HTMLElement;
+    const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop-on") as HTMLElement;
+    const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop-off") as HTMLElement;
+
+    if (!onIcon || !offIcon) return;
+
+    const newSmartCaptureState = mode !== undefined ? mode : !this.autoCropEnabled;
+
+    // If trying to turn on auto capture, ensure bounds detection is on
+    if (newSmartCaptureState && (!this.boundsDetectionEnabled || !this.smartCaptureEnabled)) {
+      // Turn on bouds detection first
+      await this.toggleBoundsDetection(true);
+      await this.toggleSmartCapture(true);
+    }
+
+    this.autoCropEnabled = newSmartCaptureState;
+    container.style.color = this.autoCropEnabled ? "#fe814a" : "#fff";
+    offIcon.style.display = this.autoCropEnabled ? "none" : "block";
+    onIcon.style.display = this.autoCropEnabled ? "block" : "none";
   }
 
   private toggleShowTipsMessage(
@@ -590,6 +646,15 @@ export default class DocumentScannerView {
     cameraView.clearAllInnerDrawingItems();
   }
 
+  private getFlowType(): EnumFlowType {
+    // Find flow type
+    return this.autoCropEnabled
+      ? EnumFlowType.AUTO_CROP
+      : this.smartCaptureEnabled
+      ? EnumFlowType.SMART_CAPTURE
+      : EnumFlowType.MANUAL;
+  }
+
   async takePhoto() {
     try {
       const { cameraEnhancer, onResultUpdated } = this.resources;
@@ -635,7 +700,7 @@ export default class DocumentScannerView {
       // Hide loading screen
       this.hideScannerLoadingOverlay(true);
 
-      const result = {
+      const result: DocumentScanResult = {
         status: {
           code: EnumResultStatus.RS_SUCCESS,
           message: "Success",
@@ -643,6 +708,7 @@ export default class DocumentScannerView {
         originalImageResult: this.originalImageData,
         correctedImageResult,
         detectedQuadrilateral,
+        _flowType: this.getFlowType(),
       };
 
       // Emit result through shared resources
@@ -676,8 +742,8 @@ export default class DocumentScannerView {
     ) as OriginalImageResultItem[];
     this.originalImageData = originalImage.length && originalImage[0].imageData;
 
-    if (this.smartCaptureEnabled) {
-      this.handleSmartCaptureMode(result);
+    if (this.smartCaptureEnabled || this.autoCropEnabled) {
+      this.handleAutoCaptureMode(result);
     }
   }
 
@@ -695,12 +761,13 @@ export default class DocumentScannerView {
   //   const dashOffset = ((100 - progress) / 100) * circumference;
   //   progressPath.style.strokeDashoffset = String(dashOffset);
   // }
+
   /**
    * Normalize an image with DDN given a set of points
    * @param points - points provided by either users or DDN's detect quad
    * @returns normalized image by DDN
    */
-  private async handleSmartCaptureMode(result: CapturedResult) {
+  private async handleAutoCaptureMode(result: CapturedResult) {
     /** If "Smart Capture" or "Auto Crop" is checked, the library uses the document boundaries found in consecutive
      * cross verified frames to decide whether conditions are suitable for automatic normalization.
      */
@@ -716,13 +783,14 @@ export default class DocumentScannerView {
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
-     * "getting document boundary detected after 2 cross verified reuslts".
+     * "getting document boundary detected after 2 cross verified results".
      */
     if (this.crossVerificationCount >= 2) {
       this.crossVerificationCount = 0;
-      await this.toggleSmartCapture(false); // turn off auto capture
 
       await this.takePhoto();
+
+      await this.toggleSmartCapture(false); // turn off smart capture (and also auto crop)
     }
   }
 

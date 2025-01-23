@@ -24,7 +24,13 @@ export type { DocumentScannerConfig, SharedResources } from "./DocumentScanner";
 export type { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 export type { DocumentCorrectionViewConfig, DocumentCorrectionViewControlIcons } from "./views/DocumentCorrectionView";
 export type { ScanResultViewConfig, ScanResultViewControlIcons } from "./views/ScanResultView";
-export type { DocumentScanResult, UtilizedTemplateNames, ResultStatus, ControlButton } from "./views/utils/types";
+export type {
+  DocumentScanResult,
+  UtilizedTemplateNames,
+  ResultStatus,
+  ControlButton,
+  EnumFlowType,
+} from "./views/utils/types";
 
 export { DocumentScanner, DocumentNormalizerView, DocumentScannerView, ScanResultView, EnumResultStatus };
 

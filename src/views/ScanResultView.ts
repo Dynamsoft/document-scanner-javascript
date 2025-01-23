@@ -1,7 +1,7 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls } from "./utils";
+import { createControls, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import { ControlButton, DocumentScanResult, EnumResultStatus } from "./utils/types";
@@ -165,9 +165,10 @@ export default class ScanResultView {
       this.hideView();
       const result = await this.scannerView.launch();
 
-      if (this.currentScanResultViewResolver && result?.status?.code === EnumResultStatus.RS_FAILED) {
-        this.currentScanResultViewResolver(result);
-
+      if (result?.status?.code === EnumResultStatus.RS_FAILED) {
+        if (this.currentScanResultViewResolver) {
+          this.currentScanResultViewResolver(result);
+        }
         return;
       }
 
@@ -177,6 +178,12 @@ export default class ScanResultView {
           this.resources.onResultUpdated(this.resources.result);
         } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
           this.resources.onResultUpdated(result);
+        }
+      }
+
+      if (this.correctionView && result?._flowType) {
+        if (shouldCorrectImage(result?._flowType)) {
+          await this.handleCorrectImage();
         }
       }
 

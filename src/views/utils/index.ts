@@ -1,4 +1,4 @@
-import { ControlButton } from "./types";
+import { ControlButton, EnumFlowType } from "./types";
 
 export function getElement(element: string | HTMLElement): HTMLElement | null {
   if (typeof element === "string") {
@@ -105,4 +105,8 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
   });
 
   return container;
+}
+
+export function shouldCorrectImage(flow: EnumFlowType) {
+  return [EnumFlowType.SMART_CAPTURE, EnumFlowType.UPLOADED_IMAGE].includes(flow);
 }
