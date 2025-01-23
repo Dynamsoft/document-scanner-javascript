@@ -651,6 +651,8 @@
       <div class="dce-footer">
         <div class="dce-mn-take-photo" title="Take Photo">
           <div class="dce-loading-auto-capture-animation"></div>
+          <div class="dce-loading-auto-capture-animation-bottom"></div>
+
           <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70">
             <g id="capture" transform="translate(-49 -577)">
               <circle
@@ -674,41 +676,8 @@
             </g>
           </svg>
         </div>
-        <!-- <div class="dce-loading-auto-capture-container" title="Loading Auto Capture">
-          <svg class="dce-loading-auto-capture-circle" viewBox="0 0 36 36">
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke="rgba(254, 142, 20, 0.2)"
-              stroke-width="3"
-              stroke-linecap="round"
-            />
-            <circle
-              class="dce-loading-auto-capture-progress"
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke="#fe8e14"
-              stroke-width="3"
-              stroke-dasharray="100.53096491487338"
-              stroke-dashoffset="100.53096491487338"
-              stroke-linecap="round"
-            />
-          </svg>
-        </div> -->
       </div>
       <div class="dce-mn-zoom">- <span>1.0X</span> -</div>
-      <div class="dce-mn-tips">
-        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5" />
-          <path d="M12 17V11" stroke="white" stroke-width="1.5" stroke-linecap="round" />
-          <circle cx="1" cy="1" r="1" transform="matrix(1 0 0 -1 11 9)" fill="white" />
-        </svg>
-        <div class="dce-mn-tips-msg">Tips</div>
-      </div>
       <div class="dce-mn-toast"></div>
       <svg class="dce-mn-msg-poweredby" viewBox="0 0 94 17">
         <path
@@ -1037,8 +1006,8 @@
     }
 
     .dce-mn-take-photo > svg {
-      width: 70px;
-      height: 70px;
+      width: 52px;
+      height: 52px;
     }
 
     .dce-mn-take-photo:hover {
@@ -1050,49 +1019,24 @@
       width: 62px;
       height: 62px;
       border-radius: 50%;
-      border-width: 4px;
-      border-style: solid;
+      border: 4px solid transparent;
       border-top-color: #fe8e14;
       border-right-color: #fe8e14;
-      border-bottom-color: transparent;
-      border-left-color: transparent;
       animation: rotate 1.5s linear infinite;
     }
 
-    /* .dce-loading-auto-capture-container {
-      width: 60px;
-      height: 60px;
-      position: relative;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dce-loading-auto-capture-circle {
-      width: 50px;
-      height: 50px;
-      transform: rotate(-90deg);
-      display: none;
-    }
-
-    .dce-loading-auto-capture-progress {
-      transition: stroke-dashoffset 0.2s ease;
-    }
-
-    .dce-loading-auto-capture-container::before {
-      content: "";
+    .dce-loading-auto-capture-animation-bottom {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      width: 62px;
+      height: 62px;
       border-radius: 50%;
-      border: 3px solid #323234;
-      border-top-color: #fe8e14;
-      border-right-color: #fe8e14;
-      border-bottom-color: rgba(254, 142, 20, 0.3);
-      border-left-color: rgba(254, 142, 20, 0.3);
+      border: 4px solid transparent;
+      border-bottom-color: #fe8e14;
+      border-left-color: #fe8e14;
       animation: rotate 1.5s linear infinite;
-    } */
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 0.3s ease;
+    }
 
     @keyframes rotate {
       0% {
@@ -1120,28 +1064,6 @@
       text-align: center;
       background: rgba(100, 100, 100, 0.5);
       display: inline-block;
-    }
-    .dce-mn-tips {
-      position: absolute;
-      font-size: 12px;
-      padding: 0.5rem;
-      left: 50%;
-      bottom: 30%;
-      transform: translateX(-50%);
-      font-family: Verdana;
-      color: #fff;
-      border-radius: max(0.5vmin, 4px);
-      background: rgba(100, 100, 100, 0.5);
-      pointer-events: none;
-      gap: 0.5rem;
-      justify-content: center;
-      align-items: center;
-      display: none;
-      width: max-content;
-    }
-    .dce-mn-tips svg {
-      width: 18px;
-      height: 18px;
     }
 
     .dce-mn-toast {

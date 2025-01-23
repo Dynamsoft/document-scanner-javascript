@@ -33,12 +33,6 @@ interface DCEElements {
   boundsDetectionBtn: HTMLElement | null;
   smartCaptureBtn: HTMLElement | null;
   autoCropBtn: HTMLElement | null;
-  tipsMessage: HTMLElement | null;
-}
-
-enum TipsBackgroudColor {
-  DEFAULT = "rgba(100, 100, 100, 0.5)",
-  ERROR = "rgba(255, 100, 100, 0.5)",
 }
 
 // Implementation
@@ -50,7 +44,6 @@ export default class DocumentScannerView {
 
   // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
-  private autoCaptureTimeout: NodeJS.Timeout | null = null;
 
   // Used for ImageEditorView (In NornalizerView)
   private capturedResultItems: CapturedResult["items"] = [];
@@ -68,7 +61,6 @@ export default class DocumentScannerView {
     boundsDetectionBtn: null,
     smartCaptureBtn: null,
     autoCropBtn: null,
-    tipsMessage: null,
   };
 
   // Scan Resolve
@@ -178,7 +170,6 @@ export default class DocumentScannerView {
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
       smartCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture"),
       autoCropBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop"),
-      tipsMessage: DCEContainer.shadowRoot.querySelector(".dce-mn-tips-msg"),
     };
 
     await this.toggleBoundsDetection(this.boundsDetectionEnabled);
@@ -438,6 +429,17 @@ export default class DocumentScannerView {
     });
   }
 
+  async toggleAutoCaptureAnimation(enabled?: boolean) {
+    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    if (!DCEContainer?.shadowRoot) return;
+
+    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
+      ".dce-loading-auto-capture-animation-bottom"
+    ) as HTMLElement;
+
+    loadingAutoCapture.style.clipPath = `inset(0 ${enabled ? "100%" : "0%"} 0 0)`;
+  }
+
   async toggleBoundsDetection(enabled?: boolean) {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
@@ -448,11 +450,11 @@ export default class DocumentScannerView {
 
     if (!onIcon || !offIcon) return;
 
+    this.toggleAutoCaptureAnimation(false);
     const newBoundsDetectionState = enabled !== undefined ? enabled : !this.boundsDetectionEnabled;
 
     // If we're turning off bounds detection, ensure smart capture is turned off
     if (!newBoundsDetectionState) {
-      await this.toggleSmartCapture(false);
       await this.toggleSmartCapture(false);
     }
 
@@ -470,26 +472,6 @@ export default class DocumentScannerView {
     }
   }
 
-  private setAutoCaptureTimeout() {
-    if (this.autoCaptureTimeout) {
-      clearTimeout(this.autoCaptureTimeout);
-    }
-
-    this.toggleShowTipsMessage("Keep camera steady with a contrasting background", TipsBackgroudColor.DEFAULT, true);
-
-    this.autoCaptureTimeout = setTimeout(async () => {
-      if (this.autoCaptureTimeout) {
-        await this.toggleSmartCapture(false); // This will also toggle off auto crop
-        this.toggleShowTipsMessage(
-          "Failed to auto capture. Please take photo manually",
-          TipsBackgroudColor.ERROR,
-          true
-        );
-        setTimeout(() => this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false), 5000);
-      }
-    }, 15000);
-  }
-
   async toggleSmartCapture(mode?: boolean) {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
 
@@ -498,15 +480,11 @@ export default class DocumentScannerView {
     const container = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture") as HTMLElement;
     const onIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-on") as HTMLElement;
     const offIcon = DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture-off") as HTMLElement;
-    const takePhotoBtn = DCEContainer.shadowRoot.querySelector(".dce-mn-take-photo") as HTMLElement;
-    const takePhotoIcon = takePhotoBtn.querySelector("svg");
-    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
-      ".dce-loading-auto-capture-animation"
-    ) as HTMLElement;
 
-    if (!onIcon || !offIcon || !takePhotoBtn || !loadingAutoCapture) return;
+    if (!onIcon || !offIcon) return;
 
     const newSmartCaptureState = mode !== undefined ? mode : !this.smartCaptureEnabled;
+    this.toggleAutoCaptureAnimation(newSmartCaptureState);
 
     // If trying to turn on auto capture, ensure bounds detection is on
     // If turning off auto capture, ensure auto crop is off
@@ -521,28 +499,8 @@ export default class DocumentScannerView {
     offIcon.style.display = this.smartCaptureEnabled ? "none" : "block";
     onIcon.style.display = this.smartCaptureEnabled ? "block" : "none";
 
-    // Toggle display of take photo button and loading animation
-    takePhotoIcon.style.opacity = newSmartCaptureState ? "0.4" : "1";
-    takePhotoBtn.style.pointerEvents = newSmartCaptureState ? "none" : "auto";
-
-    loadingAutoCapture.style.display = newSmartCaptureState ? "flex" : "none";
-
     // Reset crossVerificationCount whenever we toggle the smart capture
     this.crossVerificationCount = 0;
-    // this.updateLoadingProgress(this.crossVerificationCount);
-
-    // Clear any existing timeout
-    if (this.autoCaptureTimeout) {
-      clearTimeout(this.autoCaptureTimeout);
-      this.autoCaptureTimeout = null;
-    }
-
-    // Show tips message and set timeout if auto capture is enabled
-    if (this.smartCaptureEnabled && !this.autoCropEnabled) {
-      this.setAutoCaptureTimeout();
-    } else {
-      this.toggleShowTipsMessage("", TipsBackgroudColor.DEFAULT, false);
-    }
   }
 
   async toggleAutoCrop(mode?: boolean) {
@@ -569,24 +527,6 @@ export default class DocumentScannerView {
     container.style.color = this.autoCropEnabled ? "#fe814a" : "#fff";
     offIcon.style.display = this.autoCropEnabled ? "none" : "block";
     onIcon.style.display = this.autoCropEnabled ? "block" : "none";
-
-    // Reset smart capture timeout whenever auto crop state changes
-    if (this.smartCaptureEnabled || this.autoCropEnabled) {
-      this.setAutoCaptureTimeout();
-    }
-  }
-
-  private toggleShowTipsMessage(
-    message: string,
-    bgColor: TipsBackgroudColor = TipsBackgroudColor.DEFAULT,
-    show?: boolean
-  ) {
-    this.DCE_ELEMENTS.tipsMessage.textContent = message;
-
-    (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.display =
-      show || (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.display === "none" ? "flex" : "none";
-
-    (this.DCE_ELEMENTS.tipsMessage?.parentElement).style.background = bgColor;
   }
 
   async openCamera(): Promise<void> {
@@ -762,21 +702,6 @@ export default class DocumentScannerView {
     }
   }
 
-  // private updateLoadingProgress(progress: number) {
-  //   const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
-  //   if (!DCEContainer?.shadowRoot) return;
-
-  //   const progressPath = DCEContainer.shadowRoot.querySelector(".dce-loading-auto-capture-progress") as SVGPathElement;
-  //   if (!progressPath) return;
-
-  //   // The circumference of the circle (2 * PI * r)
-  //   const circumference = 100.53096491487338; // 2 * Math.PI * 16
-
-  //   // Calculate the stroke dash offset based on progress
-  //   const dashOffset = ((100 - progress) / 100) * circumference;
-  //   progressPath.style.strokeDashoffset = String(dashOffset);
-  // }
-
   /**
    * Normalize an image with DDN given a set of points
    * @param points - points provided by either users or DDN's detect quad
@@ -788,13 +713,10 @@ export default class DocumentScannerView {
      */
     if (result.items.length <= 1) {
       this.crossVerificationCount = 0;
-      // this.updateLoadingProgress(0);
       return;
     }
 
     if ((result.detectedQuadResultItems[0] as any).crossVerificationStatus === 1) this.crossVerificationCount++;
-    // const progress = Math.min(100, Math.round((this.crossVerificationCount / 2) * 100));
-    // this.updateLoadingProgress(progress);
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be

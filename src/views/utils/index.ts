@@ -108,5 +108,5 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
 }
 
 export function shouldCorrectImage(flow: EnumFlowType) {
-  return [EnumFlowType.SMART_CAPTURE, EnumFlowType.UPLOADED_IMAGE].includes(flow);
+  return [EnumFlowType.SMART_CAPTURE, EnumFlowType.UPLOADED_IMAGE, EnumFlowType.MANUAL].includes(flow);
 }
