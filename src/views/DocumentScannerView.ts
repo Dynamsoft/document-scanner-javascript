@@ -437,7 +437,7 @@ export default class DocumentScannerView {
       ".dce-loading-auto-capture-animation-bottom"
     ) as HTMLElement;
 
-    loadingAutoCapture.style.clipPath = `inset(0 ${enabled ? "100%" : "0%"} 0 0)`;
+    loadingAutoCapture.style.opacity = enabled ? "0" : "1";
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
