@@ -433,11 +433,12 @@ export default class DocumentScannerView {
     const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
-    const loadingAutoCapture = DCEContainer.shadowRoot.querySelector(
-      ".dce-loading-auto-capture-animation-bottom"
+    const loadingAnimation = DCEContainer.shadowRoot.querySelector(
+      ".dce-loading-auto-capture-animation"
     ) as HTMLElement;
 
-    loadingAutoCapture.style.opacity = enabled ? "0" : "1";
+    loadingAnimation.style.borderLeftColor = enabled ? "transparent" : "#fe8e14";
+    loadingAnimation.style.borderBottomColor = enabled ? "transparent" : "#fe8e14";
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
