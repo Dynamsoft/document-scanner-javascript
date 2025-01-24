@@ -49,8 +49,8 @@ app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
-let httpPort = 3002;
-let httpsPort = 3003;
+let httpPort = 3000;
+let httpsPort = 3001;
 
 // redirect handling
 app.use((req, res, next) => {
