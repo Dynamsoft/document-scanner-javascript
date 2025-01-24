@@ -47,9 +47,6 @@
     }
   ],
   "license": "SEE LICENSE IN LICENSE",
-  "bugs": {
-    "url": "https://github.com/Dynamsoft/document-scanner-javascript"
-  },
   "homepage": "https://www.dynamsoft.com",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",

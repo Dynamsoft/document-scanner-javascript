@@ -545,11 +545,8 @@ export default class DocumentScannerView {
         }
 
         await cameraEnhancer.open();
-
-        // cvRouter start capture? TODO
       } else if (cameraEnhancer.isPaused()) {
         await cameraEnhancer.resume();
-        // cvRouter start capture? TODO
       }
 
       // Assign boundsDetection, smartCapture, and takePhoto element
