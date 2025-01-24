@@ -29,11 +29,11 @@ DDS requires a license key to function. You can request a [30-day free trial lic
 
 ### Option 1: Work with the GitHub Repository
 
-If you're **working with the [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript)**, the "Hello World" page is available under the `/samples` directory.
+If you're **working with the [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript)**, the "hello-world.html" page is available under the [`/samples`](https://github.com/Dynamsoft/document-scanner-javascript/tree/main/samples) directory.
 
 ### Option 2: Create Your Own Page
 
-Alternatively, you can create an empty file named hello-world.html and paste the following code into it:
+Alternatively, you can create an empty file named `hello-world.html` and paste the following code into it:
 
 ```html
 <!DOCTYPE html>
@@ -124,16 +124,16 @@ After running `npm run serve`, the terminal will display the local address. Open
 
 ### Option 2: Run the Page You Created
 
-If you created your own hello-world.html file (as described in Step 2, Option 2), follow these steps to run it:
+If you created your own `hello-world.html` file (as described in [Step 2, Option 2](https://github.com/Dynamsoft/document-scanner-javascript/tree/main?tab=readme-ov-file#option-2-create-your-own-page)), follow these steps to run it:
 
 1. Deploy to a web server:
 
-- You can use a production server like IIS or Apache.
-- Alternatively, for local testing, use a simple server such as the [Five Server](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server) extension for Visual Studio Code.
+  - You can use a production server like IIS or Apache.
+  - Alternatively, for local testing, use a simple server such as the [Five Server](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server) extension for Visual Studio Code.
 
-2. Access the file in your browser:
+1. Access the file in your browser:
 
-Once the server is running, open the URL where the file is served (e.g., http://localhost/hello-world.html).
+  Once the server is running, open the URL where the file is served (e.g., http://localhost/hello-world.html).
 
 ## Contact us
 
