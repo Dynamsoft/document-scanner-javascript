@@ -27,11 +27,11 @@ DDS requires a license key to function. You can request a [30-day free trial lic
 
 ### Step 2: Create a "Hello World" Page
 
-### Option 1: Work with the GitHub Repository
+#### Option 1: Work with the GitHub Repository
 
 If you're **working with the [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript)**, the "hello-world.html" page is available under the [`/samples`](https://github.com/Dynamsoft/document-scanner-javascript/tree/main/samples) directory.
 
-### Option 2: Create Your Own Page
+#### Option 2: Create Your Own Page
 
 Alternatively, you can create an empty file named `hello-world.html` and paste the following code into it:
 
@@ -87,7 +87,7 @@ Alternatively, you can create an empty file named `hello-world.html` and paste t
 
 ### Step 3: Run the "Hello World" Page
 
-### Option 1: Work with the GitHub Repository
+#### Option 1: Work with the GitHub Repository
 
 If you're **working with the [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript)**, follow these steps:
 
@@ -122,7 +122,7 @@ After running `npm run serve`, the terminal will display the local address. Open
 >   - If there are multiple **local IP addresses**, choose one that works.
 >   - You will get an security alert in the browser for "self-signed certificates", click "Advanced" to continue
 
-### Option 2: Run the Page You Created
+#### Option 2: Run the Page You Created
 
 If you created your own `hello-world.html` file (as described in [Step 2, Option 2](https://github.com/Dynamsoft/document-scanner-javascript/tree/main?tab=readme-ov-file#option-2-create-your-own-page)), follow these steps to run it:
 
