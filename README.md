@@ -31,9 +31,17 @@ DDS requires a license key to function. You can request a [30-day free trial lic
 
 If you're **working with the [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript)**, the "hello-world.html" page is available under the [`/samples`](https://github.com/Dynamsoft/document-scanner-javascript/tree/main/samples) directory.
 
+Find the following code snippet and replace `YOUR_LICENSE_KEY_HERE` with the license key you obtained in [Step 1](https://github.com/Dynamsoft/document-scanner-javascript/tree/main?tab=readme-ov-file#step-1-get-a-license).
+
+```js
+const documentScanner = new Dynamsoft.DocumentScanner({
+    license: "YOUR_LICENSE_KEY_HERE",
+});
+```
+
 #### Option 2: Create Your Own Page
 
-Alternatively, you can create an empty file named `hello-world.html` and paste the following code into it:
+Alternatively, you can create an empty file named `hello-world.html`, paste the following code into it, and replace `YOUR_LICENSE_KEY_HERE` with the license key you obtained in [Step 1](https://github.com/Dynamsoft/document-scanner-javascript/tree/main?tab=readme-ov-file#step-1-get-a-license):
 
 ```html
 <!DOCTYPE html>
