@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ TO DO"
+    "url": "git+https://github.com/Dynamsoft/document-scanner-javascript"
   },
   "keywords": [
     "document scanning",
@@ -48,7 +48,7 @@
   ],
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
-    "url": "https://github.com/ TO DO"
+    "url": "https://github.com/Dynamsoft/document-scanner-javascript"
   },
   "homepage": "https://www.dynamsoft.com",
   "devDependencies": {
