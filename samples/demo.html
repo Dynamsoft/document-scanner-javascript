@@ -10,24 +10,16 @@
   <body>
     <div class="col1">
       <!-- Logo -->
-      <a
-        class="logo-container"
-        href="https://www.dynamsoft.com"
-        target="_blank"
-      >
-        <img
-          class="logo"
-          src="./assets/dynamsoftLogo.png"
-          alt="dynamsoft-logo"
-        />
+      <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
+        <img class="logo" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
       </a>
 
       <!-- Header -->
       <header class="header">
         <h1 class="title">Dynamsoft Document Scanner</h1>
         <p class="description">
-          Dynamsoft Document Scanner snaps an image of your document and
-          performs perspective cropping to produce a corrected scan.
+          Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
+          corrected scan.
           <a
             class="description-link"
             href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html"
@@ -54,20 +46,10 @@
               >
                 <defs>
                   <clipPath id="downloadclip-path">
-                    <rect
-                      id="Rectangle_2741"
-                      data-name="Rectangle 2741"
-                      width="24"
-                      height="24"
-                      fill="#fff"
-                    />
+                    <rect id="Rectangle_2741" data-name="Rectangle 2741" width="24" height="24" fill="#fff" />
                   </clipPath>
                 </defs>
-                <g
-                  id="Group_535"
-                  data-name="Group 535"
-                  clip-path="url(#downloadclip-path)"
-                >
+                <g id="Group_535" data-name="Group 535" clip-path="url(#downloadclip-path)">
                   <path
                     id="Path_1463"
                     data-name="Path 1463"
@@ -95,20 +77,10 @@
               >
                 <defs>
                   <clipPath id="clip-pathshare">
-                    <rect
-                      id="Rectangle_2770"
-                      data-name="Rectangle 2770"
-                      width="24"
-                      height="24"
-                      fill="#fff"
-                    />
+                    <rect id="Rectangle_2770" data-name="Rectangle 2770" width="24" height="24" fill="#fff" />
                   </clipPath>
                 </defs>
-                <g
-                  id="Group_574"
-                  data-name="Group 574"
-                  clip-path="url(#clip-pathshare)"
-                >
+                <g id="Group_574" data-name="Group 574" clip-path="url(#clip-pathshare)">
                   <path
                     id="Path_1507"
                     data-name="Path 1507"
@@ -126,8 +98,8 @@
             <img class="mobile-qr" src="./assets/qr-code.svg" />
             <div class="placeholder-text-1">Scan to Open on Mobile</div>
             <div class="placeholder-text-2">
-              <span class="or">or</span> <span class="click">click</span>
-              <b>Start New Scan</b> to scan a new document and view it here
+              <span class="or">or</span> <span class="click">click</span> <b>Start New Scan</b> to scan a new document
+              and view it here
             </div>
           </div>
         </div>
@@ -149,8 +121,7 @@
       const testFile = new File([testImageBlob], "test.png", {
         type: "image/png",
       });
-      const canShare =
-        "share" in navigator && navigator.canShare({ files: [testFile] });
+      const canShare = "share" in navigator && navigator.canShare({ files: [testFile] });
 
       const downloadIcon = document.querySelector(".download-icon");
       const shareIcon = document.querySelector(".share-icon");
@@ -180,8 +151,7 @@
             previewArea.appendChild(canvas);
             shareButton.classList.remove("disabled");
           } else {
-            previewArea.innerHTML =
-              '<div class="placeholder-text">No image scanned. Please try again.</div>';
+            previewArea.innerHTML = '<div class="placeholder-text">No image scanned. Please try again.</div>';
             shareButton.classList.add("disabled");
           }
         } catch (error) {
@@ -200,9 +170,7 @@
         try {
           const canvas = previewArea.querySelector("canvas");
           if (canvas) {
-            const blob = await new Promise((resolve) =>
-              canvas.toBlob(resolve, "image/png")
-            );
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
             const file = new File([blob], `${Date.now()}.png`, {
               type: "image/png",
             });
