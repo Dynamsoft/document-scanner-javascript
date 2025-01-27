@@ -11,7 +11,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   Build-Demo:
-    if: ${{ github.ref == 'refs/heads/demo-video' }}    
+    if: ${{ github.ref == 'refs/heads/demo' }}    
     
     # The type of runner that the job will run on
     runs-on: self-hosted
@@ -25,7 +25,7 @@ jobs:
         run: |
           cd /home/ubuntu
           [ -d document-scanner-javascript ] && rm -rf document-scanner-javascript
-          git clone --depth 1 -b demo https://github.com/Dynamsoft/document-scanner-javascript-dev.git 
+          git clone --depth 1 -b demo https://github.com/Dynamsoft/document-scanner-javascript.git 
 
       - name: Prepare Files
         run: |
@@ -48,4 +48,4 @@ jobs:
           password: ${{ secrets.FTP_DEMO_PASSWORD }}
           port: 21 
           local-dir: /home/ubuntu/document-scanner-javascript/demo
-          server-dir: /Demo.dynamsoft.com/solutions/document-scanner/
+          server-dir: /Demo.dynamsoft.com/document-scanner/
