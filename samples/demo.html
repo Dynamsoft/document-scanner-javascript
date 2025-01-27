@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamsoft Document Scanner</title>
+    <script src="./dist/dds.bundle.js"></script>
+    <link rel="stylesheet" href="./css/index.css" />
+  </head>
+  <body>
+    <div class="col1">
+      <!-- Logo -->
+      <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
+        <img class="logo" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
+      </a>
+
+      <!-- Header -->
+      <header class="header">
+        <h1 class="title">Dynamsoft Document Scanner</h1>
+        <p class="description">
+          Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
+          corrected scan.
+          <a
+            class="description-link"
+            href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html"
+            target="_blank"
+            >Learn more.</a
+          >
+        </p>
+      </header>
+    </div>
+    <div class="col2">
+      <!-- Main content -->
+      <div class="scanner-area">
+        <div class="scanner-area-header">
+          <div class="scenario-dropdown">
+            <button class="scenario-type">
+              <!-- Default is Demo 1 -->
+              <span>Preset 1: Contrasting Background</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="scenario-list">
+              <div class="scenario-list-title">Try with pre-set scenarios or your camera!</div>
+              <button data-scenario="demo1" class="scenario-opt selected">Preset 1: Contrasting Background</button>
+              <button data-scenario="demo2" class="scenario-opt">Preset 2: Similar Background</button>
+              <button data-scenario="camera" class="scenario-opt">Use Physical Camera</button>
+            </div>
+          </div>
+          <button id="shareButton" class="share-button disabled">
+            <div class="download-icon">
+              <svg
+                id="download"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <defs>
+                  <clipPath id="downloadclip-path">
+                    <rect id="Rectangle_2741" data-name="Rectangle 2741" width="24" height="24" fill="#fff" />
+                  </clipPath>
+                </defs>
+                <g id="Group_535" data-name="Group 535" clip-path="url(#downloadclip-path)">
+                  <path
+                    id="Path_1463"
+                    data-name="Path 1463"
+                    d="M23.491,9.892a.507.507,0,0,0-.509.505V22.108a.87.87,0,0,1-.851.882H1.877a.874.874,0,0,1-.86-.89V10.4A.509.509,0,0,0,0,10.4V22.092A1.888,1.888,0,0,0,1.869,24h20.27A1.886,1.886,0,0,0,24,22.1V10.4a.507.507,0,0,0-.509-.505"
+                    fill="#fff"
+                  />
+                  <path
+                    id="Path_1464"
+                    data-name="Path 1464"
+                    d="M11.64,18.578a.438.438,0,0,0,.086.056.5.5,0,0,0,.078.051.521.521,0,0,0,.194.039h0a.17.17,0,0,0,.024-.005.539.539,0,0,0,.168-.033.521.521,0,0,0,.17-.113l4.291-4.219a.5.5,0,0,0,0-.714.512.512,0,0,0-.72,0l-3.428,3.371V.5A.509.509,0,0,0,11.49.5v16.5L8.062,13.636a.513.513,0,0,0-.72,0,.5.5,0,0,0,0,.715Z"
+                    fill="#fff"
+                  />
+                </g>
+              </svg>
+              <div class="text">Download</div>
+            </div>
+            <div class="share-icon">
+              <svg
+                id="share"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <defs>
+                  <clipPath id="clip-pathshare">
+                    <rect id="Rectangle_2770" data-name="Rectangle 2770" width="24" height="24" fill="#fff" />
+                  </clipPath>
+                </defs>
+                <g id="Group_574" data-name="Group 574" clip-path="url(#clip-pathshare)">
+                  <path
+                    id="Path_1507"
+                    data-name="Path 1507"
+                    d="M19.489,15.009h0c-.008,0-.014,0-.022,0a4.465,4.465,0,0,0-3.749,2.052l-7-3.5a4.482,4.482,0,0,0,0-3.1l7-3.5a4.466,4.466,0,0,0,3.771,2.053l.018,0A4.516,4.516,0,1,0,15.282,6.06L8.257,9.574a4.49,4.49,0,1,0-4.793,6.814,4.548,4.548,0,0,0,1.043.122,4.468,4.468,0,0,0,3.755-2.056l7.018,3.511a4.485,4.485,0,1,0,4.209-2.956M17.13,1.914a3.508,3.508,0,1,1,2.366,6.1h-.01l-.011,0a3.476,3.476,0,0,1-3.112-1.932l0-.006a3.525,3.525,0,0,1,.769-4.162M3.693,15.415a3.5,3.5,0,1,1,3.931-4.967v0a3.47,3.47,0,0,1,0,3.119l0,0a3.479,3.479,0,0,1-3.931,1.842m17.636,7.066a3.5,3.5,0,0,1-4.971-4.53l0,0a3.477,3.477,0,0,1,3.126-1.936l.011,0a3.5,3.5,0,0,1,1.831,6.472"
+                    fill="currentColor"
+                  />
+                </g>
+              </svg>
+              <div class="text">Share</div>
+            </div>
+          </button>
+        </div>
+        <div class="preview-area" id="preview">
+          <div class="placeholder-text">
+            <img class="mobile-qr" src="./assets/qr-code.png" />
+            <div class="placeholder-text-1">Scan to Open on Mobile</div>
+            <div class="placeholder-text-2">
+              <span class="try">Try</span> our demo:
+              <div class="placeholder-list">
+                <div class="steps">
+                  <div class="step">Step 1:</div>
+                  <div class="desc">Select a scan preset above</div>
+                </div>
+                <div class="steps">
+                  <div class="step">Step 2:</div>
+                  <div class="desc">Click "<b>Start New Scan</b>"</div>
+                </div>
+                <div class="steps">
+                  <div class="step">Step 3:</div>
+                  <div class="desc">View the scan result here</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="button-container">
+          <div class="powered-by-msg">Powered by Dynamsoft</div>
+          <button id="scanButton" class="scan-button">Start New Scan</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // DEMO scenario
+
+      const scenarioType = document.querySelector(".scenario-type");
+      const scenarioList = document.querySelector(".scenario-list");
+      const scenarioOpts = document.querySelectorAll(".scenario-opt");
+
+      // Toggle dropdown
+      scenarioType.addEventListener("click", (e) => {
+        e.stopPropagation();
+        scenarioType.classList.toggle("active");
+        scenarioList.classList.toggle("show");
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", () => {
+        scenarioType.classList.remove("active");
+        scenarioList.classList.remove("show");
+      });
+
+      // Prevent dropdown from closing when clicking inside it
+      scenarioList.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+
+      const selectScenario = (sc) => {
+        const cameraOption = document.querySelector(`[data-scenario="${sc}"]`);
+        const scenarioTypeSpan = document.querySelector(".scenario-type span");
+
+        document.querySelector(".scenario-opt.selected").classList.remove("selected");
+        cameraOption.classList.add("selected");
+        scenarioTypeSpan.textContent = cameraOption.textContent;
+
+        currentScenario = sc;
+      };
+
+      // Handle option selection
+      scenarioOpts.forEach((opt) => {
+        opt.addEventListener("click", () => {
+          // Update selected state
+          selectScenario(opt.getAttribute("data-scenario"));
+
+          // Close dropdown
+          scenarioType.classList.remove("active");
+          scenarioList.classList.remove("show");
+        });
+      });
+
+      const isFirstLoad = !localStorage.getItem("dds-first-load");
+      let currentScenario = isFirstLoad ? "demo1" : "camera";
+
+      if (isFirstLoad) {
+        localStorage.setItem("dds-first-load", "true");
+        selectScenario("demo1");
+      } else {
+        selectScenario("camera");
+      }
+
+      // Button and container references
+      const scanButton = document.getElementById("scanButton");
+      const shareButton = document.getElementById("shareButton");
+      const previewArea = document.getElementById("preview");
+
+      // Check if share is possible
+      const testImageBlob = new Blob(["mock-png-data"], { type: "image/png" });
+      const testFile = new File([testImageBlob], "test.png", {
+        type: "image/png",
+      });
+      const canShare = "share" in navigator && navigator.canShare({ files: [testFile] });
+
+      const downloadIcon = document.querySelector(".download-icon");
+      const shareIcon = document.querySelector(".share-icon");
+      downloadIcon.style.display = canShare ? "none" : "flex";
+      shareIcon.style.display = canShare ? "flex" : "none";
+
+      // Initialize the Dynamsoft Document Scanner
+      const documentScanner = new Dynamsoft.DocumentScanner({
+        license:
+          "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAwLTEwMzYzOTcyMSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21sdHMuZHluYW1zb2Z0LmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMCIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NsdHMuZHluYW1zb2Z0LmNvbS8iLCJjaGVja0NvZGUiOjEyOTQzODU5NDJ9",
+      });
+
+      // Function to handle scanning
+      async function handleScan() {
+        try {
+          // Demo
+
+          scanButton.disabled = true;
+          scanButton.classList.add("scanning");
+          scanButton.textContent = "Scanning...";
+
+          const result = await documentScanner.launch(currentScenario);
+
+          if (result?.correctedImageResult) {
+            previewArea.innerHTML = "";
+            const canvas = result.correctedImageResult.toCanvas();
+            canvas.style.objectFit = "contain";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            previewArea.appendChild(canvas);
+            shareButton.classList.remove("disabled");
+          } else {
+            previewArea.innerHTML = '<div class="placeholder-text">No image scanned. Please try again.</div>';
+            shareButton.classList.add("disabled");
+          }
+        } catch (error) {
+          console.error("Error during document scanning:", error);
+          previewArea.innerHTML =
+            '<div class="placeholder-text" style="color: #ef4444;">An error occurred while scanning. Please try again.</div>';
+        } finally {
+          scanButton.disabled = false;
+          scanButton.classList.remove("scanning");
+          scanButton.textContent = "Start New Scan";
+
+          selectScenario("camera");
+        }
+      }
+
+      // Function to handle sharing
+      async function handleShare() {
+        try {
+          const canvas = previewArea.querySelector("canvas");
+          if (canvas) {
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+            const file = new File([blob], `${Date.now()}.png`, {
+              type: "image/png",
+            });
+
+            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: "Dynamsoft Document Scanner Scanned Document",
+                url: "",
+              });
+            } else {
+              // Fallback for browsers that don't support sharing
+              const link = document.createElement("a");
+              link.download = `${Date.now()}.png`;
+              link.href = canvas.toDataURL();
+              link.click();
+            }
+          }
+        } catch (ex) {
+          // Only show error if it's not a user cancellation
+          if (ex.name !== "AbortError") {
+            let errMsg = ex?.message || ex;
+            console.error("Error sharing image:", errMsg);
+            alert(`Error sharing image: ${errMsg}`);
+          }
+        }
+      }
+
+      // Event listeners
+      scanButton.addEventListener("click", handleScan);
+      shareButton.addEventListener("click", handleShare);
+    </script>
+  </body>
+</html>

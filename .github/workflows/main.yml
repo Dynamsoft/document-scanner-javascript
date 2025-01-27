@@ -1,0 +1,51 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Build-Demo:
+    if: ${{ github.ref == 'refs/heads/demo' }}    
+    
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+         # Runs a set of commands using the runners shell
+      - name: Get Source
+        run: |
+          cd /home/ubuntu
+          [ -d document-scanner-javascript ] && rm -rf document-scanner-javascript
+          git clone --depth 1 -b demo https://github.com/Dynamsoft/document-scanner-javascript.git 
+
+      - name: Prepare Files
+        run: |
+          # Create a temporary directory for the files to be uploaded
+          mkdir -p /home/ubuntu/document-scanner-javascript/demo
+          
+          # Copy the dist folder
+          cp -r /home/ubuntu/document-scanner-javascript/dist /home/ubuntu/document-scanner-javascript/demo
+          
+          # Copy the samples folder and rename demo.html to index.html
+          cp -r /home/ubuntu/document-scanner-javascript/samples/* /home/ubuntu/document-scanner-javascript/demo
+          mv /home/ubuntu/document-scanner-javascript/demo/demo.html /home/ubuntu/document-scanner-javascript/demo/index.html
+
+          
+      - name: Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_DEMO_SERVER }}
+          username: ${{ secrets.FTP_DEMO_USERNAME }}
+          password: ${{ secrets.FTP_DEMO_PASSWORD }}
+          port: 21 
+          local-dir: /home/ubuntu/document-scanner-javascript/demo/
+          server-dir: /Demo.dynamsoft.com/document-scanner/

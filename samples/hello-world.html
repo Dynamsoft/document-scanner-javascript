@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner - Hello World</title>
-    <script src="../dist/dds.bundle.js"></script>
+    <script src="./dist/dds.bundle.js"></script>
     <style>
       html,
       body {
@@ -26,7 +26,8 @@
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
-        license: "YOUR_LICENSE_KEY_HERE",
+        license:
+          "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAwLTEwMzYzOTcyMSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21sdHMuZHluYW1zb2Z0LmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMCIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NsdHMuZHluYW1zb2Z0LmNvbS8iLCJjaGVja0NvZGUiOjEyOTQzODU5NDJ9",
       });
       (async () => {
         // Launch the scanner and wait for the result
