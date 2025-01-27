@@ -14,8 +14,8 @@ import {
 import { getElement, shouldCorrectImage } from "./views/utils";
 
 // Default DCE UI path
-const DEFAULT_DCE_UI_PATH = "../dist/document-scanner.ui.html";
-//"https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner-trial@latest/dist/document-scanner.ui.html";
+const DEFAULT_DCE_UI_PATH =
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.0/dist/document-scanner.ui.html";
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 export interface DocumentScannerConfig {

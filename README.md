@@ -50,7 +50,7 @@ Alternatively, you can create an empty file named `hello-world.html`, paste the 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner - Hello World</title>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.0/dist/dbr.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.0/dist/dds.bundle.js"></script>
     <style>
       html,
       body {

@@ -1,7 +1,7 @@
 {
   "name": "dynamsoft-document-scanner-beta",
-  "version": "1.0.10-beta-202501070922",
-  "description": "A wrapper for dynamsoft-capture-vision-javascript 2.6.1000.",
+  "version": "1.0.3-beta-2025-01-27",
+  "description": "Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows.",
   "files": [
     "/dist",
     "/LICENSE",
