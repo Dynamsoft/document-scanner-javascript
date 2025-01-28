@@ -26226,7 +26226,7 @@
                   (null === (a = this.config.scannerViewConfig) || void 0 === a ? void 0 : a.templateFilePath) || null,
                 cameraEnhancerUIPath:
                   (null === (o = this.config.scannerViewConfig) || void 0 === o ? void 0 : o.cameraEnhancerUIPath) ||
-                  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.0/dist/document-scanner.ui.html",
+                  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.1/dist/document-scanner.ui.html",
                 utilizedTemplateNames: d.utilizedTemplateNames,
               })
             : void 0,
