@@ -38,7 +38,7 @@ app.use("/font", express.static(path.join(__dirname, "../samples/font")));
 
 // Routes
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../samples/demo.html"));
+  res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
 app.get("/demo", (req, res) => {
@@ -107,10 +107,11 @@ httpsServer.on("error", (error) => {
 
 // Start the servers
 httpServer.listen(httpPort, () => {
-  console.log("\n\x1b[1m Dynamsoft Document Scanner Sample\x1b[0m\n");
-  console.log("\x1b[36m Access URLs:\x1b[0m");
+  console.log("\n\x1b[1m Dynamsoft Document Scanner Samples\x1b[0m\n");
+  console.log("\x1b[36m HTTP URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[32m Local:\x1b[0m    http://localhost:" + httpPort + "/");
+  console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
+  console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -124,13 +125,13 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
     });
   });
 
-  ipv4Addresses.forEach((localIP) => {
-    console.log("\x1b[32m Network:\x1b[0m  https://" + localIP + ":" + httpsPort + "/");
-  });
-  console.log("\x1b[36m Available Pages:\x1b[0m");
+  console.log("\n");
+  console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[33m Demo:\x1b[0m        /demo");
-  console.log("\x1b[33m Hello World:\x1b[0m  /hello-world\n");
-
+  ipv4Addresses.forEach((localIP) => {
+    console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
+    console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
+  });
+  console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
 });
