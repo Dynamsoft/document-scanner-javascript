@@ -4,19 +4,19 @@ import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { createControls, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { ControlButton, DocumentScanResult, EnumResultStatus } from "./utils/types";
+import { DocumentScanResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
-export interface ScanResultViewControlIcons {
-  uploadBtn?: Pick<ControlButton, "icon" | "text">;
-  correctImageBtn?: Pick<ControlButton, "icon" | "text">;
-  retakeBtn?: Pick<ControlButton, "icon" | "text">;
-  doneBtn?: Pick<ControlButton, "icon" | "text">;
-  containerStyle?: Partial<CSSStyleDeclaration>;
+export interface ScanResultViewToolbarButtonsConfig {
+  upload?: ToolbarButtonConfig;
+  correct?: ToolbarButtonConfig;
+  retake?: ToolbarButtonConfig;
+  done?: ToolbarButtonConfig;
 }
 
 export interface ScanResultViewConfig {
   container?: HTMLElement;
-  controlIcons?: ScanResultViewControlIcons;
+  toolbarButtonsConfig?: ScanResultViewToolbarButtonsConfig;
+
   onDone?: (result: DocumentScanResult) => Promise<void>;
   onUpload?: (result: DocumentScanResult) => Promise<void>;
 }
@@ -235,41 +235,52 @@ export default class ScanResultView {
   }
 
   private createControls(): HTMLElement {
-    const { controlIcons, onUpload } = this.config;
+    const { toolbarButtonsConfig, onUpload } = this.config;
 
     // Check if share is possible
     const testImageBlob = new Blob(["mock-png-data"], { type: "image/png" });
     const testFile = new File([testImageBlob], "test.png", { type: "image/png" });
     const canShare = "share" in navigator && navigator.canShare({ files: [testFile] });
 
-    const buttons: ControlButton[] = [
+    const buttons: ToolbarButton[] = [
       {
+        id: `dds-scanResult-upload`,
         icon:
-          controlIcons?.uploadBtn?.icon ||
+          toolbarButtonsConfig?.upload?.icon ||
           (onUpload ? DDS_ICONS.upload : canShare ? DDS_ICONS.share : DDS_ICONS.downloadPNG),
-        text: controlIcons?.uploadBtn?.text || (onUpload ? "Upload" : canShare ? "Share" : "Download"),
+        text: toolbarButtonsConfig?.upload?.text || (onUpload ? "Upload" : canShare ? "Share" : "Download"),
+        className: `${toolbarButtonsConfig?.upload?.className || ""}`,
         onClick: () => this.handleUploadAndShareBtn(),
       },
       {
-        icon: controlIcons?.correctImageBtn?.icon || DDS_ICONS.normalize,
-        text: controlIcons?.correctImageBtn?.text || "Correction",
+        id: `dds-scanResult-correct`,
+        icon: toolbarButtonsConfig?.correct?.icon || DDS_ICONS.normalize,
+        text: toolbarButtonsConfig?.correct?.text || "Correction",
         onClick: () => this.handleCorrectImage(),
-        disabled: !this.correctionView,
+        className: `${toolbarButtonsConfig?.correct?.className || ""}`,
+
+        isDisabled: !this.correctionView,
       },
       {
-        icon: controlIcons?.retakeBtn?.icon || DDS_ICONS.retake,
-        text: controlIcons?.retakeBtn?.text || "Re-take",
+        id: `dds-scanResult-retake`,
+
+        icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
+        text: toolbarButtonsConfig?.retake?.text || "Re-take",
         onClick: () => this.handleRetake(),
-        disabled: !this.scannerView,
+        className: `${toolbarButtonsConfig?.retake?.className || ""}`,
+
+        isDisabled: !this.scannerView,
       },
       {
-        icon: controlIcons?.doneBtn?.icon || DDS_ICONS.complete,
-        text: controlIcons?.doneBtn?.text || "Done",
+        id: `dds-scanResult-done`,
+        icon: toolbarButtonsConfig?.done?.icon || DDS_ICONS.complete,
+        text: toolbarButtonsConfig?.done?.text || "Done",
+        className: `${toolbarButtonsConfig?.done?.className || ""}`,
         onClick: () => this.handleDone(),
       },
     ];
 
-    return createControls(buttons, controlIcons?.containerStyle);
+    return createControls(buttons);
   }
 
   async initialize(): Promise<void> {

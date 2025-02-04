@@ -1,4 +1,4 @@
-import { ControlButton, EnumFlowType } from "./types";
+import { EnumFlowType, ToolbarButton } from "./types";
 
 export function getElement(element: string | HTMLElement): HTMLElement | null {
   if (typeof element === "string") {
@@ -48,6 +48,7 @@ const DEFAULT_CONTROLS_STYLE = `
     min-height: 40px;
   }
 
+  .dds-control-icon img,
   .dds-control-icon svg {
     width: 32px;
     height: 32px;
@@ -62,14 +63,8 @@ const DEFAULT_CONTROLS_STYLE = `
   }
 `;
 
-export function createControls(buttons: ControlButton[], containerStyle?: Partial<CSSStyleDeclaration>): HTMLElement {
-  // Inject styles if they don't exist
-  if (!document.getElementById("dds-controls-style")) {
-    const styleSheet = document.createElement("style");
-    styleSheet.id = "dds-controls-style";
-    styleSheet.textContent = DEFAULT_CONTROLS_STYLE;
-    document.head.appendChild(styleSheet);
-  }
+export function createControls(buttons: ToolbarButton[], containerStyle?: Partial<CSSStyleDeclaration>): HTMLElement {
+  createStyle("dds-controls-style", DEFAULT_CONTROLS_STYLE);
 
   // Create container
   const container = document.createElement("div");
@@ -83,21 +78,38 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
   // Create buttons
   buttons.forEach((button) => {
     const buttonEl = document.createElement("div");
-    buttonEl.className = "dds-control-btn";
+    buttonEl.className = `dds-control-btn ${button?.className}`;
 
-    // Add disabled class if button is disabled
-    if (button.disabled) {
+    // Create icon container
+    const iconContainer = document.createElement("div");
+    iconContainer.className = "dds-control-icon-wrapper";
+
+    if (isSVGString(button.icon)) {
+      iconContainer.innerHTML = button.icon;
+    } else {
+      const iconImg = document.createElement("img");
+      iconImg.src = button.icon;
+      iconImg.alt = button.text;
+      iconImg.width = 24;
+      iconImg.height = 24;
+      iconContainer.appendChild(iconImg);
+    }
+
+    // Create text container
+    const textContainer = document.createElement("div");
+    textContainer.className = "dds-control-text";
+    textContainer.textContent = button.text;
+
+    // Add disabled state if specified
+    if (button.isDisabled) {
       buttonEl.classList.add("disabled");
     }
 
-    buttonEl.innerHTML = `
-      <div class="dds-control-icon-wrapper">
-        <div class="dds-control-icon">${button.icon}</div>
-      </div>
-      <div class="dds-control-text">${button.text}</div>
-    `;
+    // Append containers to button
+    buttonEl.appendChild(iconContainer);
+    buttonEl.appendChild(textContainer);
 
-    if (button.onClick && !button.disabled) {
+    if (button.onClick && !button.isDisabled) {
       buttonEl.addEventListener("click", button.onClick);
     }
 
@@ -109,4 +121,18 @@ export function createControls(buttons: ControlButton[], containerStyle?: Partia
 
 export function shouldCorrectImage(flow: EnumFlowType) {
   return [EnumFlowType.SMART_CAPTURE, EnumFlowType.UPLOADED_IMAGE, EnumFlowType.MANUAL].includes(flow);
+}
+
+export function createStyle(id: string, style: string) {
+  // Initialize styles if not already done
+  if (!document.getElementById(id)) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = id;
+    styleSheet.textContent = style;
+    document.head.appendChild(styleSheet);
+  }
+}
+
+export function isSVGString(str: string): boolean {
+  return str.trim().startsWith("<svg") && str.trim().endsWith("</svg>");
 }

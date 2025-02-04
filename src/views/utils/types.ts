@@ -38,9 +38,14 @@ export interface DocumentScanResult {
   _flowType?: EnumFlowType;
 }
 
-export interface ControlButton {
+export type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "text" | "className" | "isHidden">;
+
+export interface ToolbarButton {
+  id: string;
   icon: string;
   text: string;
   onClick?: () => void | Promise<void>;
-  disabled?: boolean;
+  className?: string;
+  isDisabled?: boolean;
+  isHidden?: boolean;
 }

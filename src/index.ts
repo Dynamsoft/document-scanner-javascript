@@ -22,13 +22,16 @@ export const DDS = {
 export type { NormalizedImageResultItem, PlayCallbackInfo, Point, Rect, VideoDeviceInfo };
 export type { DocumentScannerConfig, SharedResources } from "./DocumentScanner";
 export type { DocumentScannerViewConfig } from "./views/DocumentScannerView";
-export type { DocumentCorrectionViewConfig, DocumentCorrectionViewControlIcons } from "./views/DocumentCorrectionView";
-export type { ScanResultViewConfig, ScanResultViewControlIcons } from "./views/ScanResultView";
+export type {
+  DocumentCorrectionViewConfig,
+  DocumentCorrectionViewToolbarButtonsConfig,
+} from "./views/DocumentCorrectionView";
+export type { ScanResultViewConfig, ScanResultViewToolbarButtonsConfig } from "./views/ScanResultView";
 export type {
   DocumentScanResult,
   UtilizedTemplateNames,
   ResultStatus,
-  ControlButton,
+  ToolbarButtonConfig,
   EnumFlowType,
 } from "./views/utils/types";
 

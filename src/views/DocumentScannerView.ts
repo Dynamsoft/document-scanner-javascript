@@ -16,6 +16,7 @@ import {
   UtilizedTemplateNames,
 } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
+import { createStyle } from "./utils";
 
 export interface DocumentScannerViewConfig {
   templateFilePath?: string;
@@ -99,9 +100,7 @@ export default class DocumentScannerView {
     }
 
     // Create loading screen style
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = DEFAULT_LOADING_SCREEN_STYLE;
-    document.head.appendChild(styleSheet);
+    createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);
 
     try {
       const { cameraView, cameraEnhancer, cvRouter } = this.resources;

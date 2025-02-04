@@ -5,25 +5,25 @@ import { SharedResources } from "../DocumentScanner";
 import { createControls } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
-  ControlButton,
+  ToolbarButtonConfig,
   DEFAULT_TEMPLATE_NAMES,
   DocumentScanResult,
   EnumResultStatus,
   UtilizedTemplateNames,
+  ToolbarButton,
 } from "./utils/types";
 
 const DEFAULT_CORNER_SIZE = 60;
 
-export interface DocumentCorrectionViewControlIcons {
-  fullImageBtn?: Pick<ControlButton, "icon" | "text">;
-  detectBordersBtn?: Pick<ControlButton, "icon" | "text">;
-  applyBtn?: Pick<ControlButton, "icon" | "text">;
-  containerStyle?: Partial<CSSStyleDeclaration>; // Optional styling
+export interface DocumentCorrectionViewToolbarButtonsConfig {
+  fullImage?: ToolbarButtonConfig;
+  detectBorders?: ToolbarButtonConfig;
+  apply?: ToolbarButtonConfig;
 }
 
 export interface DocumentCorrectionViewConfig {
   container?: HTMLElement;
-  controlIcons?: DocumentCorrectionViewControlIcons;
+  toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
   templateFilePath?: string;
   utilizedTemplateNames?: UtilizedTemplateNames;
   onFinish?: (result: DocumentScanResult) => void;
@@ -212,27 +212,33 @@ export default class DocumentCorrectionView {
   }
 
   private createControls(): HTMLElement {
-    const { controlIcons } = this.config;
+    const { toolbarButtonsConfig } = this.config;
 
-    const buttons: ControlButton[] = [
+    const buttons: ToolbarButton[] = [
       {
-        icon: controlIcons?.fullImageBtn?.icon || DDS_ICONS.fullImage,
-        text: controlIcons?.fullImageBtn?.text || "Full Image",
+        id: `dds-correction-fullImage`,
+        icon: toolbarButtonsConfig?.fullImage?.icon || DDS_ICONS.fullImage,
+        text: toolbarButtonsConfig?.fullImage?.text || "Full Image",
+        className: `${toolbarButtonsConfig?.fullImage?.className || ""}`,
         onClick: () => this.setFullImageBoundary(),
       },
       {
-        icon: controlIcons?.detectBordersBtn?.icon || DDS_ICONS.autoBounds,
-        text: controlIcons?.detectBordersBtn?.text || "Detect Borders",
+        id: `dds-correction-detectBorders`,
+        icon: toolbarButtonsConfig?.detectBorders?.icon || DDS_ICONS.autoBounds,
+        text: toolbarButtonsConfig?.detectBorders?.text || "Detect Borders",
+        className: `${toolbarButtonsConfig?.detectBorders?.className || ""}`,
         onClick: () => this.setBoundaryAutomatically(),
       },
       {
-        icon: controlIcons?.applyBtn?.icon || DDS_ICONS.finish,
-        text: controlIcons?.applyBtn?.text || "Apply",
+        id: `dds-correction-apply`,
+        icon: toolbarButtonsConfig?.apply?.icon || DDS_ICONS.finish,
+        text: toolbarButtonsConfig?.apply?.text || "Apply",
+        className: `${toolbarButtonsConfig?.apply?.className || ""}`,
         onClick: () => this.confirmCorrection(),
       },
     ];
 
-    return createControls(buttons, controlIcons?.containerStyle);
+    return createControls(buttons);
   }
 
   private setupCorrectionControls() {
