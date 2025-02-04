@@ -220,6 +220,7 @@ export default class DocumentCorrectionView {
         icon: toolbarButtonsConfig?.fullImage?.icon || DDS_ICONS.fullImage,
         text: toolbarButtonsConfig?.fullImage?.text || "Full Image",
         className: `${toolbarButtonsConfig?.fullImage?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.fullImage?.isHidden || false,
         onClick: () => this.setFullImageBoundary(),
       },
       {
@@ -227,6 +228,7 @@ export default class DocumentCorrectionView {
         icon: toolbarButtonsConfig?.detectBorders?.icon || DDS_ICONS.autoBounds,
         text: toolbarButtonsConfig?.detectBorders?.text || "Detect Borders",
         className: `${toolbarButtonsConfig?.detectBorders?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.detectBorders?.isHidden || false,
         onClick: () => this.setBoundaryAutomatically(),
       },
       {
@@ -234,6 +236,8 @@ export default class DocumentCorrectionView {
         icon: toolbarButtonsConfig?.apply?.icon || DDS_ICONS.finish,
         text: toolbarButtonsConfig?.apply?.text || "Apply",
         className: `${toolbarButtonsConfig?.apply?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
+
         onClick: () => this.confirmCorrection(),
       },
     ];

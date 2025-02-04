@@ -7,9 +7,10 @@ import { DDS_ICONS } from "./utils/icons";
 import { DocumentResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
 export interface DocumentResultViewToolbarButtonsConfig {
-  upload?: ToolbarButtonConfig;
-  correct?: ToolbarButtonConfig;
   retake?: ToolbarButtonConfig;
+  correct?: ToolbarButtonConfig;
+  share?: ToolbarButtonConfig;
+  upload?: ToolbarButtonConfig;
   done?: ToolbarButtonConfig;
 }
 
@@ -49,16 +50,16 @@ export default class DocumentResultView {
     }
   }
 
-  private async handleUploadAndShareBtn() {
+  private async handleUploadAndShareBtn(mode?: "share" | "upload") {
     try {
       const { result } = this.resources;
       if (!result?.correctedImageResult) {
         throw new Error("No image to upload");
       }
 
-      if (this.config?.onUpload) {
+      if (mode === "upload" && this.config?.onUpload) {
         await this.config.onUpload(result);
-      } else {
+      } else if (mode === "share") {
         await this.handleShare();
       }
     } catch (error) {
@@ -244,13 +245,14 @@ export default class DocumentResultView {
 
     const buttons: ToolbarButton[] = [
       {
-        id: `dds-scanResult-upload`,
-        icon:
-          toolbarButtonsConfig?.upload?.icon ||
-          (onUpload ? DDS_ICONS.upload : canShare ? DDS_ICONS.share : DDS_ICONS.downloadPNG),
-        text: toolbarButtonsConfig?.upload?.text || (onUpload ? "Upload" : canShare ? "Share" : "Download"),
-        className: `${toolbarButtonsConfig?.upload?.className || ""}`,
-        onClick: () => this.handleUploadAndShareBtn(),
+        id: `dds-scanResult-retake`,
+
+        icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
+        text: toolbarButtonsConfig?.retake?.text || "Re-take",
+        onClick: () => this.handleRetake(),
+        className: `${toolbarButtonsConfig?.retake?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
+        isDisabled: !this.scannerView,
       },
       {
         id: `dds-scanResult-correct`,
@@ -258,24 +260,33 @@ export default class DocumentResultView {
         text: toolbarButtonsConfig?.correct?.text || "Correction",
         onClick: () => this.handleCorrectImage(),
         className: `${toolbarButtonsConfig?.correct?.className || ""}`,
-
+        isHidden: toolbarButtonsConfig?.correct?.isHidden || false,
         isDisabled: !this.correctionView,
       },
       {
-        id: `dds-scanResult-retake`,
-
-        icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
-        text: toolbarButtonsConfig?.retake?.text || "Re-take",
-        onClick: () => this.handleRetake(),
-        className: `${toolbarButtonsConfig?.retake?.className || ""}`,
-
-        isDisabled: !this.scannerView,
+        id: `dds-scanResult-share`,
+        icon: toolbarButtonsConfig?.share?.icon || (canShare ? DDS_ICONS.share : DDS_ICONS.downloadPNG),
+        text: toolbarButtonsConfig?.share?.text || (canShare ? "Share" : "Download"),
+        className: `${toolbarButtonsConfig?.share?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.share?.isHidden || false,
+        onClick: () => this.handleUploadAndShareBtn("share"),
+      },
+      {
+        id: `dds-scanResult-upload`,
+        icon: toolbarButtonsConfig?.upload?.icon || DDS_ICONS.upload,
+        text: toolbarButtonsConfig?.upload?.text || "Upload",
+        className: `${toolbarButtonsConfig?.upload?.className || ""}`,
+        isHidden: !onUpload ? true : toolbarButtonsConfig?.upload?.isHidden || false,
+        isDisabled: !onUpload,
+        onClick: () => this.handleUploadAndShareBtn("upload"),
       },
       {
         id: `dds-scanResult-done`,
         icon: toolbarButtonsConfig?.done?.icon || DDS_ICONS.complete,
         text: toolbarButtonsConfig?.done?.text || "Done",
         className: `${toolbarButtonsConfig?.done?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.done?.isHidden || false,
+        isDisabled: !this.correctionView,
         onClick: () => this.handleDone(),
       },
     ];

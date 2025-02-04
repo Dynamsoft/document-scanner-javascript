@@ -34,6 +34,10 @@ const DEFAULT_CONTROLS_STYLE = `
     user-select: none;
   }
 
+  .dds-control-btn.hide {
+    display: none;
+  }
+
   .dds-control-btn.disabled {
     opacity: 0.4;
     pointer-events: none;
@@ -103,6 +107,10 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
     // Add disabled state if specified
     if (button.isDisabled) {
       buttonEl.classList.add("disabled");
+    }
+
+    if (button.isHidden) {
+      buttonEl.classList.add("hide");
     }
 
     // Append containers to button
