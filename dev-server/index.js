@@ -1,3 +1,4 @@
+import formidable from "formidable";
 import express from "express";
 import fs from "fs";
 import http from "http";
@@ -49,6 +50,54 @@ app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
+// Allow upload feature
+app.post("/upload", function (req, res) {
+  try {
+    // Create a new Formidable form
+    const form = formidable({
+      multiples: false,
+      keepExtensions: true,
+    });
+
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error processing the file upload.");
+      }
+
+      const uploadedFile = files.uploadFile[0]; // Ensure the file field name matches the form
+      if (!uploadedFile) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No file uploaded" });
+      }
+
+      // Get current timestamp
+      let dt = new Date();
+
+      const fileSavePath = path.join(__dirname, "\\");
+      const newFileName = uploadedFile.originalFilename;
+      const newFilePath = path.join(fileSavePath, newFileName);
+
+      // Move the uploaded file to the desired directory
+      fs.rename(uploadedFile.filepath, newFilePath, (err) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send("Error saving the file.");
+        }
+        console.log(`\x1b[33m ${newFileName} \x1b[0m uploaded successfully!`);
+      });
+      res.status(200).json({
+        success: true,
+        message: `${newFileName} uploaded successfully`,
+        filename: newFileName,
+      });
+    });
+  } catch (error) {
+    res.status(500).send("An error occurred during file upload.");
+  }
+});
+
 let httpPort = 3000;
 let httpsPort = 3001;
 
@@ -83,9 +132,13 @@ httpServer.on("error", (error) => {
   if (error.code === "EADDRINUSE") {
     console.error(`\x1b[31mError: Port ${httpPort} is already in use\x1b[0m`);
     console.log("\nTo fix this, you can:");
-    console.log(`1. Update the port manually by changing \x1b[33mhttpPort\x1b[0m in the code`);
+    console.log(
+      `1. Update the port manually by changing \x1b[33mhttpPort\x1b[0m in the code`
+    );
     console.log(`2. Close any other applications using port ${httpPort}`);
-    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
+    console.log(
+      `3. Wait a few moments and try again - the port might be in a cleanup state\n`
+    );
   } else {
     console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
   }
@@ -96,9 +149,13 @@ httpsServer.on("error", (error) => {
   if (error.code === "EADDRINUSE") {
     console.error(`\x1b[31mError: Port ${httpsPort} is already in use\x1b[0m`);
     console.log("\nTo fix this, you can:");
-    console.log(`1. Update the port manually by changing \x1b[33mhttpsPort\x1b[0m in the code`);
+    console.log(
+      `1. Update the port manually by changing \x1b[33mhttpsPort\x1b[0m in the code`
+    );
     console.log(`2. Close any other applications using port ${httpsPort}`);
-    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
+    console.log(
+      `3. Wait a few moments and try again - the port might be in a cleanup state\n`
+    );
   } else {
     console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
   }
@@ -110,8 +167,14 @@ httpServer.listen(httpPort, () => {
   console.log("\n\x1b[1m Dynamsoft Document Scanner Samples\x1b[0m\n");
   console.log("\x1b[36m HTTP URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
-  console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
+  console.log(
+    "\x1b[33m Hello World:\x1b[0m    http://localhost:" +
+      httpPort +
+      "/hello-world"
+  );
+  console.log(
+    "\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo"
+  );
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -129,8 +192,16 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   ipv4Addresses.forEach((localIP) => {
-    console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
-    console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
+    console.log(
+      "\x1b[32m Hello World:\x1b[0m  https://" +
+        localIP +
+        ":" +
+        httpsPort +
+        "/hello-world"
+    );
+    console.log(
+      "\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo"
+    );
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
