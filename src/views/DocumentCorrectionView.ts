@@ -277,6 +277,7 @@ export default class DocumentCorrectionView {
       newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
       await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
     }
+    this.resources.cvRouter.maxImageSideLength = Infinity;
 
     const result = await this.resources.cvRouter.capture(
       this.resources.result.originalImageResult,

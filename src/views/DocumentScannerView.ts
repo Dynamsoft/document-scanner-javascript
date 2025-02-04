@@ -130,6 +130,7 @@ export default class DocumentScannerView {
         newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
         await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
       }
+      cvRouter.maxImageSideLength = Infinity;
 
       const resultReceiver = new CapturedResultReceiver();
       resultReceiver.onCapturedResultReceived = (result) => this.handleBoundsDetection(result);
