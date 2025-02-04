@@ -246,9 +246,8 @@ export default class DocumentResultView {
     const buttons: ToolbarButton[] = [
       {
         id: `dds-scanResult-retake`,
-
         icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
-        text: toolbarButtonsConfig?.retake?.text || "Re-take",
+        label: toolbarButtonsConfig?.retake?.label || "Re-take",
         onClick: () => this.handleRetake(),
         className: `${toolbarButtonsConfig?.retake?.className || ""}`,
         isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
@@ -257,7 +256,7 @@ export default class DocumentResultView {
       {
         id: `dds-scanResult-correct`,
         icon: toolbarButtonsConfig?.correct?.icon || DDS_ICONS.normalize,
-        text: toolbarButtonsConfig?.correct?.text || "Correction",
+        label: toolbarButtonsConfig?.correct?.label || "Correction",
         onClick: () => this.handleCorrectImage(),
         className: `${toolbarButtonsConfig?.correct?.className || ""}`,
         isHidden: toolbarButtonsConfig?.correct?.isHidden || false,
@@ -266,7 +265,7 @@ export default class DocumentResultView {
       {
         id: `dds-scanResult-share`,
         icon: toolbarButtonsConfig?.share?.icon || (canShare ? DDS_ICONS.share : DDS_ICONS.downloadPNG),
-        text: toolbarButtonsConfig?.share?.text || (canShare ? "Share" : "Download"),
+        label: toolbarButtonsConfig?.share?.label || (canShare ? "Share" : "Download"),
         className: `${toolbarButtonsConfig?.share?.className || ""}`,
         isHidden: toolbarButtonsConfig?.share?.isHidden || false,
         onClick: () => this.handleUploadAndShareBtn("share"),
@@ -274,7 +273,7 @@ export default class DocumentResultView {
       {
         id: `dds-scanResult-upload`,
         icon: toolbarButtonsConfig?.upload?.icon || DDS_ICONS.upload,
-        text: toolbarButtonsConfig?.upload?.text || "Upload",
+        label: toolbarButtonsConfig?.upload?.label || "Upload",
         className: `${toolbarButtonsConfig?.upload?.className || ""}`,
         isHidden: !onUpload ? true : toolbarButtonsConfig?.upload?.isHidden || false,
         isDisabled: !onUpload,
@@ -283,7 +282,7 @@ export default class DocumentResultView {
       {
         id: `dds-scanResult-done`,
         icon: toolbarButtonsConfig?.done?.icon || DDS_ICONS.complete,
-        text: toolbarButtonsConfig?.done?.text || "Done",
+        label: toolbarButtonsConfig?.done?.label || "Done",
         className: `${toolbarButtonsConfig?.done?.className || ""}`,
         isHidden: toolbarButtonsConfig?.done?.isHidden || false,
         isDisabled: !this.correctionView,

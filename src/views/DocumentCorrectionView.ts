@@ -218,7 +218,7 @@ export default class DocumentCorrectionView {
       {
         id: `dds-correction-fullImage`,
         icon: toolbarButtonsConfig?.fullImage?.icon || DDS_ICONS.fullImage,
-        text: toolbarButtonsConfig?.fullImage?.text || "Full Image",
+        label: toolbarButtonsConfig?.fullImage?.label || "Full Image",
         className: `${toolbarButtonsConfig?.fullImage?.className || ""}`,
         isHidden: toolbarButtonsConfig?.fullImage?.isHidden || false,
         onClick: () => this.setFullImageBoundary(),
@@ -226,7 +226,7 @@ export default class DocumentCorrectionView {
       {
         id: `dds-correction-detectBorders`,
         icon: toolbarButtonsConfig?.detectBorders?.icon || DDS_ICONS.autoBounds,
-        text: toolbarButtonsConfig?.detectBorders?.text || "Detect Borders",
+        label: toolbarButtonsConfig?.detectBorders?.label || "Detect Borders",
         className: `${toolbarButtonsConfig?.detectBorders?.className || ""}`,
         isHidden: toolbarButtonsConfig?.detectBorders?.isHidden || false,
         onClick: () => this.setBoundaryAutomatically(),
@@ -234,7 +234,7 @@ export default class DocumentCorrectionView {
       {
         id: `dds-correction-apply`,
         icon: toolbarButtonsConfig?.apply?.icon || DDS_ICONS.finish,
-        text: toolbarButtonsConfig?.apply?.text || "Apply",
+        label: toolbarButtonsConfig?.apply?.label || "Apply",
         className: `${toolbarButtonsConfig?.apply?.className || ""}`,
         isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
 

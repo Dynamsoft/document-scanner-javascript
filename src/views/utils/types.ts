@@ -38,12 +38,12 @@ export interface DocumentResult {
   _flowType?: EnumFlowType;
 }
 
-export type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "text" | "className" | "isHidden">;
+export type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">;
 
 export interface ToolbarButton {
   id: string;
   icon: string;
-  text: string;
+  label: string;
   onClick?: () => void | Promise<void>;
   className?: string;
   isDisabled?: boolean;

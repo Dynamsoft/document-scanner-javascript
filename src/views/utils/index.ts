@@ -93,7 +93,7 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
     } else {
       const iconImg = document.createElement("img");
       iconImg.src = button.icon;
-      iconImg.alt = button.text;
+      iconImg.alt = button.label;
       iconImg.width = 24;
       iconImg.height = 24;
       iconContainer.appendChild(iconImg);
@@ -102,7 +102,7 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
     // Create text container
     const textContainer = document.createElement("div");
     textContainer.className = "dds-control-text";
-    textContainer.textContent = button.text;
+    textContainer.textContent = button.label;
 
     // Add disabled state if specified
     if (button.isDisabled) {
