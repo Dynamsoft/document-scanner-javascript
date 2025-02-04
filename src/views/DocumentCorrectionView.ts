@@ -7,7 +7,7 @@ import { DDS_ICONS } from "./utils/icons";
 import {
   ToolbarButtonConfig,
   DEFAULT_TEMPLATE_NAMES,
-  DocumentScanResult,
+  DocumentResult,
   EnumResultStatus,
   UtilizedTemplateNames,
   ToolbarButton,
@@ -26,13 +26,13 @@ export interface DocumentCorrectionViewConfig {
   toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
   templateFilePath?: string;
   utilizedTemplateNames?: UtilizedTemplateNames;
-  onFinish?: (result: DocumentScanResult) => void;
+  onFinish?: (result: DocumentResult) => void;
 }
 
 export default class DocumentCorrectionView {
   private imageEditorView: ImageEditorView = null;
   private layer: DrawingLayer = null;
-  private currentCorrectionResolver?: (result: DocumentScanResult) => void;
+  private currentCorrectionResolver?: (result: DocumentResult) => void;
 
   constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {
     this.config.utilizedTemplateNames = {
@@ -340,7 +340,7 @@ export default class DocumentCorrectionView {
     this.hideView();
   }
 
-  async launch(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentResult> {
     try {
       if (!this.resources.result?.correctedImageResult) {
         return {

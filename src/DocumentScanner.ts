@@ -4,13 +4,8 @@ import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
 import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
-import ScanResultView, { ScanResultViewConfig } from "./views/ScanResultView";
-import {
-  DEFAULT_TEMPLATE_NAMES,
-  DocumentScanResult,
-  EnumResultStatus,
-  UtilizedTemplateNames,
-} from "./views/utils/types";
+import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";
+import { DEFAULT_TEMPLATE_NAMES, DocumentResult, EnumResultStatus, UtilizedTemplateNames } from "./views/utils/types";
 import { getElement, shouldCorrectImage } from "./views/utils";
 
 // Default DCE UI path
@@ -22,7 +17,7 @@ export interface DocumentScannerConfig {
   license?: string;
   container?: HTMLElement | string;
   scannerViewConfig?: DocumentScannerViewConfig;
-  scanResultViewConfig?: ScanResultViewConfig;
+  resultViewConfig?: DocumentResultViewConfig;
   correctionViewConfig?: DocumentCorrectionViewConfig;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
@@ -31,14 +26,14 @@ export interface SharedResources {
   cvRouter?: CaptureVisionRouter;
   cameraEnhancer?: CameraEnhancer;
   cameraView?: CameraView;
-  result?: DocumentScanResult;
-  onResultUpdated?: (result: DocumentScanResult) => void;
+  result?: DocumentResult;
+  onResultUpdated?: (result: DocumentResult) => void;
 }
 
 // Main class
 class DocumentScanner {
   private scannerView?: DocumentScannerView;
-  private scanResultView?: ScanResultView;
+  private scanResultView?: DocumentResultView;
   private correctionView?: DocumentCorrectionView;
   private resources: Partial<SharedResources> = {};
   private isCapturing = false;
@@ -47,7 +42,7 @@ class DocumentScanner {
     const hasNoMainContainer = !this.config.container;
     const hasNoViewContainers = !(
       this.config.scannerViewConfig?.container ||
-      this.config.scanResultViewConfig?.container ||
+      this.config.resultViewConfig?.container ||
       this.config.correctionViewConfig?.container
     );
     return hasNoMainContainer && hasNoViewContainers;
@@ -80,7 +75,7 @@ class DocumentScanner {
       // Only create containers for specifically configured views
       if (this.config.scannerViewConfig?.container) views.push("scanner");
       if (this.config.correctionViewConfig?.container) views.push("correction");
-      if (this.config.scanResultViewConfig?.container) views.push("scan-result");
+      if (this.config.resultViewConfig?.container) views.push("scan-result");
     }
 
     mainContainer.textContent = "";
@@ -125,7 +120,7 @@ class DocumentScanner {
     // Only initialize configs for views that should exist
     const shouldInitScanner = this.config.container || this.config.scannerViewConfig?.container;
     const shouldInitCorrection = this.config.container || this.config.correctionViewConfig?.container;
-    const shouldInitResult = this.config.container || this.config.scanResultViewConfig?.container;
+    const shouldInitResult = this.config.container || this.config.resultViewConfig?.container;
 
     Object.assign(this.config, {
       ...baseConfig,
@@ -147,10 +142,10 @@ class DocumentScanner {
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
-      scanResultViewConfig: shouldInitResult
+      resultViewConfig: shouldInitResult
         ? {
-            ...this.config.scanResultViewConfig,
-            container: viewContainers["scan-result"] || this.config.scanResultViewConfig?.container || null,
+            ...this.config.resultViewConfig,
+            container: viewContainers["scan-result"] || this.config.resultViewConfig?.container || null,
           }
         : undefined,
     });
@@ -161,7 +156,7 @@ class DocumentScanner {
     components: {
       scannerView?: DocumentScannerView;
       correctionView?: DocumentCorrectionView;
-      scanResultView?: ScanResultView;
+      scanResultView?: DocumentResultView;
     };
   }> {
     try {
@@ -175,7 +170,7 @@ class DocumentScanner {
       const components: {
         scannerView?: DocumentScannerView;
         correctionView?: DocumentCorrectionView;
-        scanResultView?: ScanResultView;
+        scanResultView?: DocumentResultView;
       } = {};
 
       // Only initialize components that are configured
@@ -190,10 +185,10 @@ class DocumentScanner {
         components.correctionView = this.correctionView;
       }
 
-      if (this.config.scanResultViewConfig) {
-        this.scanResultView = new ScanResultView(
+      if (this.config.resultViewConfig) {
+        this.scanResultView = new DocumentResultView(
           this.resources,
-          this.config.scanResultViewConfig,
+          this.config.resultViewConfig,
           this.scannerView,
           this.correctionView
         );
@@ -270,7 +265,7 @@ class DocumentScanner {
     cleanContainer(this.config.container);
     cleanContainer(this.config.scannerViewConfig?.container);
     cleanContainer(this.config.correctionViewConfig?.container);
-    cleanContainer(this.config.scanResultViewConfig?.container);
+    cleanContainer(this.config.resultViewConfig?.container);
   }
 
   /**
@@ -299,7 +294,7 @@ class DocumentScanner {
    *    - Only Correction available + existing result: Goes to Correction
    *    - Only ScanResult available + existing result: Goes to ScanResult
    *
-   * @returns Promise<DocumentScanResult> containing:
+   * @returns Promise<DocumentResult> containing:
    *  - status: Success/Failed/Cancelled with message
    *  - originalImageResult: Raw captured image
    *  - correctedImageResult: Normalized image (if correction applied)
@@ -308,7 +303,7 @@ class DocumentScanner {
    *
    * @throws Error if capture session already running
    */
-  async launch(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentResult> {
     if (this.isCapturing) {
       throw new Error("Capture session already in progress");
     }

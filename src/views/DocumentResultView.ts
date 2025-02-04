@@ -4,35 +4,35 @@ import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { createControls, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { DocumentScanResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
+import { DocumentResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
-export interface ScanResultViewToolbarButtonsConfig {
+export interface DocumentResultViewToolbarButtonsConfig {
   upload?: ToolbarButtonConfig;
   correct?: ToolbarButtonConfig;
   retake?: ToolbarButtonConfig;
   done?: ToolbarButtonConfig;
 }
 
-export interface ScanResultViewConfig {
+export interface DocumentResultViewConfig {
   container?: HTMLElement;
-  toolbarButtonsConfig?: ScanResultViewToolbarButtonsConfig;
+  toolbarButtonsConfig?: DocumentResultViewToolbarButtonsConfig;
 
-  onDone?: (result: DocumentScanResult) => Promise<void>;
-  onUpload?: (result: DocumentScanResult) => Promise<void>;
+  onDone?: (result: DocumentResult) => Promise<void>;
+  onUpload?: (result: DocumentResult) => Promise<void>;
 }
 
-export default class ScanResultView {
+export default class DocumentResultView {
   private container: HTMLElement;
-  private currentScanResultViewResolver?: (result: DocumentScanResult) => void;
+  private currentScanResultViewResolver?: (result: DocumentResult) => void;
 
   constructor(
     private resources: SharedResources,
-    private config: ScanResultViewConfig,
+    private config: DocumentResultViewConfig,
     private scannerView: DocumentScannerView,
     private correctionView: DocumentCorrectionView
   ) {}
 
-  async launch(): Promise<DocumentScanResult> {
+  async launch(): Promise<DocumentResult> {
     try {
       this.config.container.textContent = "";
       await this.initialize();
@@ -141,7 +141,7 @@ export default class ScanResultView {
         this.config.container.style.display = "flex";
       }
     } catch (error) {
-      console.error("ScanResultView - Handle Correction View Error:", error);
+      console.error("DocumentResultView - Handle Correction View Error:", error);
       // Make sure to resolve with error if something goes wrong
       if (this.currentScanResultViewResolver) {
         this.currentScanResultViewResolver({

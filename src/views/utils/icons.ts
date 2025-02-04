@@ -69,7 +69,7 @@ export const DDS_ICONS = {
 </svg>
 `,
   share: `
-<svg id="sharePng" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<svg id="sharePng" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
   <defs>
     <style>
       .cls-1 {

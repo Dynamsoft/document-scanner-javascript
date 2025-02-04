@@ -30,7 +30,7 @@ export type ResultStatus = {
   message?: string;
 };
 
-export interface DocumentScanResult {
+export interface DocumentResult {
   status: ResultStatus;
   correctedImageResult?: NormalizedImageResultItem | DSImageData;
   originalImageResult?: OriginalImageResultItem["imageData"];
