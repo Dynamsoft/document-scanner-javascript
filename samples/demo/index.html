@@ -6,8 +6,66 @@
     <title>Dynamsoft Document Scanner</title>
     <script src="./dist/dds.bundle.js"></script>
     <link rel="stylesheet" href="./css/index.css" />
+    <style id="rotate-phone-style">
+      .rotation-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+      }
+
+      .rotation-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .rotation-content svg {
+        width: 48px;
+        height: 48px;
+        animation: rotate 2s infinite linear;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="rotationMessage" class="rotation-message" style="display: none">
+      <div class="rotation-content">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
+        </svg>
+        <span>Please rotate your device to portrait mode</span>
+      </div>
+    </div>
     <div class="col1">
       <!-- Logo -->
       <a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
@@ -55,7 +113,7 @@
               <div class="scenario-list-title">Try with pre-set scenarios or your camera!</div>
               <button data-scenario="demo1" class="scenario-opt selected">Preset 1: Contrasting Background</button>
               <button data-scenario="demo2" class="scenario-opt">Preset 2: Similar Background</button>
-              <button data-scenario="camera" class="scenario-opt">Use Physical Camera</button>
+              <button data-scenario="camera" class="scenario-opt">Use Live Camera</button>
             </div>
           </div>
           <button id="shareButton" class="share-button disabled">
@@ -136,6 +194,10 @@
                   <div class="step">Step 3:</div>
                   <div class="desc">View the scan result here</div>
                 </div>
+                <div class="steps firefox" style="margin-top: 1rem">
+                  <div class="step">NOTE:</div>
+                  <div class="desc">Preset demo not available on Firefox Android</div>
+                </div>
               </div>
             </div>
           </div>
@@ -148,6 +210,9 @@
     </div>
 
     <script>
+      const isFirefoxAndroid =
+        navigator.userAgent.toLowerCase().includes("firefox") && navigator.userAgent.toLowerCase().includes("android");
+
       // DEMO scenario
 
       const scenarioType = document.querySelector(".scenario-type");
@@ -198,11 +263,22 @@
       const isFirstLoad = !localStorage.getItem("dds-first-load");
       let currentScenario = isFirstLoad ? "demo1" : "camera";
 
-      if (isFirstLoad) {
+      if (isFirstLoad && !isFirefoxAndroid) {
         localStorage.setItem("dds-first-load", "true");
         selectScenario("demo1");
       } else {
         selectScenario("camera");
+      }
+
+      const firefoxNote = document.querySelector(".steps.firefox");
+      if (isFirefoxAndroid) {
+        firefoxNote.style.display = "flex";
+        scenarioOpts[0].style.display = "none";
+        scenarioOpts[1].style.display = "none";
+      } else {
+        firefoxNote.style.display = "none";
+        scenarioOpts[0].style.display = "block";
+        scenarioOpts[1].style.display = "block";
       }
 
       // Button and container references
@@ -224,9 +300,6 @@
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
-        scannerViewConfig: {
-          cameraEnhancerUIPath: "./dist/document-scanner.ui.html",
-        },
         license:
           "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAwLTEwMzYzOTcyMSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21sdHMuZHluYW1zb2Z0LmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMCIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NsdHMuZHluYW1zb2Z0LmNvbS8iLCJjaGVja0NvZGUiOjEyOTQzODU5NDJ9",
       });
@@ -304,6 +377,40 @@
       // Event listeners
       scanButton.addEventListener("click", handleScan);
       shareButton.addEventListener("click", handleShare);
+
+      // Rotate Phone
+      function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      // Function to handle orientation change
+      function handleOrientation() {
+        const rotationMessage = document.getElementById("rotationMessage");
+        if (isMobile()) {
+          if (window.orientation === 90 || window.orientation === -90) {
+            rotationMessage.style.display = "flex";
+          } else {
+            rotationMessage.style.display = "none";
+          }
+        }
+      }
+
+      // Listen for orientation changes
+      window.addEventListener("orientationchange", handleOrientation);
+      // Also check on load
+      handleOrientation();
+
+      // Alternative method for browsers that don't support window.orientation
+      window.matchMedia("(orientation: landscape)").addListener(function (e) {
+        const rotationMessage = document.getElementById("rotationMessage");
+        if (isMobile()) {
+          if (e.matches) {
+            rotationMessage.style.display = "flex";
+          } else {
+            rotationMessage.style.display = "none";
+          }
+        }
+      });
     </script>
   </body>
 </html>

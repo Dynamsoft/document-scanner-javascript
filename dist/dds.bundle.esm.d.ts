@@ -29,32 +29,35 @@ type ResultStatus = {
     code: EnumResultStatus;
     message?: string;
 };
-interface DocumentScanResult {
+interface DocumentResult {
     status: ResultStatus;
     correctedImageResult?: NormalizedImageResultItem | DSImageData;
     originalImageResult?: OriginalImageResultItem["imageData"];
     detectedQuadrilateral?: Quadrilateral;
     _flowType?: EnumFlowType;
 }
-interface ControlButton {
+type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">;
+interface ToolbarButton {
+    id: string;
     icon: string;
-    text: string;
+    label: string;
     onClick?: () => void | Promise<void>;
-    disabled?: boolean;
+    className?: string;
+    isDisabled?: boolean;
+    isHidden?: boolean;
 }
 
-interface DocumentCorrectionViewControlIcons {
-    fullImageBtn?: Pick<ControlButton, "icon" | "text">;
-    detectBordersBtn?: Pick<ControlButton, "icon" | "text">;
-    applyBtn?: Pick<ControlButton, "icon" | "text">;
-    containerStyle?: Partial<CSSStyleDeclaration>;
+interface DocumentCorrectionViewToolbarButtonsConfig {
+    fullImage?: ToolbarButtonConfig;
+    detectBorders?: ToolbarButtonConfig;
+    apply?: ToolbarButtonConfig;
 }
 interface DocumentCorrectionViewConfig {
     container?: HTMLElement;
-    controlIcons?: DocumentCorrectionViewControlIcons;
+    toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
     templateFilePath?: string;
     utilizedTemplateNames?: UtilizedTemplateNames;
-    onFinish?: (result: DocumentScanResult) => void;
+    onFinish?: (result: DocumentResult) => void;
 }
 declare class DocumentCorrectionView {
     private resources;
@@ -74,7 +77,7 @@ declare class DocumentCorrectionView {
     setFullImageBoundary(): void;
     setBoundaryAutomatically(): Promise<void>;
     confirmCorrection(): Promise<void>;
-    launch(): Promise<DocumentScanResult>;
+    launch(): Promise<DocumentResult>;
     hideView(): void;
     /**
      * Normalize an image with DDN given a set of points
@@ -147,32 +150,32 @@ declare class DocumentScannerView {
      * @returns normalized image by DDN
      */
     private handleAutoCaptureMode;
-    launch(_demo_cameraType?: _DEMO_CameraType): Promise<DocumentScanResult>;
+    launch(_demo_cameraType?: _DEMO_CameraType): Promise<DocumentResult>;
     normalizeImage(points: Quadrilateral["points"], originalImageData: OriginalImageResultItem["imageData"]): Promise<NormalizedImageResultItem>;
 }
 
-interface ScanResultViewControlIcons {
-    uploadBtn?: Pick<ControlButton, "icon" | "text">;
-    correctImageBtn?: Pick<ControlButton, "icon" | "text">;
-    retakeBtn?: Pick<ControlButton, "icon" | "text">;
-    doneBtn?: Pick<ControlButton, "icon" | "text">;
-    containerStyle?: Partial<CSSStyleDeclaration>;
+interface DocumentResultViewToolbarButtonsConfig {
+    retake?: ToolbarButtonConfig;
+    correct?: ToolbarButtonConfig;
+    share?: ToolbarButtonConfig;
+    upload?: ToolbarButtonConfig;
+    done?: ToolbarButtonConfig;
 }
-interface ScanResultViewConfig {
+interface DocumentResultViewConfig {
     container?: HTMLElement;
-    controlIcons?: ScanResultViewControlIcons;
-    onDone?: (result: DocumentScanResult) => Promise<void>;
-    onUpload?: (result: DocumentScanResult) => Promise<void>;
+    toolbarButtonsConfig?: DocumentResultViewToolbarButtonsConfig;
+    onDone?: (result: DocumentResult) => Promise<void>;
+    onUpload?: (result: DocumentResult) => Promise<void>;
 }
-declare class ScanResultView {
+declare class DocumentResultView {
     private resources;
     private config;
     private scannerView;
     private correctionView;
     private container;
     private currentScanResultViewResolver?;
-    constructor(resources: SharedResources, config: ScanResultViewConfig, scannerView: DocumentScannerView, correctionView: DocumentCorrectionView);
-    launch(): Promise<DocumentScanResult>;
+    constructor(resources: SharedResources, config: DocumentResultViewConfig, scannerView: DocumentScannerView, correctionView: DocumentCorrectionView);
+    launch(): Promise<DocumentResult>;
     private handleUploadAndShareBtn;
     private handleShare;
     private handleCorrectImage;
@@ -188,7 +191,7 @@ interface DocumentScannerConfig {
     license?: string;
     container?: HTMLElement | string;
     scannerViewConfig?: DocumentScannerViewConfig;
-    scanResultViewConfig?: ScanResultViewConfig;
+    resultViewConfig?: DocumentResultViewConfig;
     correctionViewConfig?: DocumentCorrectionViewConfig;
     utilizedTemplateNames?: UtilizedTemplateNames;
 }
@@ -196,8 +199,8 @@ interface SharedResources {
     cvRouter?: CaptureVisionRouter;
     cameraEnhancer?: CameraEnhancer;
     cameraView?: CameraView;
-    result?: DocumentScanResult;
-    onResultUpdated?: (result: DocumentScanResult) => void;
+    result?: DocumentResult;
+    onResultUpdated?: (result: DocumentResult) => void;
 }
 declare class DocumentScanner {
     private config;
@@ -216,7 +219,7 @@ declare class DocumentScanner {
         components: {
             scannerView?: DocumentScannerView;
             correctionView?: DocumentCorrectionView;
-            scanResultView?: ScanResultView;
+            scanResultView?: DocumentResultView;
         };
     }>;
     private initializeResources;
@@ -247,7 +250,7 @@ declare class DocumentScanner {
      *    - Only Correction available + existing result: Goes to Correction
      *    - Only ScanResult available + existing result: Goes to ScanResult
      *
-     * @returns Promise<DocumentScanResult> containing:
+     * @returns Promise<DocumentResult> containing:
      *  - status: Success/Failed/Cancelled with message
      *  - originalImageResult: Raw captured image
      *  - correctedImageResult: Normalized image (if correction applied)
@@ -256,7 +259,7 @@ declare class DocumentScanner {
      *
      * @throws Error if capture session already running
      */
-    launch(_demo_cameraType?: _DEMO_CameraType): Promise<DocumentScanResult>;
+    launch(_demo_cameraType?: _DEMO_CameraType): Promise<DocumentResult>;
     /**
      * Checks if a capture session is currently in progress
      */
@@ -267,8 +270,8 @@ declare const DDS: {
     DocumentScanner: typeof DocumentScanner;
     DocumentNormalizerView: typeof DocumentCorrectionView;
     DocumentScannerView: typeof DocumentScannerView;
-    ScanResultView: typeof ScanResultView;
+    DocumentResultView: typeof DocumentResultView;
     EnumResultStatus: typeof EnumResultStatus;
 };
 
-export { ControlButton, DDS, DocumentCorrectionViewConfig, DocumentCorrectionViewControlIcons, DocumentCorrectionView as DocumentNormalizerView, DocumentScanResult, DocumentScanner, DocumentScannerConfig, DocumentScannerView, DocumentScannerViewConfig, EnumFlowType, EnumResultStatus, ResultStatus, ScanResultView, ScanResultViewConfig, ScanResultViewControlIcons, SharedResources, UtilizedTemplateNames };
+export { DDS, DocumentCorrectionViewConfig, DocumentCorrectionViewToolbarButtonsConfig, DocumentCorrectionView as DocumentNormalizerView, DocumentResult, DocumentResultView, DocumentResultViewConfig, DocumentResultViewToolbarButtonsConfig, DocumentScanner, DocumentScannerConfig, DocumentScannerView, DocumentScannerViewConfig, EnumFlowType, EnumResultStatus, ResultStatus, SharedResources, ToolbarButtonConfig, UtilizedTemplateNames };
