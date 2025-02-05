@@ -33,9 +33,9 @@ app.use(
 
 // Serve static files
 app.use("/dist", express.static(distPath));
-app.use("/assets", express.static(path.join(__dirname, "../samples/assets")));
-app.use("/css", express.static(path.join(__dirname, "../samples/css")));
-app.use("/font", express.static(path.join(__dirname, "../samples/font")));
+app.use("/assets", express.static(path.join(__dirname, "../samples/demo/assets")));
+app.use("/css", express.static(path.join(__dirname, "../samples/demo/css")));
+app.use("/font", express.static(path.join(__dirname, "../samples/demo/font")));
 
 // Routes
 app.get("/", (req, res) => {
@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/demo", (req, res) => {
-  res.sendFile(path.join(__dirname, "../samples/demo.html"));
+  res.sendFile(path.join(__dirname, "../samples/demo/index.html"));
 });
 
 app.get("/hello-world", (req, res) => {
@@ -67,9 +67,7 @@ app.post("/upload", function (req, res) {
 
       const uploadedFile = files.uploadFile[0]; // Ensure the file field name matches the form
       if (!uploadedFile) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No file uploaded" });
+        return res.status(400).json({ success: false, message: "No file uploaded" });
       }
 
       // Get current timestamp
@@ -132,13 +130,9 @@ httpServer.on("error", (error) => {
   if (error.code === "EADDRINUSE") {
     console.error(`\x1b[31mError: Port ${httpPort} is already in use\x1b[0m`);
     console.log("\nTo fix this, you can:");
-    console.log(
-      `1. Update the port manually by changing \x1b[33mhttpPort\x1b[0m in the code`
-    );
+    console.log(`1. Update the port manually by changing \x1b[33mhttpPort\x1b[0m in the code`);
     console.log(`2. Close any other applications using port ${httpPort}`);
-    console.log(
-      `3. Wait a few moments and try again - the port might be in a cleanup state\n`
-    );
+    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
   } else {
     console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
   }
@@ -149,13 +143,9 @@ httpsServer.on("error", (error) => {
   if (error.code === "EADDRINUSE") {
     console.error(`\x1b[31mError: Port ${httpsPort} is already in use\x1b[0m`);
     console.log("\nTo fix this, you can:");
-    console.log(
-      `1. Update the port manually by changing \x1b[33mhttpsPort\x1b[0m in the code`
-    );
+    console.log(`1. Update the port manually by changing \x1b[33mhttpsPort\x1b[0m in the code`);
     console.log(`2. Close any other applications using port ${httpsPort}`);
-    console.log(
-      `3. Wait a few moments and try again - the port might be in a cleanup state\n`
-    );
+    console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
   } else {
     console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
   }
@@ -167,14 +157,8 @@ httpServer.listen(httpPort, () => {
   console.log("\n\x1b[1m Dynamsoft Document Scanner Samples\x1b[0m\n");
   console.log("\x1b[36m HTTP URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log(
-    "\x1b[33m Hello World:\x1b[0m    http://localhost:" +
-      httpPort +
-      "/hello-world"
-  );
-  console.log(
-    "\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo"
-  );
+  console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
+  console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -192,16 +176,8 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   ipv4Addresses.forEach((localIP) => {
-    console.log(
-      "\x1b[32m Hello World:\x1b[0m  https://" +
-        localIP +
-        ":" +
-        httpsPort +
-        "/hello-world"
-    );
-    console.log(
-      "\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo"
-    );
+    console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
+    console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
