@@ -285,7 +285,6 @@ export default class DocumentResultView {
         label: toolbarButtonsConfig?.done?.label || "Done",
         className: `${toolbarButtonsConfig?.done?.className || ""}`,
         isHidden: toolbarButtonsConfig?.done?.isHidden || false,
-        isDisabled: !this.correctionView,
         onClick: () => this.handleDone(),
       },
     ];
