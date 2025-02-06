@@ -7,23 +7,40 @@
 This guide walks you through building a web application that scans single-page documents using **DDS**, with **pre-defined configurations**.
 
 **Table of Contents**
-- [License](#license)
-  - [Get a Trial License](#get-a-trial-license)
-  - [Get a Full License](#get-a-full-license)
-- [Quick Start](#quick-start)
-  - [Option 1: Build from Source](#option-1-build-from-source)
-  - [Option 2: Use Precompiled Script](#option-2-use-precompiled-script)
-- [Hello World Sample Explained](#hello-world-sample-explained)
-  - [Reference DDS](#reference-dds)
-  - [Instantiate DDS](#instantiate-dds)
-  - [Launch DDS](#launch-dds)
-  - [Display the Result](#display-the-result)
-- [Custom Usage](#custom-usage)
-  - [DocumentScannerConfig Overview](#documentscannerconfig-overview)
-  - [Workflow Customization](#workflow-customization)
-  - [View-Based Customization](#view-based-customization)
-  - [Self-Hosting Resource Files](#self-hosting-resource-files)
-- [Next Step](#next-step)
+- [Scan Single-Page Documents with Dynamsoft Document Scanner](#scan-single-page-documents-with-dynamsoft-document-scanner)
+  - [License](#license)
+    - [Get a Trial License](#get-a-trial-license)
+    - [Get a Full License](#get-a-full-license)
+  - [Quick Start](#quick-start)
+    - [Option 1: Build from Source](#option-1-build-from-source)
+    - [Option 2: Use Precompiled Script](#option-2-use-precompiled-script)
+  - [Hello World Sample Explained](#hello-world-sample-explained)
+    - [Reference DDS](#reference-dds)
+    - [Instantiate DDS](#instantiate-dds)
+    - [Launch DDS](#launch-dds)
+    - [Display the Result](#display-the-result)
+  - [Custom Usage](#custom-usage)
+    - [DocumentScannerConfig Overview](#documentscannerconfig-overview)
+    - [Workflow Customization](#workflow-customization)
+      - [Example 1: Specify the Container for DocumentScanner](#example-1-specify-the-container-for-documentscanner)
+      - [Example 2: Specify Only the Container for DocumentScannerView](#example-2-specify-only-the-container-for-documentscannerview)
+      - [Example 3: Specify Individual View Containers](#example-3-specify-individual-view-containers)
+    - [View-Based Customization](#view-based-customization)
+      - [`DocumentScannerView` Configuration](#documentscannerview-configuration)
+        - [Steps to Customize the UI for `DocumentScannerView`](#steps-to-customize-the-ui-for-documentscannerview)
+        - [Styling Buttons](#styling-buttons)
+        - [Customizing Apply Button Callback](#customizing-apply-button-callback)
+      - [`DocumentResultView` Configuration](#documentresultview-configuration)
+        - [Styling Buttons](#styling-buttons-1)
+        - [Customizing the "Done" Button Callback](#customizing-the-done-button-callback)
+        - [Customizing the "Upload" Button](#customizing-the-upload-button)
+    - [Self-Hosting Resource Files](#self-hosting-resource-files)
+      - [Modify the Build Script](#modify-the-build-script)
+      - [Update the Engine Resource Paths](#update-the-engine-resource-paths)
+      - [Update the UI Configuration](#update-the-ui-configuration)
+      - [Build the Project](#build-the-project)
+      - [Serve the Project Locally](#serve-the-project-locally)
+  - [Next Step](#next-step)
 
 ## License
 
@@ -169,7 +186,7 @@ Alternatively, the script can be referenced from a CDN:
 <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/dds.bundle.js"></script>
 ```
 
-**DDS** wraps all its dependency scripts, so a **DDS** project only needs to include **DDS** itself as a single script — no additional dependency scripts are required.
+**DDS** wraps all its dependency scripts, so a **DDS** project only needs to include **DDS** itself as a single script. No additional dependency scripts are required.
 
 > ⚠**IMPORTANT**: Even if you reference the script locally, supporting resources like `.wasm` engine files are **still loaded from the CDN at runtime**. If you require a **fully offline setup**, follow the instructions in [Self-Hosting Resource File](#self-hosting-resource-files).
 
@@ -326,7 +343,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 #### Example 3: Specify Individual View Containers
 
-If only the `DocumentScannerView`, `DocumentResultView`, and `DocumentCorrectionView` containers are provided — without the `DocumentScanner` container — DDS renders the full workflow using these three containers
+If only the `DocumentScannerView` container is provided, **DDS** displays only the `DocumentScannerView` and returns the scan result from `DocumentScanner.launch()` immediately after a successful scan.
 
 ```html
 <div id="myDocumentScannerViewContainer" style="width: 80vw; height: 80vh"></div>
