@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamsoft Document Scanner - Hello World</title>
+    <script src="./dist/dds.bundle.js"></script>
+  </head>
+
+  <body>
+    <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
+    <div id="results"></div>
+
+    <script>
+      const resultContainer = document.querySelector("#results");
+
+      // Initialize the Dynamsoft Document Scanner
+      const documentScanner = new Dynamsoft.DocumentScanner({
+        license:
+          "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAwLTEwMzYzOTcyMSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21sdHMuZHluYW1zb2Z0LmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMCIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NsdHMuZHluYW1zb2Z0LmNvbS8iLCJjaGVja0NvZGUiOjEyOTQzODU5NDJ9",
+      });
+      (async () => {
+        // Launch the scanner and wait for the result
+        const result = await documentScanner.launch();
+        console.log(result);
+
+        // Clear the result container and display the scanned result as a canvas
+        if (result?.correctedImageResult) {
+          resultContainer.innerHTML = ""; // Clear placeholder content
+          const canvas = result.correctedImageResult.toCanvas();
+          resultContainer.appendChild(canvas);
+        } else {
+          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+        }
+      })();
+    </script>
+  </body>
+</html>
