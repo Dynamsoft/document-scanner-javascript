@@ -1,5 +1,5 @@
 import { LicenseManager } from "dynamsoft-license";
-import { CoreModule } from "dynamsoft-core";
+import { CoreModule, EngineResourcePaths } from "dynamsoft-core";
 import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
 import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
@@ -17,15 +17,22 @@ import { getElement, shouldCorrectImage } from "./views/utils";
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
   "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.3/dist/document-scanner.ui.html";
+const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 export interface DocumentScannerConfig {
   license?: string;
   container?: HTMLElement | string;
+
+  // DCV specific configs
+  utilizedTemplateNames?: UtilizedTemplateNames;
+  engineResourcePaths: EngineResourcePaths;
+
+  // Views Config
   scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames">;
   resultViewConfig?: DocumentResultViewConfig;
   correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames">;
-  utilizedTemplateNames?: UtilizedTemplateNames;
+
   showResultView?: boolean;
   showCorrectionView?: boolean;
 }
@@ -248,7 +255,7 @@ class DocumentScanner {
       LicenseManager.initLicense(this.config?.license || "", true);
 
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
-      CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
+      CoreModule.engineResourcePaths = this.config?.engineResourcePaths || DEFAULT_DCV_ENGINE_RESOURCE_PATHS;
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
