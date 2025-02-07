@@ -236,8 +236,9 @@ export default class DocumentCorrectionView {
       {
         id: `dds-correction-apply`,
         icon:
-          toolbarButtonsConfig?.apply?.icon || (this.config?._showResultView ? DDS_ICONS.complete : DDS_ICONS.finish),
-        label: toolbarButtonsConfig?.apply?.label || (this.config?._showResultView ? "Done" : "Apply"),
+          toolbarButtonsConfig?.apply?.icon ||
+          (this.config?._showResultView === false ? DDS_ICONS.complete : DDS_ICONS.finish),
+        label: toolbarButtonsConfig?.apply?.label || (this.config?._showResultView === false ? "Done" : "Apply"),
         className: `${toolbarButtonsConfig?.apply?.className || ""}`,
         isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
 
