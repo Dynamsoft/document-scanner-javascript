@@ -25,13 +25,21 @@ export interface DocumentScannerConfig {
   container?: HTMLElement | string;
 
   // DCV specific configs
+  templateFilePath?: string;
   utilizedTemplateNames?: UtilizedTemplateNames;
   engineResourcePaths?: EngineResourcePaths;
 
   // Views Config
-  scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames" | "_showCorrectionView">;
+  scannerViewConfig?: Omit<
+    DocumentScannerViewConfig,
+    "templateFilePath" | "utilizedTemplateNames" | "_showCorrectionView"
+  >;
+
   resultViewConfig?: DocumentResultViewConfig;
-  correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames" | "_showCorrectionView">;
+  correctionViewConfig?: Omit<
+    DocumentCorrectionViewConfig,
+    "templateFilePath" | "utilizedTemplateNames" | "_showCorrectionView"
+  >;
   showResultView?: boolean;
   showCorrectionView?: boolean;
 }
@@ -250,14 +258,15 @@ class DocumentScanner {
         detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
         normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
       },
+      templateFilePath: this.config?.templateFilePath || null,
     };
 
     // Views Config
     const scannerViewConfig = {
       ...this.config.scannerViewConfig,
       container: viewContainers[EnumDDSViews.Scanner] || this.config.scannerViewConfig?.container || null,
-      templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
       cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
+      templateFilePath: baseConfig.templateFilePath,
       utilizedTemplateNames: baseConfig.utilizedTemplateNames,
       _showCorrectionView: this.showCorrectionView(),
     };
@@ -265,6 +274,7 @@ class DocumentScanner {
       ? {
           ...this.config.correctionViewConfig,
           container: viewContainers[EnumDDSViews.Correction] || this.config.correctionViewConfig?.container || null,
+          templateFilePath: baseConfig.templateFilePath,
           utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           _showResultView: this.showResultView(),
         }
