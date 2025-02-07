@@ -217,7 +217,7 @@ The workflow returns a scanned image object of type `CorrectedImageResult`. To d
     <div id="results"></div>
 ```
 
-API Reference: [`CorrectedImageResult`](https://www.dynamsoft.com/mobile-web-capture/docs/api/document-scanner.html#CorrectedImageResult)
+API Reference: [`DocumentResult`](https://www.dynamsoft.com/mobile-web-capture/docs/api/document-scanner.html#documentresult)
 
 The following code clears the result container and displays the scanned result as a canvas:
 
