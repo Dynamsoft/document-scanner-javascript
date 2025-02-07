@@ -2,7 +2,9 @@ import { EnumFlowType, ToolbarButton } from "./types";
 
 export function getElement(element: string | HTMLElement): HTMLElement | null {
   if (typeof element === "string") {
-    return document.querySelector(element);
+    const el = document.querySelector(element) as HTMLElement;
+    if (!el) throw new Error("Element not found");
+    return el;
   }
   return element instanceof HTMLElement ? element : null;
 }

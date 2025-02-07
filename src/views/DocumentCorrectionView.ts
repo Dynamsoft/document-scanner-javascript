@@ -27,6 +27,8 @@ export interface DocumentCorrectionViewConfig {
   templateFilePath?: string;
   utilizedTemplateNames?: UtilizedTemplateNames;
   onFinish?: (result: DocumentResult) => void;
+
+  _showResultView?: boolean; // Internal use, to change Apply -> Done if result view is not configured
 }
 
 export default class DocumentCorrectionView {
@@ -233,8 +235,9 @@ export default class DocumentCorrectionView {
       },
       {
         id: `dds-correction-apply`,
-        icon: toolbarButtonsConfig?.apply?.icon || DDS_ICONS.finish,
-        label: toolbarButtonsConfig?.apply?.label || "Apply",
+        icon:
+          toolbarButtonsConfig?.apply?.icon || (this.config?._showResultView ? DDS_ICONS.complete : DDS_ICONS.finish),
+        label: toolbarButtonsConfig?.apply?.label || (this.config?._showResultView ? "Done" : "Apply"),
         className: `${toolbarButtonsConfig?.apply?.className || ""}`,
         isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
 

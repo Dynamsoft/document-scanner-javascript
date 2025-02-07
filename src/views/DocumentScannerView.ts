@@ -19,6 +19,8 @@ import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/Loading
 import { createStyle, getElement } from "./utils";
 
 export interface DocumentScannerViewConfig {
+  _showCorrectionView?: boolean; // Internal use, to remove Smart Capture if correctionView is not available
+
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
   container?: HTMLElement | string;
@@ -180,6 +182,11 @@ export default class DocumentScannerView {
     await this.toggleAutoCrop(this.autoCropEnabled);
 
     this.assignDCEClickEvents();
+
+    // If showCorrectionView is false, hide smartCapture
+    if (this.config._showCorrectionView === false) {
+      this.DCE_ELEMENTS.smartCaptureBtn.style.display = "none";
+    }
 
     this.initializedDCE = true;
   }
@@ -503,7 +510,8 @@ export default class DocumentScannerView {
     // If turning off auto capture, ensure auto crop is off
     if (newSmartCaptureState && !this.boundsDetectionEnabled) {
       await this.toggleBoundsDetection(true);
-    } else if (!newSmartCaptureState) {
+    } else if (!newSmartCaptureState && this.config._showCorrectionView !== false) {
+      // Handle correctionView
       await this.toggleAutoCrop(false);
     }
 
@@ -535,6 +543,11 @@ export default class DocumentScannerView {
       // Turn on bouds detection first
       await this.toggleBoundsDetection(true);
       await this.toggleSmartCapture(true);
+    }
+
+    // If turning off auto crop and _showCorrectionView is false, also turn off smartCapture
+    if (!newSmartCaptureState && this.config._showCorrectionView === false) {
+      await this.toggleSmartCapture(false);
     }
 
     this.autoCropEnabled = newSmartCaptureState;

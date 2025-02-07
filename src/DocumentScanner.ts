@@ -29,9 +29,9 @@ export interface DocumentScannerConfig {
   engineResourcePaths: EngineResourcePaths;
 
   // Views Config
-  scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames">;
+  scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames" | "_showCorrectionView">;
   resultViewConfig?: DocumentResultViewConfig;
-  correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames">;
+  correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames" | "_showCorrectionView">;
   showResultView?: boolean;
   showCorrectionView?: boolean;
 }
@@ -248,12 +248,14 @@ class DocumentScanner {
       templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
       cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
       utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+      _showCorrectionView: this.showCorrectionView(),
     };
     const correctionViewConfig = this.showCorrectionView()
       ? {
           ...this.config.correctionViewConfig,
           container: viewContainers[EnumDDSViews.Correction] || this.config.correctionViewConfig?.container || null,
           utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+          _showResultView: this.showResultView(),
         }
       : undefined;
     const resultViewConfig = this.showResultView()
