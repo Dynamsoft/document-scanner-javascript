@@ -146,3 +146,7 @@ export function createStyle(id: string, style: string) {
 export function isSVGString(str: string): boolean {
   return str.trim().startsWith("<svg") && str.trim().endsWith("</svg>");
 }
+
+export const isEmptyObject = (obj: object | null | undefined): boolean => {
+  return !obj || Object.keys(obj).length === 0;
+};

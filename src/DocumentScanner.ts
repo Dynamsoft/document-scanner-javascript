@@ -12,7 +12,7 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
 } from "./views/utils/types";
-import { getElement, shouldCorrectImage } from "./views/utils";
+import { getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
@@ -126,7 +126,9 @@ class DocumentScanner {
       LicenseManager.initLicense(this.config?.license || "", true);
 
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
-      CoreModule.engineResourcePaths = this.config?.engineResourcePaths || DEFAULT_DCV_ENGINE_RESOURCE_PATHS;
+      CoreModule.engineResourcePaths = isEmptyObject(this.config?.engineResourcePaths)
+        ? DEFAULT_DCV_ENGINE_RESOURCE_PATHS
+        : this.config.engineResourcePaths;
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
