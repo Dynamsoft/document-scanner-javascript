@@ -4,9 +4,9 @@
 
 > See it in action with the [Dynamsoft Document Scanner Demo](https://demo.dynamsoft.com/document-scanner/).
 
-This guide walks you through building a web application that scans single-page documents using **DDS**, with **pre-defined configurations**.
+This guide walks you through building a web application that scans single-page documents using DDS, with pre-defined configurations.
 
-**Table of Contents**
+**Table of Contents** Keep the TOC only for README of the GitHub Repo
 - [License](#license)
   - [Get a Trial License](#get-a-trial-license)
   - [Get a Full License](#get-a-full-license)
@@ -29,7 +29,9 @@ This guide walks you through building a web application that scans single-page d
 
 ### Get a Trial License
 
-Try **DDS** by requesting a trial license through our [customer portal](https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&source=guide). The trial can be renewed twice, providing a total of two months of free access. Note that **DDS** and **MWC** share the same license keys.
+Try **DDS** by requesting a trial license through our [customer portal](https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&source=guide). The trial can be renewed twice, providing a total of two months of free access.
+
+> **DDS** and **MWC** share the same license keys. If you already have a **DDS** license, you can use it for **MWC**, and vice versa.
 
 ### Get a Full License
 
@@ -37,40 +39,38 @@ To purchase a full license, [contact us](https://www.dynamsoft.com/company/conta
 
 ## Quick Start
 
-To use **DDS**, the first step is to obtain its **library files**. You can acquire them from one of the following sources:
+To use DDS, the first step is to obtain its library files. You can acquire them from one of the following sources:
 
-1. [**GitHub**](https://github.com/Dynamsoft/document-scanner-javascript) – Contains the source files for the **DDS** SDK, which can be compiled into library files.
-2. [**npm**](https://www.npmjs.com/package/dynamsoft-document-scanner) – Provides precompiled library files via **npm** for easier installation.
-3. [**CDN**](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner) – Delivers precompiled library files through a **CDN** for quick and seamless integration.
+1. [**GitHub**](https://github.com/Dynamsoft/document-scanner-javascript) – Contains the source files for the DDS SDK, which can be compiled into library files.
+2. [**npm**](https://www.npmjs.com/package/dynamsoft-document-scanner) – Provides precompiled library files via npm for easier installation.
+3. [**CDN**](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner) – Delivers precompiled library files through a CDN for quick and seamless integration.
 
-You can choose one of the following methods to set up a **Hello World** page:
+You can choose one of the following methods to set up a Hello World page:
 
-1. **Build from Source** – Download the source files from **GitHub** and compile the resource script yourself.
-2. **Using Precompiled Script** – Use the precompiled resource scripts from **npm** or the **CDN** for a quicker setup.
+1. **Build from Source** – Download the source files from GitHub and compile the resource script yourself.
+2. **Using Precompiled Script** – Use the precompiled resource scripts from npm or the CDN for a quicker setup.
 
 ### Option 1: Build from Source
 
-This method retrieves all **DDS source files** from its [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs a *ready-made* **Hello World** sample page included in the repository.
+This method retrieves all DDS source files from its [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs a *ready-made* Hello World sample page included in the repository.
 
 Follow these steps:
 
-1. **Download** **DDS** from [GitHub](https://github.com/Dynamsoft/document-scanner-javascript) as a compressed folder.
-2. **Extract** the contents of the archive.
-3. **Open** the root directory in a code editor.
-   > We recommend using [VS Code](https://code.visualstudio.com) to follow along with this guide, though any code editor will work.
-4. **Enter** the license key you received in [Get a Trial License](#get-a-trial-license).
-   > Open the Hello World sample located at [`/samples/hello-world.html`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/hello-world.html). Search for `"YOUR_LICENSE_KEY_HERE"` and replace it with your actual license key.
-5. **Install** project dependencies
+1. Download DDS from [GitHub](https://github.com/Dynamsoft/document-scanner-javascript) as a compressed folder.
+2. Extract the contents of the archive.
+3. Enter the license key you received in [Get a Trial License](#get-a-trial-license) in the Hello World sample.
+   > In your code editor, open the Hello World sample located at [`/samples/hello-world.html`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/hello-world.html). Search for `"YOUR_LICENSE_KEY_HERE"` and replace it with your actual license key.
+4. Install project dependencies
     In the terminal, navigate to the project root directory and run:
     ```bash
     npm install
     ```
-6. **Build** the project
+5. Build the project
     After the dependencies are installed, build the project by running:
     ```bash
     npm run build
     ```
-7. **Serve** the project locally
+6. Serve the project locally
     Start the local server by running:
     ```bash
     npm run serve
@@ -80,14 +80,14 @@ Once the server is running, open the application in a browser using the address 
 
 ### Option 2: Use Precompiled Script
 
-Since the **DDS library files** are published on [**npm**](https://www.npmjs.com/package/dynamsoft-document-scanner), it's easy to reference them from a CDN.
+Since the DDS library files are published on [npm](https://www.npmjs.com/package/dynamsoft-document-scanner), it's easy to reference them from a CDN.
 
 To use the precompiled script, simply include the following URL in a `<script>` tag:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/dds.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/dds.bundle.js"></script>
 ```
 
-Below is the complete **Hello World** sample page that uses this precompiled script from a CDN.
+Below is the complete Hello World sample page that uses this precompiled script from a CDN.
 > The code is identical to the [`/samples/hello-world.html`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/hello-world.html) file mentioned in the [Build from Source](#option-1-build-from-source) section, except for the script source.
 >
 > **Don't forget** to replace `"YOUR_LICENSE_KEY_HERE"` with your actual license key.
@@ -99,14 +99,14 @@ Below is the complete **Hello World** sample page that uses this precompiled scr
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner - Hello World</title>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/dds.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/dds.bundle.js"></script>
   </head>
   <body>
     <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
     <div id="results"></div>
     <script>
       const resultContainer = document.querySelector("#results");
-      // Initialize the Dynamsoft Document Scanner
+      // Instantiate a Dynamsoft Document Scanner Object
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
       });
@@ -131,7 +131,7 @@ Below is the complete **Hello World** sample page that uses this precompiled scr
 
 To run the sample, create a new file called `hello-world.html`, then copy and paste the code above into the file. Next, serve the page directly by deploying it to a server.
 
-If you are using VS Code, a quick and easy way to serve the project is using the [**Five Server** VSCode extension](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server). Simply install the extension, open the `hello-world.html` file in the editor, and click "Go Live" in the bottom right corner of the editor. This will serve the application at `http://127.0.0.1:5500/hello-world.html`.
+If you are using VS Code, a quick and easy way to serve the project is using the [Five Server VSCode extension](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server). Simply install the extension, open the `hello-world.html` file in the editor, and click "Go Live" in the bottom right corner of the editor. This will serve the application at `http://127.0.0.1:5500/hello-world.html`.
 
 Alternatively, you can use other methods like `IIS` or `Apache` to serve the project, though we won't cover those here for brevity.
 
@@ -152,12 +152,12 @@ Let’s walk through the code in the Hello World Sample to understand how it wor
     <title>Dynamsoft Document Scanner - Hello World</title>
     <script src="../dist/dds.bundle.js"></script>
     <!--Alternatively, reference the script from CDN
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/dds.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/dds.bundle.js"></script>
     -->
   </head>
 ```
 
-In this step, **DDS** is referenced using a relative local path in the `<head>` section of the HTML.
+In this step, DDS is referenced using a relative local path in the `<head>` section of the HTML.
 
 ```html
 <script src="../dist/dds.bundle.js"></script>
@@ -166,12 +166,12 @@ In this step, **DDS** is referenced using a relative local path in the `<head>` 
 Alternatively, the script can be referenced from a CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/dds.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/dds.bundle.js"></script>
 ```
 
 **DDS** wraps all its dependency scripts, so a **DDS** project only needs to include **DDS** itself as a single script. No additional dependency scripts are required.
 
-> ⚠**IMPORTANT**: Even if you reference the script locally, supporting resources like `.wasm` engine files are **still loaded from the CDN at runtime**. If you require a **fully offline setup**, follow the instructions in [Self-Hosting Resource File](#self-hosting-resource-files).
+> ⚠**IMPORTANT**: Even if you reference the script locally, supporting resources like `.wasm` engine files are still loaded from the CDN at runtime. If you require a **fully offline setup**, follow the instructions in [Self-Hosting Resource File](#self-hosting-resource-files).
 
 ### Instantiate DDS
 
@@ -183,9 +183,9 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 API Reference: [`DocumentScanner()`](https://www.dynamsoft.com/mobile-web-capture/docs/api/document-scanner.html#documentscanner)
 
-This step creates the **DDS** UI, which, when launched, occupies the entire visible area of the browser window by default. If needed, you can specify a container to restrict the UI's size. For more details, refer to [Specify the Container for DocumentScanner](#example-1-specify-the-container-for-documentscanner).
+This step creates the **DDS** UI, which, occupies the entire visible area of the browser window by default when launched. If needed, you can specify a container to restrict the UI's size. For more details, refer to [Confine DocumentScanner UI to a Specific Container](#example-1-confine-documentscanner-ui-to-a-specific-container)
 
-> A **license key** is required for the instantiation.
+> A license key is required for the instantiation.
 
 ### Launch DDS
 
@@ -193,19 +193,19 @@ This step creates the **DDS** UI, which, when launched, occupies the entire visi
 const result = await documentScanner.launch();
 ```
 
-API Reference: [`DocumentScanner.launch()`]({{ site.api }}document-scanner.html#documentscannerlaunch)
+API Reference: [`launch()`](https://www.dynamsoft.com/mobile-web-capture/docs/api/document-scanner.html#launch)
 
 This step launches the user into the document scanning workflow, beginning in the `DocumentScannerView`, where they can scan a document using one of three methods: 
 
-* **Option 1**: Manually scan by pressing the **shutter button**.
-* **Option 2**: Enable "**Smart Capture**" - the scanner will pause once a document is detected.
-* **Option 3**: Enable "**Auto Crop**" - the scanner will automatically detect the document and crop it out of the video frame.
+* Option 1: Manually scan by pressing the **shutter button**.
+* Option 2: Enable "**Smart Capture**" - the scanner will automatically capture an image once a document is detected.
+* Option 3: Enable "**Auto Crop**" - the scanner will automatically capture an image, detect the document, and crop it out of the video frame.
 
 > For Options 1 & 2: The user is directed to `DocumentCorrectionView` to review detected document boundaries and make any necessary adjustments before applying corrections. Afterward, they proceed to `DocumentResultView`.
 > 
 > For Option 3: The `DocumentCorrectionView` step is skipped. Image correction is applied automatically, and the user is taken directly to `DocumentResultView`.
 
-On `DocumentResultView`, if needed, the user can return to `DocumentCorrectionView` to make additional adjustments or press "**Re-take**" to restart the scanning process.
+In `DocumentResultView`, if needed, the user can return to `DocumentCorrectionView` to make additional adjustments or press "Re-take" to restart the scanning process.
 
 ### Display the Result
 
@@ -217,7 +217,7 @@ The workflow returns a scanned image object of type `CorrectedImageResult`. To d
     <div id="results"></div>
 ```
 
-API Reference: [`CorrectedImageResult`]({{ site.api }}document-scanner.html#correctedimageresult)
+API Reference: [`CorrectedImageResult`](https://www.dynamsoft.com/mobile-web-capture/docs/api/document-scanner.html#CorrectedImageResult)
 
 The following code clears the result container and displays the scanned result as a canvas:
 
@@ -233,30 +233,33 @@ if (result?.correctedImageResult) {
 
 ## Custom Usage
 
-This section builds on the **Hello World** sample to demonstrate how to configure **DDS**, typically by adjusting the `DocumentScannerConfig` object.
+This section builds on the Hello World sample to demonstrate how to configure DDS, typically by adjusting the `DocumentScannerConfig` object.
 
 ### DocumentScannerConfig Overview
 
-`DocumentScannerConfig` is the primary configuration object for customizing **DDS**. It includes the following properties:
+`DocumentScannerConfig` is the primary configuration object for customizing DDS. It includes the following properties:
 
 1. `license`: The license key.
 2. `container`: The HTML container for the entire workflow. If not specified (like in the Hello World Sample), one is created automatically.
-3. `scannerViewConfig`: Configures the main scanner view with the following properties:
+3. `showCorrectionView`: Configures where or not to show `DocumentCorrectionView`.
+4. `showResultView`: Configures where or not to show `DocumentResultView`.
+5. `scannerViewConfig`: Configures the main scanner view with the following properties:
    1. `container`: The HTML container for the `DocumentScannerView`.
-   2. `templateFilePath`: Path to a Capture Vision template. Typically not needed as the default template is used.
-   3. `cameraEnhancerUIPath`: Path to the UI definition file (.html) for the `DocumentScannerView`.
-4. `correctionViewConfig`: Configures the document correction view.
+   2. `cameraEnhancerUIPath`: Path to the UI definition file (.html) for the `DocumentScannerView`.
+6. `correctionViewConfig`: Configures the document correction view.
    1. `container`: The HTML container for the `DocumentCorrectionView`.
    2. `toolbarButtonsConfig`: Configures the appearance and labels of the buttons for the `DocumentCorrectionView` UI.
-   4. `onFinish`: Handler called when the user clicks the "**Apply**" button.
-5. `resultViewConfig`: Configures the result view with the following properties:
+   3. `onFinish`: Handler called when the user clicks the "Apply" button.
+7. `resultViewConfig`: Configures the result view with the following properties:
    1. `container`: The HTML container for the `DocumentResultView`.
    2. `toolbarButtonsConfig`: Configures the appearance and labels of the buttons for the `DocumentResultView` UI.
-   3. `onDone`: Handler called when the user clicks the "**Done**" button.
-   4. `onUpload`: Handler called when the user clicks the "**Upload**" button.
-6. `utilizedTemplateNames`: Template names for detection and correction. Typically not needed as the default template is used.
+   3. `onDone`: Handler called when the user clicks the "Done" button.
+   4. `onUpload`: Handler called when the user clicks the "Upload" button.
+8. `templateFilePath`: Path to a Capture Vision template. Typically not needed as the default template is used.
+9. `utilizedTemplateNames`: Template names for detection and correction. Typically not needed as the default template is used.
+10. `engineResourcePaths`: Paths to extra resources such as `.wasm` engine files
 
-We will discuss two main methods of customizing **DDS** with `DocumentScannerConfig`:
+We will discuss two main methods of customizing DDS with `DocumentScannerConfig`:
 
 1. **Workflow Customization**: Through container definitions.
 2. **View-Based Customization**: Through configuration objects.
@@ -272,26 +275,22 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 ### Workflow Customization
 
-**DDS** automatically creates containers for its **Views** if none are specified in the configuration. When containers are provided, the workflow adjusts accordingly.
+In the Hello World sample, we use the complete workflow with minimum configuration:
 
-The chart below outlines the different behaviors when specific **containers** are assigned for the `DocumentScanner` instance or its constituent **Views**. Note that other configuration options not covered here are not supported at this time.
+```javascript
+const documentScanner = new Dynamsoft.DocumentScanner({
+    license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+});
+// Launch the scanner and wait for the result
+const result = await documentScanner.launch();
+```
 
-- "✓": the container is provided in `DocumentScannerConfig`.
-- "🗙": the container is not provided in `DocumentScannerConfig`.
-- "✓/🗙": the container may or may not be provided in `DocumentScannerConfig`.
+In this case, **DDS** automatically creates "containers" for its **Views**. In this section, we'll discuss a few examples to adjust the **DDS** workflow.
 
-| DocumentScanner | DocumentScannerView | DocumentCorrectionView | DocumentResultView | Resulting Workflow                                                                                                                                  |
-| :-------------: | :-----------------: | :--------------------: | :----------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-|        🗙        |          🗙          |           🗙            |         🗙          | DDS creates containers for the `DocumentScanner`, `DocumentScannerView`, `DocumentCorrectionView`, and `DocumentResultView` by default.             |
-|        ✓        |         ✓/🗙         |          ✓/🗙           |        ✓/🗙         | DDS uses the container for the `DocumentScanner` and ignores any specified containers for the Views, creating its own instead.                      |
-|        🗙        |          ✓          |           🗙            |         🗙          | DDS only makes the `DocumentScannerView` available and returns the scan result from `DocumentScanner.launch()` immediately after a successful scan. |
-|        🗙        |          ✓          |           ✓            |         ✓          | DDS makes the full workflow available through the three specified containers.                                                                       |
-|        🗙        |          ✓          |           ✓            |         🗙          | DDS does not create the `DocumentResultView`, so scans always move from the `DocumentScannerView` to the `DocumentCorrectionView`.                  |
-|        🗙        |          ✓          |           🗙            |         ✓          | DDS uses those two containers during View creation but creates the `DocumentCorrectionView` with its own self-generated container.                  |
+#### Example 1: Confine DocumentScanner UI to a Specific Container
 
-#### Example 1: Specify the Container for DocumentScanner
-
-As long as the `DocumentScanner` container is assigned, **DDS** will ignore any other containers assigned to its constituent **Views**:
+As long as the `DocumentScanner` container is assigned, **DDS** will confine its **Views** within that container.
+> Note that containers assigned to its constituent **Views** will be ignored.
 
 ```html
 <div id="myDocumentScannerContainer" style="width: 80vw; height: 80vh;"></div>
@@ -307,26 +306,21 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 });
 ```
 
-#### Example 2: Specify Only the Container for DocumentScannerView
+#### Example 2: Show DocumentScannerView Only
 
-If only the `DocumentScannerView` container is provided, **DDS** displays only the `DocumentScannerView` and returns the scan result from `DocumentScanner.launch()` immediately after a successful scan.
-
-```html
-<div id="myDocumentScannerViewContainer" style="width: 80vw; height: 80vh;"></div>
-```
+In some cases, `DocumentResultView` and `DocumentCorrectionView` may not be needed, so they can be hidden:
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
-    scannerViewConfig: {
-        container: document.getElementById("myDocumentScannerViewContainer")
-    }
+    showResultView: false,
+    showCorrectionView: false
 });
 ```
 
 #### Example 3: Specify Individual View Containers
 
-If only the `DocumentScannerView` container is provided, **DDS** displays only the `DocumentScannerView` and returns the scan result from `DocumentScanner.launch()` immediately after a successful scan.
+If only the `DocumentScannerView`, `DocumentResultView`, and `DocumentCorrectionView` containers are provided without the `DocumentScanner` container, **DDS** will render the full workflow using these three containers.
 
 ```html
 <div id="myDocumentScannerViewContainer" style="width: 80vw; height: 80vh"></div>
@@ -351,7 +345,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 ### View-Based Customization
 
-In addition to modifying the workflow, individual **Views** can be customized with configuration options for **UI styling, button settings, and event handling**.
+In addition to modifying the workflow, individual Views can be customized with configuration options for UI styling, button settings, and event handling.
 
 #### `DocumentScannerView` Configuration
 
@@ -367,15 +361,15 @@ interface DocumentScannerViewConfig {
 
 We previously covered `container` in [Workflow Customization](#workflow-customization), and changing `templateFilePath` is usually not required. Now, let's focus on `cameraEnhancerUIPath`.
 
-> If **DDS** performance does not meet your needs in your usage scenario, you may require a customized algorithm template for better results. In this case, please contact our experienced [Technical Support Team](https://www.dynamsoft.com/company/contact/) to discuss your requirements. They will help tailor a suitable template for you, which you can then apply by updating `templateFilePath`.
+> If DDS performance does not meet your needs in your usage scenario, you may require a customized algorithm template for better results. In this case, please contact our experienced [Technical Support Team](https://www.dynamsoft.com/company/contact/) to discuss your requirements. They will help tailor a suitable template for you, which you can then apply by updating `templateFilePath`.
 
 By default, `cameraEnhancerUIPath` points to a file hosted on the jsDelivr CDN:  
-[https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/document-scanner.ui.html](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.0/dist/document-scanner.ui.html).  
+[https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/document-scanner.ui.html](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.0.2/dist/document-scanner.ui.html).  
 
 This file defines the UI for `DocumentScannerView`. However, since files on the CDN **cannot be modified directly**, you need to use a **local version** to customize the UI. `cameraEnhancerUIPath` is used to specify the local version.
 
 ##### Steps to Customize the UI for `DocumentScannerView`
-1. Follow the instructions in [Build from Source](#option-1-build-from-source) to obtain the source files for **DDS**.  
+1. Follow the instructions in [Build from Source](#option-1-build-from-source) to obtain the source files for DDS.  
 2. Edit `/src/document-scanner.ui.html` to apply your customizations.  
 3. Build the project to generate the updated file in `/dist/document-scanner.ui.html`:  
 
@@ -419,7 +413,7 @@ interface DocumentCorrectionViewToolbarButtonsConfig {
 }
 ```
 
-We can use it to change the **icon** and **label** of each of the three UI buttons individually or even hide them. Below is an example that sets a custom label and image icon for the "Detect Borders" button and hides the "fullImage" button:
+We can use it to change the icon and label of each of the three UI buttons individually or even hide them. Below is an example that sets a custom label and image icon for the "Detect Borders" button and hides the "fullImage" button:
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -431,7 +425,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
             },
             detectBorders: {
                 icon: "path/to/new_icon.png", // Change to the actual path of the new icon
-                text: "Custom Label" // Capitalized for consistency, adjust as needed
+                label: "Custom Label"
             }
         }
     }
@@ -440,7 +434,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 ##### Customizing Apply Button Callback
 
-The `onFinish` callback is triggered after the user's corrections have been applied. For example, the code below displays the corrected image in a `resultContainer` after the user clicks "**Apply**":
+The `onFinish` callback is triggered after the user's corrections have been applied. For example, the code below displays the corrected image in a `resultContainer` after the user clicks "Apply":
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -484,7 +478,7 @@ interface interface DocumentResultViewToolbarButtonsConfig {
 }
 ```
 
-We can use it to change the **icon** and **label** of each of the three UI buttons individually or even hide them.
+We can use it to change the icon and label of each of the three UI buttons individually or even hide them.
 Below is an example that sets a custom label and image icon for the "retake" button and hides the "share" button:
 
 ```javascript
@@ -494,7 +488,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
         toolbarButtonsConfig: {
             retake: {
                 icon: "path/to/new_icon.png", // Change to the actual path of the new icon
-                text: "Custom Label" // Capitalized for consistency, adjust as needed
+                label: "Custom Label"
             },
             share: {
                 isHidden: true
@@ -502,12 +496,11 @@ const documentScanner = new Dynamsoft.DocumentScanner({
         }
     }
 });
-
 ```
 
 ##### Customizing the "Done" Button Callback
 
-The `onDone` callback is triggered when the "**Done**" button is pressed. For example, the code below displays the result image in a `resultContainer` after the user clicks "**Done**":
+The `onDone` callback is triggered when the "Done" button is pressed. For example, the code below displays the result image in a `resultContainer` after the user clicks "Done":
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -523,7 +516,7 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 ```
 ##### Customizing the "Upload" Button
 
-The `onUpload` callback is triggered when the **"Upload"** button is pressed. Note that the **Upload** button **only appears** if a callback function is defined for `onUpload`; otherwise, the button remains hidden.  
+The `onUpload` callback is triggered when the "Upload" button is pressed. Note that the Upload button _only appears_ if a callback function is defined for `onUpload`; otherwise, the button remains hidden.  
 
 The following example demonstrates how to upload the result image to a server:
 
@@ -554,8 +547,27 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 
 ### Self-Hosting Resource Files
 
-By default, **DDS** relies on a **CDN** for resources such as `.wasm` engine files. If you require a **fully offline setup**, follow these steps:
-> These steps are based on [Build from Source](#option-1-build-from-source), meaning that all **DDS** source files must be available on your local machine.
+By default, DDS relies on a CDN for resources such as `.wasm` engine files. If you require a **fully offline setup**, follow these steps:
+> These steps are based on [Build from Source](#option-1-build-from-source), meaning that all DDS source files must be available on your local machine.
+
+#### Update the Engine Resource Paths and the UI Path:
+
+```javascript
+const documentScanner = new Dynamsoft.DocumentScanner({
+    license: "YOUR_LICENSE_KEY_HERE",
+    scannerViewConfig: {
+        cameraEnhancerUIPath: "./dist/document-scanner.ui.html", // Use the local file
+    },
+    engineResourcePaths: {
+        std: "./dist/libs/dynamsoft-capture-vision-std/dist/",
+        dip: "./dist/libs/dynamsoft-image-processing/dist/",
+        core: "./dist/libs/dynamsoft-core/dist/",
+        license: "./dist/libs/dynamsoft-license/dist/",
+        cvr: "./dist/libs/dynamsoft-capture-vision-router/dist/",
+        ddn: "./dist/libs/dynamsoft-document-normalizer/dist/",
+    },
+});
+```
 
 #### Modify the Build Script
 
@@ -570,43 +582,9 @@ Update the `scripts` section in `package.json` to automatically copy the librari
 },
 ```
 
-#### Update the Engine Resource Paths
-
-Open `src/DocumentScanner.ts` and locate the following line:
-
-```typescript
-CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm/";
-```
-
-Replace it with:
-
-```typescript
-CoreModule.engineResourcePaths = {
-    "std": "./dist/libs/dynamsoft-capture-vision-std/dist/",
-    "dip": "./dist/libs/dynamsoft-image-processing/dist/",
-    "core": "./dist/libs/dynamsoft-core/dist/",
-    "license": "./dist/libs/dynamsoft-license/dist/",
-    "cvr": "./dist/libs/dynamsoft-capture-vision-router/dist/",
-    "ddn": "./dist/libs/dynamsoft-document-normalizer/dist/"
-};
-```
-
-#### Update the UI Configuration
-
-Modify the UI configuration in your application (`/samples/hello-world.html` in our case) to reference the **local UI definition file** instead of the CDN:
-
-```javascript
-const documentScanner = new Dynamsoft.DocumentScanner({
-    license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
-    scannerViewConfig: {
-        cameraEnhancerUIPath: "../dist/document-scanner.ui.html",
-    },
-});
-```
-
 #### Build the Project
 
-Once all dependencies are installed, build the project by running:
+Build the project by running:
 
 ```bash
 npm run build
@@ -623,8 +601,22 @@ Once the server is running, open the application in a browser using the address 
 
 Now, all required files will be **served locally** without relying on a CDN.
 
+⚠**IMPORTANT NOTE**:
+
+* Certain legacy web application servers may lack support for the `application/wasm` mimetype for .wasm files. To address this, you have two options:
+  1. Upgrade your web application server to one that supports the `application/wasm` mimetype.
+  2. Manually define the mimetype on your server. You can refer to the guides for [apache](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Apache_Configuration_htaccess#media_types_and_character_encodings) / [IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/staticcontent/mimemap) / [nginx](https://www.nginx.com/resources/wiki/start/topics/examples/full/#mime-types).
+
+* To work properly, the SDK requires a few engine files, which are relatively large and may take quite a few seconds to download. We recommend that you set a longer cache time for these engine files, to maximize the performance of your web application.
+
+  ```
+  Cache-Control: max-age=31536000
+  ```
+
+  Reference: [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control).
+
 ## Next Step
 
-**DDS** is a fully functional, ready-to-use document scanning SDK with built-in UI layouts. However, to extend its capabilities for multi-page and multi-document processing, as well as advanced editing features, we developed **Mobile Web Capture (MWC)**.
+DDS is a fully functional, ready-to-use document scanning SDK with built-in UI layouts. However, to extend its capabilities for multi-page and multi-document processing, as well as advanced editing features, we developed **Mobile Web Capture (MWC)**.
 
-Read on to learn how to use this web-based wrapper SDK in the [MWC Developer Guide](https://www.dynamsoft.com/mobile-web-capture/docs/guides/mobile-web-capture.html).
+Read on to learn how to use this web-based wrapper SDK in the [MWC Getting Started Guide](https://www.dynamsoft.com/mobile-web-capture/docs/guides/mobile-web-capture.html).
