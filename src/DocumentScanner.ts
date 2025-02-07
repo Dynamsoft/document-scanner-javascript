@@ -26,7 +26,7 @@ export interface DocumentScannerConfig {
 
   // DCV specific configs
   utilizedTemplateNames?: UtilizedTemplateNames;
-  engineResourcePaths: EngineResourcePaths;
+  engineResourcePaths?: EngineResourcePaths;
 
   // Views Config
   scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames" | "_showCorrectionView">;
@@ -62,7 +62,16 @@ class DocumentScanner {
       scanResultView?: DocumentResultView;
     };
   }> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+      return {
+        resources: this.resources as SharedResources,
+        components: {
+          scannerView: this.scannerView,
+          correctionView: this.correctionView,
+          scanResultView: this.scanResultView,
+        },
+      };
+    }
 
     try {
       this.initializeDDSConfig();
