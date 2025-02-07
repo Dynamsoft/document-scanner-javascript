@@ -32,7 +32,6 @@ export interface DocumentScannerConfig {
   scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames">;
   resultViewConfig?: DocumentResultViewConfig;
   correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames">;
-
   showResultView?: boolean;
   showCorrectionView?: boolean;
 }
@@ -50,154 +49,10 @@ class DocumentScanner {
   private scanResultView?: DocumentResultView;
   private correctionView?: DocumentCorrectionView;
   private resources: Partial<SharedResources> = {};
+  private isInitialized = false;
   private isCapturing = false;
 
-  private shouldInitializeResultView(): boolean {
-    // If showResultView is explicitly false, don't show regardless of container
-    if (this.config.showResultView === false) {
-      return false;
-    }
-
-    // If showResultView is undefined but container exists, show the view
-    if (
-      this.config.showResultView === undefined &&
-      (this.config.resultViewConfig?.container || this.config.container)
-    ) {
-      return true;
-    }
-
-    // In all other cases, respect showResultView flag
-    return !!this.config.showResultView;
-  }
-
-  private shouldInitializeCorrectionView(): boolean {
-    // If showCorrectionView is explicitly false, don't show regardless of container
-    if (this.config.showCorrectionView === false) {
-      return false;
-    }
-
-    // If showCorrectionView is undefined but container exists, show the view
-    if (
-      this.config.showCorrectionView === undefined &&
-      (this.config.correctionViewConfig?.container || this.config.container)
-    ) {
-      return true;
-    }
-
-    // In all other cases, respect showCorrectionView flag
-    return !!this.config.showCorrectionView;
-  }
-
-  private shouldCreateDefaultContainer(): boolean {
-    const hasNoMainContainer = !this.config.container;
-    const hasNoViewContainers = !(
-      this.config.scannerViewConfig?.container ||
-      this.config.resultViewConfig?.container ||
-      this.config.correctionViewConfig?.container
-    );
-    return hasNoMainContainer && hasNoViewContainers;
-  }
-
-  private createDefaultDDSContainer(): HTMLElement {
-    const container = document.createElement("div");
-    container.className = "dds-main-container";
-    Object.assign(container.style, {
-      display: "none",
-      height: DEFAULT_CONTAINER_HEIGHT,
-      width: "100%",
-      /* Adding the following CSS rules to make sure the "default" container appears on top and over other elements. */
-      position: "fixed",
-      left: "0px",
-      top: "0px",
-      zIndex: "999",
-    });
-    document.body.append(container);
-    return container;
-  }
-
-  private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
-    const views: string[] = [];
-
-    if (this.config.container || !this.config.scannerViewConfig?.container) {
-      // If main container provided or no specific view containers, create all views
-      views.push(EnumDDSViews.Scanner, EnumDDSViews.Correction, EnumDDSViews.Result);
-    } else {
-      // Only create containers for specifically configured views
-      if (this.config.scannerViewConfig?.container) views.push(EnumDDSViews.Scanner);
-      if (this.shouldInitializeCorrectionView()) views.push(EnumDDSViews.Correction);
-      if (this.shouldInitializeResultView()) views.push(EnumDDSViews.Result);
-    }
-
-    mainContainer.textContent = "";
-
-    return views.reduce((containers, view) => {
-      const viewContainer = document.createElement("div");
-      viewContainer.className = `dds-${view}-view-container`;
-
-      Object.assign(viewContainer.style, {
-        height: "100%",
-        width: "100%",
-        display: "none",
-        position: "relative",
-      });
-
-      mainContainer.append(viewContainer);
-      containers[view] = viewContainer;
-      return containers;
-    }, {} as Record<string, HTMLElement>);
-  }
-
   constructor(private config: DocumentScannerConfig) {}
-
-  async initializeConfig() {
-    if (this.shouldCreateDefaultContainer()) {
-      this.config.container = this.createDefaultDDSContainer();
-    } else if (this.config.container) {
-      this.config.container = getElement(this.config.container);
-    }
-
-    const viewContainers = this.config.container ? this.createViewContainers(getElement(this.config.container)) : {};
-
-    // Base configuration
-    const baseConfig = {
-      license: this.config.license || "YOUR_LICENSE_KEY_HERE",
-      utilizedTemplateNames: {
-        detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
-        normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
-      },
-    };
-
-    // Only initialize configs for views that should exist
-    const shouldInitScanner = this.config.container || this.config.scannerViewConfig?.container;
-
-    Object.assign(this.config, {
-      ...baseConfig,
-      scannerViewConfig: shouldInitScanner
-        ? {
-            ...this.config.scannerViewConfig,
-            container: viewContainers[EnumDDSViews.Scanner] || this.config.scannerViewConfig?.container || null,
-            templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
-            cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
-            // consecutiveResultFramesBeforeNormalization:
-            //   this.config.scannerViewConfig?.consecutiveResultFramesBeforeNormalization || 15,
-            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
-          }
-        : undefined,
-      correctionViewConfig: this.shouldInitializeCorrectionView()
-        ? {
-            ...this.config.correctionViewConfig,
-            container: viewContainers[EnumDDSViews.Correction] || this.config.correctionViewConfig?.container || null,
-            utilizedTemplateNames: baseConfig.utilizedTemplateNames,
-          }
-        : undefined,
-      resultViewConfig: this.shouldInitializeResultView()
-        ? {
-            ...this.config.resultViewConfig,
-            container: viewContainers[EnumDDSViews.Result] || this.config.resultViewConfig?.container || null,
-          }
-        : undefined,
-    });
-  }
 
   async initialize(): Promise<{
     resources: SharedResources;
@@ -207,9 +62,12 @@ class DocumentScanner {
       scanResultView?: DocumentResultView;
     };
   }> {
+    if (this.isInitialized) return;
+
     try {
-      await this.initializeConfig();
-      await this.initializeResources();
+      this.initializeDDSConfig();
+
+      await this.initializeDCVResources();
 
       this.resources.onResultUpdated = (result) => {
         this.resources.result = result;
@@ -243,14 +101,18 @@ class DocumentScanner {
         components.scanResultView = this.scanResultView;
       }
 
+      this.isInitialized = true;
+
       return { resources: this.resources, components };
     } catch (ex: any) {
+      this.isInitialized = false;
+
       let errMsg = ex?.message || ex;
       throw new Error(`DDS Initialization Failed: ${errMsg}`);
     }
   }
 
-  private async initializeResources(): Promise<void> {
+  private async initializeDCVResources(): Promise<void> {
     try {
       LicenseManager.initLicense(this.config?.license || "", true);
 
@@ -267,6 +129,171 @@ class DocumentScanner {
       let errMsg = ex?.message || ex;
       throw new Error(`Resource Initialization Failed: ${errMsg}`);
     }
+  }
+
+  private shouldCreateDefaultContainer(): boolean {
+    const hasNoMainContainer = !this.config.container;
+    const hasNoViewContainers = !(
+      this.config.scannerViewConfig?.container ||
+      this.config.resultViewConfig?.container ||
+      this.config.correctionViewConfig?.container
+    );
+    return hasNoMainContainer && hasNoViewContainers;
+  }
+
+  private createDefaultDDSContainer(): HTMLElement {
+    const container = document.createElement("div");
+    container.className = "dds-main-container";
+    Object.assign(container.style, {
+      display: "none",
+      height: DEFAULT_CONTAINER_HEIGHT,
+      width: "100%",
+      /* Adding the following CSS rules to make sure the "default" container appears on top and over other elements. */
+      position: "absolute",
+      left: "0",
+      top: "0",
+      zIndex: "999",
+    });
+    document.body.append(container);
+    return container;
+  }
+
+  private checkForTemporaryLicense(license?: string) {
+    return !license?.length ||
+      license?.startsWith("A") ||
+      license?.startsWith("L") ||
+      license?.startsWith("P") ||
+      license?.startsWith("Y")
+      ? "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9"
+      : license;
+  }
+
+  private validateViewConfigs() {
+    // Only validate if there's no main container
+    if (!this.config.container) {
+      // Check correction view
+      if (this.config.showCorrectionView && !this.config.correctionViewConfig?.container) {
+        throw new Error(
+          "CorrectionView container is required when showCorrectionView is true and no main container is provided"
+        );
+      }
+
+      // Check result view
+      if (this.config.showResultView && !this.config.resultViewConfig?.container) {
+        throw new Error(
+          "ResultView container is required when showResultView is true and no main container is provided"
+        );
+      }
+    }
+  }
+
+  private showCorrectionView() {
+    if (this.config.showCorrectionView === false) return false;
+
+    // If we have a main container, follow existing logic
+    if (this.config.container) {
+      if (
+        this.config.showCorrectionView === undefined &&
+        (this.config.correctionViewConfig?.container || this.config.container)
+      ) {
+        return true;
+      }
+      return !!this.config.showCorrectionView;
+    }
+
+    // Without main container, require specific container
+    return this.config.showCorrectionView && !!this.config.correctionViewConfig?.container;
+  }
+
+  private showResultView() {
+    if (this.config.showResultView === false) return false;
+
+    // If we have a main container, follow existing logic
+    if (this.config.container) {
+      if (
+        this.config.showResultView === undefined &&
+        (this.config.resultViewConfig?.container || this.config.container)
+      ) {
+        return true;
+      }
+      return !!this.config.showResultView;
+    }
+
+    // Without main container, require specific container
+    return this.config.showResultView && !!this.config.resultViewConfig?.container;
+  }
+
+  private initializeDDSConfig() {
+    this.validateViewConfigs();
+
+    if (this.shouldCreateDefaultContainer()) {
+      this.config.container = this.createDefaultDDSContainer();
+    } else if (this.config.container) {
+      this.config.container = getElement(this.config.container);
+    }
+    const viewContainers = this.config.container ? this.createViewContainers(getElement(this.config.container)) : {};
+
+    const baseConfig = {
+      license: this.checkForTemporaryLicense(this.config.license),
+      utilizedTemplateNames: {
+        detect: this.config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
+        normalize: this.config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
+      },
+    };
+
+    // Views Config
+    const scannerViewConfig = {
+      ...this.config.scannerViewConfig,
+      container: viewContainers[EnumDDSViews.Scanner] || this.config.scannerViewConfig?.container || null,
+      templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
+      cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
+      utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+    };
+    const correctionViewConfig = this.showCorrectionView()
+      ? {
+          ...this.config.correctionViewConfig,
+          container: viewContainers[EnumDDSViews.Correction] || this.config.correctionViewConfig?.container || null,
+          utilizedTemplateNames: baseConfig.utilizedTemplateNames,
+        }
+      : undefined;
+    const resultViewConfig = this.showResultView()
+      ? {
+          ...this.config.resultViewConfig,
+          container: viewContainers[EnumDDSViews.Result] || this.config.resultViewConfig?.container || null,
+        }
+      : undefined;
+
+    Object.assign(this.config, {
+      ...baseConfig,
+      scannerViewConfig,
+      correctionViewConfig,
+      resultViewConfig,
+    });
+  }
+
+  private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
+    mainContainer.textContent = "";
+
+    const views: EnumDDSViews[] = [EnumDDSViews.Scanner];
+
+    if (this.showCorrectionView()) views.push(EnumDDSViews.Correction);
+    if (this.showResultView()) views.push(EnumDDSViews.Result);
+
+    return views.reduce((containers, view) => {
+      const viewContainer = document.createElement("div");
+      viewContainer.className = `dds-${view}-view-container`;
+
+      Object.assign(viewContainer.style, {
+        height: "100%",
+        width: "100%",
+        display: "none",
+        position: "relative",
+      });
+
+      mainContainer.append(viewContainer);
+      containers[view] = viewContainer;
+      return containers;
+    }, {} as Record<string, HTMLElement>);
   }
 
   dispose(): void {
@@ -314,33 +341,43 @@ class DocumentScanner {
     cleanContainer(this.config.scannerViewConfig?.container);
     cleanContainer(this.config.correctionViewConfig?.container);
     cleanContainer(this.config.resultViewConfig?.container);
+
+    this.isInitialized = false;
   }
 
   /**
    * Launches the document scanning process.
    *
-   * Flow paths based on which view containers are configured and the capture method:
+   * Configuration Requirements:
+   * 1. A container must be provided either through:
+   *    - A main container in config.container, OR
+   *    - Individual view containers in viewConfig.container when corresponding show flags are true
+   * 2. If no main container is provided:
+   *    - showCorrectionView: true requires correctionViewConfig.container
+   *    - showResultView: true requires resultViewConfig.container
    *
-   * View Container Configurations
-   * 1. All views present (Scanner, Correction, ScanResult)
-   *    Flow:
-   *      A. Auto-capture paths:
-   *         - Smart Capture: Scanner -> Correction -> ScanResult
-   *         - Auto Crop: Scanner -> ScanResult
+   * Flow paths based on view configurations and capture method:
    *
-   *      B. Manual paths:
-   *         - Upload Image: Scanner -> Correction -> ScanResult
-   *         - Manual Capture: Scanner -> ScanResult
-   * 2. Scanner + ScanResult
-   *    Flow: Scanner -> ScanResult
+   * 1. All views enabled (Scanner, Correction, Result):
+   *    A. Auto-capture paths:
+   *       - Smart Capture: Scanner -> Correction -> Result
+   *       - Auto Crop: Scanner -> Result
+   *    B. Manual paths:
+   *       - Upload Image: Scanner -> Correction -> Result
+   *       - Manual Capture: Scanner -> Result
    *
-   * 3. Scanner + Correction
-   *    Flow: Scanner -> Correction
+   * 2. Scanner + Result only:
+   *    - Flow: Scanner -> Result
+   *    - Requires: showCorrectionView: false or undefined
+   *
+   * 3. Scanner + Correction only:
+   *    - Flow: Scanner -> Correction
+   *    - Requires: showResultView: false or undefined
    *
    * 4. Special cases:
-   *    - Only Scanner available: Returns scan result directly
-   *    - Only Correction available + existing result: Goes to Correction
-   *    - Only ScanResult available + existing result: Goes to ScanResult
+   *    - Scanner only: Returns scan result directly
+   *    - Correction only + existing result: Goes to Correction
+   *    - Result only + existing result: Goes to Result
    *
    * @returns Promise<DocumentResult> containing:
    *  - status: Success/Failed/Cancelled with message
@@ -349,7 +386,10 @@ class DocumentScanner {
    *  - detectedQuadrilateral: Document boundaries
    *  - _flowType: Internal routing flag for different capture methods
    *
-   * @throws Error if capture session already running
+   * @throws Error if:
+   *  - Capture session is already running
+   *  - Scanner view is required but not configured
+   *  - No container is provided when showCorrectionView or showResultView is true
    */
   async launch(): Promise<DocumentResult> {
     if (this.isCapturing) {
