@@ -1,7 +1,7 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls, shouldCorrectImage } from "./utils";
+import { createControls, getElement, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import { DocumentResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
@@ -15,7 +15,7 @@ export interface DocumentResultViewToolbarButtonsConfig {
 }
 
 export interface DocumentResultViewConfig {
-  container?: HTMLElement;
+  container?: HTMLElement | string;
   toolbarButtonsConfig?: DocumentResultViewToolbarButtonsConfig;
 
   onDone?: (result: DocumentResult) => Promise<void>;
@@ -23,7 +23,6 @@ export interface DocumentResultViewConfig {
 }
 
 export default class DocumentResultView {
-  private container: HTMLElement;
   private currentScanResultViewResolver?: (result: DocumentResult) => void;
 
   constructor(
@@ -35,9 +34,9 @@ export default class DocumentResultView {
 
   async launch(): Promise<DocumentResult> {
     try {
-      this.config.container.textContent = "";
+      getElement(this.config.container).textContent = "";
       await this.initialize();
-      this.config.container.style.display = "flex";
+      getElement(this.config.container).style.display = "flex";
 
       // Return promise that resolves when user clicks done
       return new Promise((resolve) => {
@@ -139,7 +138,7 @@ export default class DocumentResultView {
         // Clear current scan result view and reinitialize with new image
         this.dispose(true); // true = preserve resolver
         await this.initialize();
-        this.config.container.style.display = "flex";
+        getElement(this.config.container).style.display = "flex";
       }
     } catch (error) {
       console.error("DocumentResultView - Handle Correction View Error:", error);
@@ -190,7 +189,7 @@ export default class DocumentResultView {
 
       this.dispose(true);
       await this.initialize();
-      this.config.container.style.display = "flex";
+      getElement(this.config.container).style.display = "flex";
     } catch (error) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
@@ -340,7 +339,7 @@ export default class DocumentResultView {
       const controlContainer = this.createControls();
       resultViewWrapper.appendChild(controlContainer);
 
-      this.config.container.appendChild(resultViewWrapper);
+      getElement(this.config.container).appendChild(resultViewWrapper);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -349,12 +348,12 @@ export default class DocumentResultView {
   }
 
   hideView(): void {
-    this.config.container.style.display = "none";
+    getElement(this.config.container).style.display = "none";
   }
 
   dispose(preserveResolver: boolean = false): void {
     // Clean up the container
-    this.config.container.textContent = "";
+    getElement(this.config.container).textContent = "";
 
     // Clear resolver only if not preserving
     if (!preserveResolver) {

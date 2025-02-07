@@ -16,12 +16,12 @@ import {
   UtilizedTemplateNames,
 } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
-import { createStyle } from "./utils";
+import { createStyle, getElement } from "./utils";
 
 export interface DocumentScannerViewConfig {
   templateFilePath?: string;
   cameraEnhancerUIPath?: string;
-  container?: HTMLElement;
+  container?: HTMLElement | string;
   // consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 }
@@ -70,9 +70,10 @@ export default class DocumentScannerView {
   private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
 
   private showScannerLoadingOverlay(message?: string) {
-    this.loadingScreen = showLoadingScreen(this.config.container, { message });
-    this.config.container.style.display = "block";
-    this.config.container.style.position = "relative";
+    const configContainer = getElement(this.config.container);
+    this.loadingScreen = showLoadingScreen(configContainer, { message });
+    configContainer.style.display = "block";
+    configContainer.style.position = "relative";
   }
 
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
@@ -81,7 +82,7 @@ export default class DocumentScannerView {
       this.loadingScreen = null;
 
       if (hideContainer) {
-        this.config.container.style.display = "none";
+        getElement(this.config.container).style.display = "none";
       }
     }
   }
@@ -156,7 +157,9 @@ export default class DocumentScannerView {
   }
 
   private async initializeElements() {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) {
       throw new Error("Shadow root not found");
@@ -239,7 +242,8 @@ export default class DocumentScannerView {
   }
 
   private attachOptionClickListeners() {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
     const settingsContainer = DCEContainer.shadowRoot.querySelector(
@@ -260,7 +264,8 @@ export default class DocumentScannerView {
   }
 
   private highlightCameraAndResolutionOption() {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
     const settingsContainer = DCEContainer.shadowRoot.querySelector(
@@ -292,7 +297,9 @@ export default class DocumentScannerView {
   }
 
   private toggleSelectCameraBox() {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
+
     if (!DCEContainer?.shadowRoot) return;
 
     const settingsBox = DCEContainer.shadowRoot.querySelector(".dce-mn-resolution-box") as HTMLElement;
@@ -430,7 +437,9 @@ export default class DocumentScannerView {
   }
 
   async toggleAutoCaptureAnimation(enabled?: boolean) {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
+
     if (!DCEContainer?.shadowRoot) return;
 
     const loadingAnimation = DCEContainer.shadowRoot.querySelector(
@@ -442,7 +451,9 @@ export default class DocumentScannerView {
   }
 
   async toggleBoundsDetection(enabled?: boolean) {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
+
     if (!DCEContainer?.shadowRoot) return;
 
     const container = DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection") as HTMLElement;
@@ -474,7 +485,8 @@ export default class DocumentScannerView {
   }
 
   async toggleSmartCapture(mode?: boolean) {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
 
@@ -505,7 +517,8 @@ export default class DocumentScannerView {
   }
 
   async toggleAutoCrop(mode?: boolean) {
-    const DCEContainer = this.config.container.children[this.config.container.children.length - 1];
+    const configContainer = getElement(this.config.container);
+    const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
 
@@ -536,12 +549,13 @@ export default class DocumentScannerView {
 
       const { cameraEnhancer, cameraView } = this.resources;
 
-      this.config.container.style.display = "block";
+      const configContainer = getElement(this.config.container);
+      configContainer.style.display = "block";
 
       if (!cameraEnhancer.isOpen()) {
         const currentCameraView = cameraView.getUIElement();
         if (!currentCameraView.parentElement) {
-          this.config.container.append(currentCameraView);
+          configContainer.append(currentCameraView);
         }
 
         await cameraEnhancer.open();
@@ -550,7 +564,7 @@ export default class DocumentScannerView {
       }
 
       // Assign boundsDetection, smartCapture, and takePhoto element
-      if (!this.initializedDCE) {
+      if (!this.initializedDCE && cameraEnhancer.isOpen()) {
         await this.initializeElements();
       }
     } catch (ex: any) {
@@ -573,10 +587,11 @@ export default class DocumentScannerView {
   closeCamera(hideContainer: boolean = true) {
     const { cameraEnhancer, cameraView } = this.resources;
 
-    this.config.container.style.display = hideContainer ? "none" : "block";
+    const configContainer = getElement(this.config.container);
+    configContainer.style.display = hideContainer ? "none" : "block";
 
     if (cameraView.getUIElement().parentElement) {
-      this.config.container.removeChild(cameraView.getUIElement());
+      configContainer.removeChild(cameraView.getUIElement());
     }
 
     cameraEnhancer.close();

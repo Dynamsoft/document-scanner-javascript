@@ -1,6 +1,12 @@
 import { DSImageData, OriginalImageResultItem, Quadrilateral } from "dynamsoft-core";
 import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 
+export enum EnumDDSViews {
+  Scanner = "scanner",
+  Result = "scan-result",
+  Correction = "correction",
+}
+
 export const DEFAULT_TEMPLATE_NAMES = {
   detect: "DetectDocumentBoundaries_Default",
   normalize: "NormalizeDocument_Default",

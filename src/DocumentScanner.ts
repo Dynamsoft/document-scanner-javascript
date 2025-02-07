@@ -5,7 +5,13 @@ import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";
-import { DEFAULT_TEMPLATE_NAMES, DocumentResult, EnumResultStatus, UtilizedTemplateNames } from "./views/utils/types";
+import {
+  DEFAULT_TEMPLATE_NAMES,
+  DocumentResult,
+  EnumDDSViews,
+  EnumResultStatus,
+  UtilizedTemplateNames,
+} from "./views/utils/types";
 import { getElement, shouldCorrectImage } from "./views/utils";
 
 // Default DCE UI path
@@ -16,10 +22,12 @@ const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 export interface DocumentScannerConfig {
   license?: string;
   container?: HTMLElement | string;
-  scannerViewConfig?: DocumentScannerViewConfig;
+  scannerViewConfig?: Omit<DocumentScannerViewConfig, "utilizedTemplateNames">;
   resultViewConfig?: DocumentResultViewConfig;
-  correctionViewConfig?: DocumentCorrectionViewConfig;
+  correctionViewConfig?: Omit<DocumentCorrectionViewConfig, "utilizedTemplateNames">;
   utilizedTemplateNames?: UtilizedTemplateNames;
+  showResultView?: boolean;
+  showCorrectionView?: boolean;
 }
 
 export interface SharedResources {
@@ -30,13 +38,48 @@ export interface SharedResources {
   onResultUpdated?: (result: DocumentResult) => void;
 }
 
-// Main class
 class DocumentScanner {
   private scannerView?: DocumentScannerView;
   private scanResultView?: DocumentResultView;
   private correctionView?: DocumentCorrectionView;
   private resources: Partial<SharedResources> = {};
   private isCapturing = false;
+
+  private shouldInitializeResultView(): boolean {
+    // If showResultView is explicitly false, don't show regardless of container
+    if (this.config.showResultView === false) {
+      return false;
+    }
+
+    // If showResultView is undefined but container exists, show the view
+    if (
+      this.config.showResultView === undefined &&
+      (this.config.resultViewConfig?.container || this.config.container)
+    ) {
+      return true;
+    }
+
+    // In all other cases, respect showResultView flag
+    return !!this.config.showResultView;
+  }
+
+  private shouldInitializeCorrectionView(): boolean {
+    // If showCorrectionView is explicitly false, don't show regardless of container
+    if (this.config.showCorrectionView === false) {
+      return false;
+    }
+
+    // If showCorrectionView is undefined but container exists, show the view
+    if (
+      this.config.showCorrectionView === undefined &&
+      (this.config.correctionViewConfig?.container || this.config.container)
+    ) {
+      return true;
+    }
+
+    // In all other cases, respect showCorrectionView flag
+    return !!this.config.showCorrectionView;
+  }
 
   private shouldCreateDefaultContainer(): boolean {
     const hasNoMainContainer = !this.config.container;
@@ -70,12 +113,12 @@ class DocumentScanner {
 
     if (this.config.container || !this.config.scannerViewConfig?.container) {
       // If main container provided or no specific view containers, create all views
-      views.push("scanner", "correction", "scan-result");
+      views.push(EnumDDSViews.Scanner, EnumDDSViews.Correction, EnumDDSViews.Result);
     } else {
       // Only create containers for specifically configured views
-      if (this.config.scannerViewConfig?.container) views.push("scanner");
-      if (this.config.correctionViewConfig?.container) views.push("correction");
-      if (this.config.resultViewConfig?.container) views.push("scan-result");
+      if (this.config.scannerViewConfig?.container) views.push(EnumDDSViews.Scanner);
+      if (this.shouldInitializeCorrectionView()) views.push(EnumDDSViews.Correction);
+      if (this.shouldInitializeResultView()) views.push(EnumDDSViews.Result);
     }
 
     mainContainer.textContent = "";
@@ -119,15 +162,13 @@ class DocumentScanner {
 
     // Only initialize configs for views that should exist
     const shouldInitScanner = this.config.container || this.config.scannerViewConfig?.container;
-    const shouldInitCorrection = this.config.container || this.config.correctionViewConfig?.container;
-    const shouldInitResult = this.config.container || this.config.resultViewConfig?.container;
 
     Object.assign(this.config, {
       ...baseConfig,
       scannerViewConfig: shouldInitScanner
         ? {
             ...this.config.scannerViewConfig,
-            container: viewContainers["scanner"] || this.config.scannerViewConfig?.container || null,
+            container: viewContainers[EnumDDSViews.Scanner] || this.config.scannerViewConfig?.container || null,
             templateFilePath: this.config.scannerViewConfig?.templateFilePath || null,
             cameraEnhancerUIPath: this.config.scannerViewConfig?.cameraEnhancerUIPath || DEFAULT_DCE_UI_PATH,
             // consecutiveResultFramesBeforeNormalization:
@@ -135,17 +176,17 @@ class DocumentScanner {
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
-      correctionViewConfig: shouldInitCorrection
+      correctionViewConfig: this.shouldInitializeCorrectionView()
         ? {
             ...this.config.correctionViewConfig,
-            container: viewContainers["correction"] || this.config.correctionViewConfig?.container || null,
+            container: viewContainers[EnumDDSViews.Correction] || this.config.correctionViewConfig?.container || null,
             utilizedTemplateNames: baseConfig.utilizedTemplateNames,
           }
         : undefined,
-      resultViewConfig: shouldInitResult
+      resultViewConfig: this.shouldInitializeResultView()
         ? {
             ...this.config.resultViewConfig,
-            container: viewContainers["scan-result"] || this.config.resultViewConfig?.container || null,
+            container: viewContainers[EnumDDSViews.Result] || this.config.resultViewConfig?.container || null,
           }
         : undefined,
     });
@@ -371,13 +412,6 @@ class DocumentScanner {
       this.isCapturing = false;
       this.dispose();
     }
-  }
-
-  /**
-   * Checks if a capture session is currently in progress
-   */
-  isCapturingImage(): boolean {
-    return this.isCapturing;
   }
 }
 
