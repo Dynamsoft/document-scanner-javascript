@@ -108,7 +108,7 @@ class DocumentScanner {
       this.isInitialized = false;
 
       let errMsg = ex?.message || ex;
-      throw new Error(`DDS Initialization Failed: ${errMsg}`);
+      throw new Error(`Initialization Failed: ${errMsg}`);
     }
   }
 
