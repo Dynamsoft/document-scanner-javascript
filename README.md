@@ -31,8 +31,8 @@ This guide walks you through building a web application that scans single-page d
 
 Try **DDS** by requesting a trial license through our [customer portal](https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&source=guide). The trial can be renewed twice, providing a total of two months of free access.
 
-> **DDS** and **MWC** share the same license keys. If you already have a **DDS** license, you can use it for **MWC**, and vice versa.
-
+> Note that the request link will indicate **Mobile Web Capture**. This is because **DDS** and **MWC** share the same license keys. If you already have a **MWC** license, you can use it for **DDS**, and vice versa.
+ 
 ### Get a Full License
 
 To purchase a full license, [contact us](https://www.dynamsoft.com/company/contact/).
