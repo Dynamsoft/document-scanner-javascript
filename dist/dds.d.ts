@@ -150,6 +150,7 @@ declare class DocumentScannerView {
     toggleSmartCapture(mode?: boolean): Promise<void>;
     toggleAutoCrop(mode?: boolean): Promise<void>;
     private get _demo_IsFirefoxAndroid();
+    private _demo_saveSelectedCamera;
     openCamera(_demo_cameraType?: _DEMO_CameraType): Promise<void>;
     closeCamera(hideContainer?: boolean): void;
     pauseCamera(): void;
