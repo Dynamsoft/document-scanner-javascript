@@ -21,8 +21,8 @@ jobs:
       - name: Get Source
         run: |
           cd /home/ubuntu
-          [ -d document-scanner-javascript ] && rm -rf document-scanner-javascript
-          git clone --depth 1 -b demo https://github.com/Dynamsoft/document-scanner-javascript.git 
+          [ -d document-scanner-javascript-dev ] && rm -rf document-scanner-javascript-dev
+          git clone --depth 1 -b demo https://${{ secrets.PERSONAL_READ_TOKEN }}@github.com/Dynamsoft/document-scanner-javascript-dev.git
 
       - name: Prepare Files
         run: |
@@ -30,11 +30,11 @@ jobs:
           mkdir -p /home/ubuntu/document-scanner-javascript/deploy
           
           # Copy the dist folder
-          cp -r /home/ubuntu/document-scanner-javascript/dist /home/ubuntu/document-scanner-javascript/deploy
+          cp -r /home/ubuntu/document-scanner-javascript/dist /home/ubuntu/document-scanner-javascript-dev/deploy
           
           # Copy demo and hello world. On demo branch, be sure to update the pathing for the demo
-          cp -r /home/ubuntu/document-scanner-javascript/samples/demo/* /home/ubuntu/document-scanner-javascript/deploy
-          cp -r /home/ubuntu/document-scanner-javascript/samples/hello-world.html /home/ubuntu/document-scanner-javascript/deploy
+          cp -r /home/ubuntu/document-scanner-javascript/samples/demo/* /home/ubuntu/document-scanner-javascript-dev/deploy
+          cp -r /home/ubuntu/document-scanner-javascript/samples/hello-world.html /home/ubuntu/document-scanner-javascript-dev/deploy
 
       - name: Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
