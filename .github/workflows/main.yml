@@ -30,11 +30,11 @@ jobs:
           mkdir -p /home/ubuntu/document-scanner-javascript/deploy
           
           # Copy the dist folder
-          cp -r /home/ubuntu/document-scanner-javascript/dist /home/ubuntu/document-scanner-javascript-dev/deploy
+          cp -r /home/ubuntu/document-scanner-javascript-dev/dist /home/ubuntu/document-scanner-javascript-dev/deploy
           
           # Copy demo and hello world. On demo branch, be sure to update the pathing for the demo
-          cp -r /home/ubuntu/document-scanner-javascript/samples/demo/* /home/ubuntu/document-scanner-javascript-dev/deploy
-          cp -r /home/ubuntu/document-scanner-javascript/samples/hello-world.html /home/ubuntu/document-scanner-javascript-dev/deploy
+          cp -r /home/ubuntu/document-scanner-javascript-dev/samples/demo/* /home/ubuntu/document-scanner-javascript-dev/deploy
+          cp -r /home/ubuntu/document-scanner-javascript-dev/samples/hello-world.html /home/ubuntu/document-scanner-javascript-dev/deploy
 
       - name: Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
@@ -43,5 +43,5 @@ jobs:
           username: ${{ secrets.FTP_DEMO_USERNAME }}
           password: ${{ secrets.FTP_DEMO_PASSWORD }}
           port: 21 
-          local-dir: /home/ubuntu/document-scanner-javascript/deploy/
+          local-dir: /home/ubuntu/document-scanner-javascript-dev/deploy/
           server-dir: /Demo.dynamsoft.com/document-scanner/
