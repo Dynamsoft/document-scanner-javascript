@@ -30,7 +30,8 @@ jobs:
           mkdir -p /home/ubuntu/document-scanner-javascript/deploy
           
           # Copy the dist folder
-          cp -r /home/ubuntu/document-scanner-javascript-dev/dist /home/ubuntu/document-scanner-javascript-dev/deploy
+          mkdir -p /home/ubuntu/document-scanner-javascript-dev/deploy/dist
+          cp -r /home/ubuntu/document-scanner-javascript-dev/dist/* /home/ubuntu/document-scanner-javascript-dev/deploy/dist/
           
           # Copy demo and hello world. On demo branch, be sure to update the pathing for the demo
           cp -r /home/ubuntu/document-scanner-javascript-dev/samples/demo/* /home/ubuntu/document-scanner-javascript-dev/deploy
