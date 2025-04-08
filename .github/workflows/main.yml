@@ -9,7 +9,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   Build-Demo:
-    if: ${{ github.ref == 'refs/heads/demo' }}    
+    if: ${{ github.ref == 'refs/heads/demo-video' }}    
     
     # The type of runner that the job will run on
     runs-on: self-hosted
@@ -22,7 +22,7 @@ jobs:
         run: |
           cd /home/ubuntu
           [ -d document-scanner-javascript-dev ] && rm -rf document-scanner-javascript-dev
-          git clone --depth 1 -b demo https://${{ secrets.PERSONAL_READ_TOKEN }}@github.com/Dynamsoft/document-scanner-javascript-dev.git
+          git clone --depth 1 -b demo-video https://${{ secrets.PERSONAL_READ_TOKEN }}@github.com/Dynamsoft/document-scanner-javascript-dev.git
 
       - name: Prepare Files
         run: |
