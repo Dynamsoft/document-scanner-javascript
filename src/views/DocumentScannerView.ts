@@ -26,6 +26,9 @@ export interface DocumentScannerViewConfig {
   container?: HTMLElement | string;
   // consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
+
+  enableAutoCropMode?: boolean; // False by default
+  enableSmartCaptureMode?: boolean; // False by default
 }
 
 interface DCEElements {
@@ -138,8 +141,9 @@ export default class DocumentScannerView {
       resultReceiver.onCapturedResultReceived = (result) => this.handleBoundsDetection(result);
       await cvRouter.addResultReceiver(resultReceiver);
 
-      // Set default value for smartCapture and boundsDetection modes
-      this.smartCaptureEnabled = false;
+      // Set default value for autoCrop, smartCapture and boundsDetection modes
+      this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
+      this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
       this.boundsDetectionEnabled = true;
 
       this.initialized = true;
