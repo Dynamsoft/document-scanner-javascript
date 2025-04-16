@@ -131,6 +131,13 @@ class DocumentScanner {
 
   private async initializeDCVResources(): Promise<void> {
     try {
+      // Change trial link to include product and deploymenttype
+      (LicenseManager as any)._onAuthMessage = (message: string) =>
+        message.replace(
+          "(https://www.dynamsoft.com/customer/license/trialLicense?product=unknown&deploymenttype=unknown)",
+          "(https://www.dynamsoft.com/customer/license/trialLicense?product=dds&deploymenttype=web)"
+        );
+
       LicenseManager.initLicense(this.config?.license || "", true);
 
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
