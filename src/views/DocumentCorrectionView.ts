@@ -2,7 +2,7 @@ import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, getElement } from "./utils";
+import { createControls, createStyle, getElement } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
   ToolbarButtonConfig,
@@ -52,17 +52,11 @@ export default class DocumentCorrectionView {
       throw new Error("Please create an Correction View Container element");
     }
 
+    createStyle("dds-correction-view-style", DEFAULT_CORRECTION_VIEW_CSS);
+
     // Create a wrapper div that preserves container dimensions
     const correctionViewWrapper = document.createElement("div");
-    Object.assign(correctionViewWrapper.style, {
-      display: "flex",
-      width: "100%",
-      height: "100%",
-      backgroundColor: "#575757",
-      fontSize: "12px",
-      flexDirection: "column",
-      alignItems: "center",
-    });
+    correctionViewWrapper.className = "dds-correction-view-container";
 
     // Add image editor view from DCE to correct documents
     const imageEditorViewElement = document.createElement("div");
@@ -429,3 +423,21 @@ export default class DocumentCorrectionView {
     this.currentCorrectionResolver = undefined;
   }
 }
+
+const DEFAULT_CORRECTION_VIEW_CSS = `
+  .dds-correction-view-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color:#575757;
+    font-size: 12px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-correction-view-container {
+      flex-direction: row;
+    }
+  }
+`;

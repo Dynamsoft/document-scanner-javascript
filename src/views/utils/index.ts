@@ -67,6 +67,14 @@ const DEFAULT_CONTROLS_STYLE = `
     align-items: flex-start;
     justify-content: center;
   }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-controls {
+      flex-direction: column;
+      height: 100%;
+      width: 8rem;
+    }
+  }
 `;
 
 export function createControls(buttons: ToolbarButton[], containerStyle?: Partial<CSSStyleDeclaration>): HTMLElement {
