@@ -104,7 +104,11 @@ class DocumentScanner {
       }
 
       if (this.config.correctionViewConfig) {
-        this.correctionView = new DocumentCorrectionView(this.resources, this.config.correctionViewConfig);
+        this.correctionView = new DocumentCorrectionView(
+          this.resources,
+          this.config.correctionViewConfig,
+          this.scannerView
+        );
         components.correctionView = this.correctionView;
       }
 

@@ -18,6 +18,11 @@ import {
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 import { createStyle, getElement } from "./utils";
 
+const DEFAULT_SCAN_GUIDE_RATIO: { width: number; height: number } = {
+  width: 1,
+  height: 1,
+};
+
 export interface DocumentScannerViewConfig {
   _showCorrectionView?: boolean; // Internal use, to remove Smart Capture if correctionView is not available
 
@@ -27,6 +32,7 @@ export interface DocumentScannerViewConfig {
   // consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 
+  enableDetectBorderMode?: boolean; // True by default
   enableAutoCropMode?: boolean; // False by default
   enableSmartCaptureMode?: boolean; // False by default
 }
@@ -47,6 +53,8 @@ export default class DocumentScannerView {
   private boundsDetectionEnabled: boolean = false;
   private smartCaptureEnabled: boolean = false;
   private autoCropEnabled: boolean = false;
+
+  private resizeTimer: number | null = null;
 
   // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
@@ -92,6 +100,22 @@ export default class DocumentScannerView {
     }
   }
 
+  // private handleResize = () => {
+  //   // Hide all guides first
+  //   this.toggleScanGuide(false);
+
+  //   // Clear existing timer
+  //   if (this.resizeTimer) {
+  //     window.clearTimeout(this.resizeTimer);
+  //   }
+
+  //   // Set new timer
+  //   this.resizeTimer = window.setTimeout(() => {
+  //     // Re-show guides and update scan region
+  //     this.toggleScanGuide(true);
+  //   }, 500);
+  // };
+
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
@@ -101,6 +125,11 @@ export default class DocumentScannerView {
   }
 
   async initialize(): Promise<void> {
+    // Set default value for autoCrop, smartCapture and boundsDetection modes
+    this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
+    this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
+    this.boundsDetectionEnabled = true;
+
     if (this.initialized) {
       return;
     }
@@ -117,6 +146,7 @@ export default class DocumentScannerView {
         ...cameraView.getScanRegionMaskStyle(),
         strokeStyle: "transparent",
       });
+      cameraView.setVideoFit("cover");
 
       // Set cameraEnhancer as input for CaptureVisionRouter
       cvRouter.setInput(cameraEnhancer);
@@ -140,11 +170,6 @@ export default class DocumentScannerView {
       const resultReceiver = new CapturedResultReceiver();
       resultReceiver.onCapturedResultReceived = (result) => this.handleBoundsDetection(result);
       await cvRouter.addResultReceiver(resultReceiver);
-
-      // Set default value for autoCrop, smartCapture and boundsDetection modes
-      this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
-      this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
-      this.boundsDetectionEnabled = true;
 
       this.initialized = true;
     } catch (ex: any) {
@@ -181,10 +206,6 @@ export default class DocumentScannerView {
       autoCropBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop"),
     };
 
-    await this.toggleBoundsDetection(this.boundsDetectionEnabled);
-    await this.toggleSmartCapture(this.smartCaptureEnabled);
-    await this.toggleAutoCrop(this.autoCropEnabled);
-
     this.assignDCEClickEvents();
 
     // If showCorrectionView is false, hide smartCapture
@@ -200,43 +221,39 @@ export default class DocumentScannerView {
       throw new Error("Camera control elements not found");
     }
 
-    // Use passive event listeners for better performance
-    const eventOptions = { passive: true };
-
     this.takePhoto = this.takePhoto.bind(this);
     this.toggleBoundsDetection = this.toggleBoundsDetection.bind(this);
     this.toggleSmartCapture = this.toggleSmartCapture.bind(this);
     this.toggleAutoCrop = this.toggleAutoCrop.bind(this);
     this.closeCamera = this.closeCamera.bind(this);
 
-    this.DCE_ELEMENTS.takePhotoBtn.addEventListener("click", this.takePhoto, eventOptions);
+    // Using onclick instead of addEventListener
+    this.DCE_ELEMENTS.takePhotoBtn.onclick = this.takePhoto;
 
-    this.DCE_ELEMENTS.boundsDetectionBtn.addEventListener(
-      "click",
-      async () => await this.toggleBoundsDetection(),
-      eventOptions
-    );
+    this.DCE_ELEMENTS.boundsDetectionBtn.onclick = async () => {
+      await this.toggleBoundsDetection();
+    };
 
-    this.DCE_ELEMENTS.smartCaptureBtn.addEventListener(
-      "click",
-      async () => await this.toggleSmartCapture(),
-      eventOptions
-    );
+    this.DCE_ELEMENTS.smartCaptureBtn.onclick = async () => {
+      await this.toggleSmartCapture();
+    };
 
-    this.DCE_ELEMENTS.autoCropBtn.addEventListener("click", async () => await this.toggleAutoCrop(), eventOptions);
+    this.DCE_ELEMENTS.autoCropBtn.onclick = async () => {
+      await this.toggleAutoCrop();
+    };
 
-    this.DCE_ELEMENTS.closeScannerBtn.addEventListener("click", async () => await this.handleCloseBtn(), eventOptions);
+    this.DCE_ELEMENTS.closeScannerBtn.onclick = async () => {
+      await this.handleCloseBtn();
+    };
 
-    this.DCE_ELEMENTS.selectCameraBtn.addEventListener(
-      "click",
-      (event) => {
-        event.stopPropagation();
-        this.toggleSelectCameraBox();
-      },
-      eventOptions
-    );
+    this.DCE_ELEMENTS.selectCameraBtn.onclick = (event) => {
+      event.stopPropagation();
+      this.toggleSelectCameraBox();
+    };
 
-    this.DCE_ELEMENTS.uploadImageBtn.addEventListener("click", () => this.uploadImage(), eventOptions);
+    this.DCE_ELEMENTS.uploadImageBtn.onclick = () => {
+      this.uploadImage();
+    };
   }
 
   async handleCloseBtn() {
@@ -584,6 +601,11 @@ export default class DocumentScannerView {
       if (!this.initializedDCE && cameraEnhancer.isOpen()) {
         await this.initializeElements();
       }
+
+      // Toggle capture modes
+      await this.toggleBoundsDetection(this.boundsDetectionEnabled);
+      await this.toggleSmartCapture(this.smartCaptureEnabled);
+      await this.toggleAutoCrop(this.autoCropEnabled);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);

@@ -2,7 +2,7 @@ import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, createStyle, getElement } from "./utils";
+import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
   ToolbarButtonConfig,
@@ -12,10 +12,13 @@ import {
   UtilizedTemplateNames,
   ToolbarButton,
 } from "./utils/types";
+import DocumentScannerView from "./DocumentScannerView";
+import DocumentResultView from "./DocumentResultView";
 
 const DEFAULT_CORNER_SIZE = 60;
 
 export interface DocumentCorrectionViewToolbarButtonsConfig {
+  retake?: ToolbarButtonConfig;
   fullImage?: ToolbarButtonConfig;
   detectBorders?: ToolbarButtonConfig;
   apply?: ToolbarButtonConfig;
@@ -36,7 +39,11 @@ export default class DocumentCorrectionView {
   private layer: DrawingLayer = null;
   private currentCorrectionResolver?: (result: DocumentResult) => void;
 
-  constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {
+  constructor(
+    private resources: SharedResources,
+    private config: DocumentCorrectionViewConfig,
+    private scannerView: DocumentScannerView
+  ) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
       normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
@@ -212,6 +219,15 @@ export default class DocumentCorrectionView {
 
     const buttons: ToolbarButton[] = [
       {
+        id: `dds-scanResult-retake`,
+        icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
+        label: toolbarButtonsConfig?.retake?.label || "Re-take",
+        onClick: () => this.handleRetake(),
+        className: `${toolbarButtonsConfig?.retake?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
+        isDisabled: !this.scannerView,
+      },
+      {
         id: `dds-correction-fullImage`,
         icon: toolbarButtonsConfig?.fullImage?.icon || DDS_ICONS.fullImage,
         label: toolbarButtonsConfig?.fullImage?.label || "Full Image",
@@ -253,6 +269,50 @@ export default class DocumentCorrectionView {
     } catch (error) {
       console.error("Error setting up correction controls:", error);
       throw new Error(`Failed to setup correction controls: ${error.message}`);
+    }
+  }
+
+  private async handleRetake() {
+    try {
+      if (!this.scannerView) {
+        console.error("Correction View not initialized");
+        return;
+      }
+
+      this.hideView();
+      const result = await this.scannerView.launch();
+
+      if (result?.status?.code === EnumResultStatus.RS_FAILED) {
+        if (this.currentCorrectionResolver) {
+          this.currentCorrectionResolver(result);
+        }
+        return;
+      }
+
+      // Handle success case
+      if (this.resources.onResultUpdated) {
+        if (result?.status.code === EnumResultStatus.RS_CANCELLED) {
+          this.resources.onResultUpdated(this.resources.result);
+        } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
+          this.resources.onResultUpdated(result);
+        }
+      }
+
+      this.dispose(true);
+      await this.initialize();
+      getElement(this.config.container).style.display = "flex";
+    } catch (error) {
+      console.error("Error in retake handler:", error);
+      // Make sure to resolve with error if something goes wrong
+      if (this.currentCorrectionResolver) {
+        this.currentCorrectionResolver({
+          status: {
+            code: EnumResultStatus.RS_FAILED,
+            message: error?.message || error,
+          },
+        });
+      }
+      throw error;
     }
   }
 
@@ -407,7 +467,7 @@ export default class DocumentCorrectionView {
     }
   }
 
-  dispose(): void {
+  dispose(preserveResolver: boolean = false): void {
     // Clean up resources
     if (this.imageEditorView?.dispose) {
       this.imageEditorView.dispose();
@@ -419,8 +479,10 @@ export default class DocumentCorrectionView {
       getElement(this.config.container).textContent = "";
     }
 
-    // Clear resolver
-    this.currentCorrectionResolver = undefined;
+    // Clear resolver only if not preserving
+    if (!preserveResolver) {
+      this.currentCorrectionResolver = undefined;
+    }
   }
 }
 
