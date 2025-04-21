@@ -16,12 +16,21 @@ import {
   UtilizedTemplateNames,
 } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
-import { createStyle, getElement } from "./utils";
+import { createStyle, findClosestResolutionLevel, getElement, isEmptyObject } from "./utils";
 
-const DEFAULT_SCAN_GUIDE_RATIO: { width: number; height: number } = {
-  width: 1,
-  height: 1,
-};
+const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
+
+export interface ScanRegion {
+  ratio: {
+    width: number;
+    height: number;
+  };
+  regionBottomMargin: number; // Bottom margin calculated in pixel
+  style: {
+    strokeWidth: number;
+    strokeColor: string;
+  };
+}
 
 export interface DocumentScannerViewConfig {
   _showCorrectionView?: boolean; // Internal use, to remove Smart Capture if correctionView is not available
@@ -35,6 +44,10 @@ export interface DocumentScannerViewConfig {
   enableDetectBorderMode?: boolean; // True by default
   enableAutoCropMode?: boolean; // False by default
   enableSmartCaptureMode?: boolean; // False by default
+
+  scanRegion: ScanRegion;
+
+  minVerifiedFramesForAutoCapture: number; // 2 by default
 }
 
 interface DCEElements {
@@ -100,22 +113,6 @@ export default class DocumentScannerView {
     }
   }
 
-  // private handleResize = () => {
-  //   // Hide all guides first
-  //   this.toggleScanGuide(false);
-
-  //   // Clear existing timer
-  //   if (this.resizeTimer) {
-  //     window.clearTimeout(this.resizeTimer);
-  //   }
-
-  //   // Set new timer
-  //   this.resizeTimer = window.setTimeout(() => {
-  //     // Re-show guides and update scan region
-  //     this.toggleScanGuide(true);
-  //   }, 500);
-  // };
-
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
@@ -129,6 +126,8 @@ export default class DocumentScannerView {
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
     this.boundsDetectionEnabled = true;
+
+    this.config.minVerifiedFramesForAutoCapture = this.config?.minVerifiedFramesForAutoCapture ?? 2;
 
     if (this.initialized) {
       return;
@@ -144,7 +143,8 @@ export default class DocumentScannerView {
       // cameraView.getVideoElement().style.objectPosition = "center";
       cameraView.setScanRegionMaskStyle({
         ...cameraView.getScanRegionMaskStyle(),
-        strokeStyle: "transparent",
+        lineWidth: this.config?.scanRegion?.style?.strokeWidth ?? 2,
+        strokeStyle: this.config?.scanRegion?.style?.strokeColor ?? "transparent",
       });
       cameraView.setVideoFit("cover");
 
@@ -283,11 +283,29 @@ export default class DocumentScannerView {
 
     // Add click handlers to all options
     [...cameraOptions, ...resolutionOptions].forEach((option) => {
-      option.addEventListener("click", () => {
+      (option as HTMLElement).onclick = () => {
+        const deviceId = option.getAttribute("data-davice-id");
+        const resHeight = option.getAttribute("data-height");
+        const resWidth = option.getAttribute("data-width");
+        if (deviceId) {
+          this.resources.cameraEnhancer.selectCamera(deviceId).then(() => {
+            this.toggleScanGuide(true);
+          });
+        } else if (resHeight && resWidth) {
+          this.resources.cameraEnhancer
+            .setResolution({
+              width: parseInt(resWidth),
+              height: parseInt(resHeight),
+            })
+            .then(() => {
+              this.toggleScanGuide(true);
+            });
+        }
+
         if (settingsContainer.style.display !== "none") {
           this.toggleSelectCameraBox();
         }
-      });
+      };
     });
   }
 
@@ -314,9 +332,20 @@ export default class DocumentScannerView {
       }
     });
 
+    const heightMap: Record<string, string> = {
+      "480p": "480",
+      "720p": "720",
+      "1080p": "1080",
+      "2k": "1440",
+      "4k": "2160",
+    };
+    const resolutionLvl = findClosestResolutionLevel(selectedResolution);
+
     resOptions.forEach((options) => {
       const o = options as HTMLElement;
-      if (o.getAttribute("data-height") === `${selectedResolution.height}`) {
+      const height = o.getAttribute("data-height");
+
+      if (height === heightMap[resolutionLvl]) {
         o.style.border = "2px solid #fe814a";
       } else {
         o.style.border = "none";
@@ -339,6 +368,8 @@ export default class DocumentScannerView {
     this.attachOptionClickListeners();
 
     settingsBox.click();
+
+    this.toggleScanGuide(true);
   }
 
   private async uploadImage() {
@@ -403,6 +434,14 @@ export default class DocumentScannerView {
           ) as DetectedQuadResultItem
         )?.location;
       }
+
+      if (!isEmptyObject(this.config?.scanRegion?.ratio)) {
+        // If scan region is enabled, convert to scanRegionCoordinates
+        detectedQuadrilateral.points = detectedQuadrilateral.points.map(
+          (point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point
+        ) as Quadrilateral["points"];
+      }
+
       const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       const result = {
@@ -507,6 +546,8 @@ export default class DocumentScannerView {
 
     if (this.initialized && this.boundsDetectionEnabled) {
       await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+
+      this.toggleScanGuide(true);
     } else if (this.initialized && !this.boundsDetectionEnabled) {
       this.stopCapturing();
     }
@@ -577,6 +618,116 @@ export default class DocumentScannerView {
     onIcon.style.display = this.autoCropEnabled ? "block" : "none";
   }
 
+  private handleResize = () => {
+    // Hide all guides first
+    this.toggleScanGuide(false);
+
+    // Clear existing timer
+    if (this.resizeTimer) {
+      window.clearTimeout(this.resizeTimer);
+    }
+
+    // Set new timer
+    this.resizeTimer = window.setTimeout(() => {
+      // Re-show guides and update scan region
+      this.toggleScanGuide(true);
+    }, 500);
+  };
+
+  private toggleScanGuide(enabled?: boolean) {
+    if (enabled && !isEmptyObject(this.config?.scanRegion?.ratio)) {
+      this.calculateScanRegion();
+    }
+  }
+
+  private calculateScanRegion() {
+    const { cameraEnhancer, cameraView } = this.resources;
+
+    if (!cameraEnhancer || !cameraEnhancer.isOpen()) return;
+
+    // Get visible region of video
+    const visibleRegion = cameraView.getVisibleRegionOfVideo({ inPixels: true });
+
+    if (!visibleRegion) return;
+
+    // Get the total video dimensions
+    const video = cameraView.getVideoElement();
+    const totalWidth = video.videoWidth;
+    const totalHeight = video.videoHeight;
+
+    // Get the document ratio for the specific document type
+
+    const targetRatio = this.config?.scanRegion?.ratio;
+
+    // Calculate the base unit to scale the document dimensions
+    let baseUnit: number;
+
+    // Calculate bottom margin
+    const bottomMarginPx = this.config?.scanRegion?.regionBottomMargin ?? 0; // 5 * 16 is 5rem in pixels
+    const effectiveHeightWithMargin = visibleRegion.height - bottomMarginPx;
+
+    if (visibleRegion.width > visibleRegion.height) {
+      // Landscape orientation
+      const availableHeight = effectiveHeightWithMargin * 0.75;
+      baseUnit = availableHeight / targetRatio.height;
+
+      // Check if width would exceed bounds
+      const resultingWidth = baseUnit * targetRatio.width;
+      if (resultingWidth > visibleRegion.width * 0.9) {
+        // If too wide, recalculate using width as reference
+        baseUnit = (visibleRegion.width * 0.9) / targetRatio.width;
+      }
+    } else {
+      // Portrait orientation
+      const availableWidth = visibleRegion.width * 0.9;
+      baseUnit = availableWidth / targetRatio.width;
+
+      // Check if height would exceed bounds
+      const resultingHeight = baseUnit * targetRatio.height;
+      if (resultingHeight > effectiveHeightWithMargin * 0.75) {
+        // If too tall, recalculate using height as reference
+        baseUnit = (effectiveHeightWithMargin * 0.75) / targetRatio.height;
+      }
+    }
+
+    // Calculate actual dimensions in pixels
+    const actualWidth = baseUnit * targetRatio.width;
+    const actualHeight = baseUnit * targetRatio.height;
+
+    // Calculate the offsets to center the region horizontally and vertically
+    const leftOffset = (visibleRegion.width - actualWidth) / 2;
+    const topOffset = (effectiveHeightWithMargin - actualHeight) / 2;
+
+    // Calculate pixel coordinates of the scan region relative to the visible region
+    const scanLeft = leftOffset;
+    const scanRight = leftOffset + actualWidth;
+    const scanTop = topOffset;
+    const scanBottom = topOffset + actualHeight;
+
+    // Convert to percentages relative to the TOTAL video size, considering the visible region offset
+    const absoluteLeft = visibleRegion.x + scanLeft;
+    const absoluteRight = visibleRegion.x + scanRight;
+    const absoluteTop = visibleRegion.y + scanTop;
+    const absoluteBottom = visibleRegion.y + scanBottom;
+
+    const left = (absoluteLeft / totalWidth) * 100;
+    const right = (absoluteRight / totalWidth) * 100;
+    const top = (absoluteTop / totalHeight) * 100;
+    const bottom = (absoluteBottom / totalHeight) * 100;
+
+    // Apply scan region
+    const region = {
+      left: Math.round(left),
+      right: Math.round(right),
+      top: Math.round(top),
+      bottom: Math.round(bottom),
+      isMeasuredInPercentage: true,
+    };
+
+    cameraView?.setScanRegionMaskVisible(true);
+    cameraEnhancer.setScanRegion(region);
+  }
+
   async openCamera(): Promise<void> {
     try {
       this.showScannerLoadingOverlay("Initializing camera...");
@@ -602,6 +753,9 @@ export default class DocumentScannerView {
         await this.initializeElements();
       }
 
+      // Add resize
+      window.addEventListener("resize", this.handleResize);
+
       // Toggle capture modes
       await this.toggleBoundsDetection(this.boundsDetectionEnabled);
       await this.toggleSmartCapture(this.smartCaptureEnabled);
@@ -624,6 +778,14 @@ export default class DocumentScannerView {
   }
 
   closeCamera(hideContainer: boolean = true) {
+    // Remove resize event listener
+    window.removeEventListener("resize", this.handleResize);
+    // Clear any existing resize timer
+    if (this.resizeTimer) {
+      window.clearTimeout(this.resizeTimer);
+      this.resizeTimer = null;
+    }
+
     const { cameraEnhancer, cameraView } = this.resources;
 
     const configContainer = getElement(this.config.container);
@@ -689,6 +851,13 @@ export default class DocumentScannerView {
             (item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD
           ) as DetectedQuadResultItem
         )?.location;
+      }
+
+      if (!isEmptyObject(this.config?.scanRegion?.ratio)) {
+        // If scan region is enabled, convert to scanRegionCoordinates
+        detectedQuadrilateral.points = detectedQuadrilateral.points.map(
+          (point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point
+        ) as Quadrilateral["points"];
       }
 
       const flowType = this.getFlowType();
@@ -774,7 +943,7 @@ export default class DocumentScannerView {
      * In our case, we determine a good condition for "automatic normalization" to be
      * "getting document boundary detected after 2 cross verified results".
      */
-    if (this.crossVerificationCount >= 2) {
+    if (this.crossVerificationCount >= this.config?.minVerifiedFramesForAutoCapture) {
       this.crossVerificationCount = 0;
 
       await this.takePhoto();
@@ -796,6 +965,8 @@ export default class DocumentScannerView {
         if (this.boundsDetectionEnabled) {
           await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
         }
+
+        this.toggleScanGuide(true);
 
         // By default, cameraEnhancer captures grayscale images to optimize performance.
         // To capture RGB Images, we set the Pixel Format to EnumImagePixelFormat.IPF_ABGR_8888

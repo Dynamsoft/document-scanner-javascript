@@ -20,6 +20,16 @@
         scannerViewConfig: {
           cameraEnhancerUIPath: "../dist/document-scanner.ui.html",
           enableAutoCropMode: true,
+          scanRegion: {
+            style: {
+              strokeColor: "black",
+              strokeWidth: 2,
+            },
+            ratio: {
+              width: 3,
+              height: 2,
+            },
+          },
         },
       });
       (async () => {
