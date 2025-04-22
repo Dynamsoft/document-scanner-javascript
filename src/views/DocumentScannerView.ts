@@ -127,7 +127,8 @@ export default class DocumentScannerView {
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
     this.boundsDetectionEnabled = true;
 
-    this.config.minVerifiedFramesForAutoCapture = this.config?.minVerifiedFramesForAutoCapture ?? 2;
+    this.config.minVerifiedFramesForAutoCapture =
+      this.config?.minVerifiedFramesForAutoCapture ?? DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE;
 
     if (this.initialized) {
       return;

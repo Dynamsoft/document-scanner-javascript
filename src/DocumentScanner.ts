@@ -139,7 +139,7 @@ class DocumentScanner {
       (LicenseManager as any)._onAuthMessage = (message: string) =>
         message.replace(
           "(https://www.dynamsoft.com/customer/license/trialLicense?product=unknown&deploymenttype=unknown)",
-          "(https://www.dynamsoft.com/customer/license/trialLicense?product=dds&deploymenttype=web)"
+          "(https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&deploymenttype=web)"
         );
 
       LicenseManager.initLicense(this.config?.license || "", true);
