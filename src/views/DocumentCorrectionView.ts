@@ -340,11 +340,12 @@ export default class DocumentCorrectionView {
     // Auto detect bounds
     if (this.config.templateFilePath) {
       await this.resources.cvRouter.initSettings(this.config.templateFilePath);
-    } else {
-      let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
     }
+
+    let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+    newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
+    await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+
     this.resources.cvRouter.maxImageSideLength = Infinity;
 
     const result = await this.resources.cvRouter.capture(

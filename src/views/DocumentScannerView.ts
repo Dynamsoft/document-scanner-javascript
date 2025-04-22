@@ -161,11 +161,12 @@ export default class DocumentScannerView {
       // Initialize the template parameters for DL scanning4
       if (this.config.templateFilePath) {
         await cvRouter.initSettings(this.config.templateFilePath);
-      } else {
-        let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-        newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-        await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
       }
+
+      let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
+      await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+
       cvRouter.maxImageSideLength = Infinity;
 
       const resultReceiver = new CapturedResultReceiver();
