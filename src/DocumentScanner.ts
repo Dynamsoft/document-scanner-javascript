@@ -135,6 +135,11 @@ class DocumentScanner {
 
   private async initializeDCVResources(): Promise<void> {
     try {
+      //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
+      CoreModule.engineResourcePaths = isEmptyObject(this.config?.engineResourcePaths)
+        ? DEFAULT_DCV_ENGINE_RESOURCE_PATHS
+        : this.config.engineResourcePaths;
+
       // Change trial link to include product and deploymenttype
       (LicenseManager as any)._onAuthMessage = (message: string) =>
         message.replace(
@@ -143,11 +148,6 @@ class DocumentScanner {
         );
 
       LicenseManager.initLicense(this.config?.license || "", true);
-
-      //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
-      CoreModule.engineResourcePaths = isEmptyObject(this.config?.engineResourcePaths)
-        ? DEFAULT_DCV_ENGINE_RESOURCE_PATHS
-        : this.config.engineResourcePaths;
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
