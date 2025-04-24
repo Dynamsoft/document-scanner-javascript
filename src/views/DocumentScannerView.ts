@@ -449,14 +449,6 @@ export default class DocumentScannerView {
         )?.location;
       }
 
-      // If we useImageDimensions, we shouldnt convert to scanRegionCoordinates since we're using the full image.
-      if (!isEmptyObject(this.config?.scanRegion?.ratio) && !useImageDimensions) {
-        // If scan region is enabled, convert to scanRegionCoordinates
-        detectedQuadrilateral.points = detectedQuadrilateral.points.map(
-          (point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point
-        ) as Quadrilateral["points"];
-      }
-
       const correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
       const result = {
