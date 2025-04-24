@@ -47,7 +47,7 @@ export interface DocumentScannerViewConfig {
 
   scanRegion: ScanRegion;
 
-  minVerifiedFramesForAutoCapture: number; // 2 by default
+  minVerifiedFramesForAutoCapture: number; // 2 by default. Min: 1, Max: 5
 }
 
 interface DCEElements {
@@ -113,6 +113,18 @@ export default class DocumentScannerView {
     }
   }
 
+  private getMinVerifiedFramesForAutoCapture() {
+    // 1 <= minVerifiedFramesForAutoCapture <= 5
+    if (
+      !this.config?.minVerifiedFramesForAutoCapture ||
+      this.config?.minVerifiedFramesForAutoCapture <= 0 ||
+      this.config?.minVerifiedFramesForAutoCapture > 5
+    )
+      return DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE;
+
+    return this.config?.minVerifiedFramesForAutoCapture;
+  }
+
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
@@ -127,8 +139,7 @@ export default class DocumentScannerView {
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
     this.boundsDetectionEnabled = true;
 
-    this.config.minVerifiedFramesForAutoCapture =
-      this.config?.minVerifiedFramesForAutoCapture ?? DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE;
+    this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
 
     if (this.initialized) {
       return;
