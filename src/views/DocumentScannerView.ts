@@ -428,7 +428,8 @@ export default class DocumentScannerView {
 
       // Reset captured items if not using bounds detection
       let detectedQuadrilateral: Quadrilateral = null;
-      if (this.capturedResultItems?.length <= 1) {
+      const useImageDimensions = this.capturedResultItems?.length <= 1;
+      if (useImageDimensions) {
         this.capturedResultItems = [];
         const { width, height } = this.originalImageData;
         detectedQuadrilateral = {
@@ -448,7 +449,8 @@ export default class DocumentScannerView {
         )?.location;
       }
 
-      if (!isEmptyObject(this.config?.scanRegion?.ratio)) {
+      // If we useImageDimensions, we shouldnt convert to scanRegionCoordinates since we're using the full image.
+      if (!isEmptyObject(this.config?.scanRegion?.ratio) && !useImageDimensions) {
         // If scan region is enabled, convert to scanRegionCoordinates
         detectedQuadrilateral.points = detectedQuadrilateral.points.map(
           (point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point
@@ -866,7 +868,8 @@ export default class DocumentScannerView {
         )?.location;
       }
 
-      if (!isEmptyObject(this.config?.scanRegion?.ratio)) {
+      // If theres no detected quads, we shouldnt convert to scanRegionCoordinates since we're using the full image.
+      if (!isEmptyObject(this.config?.scanRegion?.ratio) && !shouldUseLatestFrame) {
         // If scan region is enabled, convert to scanRegionCoordinates
         detectedQuadrilateral.points = detectedQuadrilateral.points.map(
           (point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point
