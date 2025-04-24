@@ -475,7 +475,7 @@ export default class DocumentScannerView {
         _flowType: EnumFlowType.UPLOADED_IMAGE,
       };
 
-      // Emit result through shared resources
+      // Update shared resources
       this.resources.onResultUpdated?.(result);
 
       // Resolve scan promise

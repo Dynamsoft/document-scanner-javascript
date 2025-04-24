@@ -29,6 +29,7 @@ export enum EnumFlowType {
   SMART_CAPTURE = "smartCapture",
   AUTO_CROP = "autoCrop",
   UPLOADED_IMAGE = "uploadedImage",
+  STATIC_FILE = "staticFile",
 }
 
 export type ResultStatus = {

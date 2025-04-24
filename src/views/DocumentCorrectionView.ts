@@ -11,6 +11,7 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
   ToolbarButton,
+  EnumFlowType,
 } from "./utils/types";
 import DocumentScannerView from "./DocumentScannerView";
 import DocumentResultView from "./DocumentResultView";
@@ -83,6 +84,12 @@ export default class DocumentCorrectionView {
     this.setupInitialDetectedQuad();
     this.setupCorrectionControls();
     this.setupQuadConstraints();
+
+    // Hide retake button on flow.STATIC_FILE
+    if (this.resources.result._flowType === EnumFlowType.STATIC_FILE) {
+      const retakeBtn = document.querySelector("#dds-correction-retake") as HTMLElement;
+      retakeBtn.style.display = "none";
+    }
   }
 
   private setupDrawingLayerStyle() {
@@ -219,7 +226,7 @@ export default class DocumentCorrectionView {
 
     const buttons: ToolbarButton[] = [
       {
-        id: `dds-scanResult-retake`,
+        id: `dds-correction-retake`,
         icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
         label: toolbarButtonsConfig?.retake?.label || "Re-take",
         onClick: () => this.handleRetake(),

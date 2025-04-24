@@ -4,7 +4,7 @@ import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { DocumentResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
+import { DocumentResult, EnumFlowType, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
 export interface DocumentResultViewToolbarButtonsConfig {
   retake?: ToolbarButtonConfig;
@@ -334,6 +334,12 @@ export default class DocumentResultView {
       resultViewWrapper.appendChild(controlContainer);
 
       getElement(this.config.container).appendChild(resultViewWrapper);
+
+      // Hide retake button on flow.STATIC_FILE
+      if (this.resources.result._flowType === EnumFlowType.STATIC_FILE) {
+        const retakeBtn = document.querySelector("#dds-scanResult-retake") as HTMLElement;
+        retakeBtn.style.display = "none";
+      }
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);

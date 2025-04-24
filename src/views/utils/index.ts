@@ -92,6 +92,7 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
   // Create buttons
   buttons.forEach((button) => {
     const buttonEl = document.createElement("div");
+    buttonEl.id = button.id;
     buttonEl.className = `dds-control-btn ${button?.className}`;
 
     // Create icon container
