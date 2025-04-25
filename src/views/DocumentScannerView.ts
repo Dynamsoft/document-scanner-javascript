@@ -41,7 +41,6 @@ export interface DocumentScannerViewConfig {
   // consecutiveResultFramesBeforeNormalization?: number;
   utilizedTemplateNames?: UtilizedTemplateNames;
 
-  enableDetectBorderMode?: boolean; // True by default
   enableAutoCropMode?: boolean; // False by default
   enableSmartCaptureMode?: boolean; // False by default
 
