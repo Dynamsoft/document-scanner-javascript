@@ -48,6 +48,9 @@ export interface DocumentScannerViewConfig {
   scanRegion: ScanRegion;
 
   minVerifiedFramesForAutoCapture: number; // 2 by default. Min: 1, Max: 5
+
+  showSubfooter?: boolean; // True by default
+  showPoweredByDynamsoft?: boolean; // True by default
 }
 
 interface DCEElements {
@@ -224,6 +227,16 @@ export default class DocumentScannerView {
     // If showCorrectionView is false, hide smartCapture
     if (this.config._showCorrectionView === false) {
       this.DCE_ELEMENTS.smartCaptureBtn.style.display = "none";
+    }
+
+    // Hide subfooter or showPoweredByDynamsoft message
+    if (this.config?.showSubfooter === false) {
+      const subFooter = DCEContainer.shadowRoot.querySelector(".dce-subfooter") as HTMLElement;
+      subFooter.style.display = "none";
+    }
+    if (this.config?.showPoweredByDynamsoft === false) {
+      const poweredByDynamsoft = DCEContainer.shadowRoot.querySelector(".dce-mn-msg-poweredby") as HTMLElement;
+      poweredByDynamsoft.style.display = "none";
     }
 
     this.initializedDCE = true;
