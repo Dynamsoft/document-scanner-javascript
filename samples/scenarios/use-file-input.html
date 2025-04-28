@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamsoft Document Scanner - Use File Input</title>
+    <script src="../../dist/dds.bundle.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      #results canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button type="button" id="start-scan">Start Scan Button</button>
+    <input type="file" id="initialFile" accept="image/*,application/pdf" />
+    <div id="results"></div>
+    <script>
+      const resultContainer = document.querySelector("#results");
+
+      // Instantiate a Mobile Web Capture Object
+      const documentScanner = new Dynamsoft.DocumentScanner({
+        license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+      });
+      document.getElementById("start-scan").onclick = async function () {
+        const result = await documentScanner.launch();
+        console.log(result);
+
+        // Clear the result container and display the scanned result as a canvas
+        if (result?.correctedImageResult) {
+          resultContainer.innerHTML = ""; // Clear placeholder content
+          const canvas = result.correctedImageResult.toCanvas();
+          resultContainer.appendChild(canvas);
+        } else {
+          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+        }
+      };
+      document.getElementById("initialFile").onchange = async function () {
+        const files = Array.from(this.files || []);
+        if (files.length) {
+          const result = await documentScanner.launch(files[0]);
+          console.log(result);
+
+          // Clear the result container and display the scanned result as a canvas
+          if (result?.correctedImageResult) {
+            resultContainer.innerHTML = ""; // Clear placeholder content
+            const canvas = result.correctedImageResult.toCanvas();
+            resultContainer.appendChild(canvas);
+          } else {
+            resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+          }
+        }
+      };
+    </script>
+  </body>
+</html>

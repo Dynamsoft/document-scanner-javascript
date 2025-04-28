@@ -1,6 +1,6 @@
 {
   "name": "dynamsoft-document-scanner",
-  "version": "1.1.1",
+  "version": "1.2.0-beta-1745342777464",
   "description": "Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows.",
   "files": [
     "/dist",
@@ -52,13 +52,13 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.6",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "formidable": "^3.5.2",
     "rollup": "^4.9.5",
     "rollup-plugin-dts": "^6.1.1",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.3",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "formidable": "^3.5.2"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "dynamsoft-capture-vision-bundle": "2.6.1000",

@@ -17,6 +17,22 @@
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
+        scannerViewConfig: {
+          cameraEnhancerUIPath: "../dist/document-scanner.ui.html",
+          enableAutoCropMode: true,
+          showSubfooter: false,
+          showPoweredByDynamsoft: false,
+          scanRegion: {
+            style: {
+              strokeColor: "black",
+              strokeWidth: 2,
+            },
+            ratio: {
+              width: 3,
+              height: 2,
+            },
+          },
+        },
       });
       (async () => {
         // Launch the scanner and wait for the result

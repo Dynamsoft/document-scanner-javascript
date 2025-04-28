@@ -1,4 +1,4 @@
-import { DSImageData, OriginalImageResultItem, Quadrilateral } from "dynamsoft-core";
+import { DSImageData, Quadrilateral } from "dynamsoft-core";
 import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 
 export enum EnumDDSViews {
@@ -29,6 +29,7 @@ export enum EnumFlowType {
   SMART_CAPTURE = "smartCapture",
   AUTO_CROP = "autoCrop",
   UPLOADED_IMAGE = "uploadedImage",
+  STATIC_FILE = "staticFile",
 }
 
 export type ResultStatus = {
@@ -39,7 +40,7 @@ export type ResultStatus = {
 export interface DocumentResult {
   status: ResultStatus;
   correctedImageResult?: NormalizedImageResultItem | DSImageData;
-  originalImageResult?: OriginalImageResultItem["imageData"];
+  originalImageResult?: DSImageData;
   detectedQuadrilateral?: Quadrilateral;
   _flowType?: EnumFlowType;
 }

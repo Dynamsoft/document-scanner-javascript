@@ -50,6 +50,10 @@ app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
+app.get("/scenarios/use-file-input", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/scenarios/use-file-input.html"));
+});
+
 // Allow upload feature
 app.post("/upload", function (req, res) {
   try {

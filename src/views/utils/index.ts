@@ -67,6 +67,14 @@ const DEFAULT_CONTROLS_STYLE = `
     align-items: flex-start;
     justify-content: center;
   }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-controls {
+      flex-direction: column;
+      height: 100%;
+      width: 8rem;
+    }
+  }
 `;
 
 export function createControls(buttons: ToolbarButton[], containerStyle?: Partial<CSSStyleDeclaration>): HTMLElement {
@@ -84,6 +92,7 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
   // Create buttons
   buttons.forEach((button) => {
     const buttonEl = document.createElement("div");
+    buttonEl.id = button.id;
     buttonEl.className = `dds-control-btn ${button?.className}`;
 
     // Create icon container
@@ -150,3 +159,44 @@ export function isSVGString(str: string): boolean {
 export const isEmptyObject = (obj: object | null | undefined): boolean => {
   return !obj || Object.keys(obj).length === 0;
 };
+
+export const STANDARD_RESOLUTIONS = {
+  "4k": { width: 3840, height: 2160 },
+  "2k": { width: 2560, height: 1440 },
+  "1080p": { width: 1920, height: 1080 },
+  "720p": { width: 1280, height: 720 },
+  "480p": { width: 640, height: 480 },
+} as const;
+
+type ResolutionLevel = keyof typeof STANDARD_RESOLUTIONS;
+
+export function findClosestResolutionLevel(selectedResolution: { width: number; height: number }): ResolutionLevel {
+  // Calculate the total pixels for the input resolution
+  const inputPixels = selectedResolution.width * selectedResolution.height;
+
+  // Calculate the aspect ratio of the input resolution
+  const inputAspectRatio = selectedResolution.width / selectedResolution.height;
+
+  // Find the closest resolution by comparing total pixels and aspect ratio
+  let closestLevel: ResolutionLevel = "480p";
+  let smallestDifference = Number.MAX_VALUE;
+
+  for (const [level, resolution] of Object.entries(STANDARD_RESOLUTIONS)) {
+    const standardPixels = resolution.width * resolution.height;
+    const standardAspectRatio = resolution.width / resolution.height;
+
+    // Calculate differences in pixels and aspect ratio
+    const pixelDifference = Math.abs(standardPixels - inputPixels);
+    const aspectRatioDifference = Math.abs(standardAspectRatio - inputAspectRatio);
+
+    // Use a weighted scoring system - pixels are more important than aspect ratio
+    const totalDifference = pixelDifference * 0.7 + aspectRatioDifference * standardPixels * 0.3;
+
+    if (totalDifference < smallestDifference) {
+      smallestDifference = totalDifference;
+      closestLevel = level as ResolutionLevel;
+    }
+  }
+
+  return closestLevel;
+}
