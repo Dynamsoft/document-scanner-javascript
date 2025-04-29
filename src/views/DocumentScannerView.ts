@@ -178,7 +178,7 @@ export default class DocumentScannerView {
 
       let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
       newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      newSettings.documentSettings.scaleDownThreshold = 1100;
+      newSettings.documentSettings.scaleDownThreshold = 1000;
       await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
       cvRouter.maxImageSideLength = Infinity;
