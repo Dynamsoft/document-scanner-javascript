@@ -768,6 +768,12 @@ export default class DocumentScannerView {
         await cameraEnhancer.resume();
       }
 
+      // Try to set default as 2k
+      await cameraEnhancer.setResolution({
+        width: 2560,
+        height: 1440,
+      });
+
       // Assign boundsDetection, smartCapture, and takePhoto element
       if (!this.initializedDCE && cameraEnhancer.isOpen()) {
         await this.initializeElements();
