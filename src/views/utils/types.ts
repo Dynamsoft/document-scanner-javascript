@@ -1,4 +1,4 @@
-import { DSImageData, OriginalImageResultItem, Quadrilateral } from "dynamsoft-core";
+import { DSImageData, Quadrilateral } from "dynamsoft-core";
 import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 
 export enum EnumDDSViews {
