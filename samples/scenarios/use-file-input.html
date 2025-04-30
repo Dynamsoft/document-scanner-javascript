@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner - Use File Input</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.1/dist/dds.bundle.js"></script> -->
+    <!-- To use locally: -->
     <script src="../../dist/dds.bundle.js"></script>
     <style>
       html,
@@ -30,6 +32,7 @@
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
       });
+
       document.getElementById("start-scan").onclick = async function () {
         const result = await documentScanner.launch();
         console.log(result);
