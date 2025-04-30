@@ -2,7 +2,7 @@ import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
+import { createControls, createStyle, getElement } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
   ToolbarButtonConfig,
@@ -14,9 +14,6 @@ import {
   EnumFlowType,
 } from "./utils/types";
 import DocumentScannerView from "./DocumentScannerView";
-import DocumentResultView from "./DocumentResultView";
-
-const DEFAULT_CORNER_SIZE = 60;
 
 export interface DocumentCorrectionViewToolbarButtonsConfig {
   retake?: ToolbarButtonConfig;
