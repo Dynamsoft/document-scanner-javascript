@@ -167,7 +167,6 @@ export default class DocumentCorrectionView {
     this.layer.clearDrawingItems();
 
     const fabricObject = newQuad._getFabricObject();
-    console.log(this.resources.result.originalImageResult);
 
     const cornerSize =
       Math.min(this.resources.result.originalImageResult?.width, this.resources.result.originalImageResult?.height) *
