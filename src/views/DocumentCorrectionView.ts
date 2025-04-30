@@ -170,7 +170,13 @@ export default class DocumentCorrectionView {
     this.layer.clearDrawingItems();
 
     const fabricObject = newQuad._getFabricObject();
-    fabricObject.cornerSize = DEFAULT_CORNER_SIZE;
+    console.log(this.resources.result.originalImageResult);
+
+    const cornerSize =
+      Math.min(this.resources.result.originalImageResult?.width, this.resources.result.originalImageResult?.height) *
+      0.1;
+
+    fabricObject.cornerSize = cornerSize;
 
     // Make quad non-draggable but keep corner controls
     fabricObject.lockMovementX = true;
