@@ -1,4 +1,4 @@
-import { DSImageData, OriginalImageResultItem, Quadrilateral, EngineResourcePaths } from 'dynamsoft-core';
+import { DSImageData, Quadrilateral, OriginalImageResultItem, EngineResourcePaths } from 'dynamsoft-core';
 export * from 'dynamsoft-core';
 export * from 'dynamsoft-license';
 import { CapturedResult, CaptureVisionRouter } from 'dynamsoft-capture-vision-router';
@@ -28,7 +28,8 @@ declare enum EnumFlowType {
     MANUAL = "manual",
     SMART_CAPTURE = "smartCapture",
     AUTO_CROP = "autoCrop",
-    UPLOADED_IMAGE = "uploadedImage"
+    UPLOADED_IMAGE = "uploadedImage",
+    STATIC_FILE = "staticFile"
 }
 type ResultStatus = {
     code: EnumResultStatus;
@@ -37,7 +38,7 @@ type ResultStatus = {
 interface DocumentResult {
     status: ResultStatus;
     correctedImageResult?: NormalizedImageResultItem | DSImageData;
-    originalImageResult?: OriginalImageResultItem["imageData"];
+    originalImageResult?: DSImageData;
     detectedQuadrilateral?: Quadrilateral;
     _flowType?: EnumFlowType;
 }
@@ -52,54 +53,29 @@ interface ToolbarButton {
     isHidden?: boolean;
 }
 
-interface DocumentCorrectionViewToolbarButtonsConfig {
-    fullImage?: ToolbarButtonConfig;
-    detectBorders?: ToolbarButtonConfig;
-    apply?: ToolbarButtonConfig;
+interface ScanRegion {
+    ratio: {
+        width: number;
+        height: number;
+    };
+    regionBottomMargin: number;
+    style: {
+        strokeWidth: number;
+        strokeColor: string;
+    };
 }
-interface DocumentCorrectionViewConfig {
-    container?: HTMLElement | string;
-    toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
-    templateFilePath?: string;
-    utilizedTemplateNames?: UtilizedTemplateNames;
-    onFinish?: (result: DocumentResult) => void;
-    _showResultView?: boolean;
-}
-declare class DocumentCorrectionView {
-    private resources;
-    private config;
-    private imageEditorView;
-    private layer;
-    private currentCorrectionResolver?;
-    constructor(resources: SharedResources, config: DocumentCorrectionViewConfig);
-    initialize(): Promise<void>;
-    private setupDrawingLayerStyle;
-    private setupQuadConstraints;
-    private getCanvasBounds;
-    private addQuadToLayer;
-    private setupInitialDetectedQuad;
-    private createControls;
-    private setupCorrectionControls;
-    setFullImageBoundary(): void;
-    setBoundaryAutomatically(): Promise<void>;
-    confirmCorrection(): Promise<void>;
-    launch(): Promise<DocumentResult>;
-    hideView(): void;
-    /**
-     * Normalize an image with DDN given a set of points
-     * @param points - points provided by either users or DDN's detect quad
-     * @returns normalized image by DDN
-     */
-    correctImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem>;
-    dispose(): void;
-}
-
 interface DocumentScannerViewConfig {
     _showCorrectionView?: boolean;
     templateFilePath?: string;
     cameraEnhancerUIPath?: string;
     container?: HTMLElement | string;
     utilizedTemplateNames?: UtilizedTemplateNames;
+    enableAutoCropMode?: boolean;
+    enableSmartCaptureMode?: boolean;
+    scanRegion: ScanRegion;
+    minVerifiedFramesForAutoCapture: number;
+    showSubfooter?: boolean;
+    showPoweredByDynamsoft?: boolean;
 }
 declare class DocumentScannerView {
     private resources;
@@ -107,6 +83,7 @@ declare class DocumentScannerView {
     private boundsDetectionEnabled;
     private smartCaptureEnabled;
     private autoCropEnabled;
+    private resizeTimer;
     private crossVerificationCount;
     private capturedResultItems;
     private originalImageData;
@@ -117,6 +94,7 @@ declare class DocumentScannerView {
     private loadingScreen;
     private showScannerLoadingOverlay;
     private hideScannerLoadingOverlay;
+    private getMinVerifiedFramesForAutoCapture;
     constructor(resources: SharedResources, config: DocumentScannerViewConfig);
     initialize(): Promise<void>;
     private initializeElements;
@@ -131,6 +109,9 @@ declare class DocumentScannerView {
     toggleBoundsDetection(enabled?: boolean): Promise<void>;
     toggleSmartCapture(mode?: boolean): Promise<void>;
     toggleAutoCrop(mode?: boolean): Promise<void>;
+    private handleResize;
+    private toggleScanGuide;
+    private calculateScanRegion;
     openCamera(): Promise<void>;
     closeCamera(hideContainer?: boolean): void;
     pauseCamera(): void;
@@ -146,6 +127,51 @@ declare class DocumentScannerView {
     private handleAutoCaptureMode;
     launch(): Promise<DocumentResult>;
     normalizeImage(points: Quadrilateral["points"], originalImageData: OriginalImageResultItem["imageData"]): Promise<NormalizedImageResultItem>;
+}
+
+interface DocumentCorrectionViewToolbarButtonsConfig {
+    retake?: ToolbarButtonConfig;
+    fullImage?: ToolbarButtonConfig;
+    detectBorders?: ToolbarButtonConfig;
+    apply?: ToolbarButtonConfig;
+}
+interface DocumentCorrectionViewConfig {
+    container?: HTMLElement | string;
+    toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
+    templateFilePath?: string;
+    utilizedTemplateNames?: UtilizedTemplateNames;
+    onFinish?: (result: DocumentResult) => void;
+    _showResultView?: boolean;
+}
+declare class DocumentCorrectionView {
+    private resources;
+    private config;
+    private scannerView;
+    private imageEditorView;
+    private layer;
+    private currentCorrectionResolver?;
+    constructor(resources: SharedResources, config: DocumentCorrectionViewConfig, scannerView: DocumentScannerView);
+    initialize(): Promise<void>;
+    private setupDrawingLayerStyle;
+    private setupQuadConstraints;
+    private getCanvasBounds;
+    private addQuadToLayer;
+    private setupInitialDetectedQuad;
+    private createControls;
+    private setupCorrectionControls;
+    private handleRetake;
+    setFullImageBoundary(): void;
+    setBoundaryAutomatically(): Promise<void>;
+    confirmCorrection(): Promise<void>;
+    launch(): Promise<DocumentResult>;
+    hideView(): void;
+    /**
+     * Normalize an image with DDN given a set of points
+     * @param points - points provided by either users or DDN's detect quad
+     * @returns normalized image by DDN
+     */
+    correctImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem>;
+    dispose(preserveResolver?: boolean): void;
 }
 
 interface DocumentResultViewToolbarButtonsConfig {
@@ -207,6 +233,9 @@ declare class DocumentScanner {
     private resources;
     private isInitialized;
     private isCapturing;
+    private loadingScreen;
+    private showScannerLoadingOverlay;
+    private hideScannerLoadingOverlay;
     constructor(config: DocumentScannerConfig);
     initialize(): Promise<{
         resources: SharedResources;
@@ -227,52 +256,24 @@ declare class DocumentScanner {
     private createViewContainers;
     dispose(): void;
     /**
+     * Process a File object to extract image information
+     * @param file The File object to process
+     * @returns Promise with the processed image blob and dimensions
+     */
+    private processFileToBlob;
+    /**
+     * Processes an uploaded image file
+     * @param file The file to process
+     * @returns Promise with the document result
+     */
+    private processUploadedFile;
+    /**
      * Launches the document scanning process.
      *
-     * Configuration Requirements:
-     * 1. A container must be provided either through:
-     *    - A main container in config.container, OR
-     *    - Individual view containers in viewConfig.container when corresponding show flags are true
-     * 2. If no main container is provided:
-     *    - showCorrectionView: true requires correctionViewConfig.container
-     *    - showResultView: true requires resultViewConfig.container
-     *
-     * Flow paths based on view configurations and capture method:
-     *
-     * 1. All views enabled (Scanner, Correction, Result):
-     *    A. Auto-capture paths:
-     *       - Smart Capture: Scanner -> Correction -> Result
-     *       - Auto Crop: Scanner -> Result
-     *    B. Manual paths:
-     *       - Upload Image: Scanner -> Correction -> Result
-     *       - Manual Capture: Scanner -> Result
-     *
-     * 2. Scanner + Result only:
-     *    - Flow: Scanner -> Result
-     *    - Requires: showCorrectionView: false or undefined
-     *
-     * 3. Scanner + Correction only:
-     *    - Flow: Scanner -> Correction
-     *    - Requires: showResultView: false or undefined
-     *
-     * 4. Special cases:
-     *    - Scanner only: Returns scan result directly
-     *    - Correction only + existing result: Goes to Correction
-     *    - Result only + existing result: Goes to Result
-     *
-     * @returns Promise<DocumentResult> containing:
-     *  - status: Success/Failed/Cancelled with message
-     *  - originalImageResult: Raw captured image
-     *  - correctedImageResult: Normalized image (if correction applied)
-     *  - detectedQuadrilateral: Document boundaries
-     *  - _flowType: Internal routing flag for different capture methods
-     *
-     * @throws Error if:
-     *  - Capture session is already running
-     *  - Scanner view is required but not configured
-     *  - No container is provided when showCorrectionView or showResultView is true
+     * @param file Optional File object to process instead of using the camera
+     * @returns Promise<DocumentResult> containing scan results
      */
-    launch(): Promise<DocumentResult>;
+    launch(file?: File): Promise<DocumentResult>;
 }
 
 declare const DDS: {

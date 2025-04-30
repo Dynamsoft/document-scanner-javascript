@@ -2,7 +2,7 @@ import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core
 import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
 import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, getElement } from "./utils";
+import { createControls, createStyle, getElement } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
   ToolbarButtonConfig,
@@ -11,11 +11,12 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
   ToolbarButton,
+  EnumFlowType,
 } from "./utils/types";
-
-const DEFAULT_CORNER_SIZE = 60;
+import DocumentScannerView from "./DocumentScannerView";
 
 export interface DocumentCorrectionViewToolbarButtonsConfig {
+  retake?: ToolbarButtonConfig;
   fullImage?: ToolbarButtonConfig;
   detectBorders?: ToolbarButtonConfig;
   apply?: ToolbarButtonConfig;
@@ -36,7 +37,11 @@ export default class DocumentCorrectionView {
   private layer: DrawingLayer = null;
   private currentCorrectionResolver?: (result: DocumentResult) => void;
 
-  constructor(private resources: SharedResources, private config: DocumentCorrectionViewConfig) {
+  constructor(
+    private resources: SharedResources,
+    private config: DocumentCorrectionViewConfig,
+    private scannerView: DocumentScannerView
+  ) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
       normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
@@ -52,17 +57,11 @@ export default class DocumentCorrectionView {
       throw new Error("Please create an Correction View Container element");
     }
 
+    createStyle("dds-correction-view-style", DEFAULT_CORRECTION_VIEW_CSS);
+
     // Create a wrapper div that preserves container dimensions
     const correctionViewWrapper = document.createElement("div");
-    Object.assign(correctionViewWrapper.style, {
-      display: "flex",
-      width: "100%",
-      height: "100%",
-      backgroundColor: "#575757",
-      fontSize: "12px",
-      flexDirection: "column",
-      alignItems: "center",
-    });
+    correctionViewWrapper.className = "dds-correction-view-container";
 
     // Add image editor view from DCE to correct documents
     const imageEditorViewElement = document.createElement("div");
@@ -82,6 +81,12 @@ export default class DocumentCorrectionView {
     this.setupInitialDetectedQuad();
     this.setupCorrectionControls();
     this.setupQuadConstraints();
+
+    // Hide retake button on flow.STATIC_FILE
+    if (this.resources.result._flowType === EnumFlowType.STATIC_FILE) {
+      const retakeBtn = document.querySelector("#dds-correction-retake") as HTMLElement;
+      retakeBtn.style.display = "none";
+    }
   }
 
   private setupDrawingLayerStyle() {
@@ -162,7 +167,12 @@ export default class DocumentCorrectionView {
     this.layer.clearDrawingItems();
 
     const fabricObject = newQuad._getFabricObject();
-    fabricObject.cornerSize = DEFAULT_CORNER_SIZE;
+
+    const cornerSize =
+      Math.min(this.resources.result.originalImageResult?.width, this.resources.result.originalImageResult?.height) *
+      0.1;
+
+    fabricObject.cornerSize = cornerSize;
 
     // Make quad non-draggable but keep corner controls
     fabricObject.lockMovementX = true;
@@ -218,6 +228,15 @@ export default class DocumentCorrectionView {
 
     const buttons: ToolbarButton[] = [
       {
+        id: `dds-correction-retake`,
+        icon: toolbarButtonsConfig?.retake?.icon || DDS_ICONS.retake,
+        label: toolbarButtonsConfig?.retake?.label || "Re-take",
+        onClick: () => this.handleRetake(),
+        className: `${toolbarButtonsConfig?.retake?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
+        isDisabled: !this.scannerView,
+      },
+      {
         id: `dds-correction-fullImage`,
         icon: toolbarButtonsConfig?.fullImage?.icon || DDS_ICONS.fullImage,
         label: toolbarButtonsConfig?.fullImage?.label || "Full Image",
@@ -262,6 +281,50 @@ export default class DocumentCorrectionView {
     }
   }
 
+  private async handleRetake() {
+    try {
+      if (!this.scannerView) {
+        console.error("Correction View not initialized");
+        return;
+      }
+
+      this.hideView();
+      const result = await this.scannerView.launch();
+
+      if (result?.status?.code === EnumResultStatus.RS_FAILED) {
+        if (this.currentCorrectionResolver) {
+          this.currentCorrectionResolver(result);
+        }
+        return;
+      }
+
+      // Handle success case
+      if (this.resources.onResultUpdated) {
+        if (result?.status.code === EnumResultStatus.RS_CANCELLED) {
+          this.resources.onResultUpdated(this.resources.result);
+        } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
+          this.resources.onResultUpdated(result);
+        }
+      }
+
+      this.dispose(true);
+      await this.initialize();
+      getElement(this.config.container).style.display = "flex";
+    } catch (error) {
+      console.error("Error in retake handler:", error);
+      // Make sure to resolve with error if something goes wrong
+      if (this.currentCorrectionResolver) {
+        this.currentCorrectionResolver({
+          status: {
+            code: EnumResultStatus.RS_FAILED,
+            message: error?.message || error,
+          },
+        });
+      }
+      throw error;
+    }
+  }
+
   setFullImageBoundary() {
     if (!this.resources.result) {
       throw Error("Captured image is missing. Please capture an image first!");
@@ -286,11 +349,12 @@ export default class DocumentCorrectionView {
     // Auto detect bounds
     if (this.config.templateFilePath) {
       await this.resources.cvRouter.initSettings(this.config.templateFilePath);
-    } else {
-      let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
     }
+
+    let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+    newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
+    await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+
     this.resources.cvRouter.maxImageSideLength = Infinity;
 
     const result = await this.resources.cvRouter.capture(
@@ -413,7 +477,7 @@ export default class DocumentCorrectionView {
     }
   }
 
-  dispose(): void {
+  dispose(preserveResolver: boolean = false): void {
     // Clean up resources
     if (this.imageEditorView?.dispose) {
       this.imageEditorView.dispose();
@@ -425,7 +489,27 @@ export default class DocumentCorrectionView {
       getElement(this.config.container).textContent = "";
     }
 
-    // Clear resolver
-    this.currentCorrectionResolver = undefined;
+    // Clear resolver only if not preserving
+    if (!preserveResolver) {
+      this.currentCorrectionResolver = undefined;
+    }
   }
 }
+
+const DEFAULT_CORRECTION_VIEW_CSS = `
+  .dds-correction-view-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color:#575757;
+    font-size: 12px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-correction-view-container {
+      flex-direction: row;
+    }
+  }
+`;

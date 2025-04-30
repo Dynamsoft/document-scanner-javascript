@@ -1,10 +1,10 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls, getElement, shouldCorrectImage } from "./utils";
+import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
-import { DocumentResult, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
+import { DocumentResult, EnumFlowType, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
 export interface DocumentResultViewToolbarButtonsConfig {
   retake?: ToolbarButtonConfig;
@@ -301,17 +301,11 @@ export default class DocumentResultView {
         throw new Error("Please create a Scan Result View Container element");
       }
 
+      createStyle("dds-result-view-style", DEFAULT_RESULT_VIEW_CSS);
+
       // Create a wrapper div that preserves container dimensions
       const resultViewWrapper = document.createElement("div");
-      Object.assign(resultViewWrapper.style, {
-        display: "flex",
-        width: "100%",
-        height: "100%",
-        backgroundColor: "#575757",
-        fontSize: "12px",
-        flexDirection: "column",
-        alignItems: "center",
-      });
+      resultViewWrapper.className = "dds-result-view-container";
 
       // Create and add scan result view image container
       const scanResultViewImageContainer = document.createElement("div");
@@ -340,6 +334,12 @@ export default class DocumentResultView {
       resultViewWrapper.appendChild(controlContainer);
 
       getElement(this.config.container).appendChild(resultViewWrapper);
+
+      // Hide retake button on flow.STATIC_FILE
+      if (this.resources.result._flowType === EnumFlowType.STATIC_FILE) {
+        const retakeBtn = document.querySelector("#dds-scanResult-retake") as HTMLElement;
+        retakeBtn.style.display = "none";
+      }
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -361,3 +361,21 @@ export default class DocumentResultView {
     }
   }
 }
+
+const DEFAULT_RESULT_VIEW_CSS = `
+  .dds-result-view-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color:#575757;
+    font-size: 12px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-result-view-container {
+      flex-direction: row;
+    }
+  }
+`;
