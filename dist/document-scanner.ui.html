@@ -909,6 +909,7 @@
     }
 
     .dce-mn-camera-and-resolution-settings {
+      font-family: Verdana;
       position: absolute;
       top: calc(24px + max(3vmin, 24px));
       left: 0;
@@ -1108,6 +1109,122 @@
       border-radius: max(0.75vmin, 6px);
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
+    }
+
+    @media (orientation: landscape) and (max-width: 1024px) {
+      .dce-header {
+        width: 3rem;
+        position: absolute;
+        left: 0;
+        height: 100%;
+        z-index: 999;
+      }
+
+      .dce-mn-close {
+        top: 12px;
+      }
+
+      .dce-mn-select-camera-icon {
+        left: 12px;
+        top: calc(12px + 24px + 12px);
+      }
+
+      .dce-mn-select-camera-icon #video-resolution {
+        width: 24px;
+      }
+
+      .dce-mn-select-camera-icon .dce-mn-select-camera-down-icon {
+        display: none;
+      }
+
+      .dce-mn-camera-and-resolution-settings {
+        top: 12px;
+        left: calc(3rem + 12px);
+      }
+
+      .dce-mn-cameras {
+        overflow: scroll;
+        height: 80dvh;
+      }
+
+      .dce-mn-upload-image-icon {
+        left: 12px;
+        top: calc(12px + 24px + 12px + 21px + 12px);
+      }
+
+      .dce-mn-torch {
+        bottom: 12px;
+        left: 12px;
+        width: 24px;
+      }
+
+      .dce-footer {
+        height: 100%;
+        width: 6rem;
+        right: 0;
+        bottom: unset;
+        background-color: rgba(0, 0, 0, 0.6);
+      }
+
+      .dce-mn-take-photo {
+        width: 60px;
+        height: 60px;
+      }
+
+      .dce-mn-take-photo > svg {
+        width: 45px;
+        height: 45px;
+      }
+
+      .dce-loading-auto-capture-animation {
+        width: 50px;
+        height: 50px;
+      }
+
+      .dce-subfooter {
+        bottom: 0;
+        right: 6rem;
+        height: 100%;
+        width: 6rem;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        padding-top: 0;
+      }
+
+      .dce-mn-smart-capture,
+      .dce-mn-auto-crop,
+      .dce-mn-bounds-detection {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .dce-mn-smart-capture-icon,
+      .dce-mn-auto-crop-icon,
+      .dce-mn-bounds-detection-icon {
+        height: 24px;
+        width: 24px;
+      }
+
+      .dce-mn-auto-crop-text,
+      .dce-mn-smart-capture-text,
+      .dce-mn-bounds-detection-text {
+        font-size: 10px;
+      }
+
+      .dce-mn-msg-poweredby {
+        bottom: 5px;
+      }
+
+      .dce-mn-zoom {
+        bottom: auto;
+        top: 3rem;
+      }
+
+      .dce-mn-toast {
+        bottom: auto;
+        top: 3rem;
+      }
     }
   </style>
 </template>

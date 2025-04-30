@@ -1,7 +1,8 @@
 import { LicenseManager } from "dynamsoft-license";
-import { CoreModule, EngineResourcePaths } from "dynamsoft-core";
+import { CoreModule, EngineResourcePaths, EnumCapturedResultItemType, Quadrilateral } from "dynamsoft-core";
 import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
 import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
+import { DetectedQuadResultItem } from "dynamsoft-document-normalizer";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";
@@ -9,14 +10,16 @@ import {
   DEFAULT_TEMPLATE_NAMES,
   DocumentResult,
   EnumDDSViews,
+  EnumFlowType,
   EnumResultStatus,
   UtilizedTemplateNames,
 } from "./views/utils/types";
 import { getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
+import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.1.1/dist/document-scanner.ui.html";
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/dist/document-scanner.ui.html";
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
@@ -59,6 +62,27 @@ class DocumentScanner {
   private resources: Partial<SharedResources> = {};
   private isInitialized = false;
   private isCapturing = false;
+
+  private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
+
+  private showScannerLoadingOverlay(message?: string) {
+    const configContainer = getElement(this.config.scannerViewConfig.container);
+    this.loadingScreen = showLoadingScreen(configContainer, { message });
+    configContainer.style.display = "block";
+    configContainer.style.position = "relative";
+  }
+
+  private hideScannerLoadingOverlay(hideContainer: boolean = false) {
+    if (this.loadingScreen) {
+      this.loadingScreen.hide();
+      this.loadingScreen = null;
+
+      if (hideContainer) {
+        const configContainer = getElement(this.config.scannerViewConfig.container);
+        configContainer.style.display = "none";
+      }
+    }
+  }
 
   constructor(private config: DocumentScannerConfig) {}
 
@@ -104,7 +128,11 @@ class DocumentScanner {
       }
 
       if (this.config.correctionViewConfig) {
-        this.correctionView = new DocumentCorrectionView(this.resources, this.config.correctionViewConfig);
+        this.correctionView = new DocumentCorrectionView(
+          this.resources,
+          this.config.correctionViewConfig,
+          this.scannerView
+        );
         components.correctionView = this.correctionView;
       }
 
@@ -131,12 +159,19 @@ class DocumentScanner {
 
   private async initializeDCVResources(): Promise<void> {
     try {
-      LicenseManager.initLicense(this.config?.license || "", true);
-
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
       CoreModule.engineResourcePaths = isEmptyObject(this.config?.engineResourcePaths)
         ? DEFAULT_DCV_ENGINE_RESOURCE_PATHS
         : this.config.engineResourcePaths;
+
+      // Change trial link to include product and deploymenttype
+      (LicenseManager as any)._onAuthMessage = (message: string) =>
+        message.replace(
+          "(https://www.dynamsoft.com/customer/license/trialLicense?product=unknown&deploymenttype=unknown)",
+          "(https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&deploymenttype=web)"
+        );
+
+      LicenseManager.initLicense(this.config?.license || "", true);
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
       CoreModule.loadWasm(["DDN"]);
@@ -369,68 +404,157 @@ class DocumentScanner {
   }
 
   /**
+   * Process a File object to extract image information
+   * @param file The File object to process
+   * @returns Promise with the processed image blob and dimensions
+   */
+  private async processFileToBlob(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      // Check if file is an image
+      if (!file.type.startsWith("image/")) {
+        reject(new Error("Please select an image file"));
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve({ blob, width: img.width, height: img.height });
+          } else {
+            reject(new Error("Failed to create blob from image"));
+          }
+        }, file.type);
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  /**
+   * Processes an uploaded image file
+   * @param file The file to process
+   * @returns Promise with the document result
+   */
+  private async processUploadedFile(file: File): Promise<DocumentResult> {
+    try {
+      this.showScannerLoadingOverlay("Processing image...");
+
+      // Process the file to get blob
+      const { blob } = await this.processFileToBlob(file);
+
+      // Use CaptureVisionRouter to process the image
+      const resultItems = (await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)).items;
+
+      // Get the original image data from the first result item
+      const originalImageData = (resultItems[0] as any)?.imageData;
+      if (!originalImageData) {
+        throw new Error("Failed to extract image data");
+      }
+
+      // Determine quadrilateral (document boundaries)
+      let detectedQuadrilateral: Quadrilateral;
+      if (resultItems.length <= 1) {
+        // No boundaries detected, use full image
+        const { width, height } = originalImageData;
+        detectedQuadrilateral = {
+          points: [
+            { x: 0, y: 0 },
+            { x: width, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height },
+          ],
+          area: height * width,
+        } as Quadrilateral;
+      } else {
+        // Use detected quadrilateral
+        detectedQuadrilateral = (
+          resultItems.find(
+            (item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD
+          ) as DetectedQuadResultItem
+        )?.location;
+      }
+
+      // Normalize the image (perspective correction)
+      const settings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
+      settings.roiMeasuredInPercentage = false;
+      settings.roi.points = detectedQuadrilateral.points;
+      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
+
+      const normalizedResult = await this.resources.cvRouter.capture(
+        originalImageData,
+        this.config.utilizedTemplateNames.normalize
+      );
+
+      const correctedImageResult = normalizedResult?.normalizedImageResultItems?.[0];
+
+      // Create result object
+      const result: DocumentResult = {
+        status: {
+          code: EnumResultStatus.RS_SUCCESS,
+          message: "Success",
+        },
+        originalImageResult: originalImageData,
+        correctedImageResult,
+        detectedQuadrilateral,
+        _flowType: EnumFlowType.STATIC_FILE,
+      };
+
+      // Update shared resources
+      this.resources.onResultUpdated?.(result);
+
+      // Done processing
+      this.hideScannerLoadingOverlay(true);
+    } catch (error) {
+      console.error("Failed to process uploaded file:", error);
+      return {
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: `Failed to process image: ${error.message || error}`,
+        },
+      };
+    }
+  }
+
+  /**
    * Launches the document scanning process.
    *
-   * Configuration Requirements:
-   * 1. A container must be provided either through:
-   *    - A main container in config.container, OR
-   *    - Individual view containers in viewConfig.container when corresponding show flags are true
-   * 2. If no main container is provided:
-   *    - showCorrectionView: true requires correctionViewConfig.container
-   *    - showResultView: true requires resultViewConfig.container
-   *
-   * Flow paths based on view configurations and capture method:
-   *
-   * 1. All views enabled (Scanner, Correction, Result):
-   *    A. Auto-capture paths:
-   *       - Smart Capture: Scanner -> Correction -> Result
-   *       - Auto Crop: Scanner -> Result
-   *    B. Manual paths:
-   *       - Upload Image: Scanner -> Correction -> Result
-   *       - Manual Capture: Scanner -> Result
-   *
-   * 2. Scanner + Result only:
-   *    - Flow: Scanner -> Result
-   *    - Requires: showCorrectionView: false or undefined
-   *
-   * 3. Scanner + Correction only:
-   *    - Flow: Scanner -> Correction
-   *    - Requires: showResultView: false or undefined
-   *
-   * 4. Special cases:
-   *    - Scanner only: Returns scan result directly
-   *    - Correction only + existing result: Goes to Correction
-   *    - Result only + existing result: Goes to Result
-   *
-   * @returns Promise<DocumentResult> containing:
-   *  - status: Success/Failed/Cancelled with message
-   *  - originalImageResult: Raw captured image
-   *  - correctedImageResult: Normalized image (if correction applied)
-   *  - detectedQuadrilateral: Document boundaries
-   *  - _flowType: Internal routing flag for different capture methods
-   *
-   * @throws Error if:
-   *  - Capture session is already running
-   *  - Scanner view is required but not configured
-   *  - No container is provided when showCorrectionView or showResultView is true
+   * @param file Optional File object to process instead of using the camera
+   * @returns Promise<DocumentResult> containing scan results
    */
-  async launch(): Promise<DocumentResult> {
+  async launch(file?: File): Promise<DocumentResult> {
     if (this.isCapturing) {
       throw new Error("Capture session already in progress");
     }
 
     try {
       this.isCapturing = true;
+
       const { components } = await this.initialize();
 
       if (this.config.container) {
         getElement(this.config.container).style.display = "block";
       }
 
+      // Handle direct file upload if provided
+      if (file) {
+        components.scannerView = null;
+        await this.processUploadedFile(file);
+      }
+
       // Special case handling for direct views with existing results
       if (!components.scannerView && this.resources.result) {
-        if (components.correctionView) return await components.correctionView.launch();
-        if (components.scanResultView) return await components.scanResultView.launch();
+        if (components.correctionView && !components.scanResultView) return await components.correctionView.launch();
+        if (components.scanResultView && !components.correctionView) return await components.scanResultView.launch();
+        if (components.scanResultView && components.correctionView) {
+          await components.correctionView.launch();
+          return await components.scanResultView.launch();
+        }
       }
 
       // Scanner view is required if no existing result
