@@ -18,8 +18,7 @@ import { getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
 import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
-const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0-beta-1745342777464/dist/document-scanner.ui.html";
+const DEFAULT_DCE_UI_PATH = "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/document-scanner.ui.html";
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
