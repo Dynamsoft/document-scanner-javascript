@@ -5,6 +5,7 @@ import { createControls, createStyle, getElement, shouldCorrectImage } from "./u
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import { DocumentResult, EnumFlowType, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
+import { ImageFilterHandler, BlackwhiteFilter, InvertFilter, GrayscaleFilter, SepiaFilter, GaussianBlurFilter } from 'image-filter-js'; // Third party image filter support
 
 export interface DocumentResultViewToolbarButtonsConfig {
   retake?: ToolbarButtonConfig;
@@ -12,7 +13,21 @@ export interface DocumentResultViewToolbarButtonsConfig {
   share?: ToolbarButtonConfig;
   upload?: ToolbarButtonConfig;
   done?: ToolbarButtonConfig;
+
+  // Rotation and Filtering customization
+  rotate?: ToolbarButtonConfig;
+  filter?: ToolbarButtonConfig;
 }
+
+type DocumentResultViewToolbarButtons = Record<keyof DocumentResultViewToolbarButtonsConfig, HTMLElement>;
+
+type ImageFilters = {
+  blackWhiteFilter: BlackwhiteFilter;
+  invertFilter: InvertFilter;
+  grayscaleFilter: GrayscaleFilter;
+  sepiaFilter: SepiaFilter;
+  gaussianBlurFilter: GaussianBlurFilter;
+};
 
 export interface DocumentResultViewConfig {
   container?: HTMLElement | string;
@@ -24,12 +39,31 @@ export interface DocumentResultViewConfig {
 
 export default class DocumentResultView {
   private currentScanResultViewResolver?: (result: DocumentResult) => void;
+  private toolbarBtn: DocumentResultViewToolbarButtons = {
+    retake: null,
+    correct: null,
+    share: null,
+    upload: null,
+    done: null,
+
+    // Rotation and Filtering customization
+    rotate: null,
+    filter: null,
+  };
 
   constructor(
     private resources: SharedResources,
     private config: DocumentResultViewConfig,
     private scannerView: DocumentScannerView,
-    private correctionView: DocumentCorrectionView
+    private correctionView: DocumentCorrectionView,
+    // Custom image filters
+    private filters: {
+      blackWhiteFilter: BlackwhiteFilter,
+      invertFilter: InvertFilter,
+      grayscaleFilter: GrayscaleFilter,
+      sepiaFilter: SepiaFilter,
+      gaussianBlurFilter: GaussianBlurFilter,
+    }
   ) {}
 
   async launch(): Promise<DocumentResult> {
@@ -252,6 +286,26 @@ export default class DocumentResultView {
         isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
         isDisabled: !this.scannerView,
       },
+      // Custom rotate button
+      {
+        id: `dds-scanResult-rotate`,
+        icon: toolbarButtonsConfig?.rotate.icon,
+        label: toolbarButtonsConfig?.rotate?.label || "Rotate",
+        onClick: () => this.handleRotate(),
+        className: `${toolbarButtonsConfig?.rotate?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.rotate?.isHidden || false,
+        isDisabled: !this.scannerView,
+      },
+      // Custom filter button
+      {
+        id: `dds-scanResult-filter`,
+        icon: toolbarButtonsConfig?.filter?.icon,
+        label: toolbarButtonsConfig?.filter?.label || "Filter",
+        onClick: () => this.handleFilter(),
+        className: `${toolbarButtonsConfig?.filter?.className || ""}`,
+        isHidden: toolbarButtonsConfig?.filter?.isHidden || false,
+        isDisabled: !this.scannerView,
+      },
       {
         id: `dds-scanResult-correct`,
         icon: toolbarButtonsConfig?.correct?.icon || DDS_ICONS.normalize,
@@ -289,6 +343,119 @@ export default class DocumentResultView {
     ];
 
     return createControls(buttons);
+  }
+
+  // Custom image filter menu
+  private handleFilter(): void {
+    const filterBtn = this.toolbarBtn.filter;
+
+    // Check if menu already exists
+    let menu = filterBtn.querySelector(".dds-filter-menu");
+
+    if (!menu) {
+      createStyle("dds-filter-dropdown-style", FILTER_DROPDOWN_STYLE);
+
+      menu = document.createElement("div");
+      menu.className = "dds-filter-menu";
+      menu.innerHTML = `
+        <button class="dds-filter-option black-white">
+        Black & White
+          <span>Capture</span>
+        </button>
+        <button class="dds-filter-option invert">
+        Invert Colors
+          <span>Import</span>
+        </button>
+        <button class="dds-filter-option grayscale">
+        Grayscale
+          <span>Capture</span>
+        </button>
+        <button class="dds-filter-option sepia">
+        Sepia
+          <span>Import</span>
+        </button>
+        <button class="dds-filter-option gaussian-blur">
+        Gaussian Blur
+          <span>Import</span>
+        </button>
+        // Can add icon entry by adding icon at /src/views/utils/icons.ts and inserting the following:
+        // <button class="dds-filter-option FilterWithIcon">
+        // \${DDS_ICONS.FilterIcon}
+        //   <span>Import</span>
+        // </button>
+      `;
+
+      // Get scanned image as blob
+      const blob = new Blob([this.resources.result.originalImageResult.bytes], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.src = url;
+
+      // Add click handlers
+      const blackWhiteBtn = menu.querySelector(".black-white");
+      blackWhiteBtn.addEventListener("click", async (e: any) => {
+        if (menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+        this.filters.blackWhiteFilter?.process(img);
+        e.stopPropagation();
+      });
+
+      const invertBtn = menu.querySelector(".invert");
+      blackWhiteBtn.addEventListener("click", async (e: any) => {
+        if (menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+        this.filters.invertFilter?.process(img);
+        e.stopPropagation();
+      });
+
+      const grayscaleBtn = menu.querySelector(".grayscale");
+      blackWhiteBtn.addEventListener("click", async (e: any) => {
+        if (menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+        this.filters.grayscaleFilter?.process(img);
+        e.stopPropagation();
+      });
+
+      const sepiaBtn = menu.querySelector(".sepia");
+      blackWhiteBtn.addEventListener("click", async (e: any) => {
+        if (menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+        this.filters.sepiaFilter?.process(img);
+        e.stopPropagation();
+      });
+
+      const gaussianBlurBtn = menu.querySelector(".gaussian-blur");
+      blackWhiteBtn.addEventListener("click", async (e: any) => {
+        if (menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+        this.filters.gaussianBlurFilter?.process(img);
+        e.stopPropagation();
+      });
+
+      // Add click outside handler
+      document.addEventListener("click", (e) => {
+        if (!filterBtn.contains(e.target as Node) && menu.classList.contains("show")) {
+          menu.classList.remove("show");
+        }
+      });
+
+      // Add menu to button
+      filterBtn.querySelector(".icon").prepend(menu);
+      menu.classList.toggle("show");
+    } else {
+      // Toggle menu visibility
+      menu.classList.toggle("show");
+    }
+  }
+
+  private handleRotate() {
+    let png = (this.resources.result?.correctedImageResult as NormalizedImageResultItem).toCanvas();
+
   }
 
   async initialize(): Promise<void> {
@@ -377,5 +544,77 @@ const DEFAULT_RESULT_VIEW_CSS = `
     .dds-result-view-container {
       flex-direction: row;
     }
+  }
+`;
+
+const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
+  .dds-view-controls-btn {
+    position: relative; /* Add this to make the absolute positioning work relative to button */
+  }
+
+  .dds-filter-menu {
+    position: absolute;
+    bottom: 6rem;
+    transform: translate(-50%);
+    left: 50%;
+    right: 50%;
+    width: max-content;
+    background-color: #323234;
+    border-radius: 0.5rem;
+    overflow: visible;
+    display: none;
+    margin-bottom: 0.5px; /* Add some spacing between menu and button */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+  }
+
+  .dds-filter-menu::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; /* Triangle */
+    left: 50%;
+    right: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #323234; /* Same color as menu background */
+  }
+
+
+  .dds-filter-menu.show {
+    display: block;
+  }
+
+  .dds-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: Verdana;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dds-filter-option svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dds-filter-option span {
+    cursor: pointer;
+  }
+
+  .dds-filter-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .dds-filter-option:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;
