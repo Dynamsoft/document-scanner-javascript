@@ -1,6 +1,14 @@
-import { EnumCapturedResultItemType, Point, Quadrilateral } from "dynamsoft-core";
-import { DrawingLayer, DrawingStyleManager, ImageEditorView, QuadDrawingItem } from "dynamsoft-camera-enhancer";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { 
+  EnumCapturedResultItemType, 
+  Point, 
+  Quadrilateral,
+  DrawingLayer, 
+  DrawingStyleManager, 
+  ImageEditorView, 
+  QuadDrawingItem,
+  DetectedQuadResultItem,
+  DeskewedImageResultItem
+} from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import { createControls, createStyle, getElement } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
@@ -454,7 +462,7 @@ export default class DocumentCorrectionView {
    * @param points - points provided by either users or DDN's detect quad
    * @returns normalized image by DDN
    */
-  async correctImage(points: Quadrilateral["points"]): Promise<NormalizedImageResultItem> {
+  async correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem> {
     const { cvRouter } = this.resources;
 
     if (this.config.templateFilePath) {
@@ -471,9 +479,9 @@ export default class DocumentCorrectionView {
       this.config.utilizedTemplateNames.normalize
     );
 
-    // If normalized result found by DDN
-    if (result?.normalizedImageResultItems?.[0]) {
-      return result.normalizedImageResultItems[0];
+    // If deskewed result found by DDN
+    if (result?.deskewedImageResultItems?.[0]) {
+      return result.deskewedImageResultItems[0];
     }
   }
 

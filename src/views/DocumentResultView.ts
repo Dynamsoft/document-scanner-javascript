@@ -1,6 +1,6 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
-import { NormalizedImageResultItem } from "dynamsoft-capture-vision-bundle";
+import { DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
 import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
@@ -77,7 +77,7 @@ export default class DocumentResultView {
       }
 
       // Convert to blob
-      const blob = await (result.correctedImageResult as NormalizedImageResultItem).toBlob("image/png");
+      const blob = await (result.correctedImageResult as DeskewedImageResultItem).toBlob("image/png");
       if (!blob) {
         throw new Error("Failed to convert image to blob");
       }
@@ -319,7 +319,7 @@ export default class DocumentResultView {
       });
 
       // Add scan result image
-      const scanResultImg = (this.resources.result.correctedImageResult as NormalizedImageResultItem)?.toCanvas();
+      const scanResultImg = (this.resources.result.correctedImageResult as DeskewedImageResultItem)?.toCanvas();
       Object.assign(scanResultImg.style, {
         maxWidth: "100%",
         maxHeight: "100%",

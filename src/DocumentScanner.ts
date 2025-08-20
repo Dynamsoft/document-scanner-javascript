@@ -1,8 +1,14 @@
-import { LicenseManager } from "dynamsoft-license";
-import { CoreModule, EngineResourcePaths, EnumCapturedResultItemType, Quadrilateral } from "dynamsoft-core";
-import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
-import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
-import { DetectedQuadResultItem } from "dynamsoft-document-normalizer";
+import { 
+  LicenseManager,
+  CoreModule, 
+  EngineResourcePaths, 
+  EnumCapturedResultItemType, 
+  Quadrilateral,
+  CaptureVisionRouter,
+  CameraEnhancer, 
+  CameraView,
+  DetectedQuadResultItem
+} from "dynamsoft-capture-vision-bundle";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";

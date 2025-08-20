@@ -8,7 +8,7 @@ import {
   Point,
   Rect,
   VideoDeviceInfo,
-  NormalizedImageResultItem,
+  DeskewedImageResultItem,
 } from "dynamsoft-capture-vision-bundle";
 
 export const DDS = {
@@ -21,7 +21,7 @@ export const DDS = {
   EnumDDSViews,
 };
 
-export type { NormalizedImageResultItem, PlayCallbackInfo, Point, Rect, VideoDeviceInfo };
+export type { DeskewedImageResultItem, PlayCallbackInfo, Point, Rect, VideoDeviceInfo };
 export type { DocumentScannerConfig, SharedResources } from "./DocumentScanner";
 export type { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 export type {

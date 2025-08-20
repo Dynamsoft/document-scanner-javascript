@@ -61,7 +61,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dynamsoft-capture-vision-bundle": "2.6.1000",
+    "dynamsoft-capture-vision-bundle": "3.0.6000",
     "dynamsoft-capture-vision-std": "1.4.21",
     "dynamsoft-image-processing": "2.4.31"
   },

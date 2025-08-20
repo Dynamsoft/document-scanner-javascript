@@ -3,10 +3,12 @@ import {
   EnumImagePixelFormat,
   OriginalImageResultItem,
   Quadrilateral,
-} from "dynamsoft-core";
-import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
-import { MultiFrameResultCrossFilter } from "dynamsoft-utility";
+  CapturedResultReceiver,
+  CapturedResult,
+  DetectedQuadResultItem,
+  DeskewedImageResultItem,
+  MultiFrameResultCrossFilter
+} from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
   DEFAULT_TEMPLATE_NAMES,
@@ -1019,7 +1021,7 @@ export default class DocumentScannerView {
   async normalizeImage(
     points: Quadrilateral["points"],
     originalImageData: OriginalImageResultItem["imageData"]
-  ): Promise<NormalizedImageResultItem> {
+  ): Promise<DeskewedImageResultItem> {
     const { cvRouter, cameraEnhancer } = this.resources;
 
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
@@ -1028,9 +1030,9 @@ export default class DocumentScannerView {
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
-    // If normalized result found
-    if (result?.normalizedImageResultItems?.[0]) {
-      return result.normalizedImageResultItems[0];
+    // If deskewed result found
+    if (result?.deskewedImageResultItems?.[0]) {
+      return result.deskewedImageResultItems[0];
     }
   }
 }
