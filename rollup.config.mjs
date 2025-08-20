@@ -40,10 +40,14 @@ const banner = `/*!
 const plugin_terser_es6 = terser({ ecma: 6, format: terser_format });
 const plugin_terser_es5 = terser({ ecma: 5, format: terser_format });
 
+const DCV_CONFIG_PATH = `src/dcv-config`;
+const BUNDLE_BUILD_PATH = `src/build`;
+const TYPES_PATH = `dist/types/build`;
+
 const copyFiles = () => ({
   name: "copy-files",
   writeBundle() {
-    fs.copyFileSync("src/document-scanner.ui.html", "dist/document-scanner.ui.html");
+    fs.copyFileSync(`${DCV_CONFIG_PATH}/document-scanner.ui.html`, "dist/document-scanner.ui.html");
   },
 });
 
@@ -68,7 +72,7 @@ const globals = {
 export default [
   // 1. Full bundle
   {
-    input: "src/dds.bundle.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.bundle.ts`,
     plugins: [
       nodeResolve({ browser: true }),
       typescript({
@@ -100,7 +104,7 @@ export default [
   },
   // 2. Standard UMD bundle
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       typescript({
@@ -125,7 +129,7 @@ export default [
   },
   // 3. ESM bundle
   {
-    input: "src/dds.bundle.esm.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.bundle.esm.ts`,
     plugins: [
       nodeResolve({ browser: true }),
       typescript({
@@ -147,7 +151,7 @@ export default [
   },
   // 4. ESM with externals
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       typescript({
@@ -168,7 +172,7 @@ export default [
   },
   // 5. No-content ESM
   {
-    input: "src/dds.no-content-bundle.esm.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.no-content-bundle.esm.ts`,
     external,
     plugins: [
       typescript({
@@ -189,7 +193,7 @@ export default [
   },
   // 6. Type declarations for CommonJS/UMD
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       dts(),
@@ -209,7 +213,7 @@ export default [
   },
   // 7. Type declarations for ESM
   {
-    input: "dist/types/dds.bundle.esm.d.ts",
+    input: `${TYPES_PATH}/dds.bundle.esm.d.ts`,
     plugins: [
       dts(),
       {
