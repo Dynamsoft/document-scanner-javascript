@@ -51,23 +51,9 @@ const copyFiles = () => ({
   },
 });
 
-const external = [
-  "dynamsoft-core",
-  "dynamsoft-license",
-  "dynamsoft-capture-vision-router",
-  "dynamsoft-camera-enhancer",
-  "dynamsoft-document-normalizer",
-  "dynamsoft-utility",
-];
+const external = ["dynamsoft-capture-vision-bundle" ];
 
-const globals = {
-  "dynamsoft-core": "Dynamsoft.Core",
-  "dynamsoft-license": "Dynamsoft.License",
-  "dynamsoft-capture-vision-router": "Dynamsoft.CVR",
-  "dynamsoft-camera-enhancer": "Dynamsoft.DCE",
-  "dynamsoft-document-normalizer": "Dynamsoft.DDN",
-  "dynamsoft-utility": "Dynamsoft.Utility",
-};
+const globals = { "dynamsoft-capture-vision-bundle": "Dynamsoft" };
 
 export default [
   // 1. Full bundle
