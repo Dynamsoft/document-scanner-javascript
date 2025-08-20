@@ -7,7 +7,7 @@ import {
   CapturedResult,
   DetectedQuadResultItem,
   DeskewedImageResultItem,
-  MultiFrameResultCrossFilter
+  MultiFrameResultCrossFilter,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
@@ -179,8 +179,8 @@ export default class DocumentScannerView {
       }
 
       let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      newSettings.documentSettings.scaleDownThreshold = 1000;
+      newSettings.outputOriginalImage = true;
+      // newSettings.scaleDownThreshold = 1000;
       await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
       cvRouter.maxImageSideLength = Infinity;
@@ -966,7 +966,8 @@ export default class DocumentScannerView {
       return;
     }
 
-    if ((result.detectedQuadResultItems[0] as any).crossVerificationStatus === 1) this.crossVerificationCount++;
+    if ((result.processedDocumentResult?.detectedQuadResultItems?.[0] as any)?.crossVerificationStatus === 1)
+      this.crossVerificationCount++;
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
@@ -1031,8 +1032,8 @@ export default class DocumentScannerView {
 
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
     // If deskewed result found
-    if (result?.deskewedImageResultItems?.[0]) {
-      return result.deskewedImageResultItems[0];
+    if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
+      return result.processedDocumentResult.deskewedImageResultItems[0];
     }
   }
 }

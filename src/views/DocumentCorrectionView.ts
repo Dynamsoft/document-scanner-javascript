@@ -360,7 +360,7 @@ export default class DocumentCorrectionView {
     }
 
     let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-    newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
+    newSettings.outputOriginalImage = true;
     await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
     this.resources.cvRouter.maxImageSideLength = Infinity;
@@ -480,8 +480,8 @@ export default class DocumentCorrectionView {
     );
 
     // If deskewed result found by DDN
-    if (result?.deskewedImageResultItems?.[0]) {
-      return result.deskewedImageResultItems[0];
+    if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
+      return result.processedDocumentResult.deskewedImageResultItems[0];
     }
   }
 

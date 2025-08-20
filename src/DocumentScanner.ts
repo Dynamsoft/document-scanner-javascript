@@ -180,7 +180,7 @@ class DocumentScanner {
       LicenseManager.initLicense(this.config?.license || "", true);
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
-      CoreModule.loadWasm(["DDN"]);
+      CoreModule.loadWasm();
 
       this.resources.cameraView = await CameraView.createInstance(this.config.scannerViewConfig?.cameraEnhancerUIPath);
       this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
@@ -497,7 +497,7 @@ class DocumentScanner {
         this.config.utilizedTemplateNames.normalize
       );
 
-      const correctedImageResult = normalizedResult?.normalizedImageResultItems?.[0];
+      const correctedImageResult = normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
 
       // Create result object
       const result: DocumentResult = {
