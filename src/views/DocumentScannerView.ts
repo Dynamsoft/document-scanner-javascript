@@ -3,10 +3,12 @@ import {
   EnumImagePixelFormat,
   OriginalImageResultItem,
   Quadrilateral,
-} from "dynamsoft-core";
-import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
-import { MultiFrameResultCrossFilter } from "dynamsoft-utility";
+  CapturedResultReceiver,
+  CapturedResult,
+  DetectedQuadResultItem,
+  DeskewedImageResultItem,
+  MultiFrameResultCrossFilter,
+} from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
   DEFAULT_TEMPLATE_NAMES,
@@ -177,8 +179,8 @@ export default class DocumentScannerView {
       }
 
       let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      newSettings.documentSettings.scaleDownThreshold = 1000;
+      newSettings.outputOriginalImage = true;
+      (newSettings as any).documentSettings.scaleDownThreshold = 1000;
       await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
       cvRouter.maxImageSideLength = Infinity;
@@ -964,7 +966,8 @@ export default class DocumentScannerView {
       return;
     }
 
-    if ((result.detectedQuadResultItems[0] as any).crossVerificationStatus === 1) this.crossVerificationCount++;
+    if ((result.processedDocumentResult?.detectedQuadResultItems?.[0] as any)?.crossVerificationStatus === 1)
+      this.crossVerificationCount++;
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
@@ -1019,7 +1022,7 @@ export default class DocumentScannerView {
   async normalizeImage(
     points: Quadrilateral["points"],
     originalImageData: OriginalImageResultItem["imageData"]
-  ): Promise<NormalizedImageResultItem> {
+  ): Promise<DeskewedImageResultItem> {
     const { cvRouter, cameraEnhancer } = this.resources;
 
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
@@ -1028,9 +1031,9 @@ export default class DocumentScannerView {
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
-    // If normalized result found
-    if (result?.normalizedImageResultItems?.[0]) {
-      return result.normalizedImageResultItems[0];
+    // If deskewed result found
+    if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
+      return result.processedDocumentResult.deskewedImageResultItems[0];
     }
   }
 }

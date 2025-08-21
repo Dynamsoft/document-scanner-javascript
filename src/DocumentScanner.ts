@@ -1,8 +1,14 @@
-import { LicenseManager } from "dynamsoft-license";
-import { CoreModule, EngineResourcePaths, EnumCapturedResultItemType, Quadrilateral } from "dynamsoft-core";
-import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
-import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
-import { DetectedQuadResultItem } from "dynamsoft-document-normalizer";
+import {
+  LicenseManager,
+  CoreModule,
+  EngineResourcePaths,
+  EnumCapturedResultItemType,
+  Quadrilateral,
+  CaptureVisionRouter,
+  CameraEnhancer,
+  CameraView,
+  DetectedQuadResultItem,
+} from "dynamsoft-capture-vision-bundle";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";
@@ -19,7 +25,7 @@ import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/dist/document-scanner.ui.html";
+  "https://npm.scannerproxy.com:802/cdn/dynamsoft-document-scanner@1.3.0-beta-202508210001/dist/document-scanner.ui.html"; //TODO: revert back to cdn link "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/dist/document-scanner.ui.html"
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
@@ -174,7 +180,7 @@ class DocumentScanner {
       LicenseManager.initLicense(this.config?.license || "", true);
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
-      CoreModule.loadWasm(["DDN"]);
+      CoreModule.loadWasm();
 
       this.resources.cameraView = await CameraView.createInstance(this.config.scannerViewConfig?.cameraEnhancerUIPath);
       this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
@@ -491,7 +497,7 @@ class DocumentScanner {
         this.config.utilizedTemplateNames.normalize
       );
 
-      const correctedImageResult = normalizedResult?.normalizedImageResultItems?.[0];
+      const correctedImageResult = normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
 
       // Create result object
       const result: DocumentResult = {

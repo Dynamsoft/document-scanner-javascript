@@ -1,5 +1,4 @@
-import { DSImageData, Quadrilateral } from "dynamsoft-core";
-import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { DSImageData, Quadrilateral, DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
 
 export enum EnumDDSViews {
   Scanner = "scanner",
@@ -39,7 +38,7 @@ export type ResultStatus = {
 
 export interface DocumentResult {
   status: ResultStatus;
-  correctedImageResult?: NormalizedImageResultItem | DSImageData;
+  correctedImageResult?: DeskewedImageResultItem | DSImageData;
   originalImageResult?: DSImageData;
   detectedQuadrilateral?: Quadrilateral;
   _flowType?: EnumFlowType;

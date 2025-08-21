@@ -33,42 +33,32 @@ const banner = `/*!
 * @copyright Copyright ${new Date().getUTCFullYear()}, Dynamsoft Corporation
 * @author Dynamsoft
 * @version ${version}
-* @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v2.6.1000.
+* @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v3.0.6000.
 * More info on DDS JS: https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/
 */`;
 
 const plugin_terser_es6 = terser({ ecma: 6, format: terser_format });
 const plugin_terser_es5 = terser({ ecma: 5, format: terser_format });
 
+const DCV_CONFIG_PATH = `src/dcv-config`;
+const BUNDLE_BUILD_PATH = `src/build`;
+const TYPES_PATH = `dist/types/build`;
+
 const copyFiles = () => ({
   name: "copy-files",
   writeBundle() {
-    fs.copyFileSync("src/document-scanner.ui.html", "dist/document-scanner.ui.html");
+    fs.copyFileSync(`${DCV_CONFIG_PATH}/document-scanner.ui.html`, "dist/document-scanner.ui.html");
   },
 });
 
-const external = [
-  "dynamsoft-core",
-  "dynamsoft-license",
-  "dynamsoft-capture-vision-router",
-  "dynamsoft-camera-enhancer",
-  "dynamsoft-document-normalizer",
-  "dynamsoft-utility",
-];
+const external = ["dynamsoft-capture-vision-bundle" ];
 
-const globals = {
-  "dynamsoft-core": "Dynamsoft.Core",
-  "dynamsoft-license": "Dynamsoft.License",
-  "dynamsoft-capture-vision-router": "Dynamsoft.CVR",
-  "dynamsoft-camera-enhancer": "Dynamsoft.DCE",
-  "dynamsoft-document-normalizer": "Dynamsoft.DDN",
-  "dynamsoft-utility": "Dynamsoft.Utility",
-};
+const globals = { "dynamsoft-capture-vision-bundle": "Dynamsoft" };
 
 export default [
   // 1. Full bundle
   {
-    input: "src/dds.bundle.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.bundle.ts`,
     plugins: [
       nodeResolve({ browser: true }),
       typescript({
@@ -100,7 +90,7 @@ export default [
   },
   // 2. Standard UMD bundle
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       typescript({
@@ -125,7 +115,7 @@ export default [
   },
   // 3. ESM bundle
   {
-    input: "src/dds.bundle.esm.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.bundle.esm.ts`,
     plugins: [
       nodeResolve({ browser: true }),
       typescript({
@@ -147,7 +137,7 @@ export default [
   },
   // 4. ESM with externals
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       typescript({
@@ -168,7 +158,7 @@ export default [
   },
   // 5. No-content ESM
   {
-    input: "src/dds.no-content-bundle.esm.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.no-content-bundle.esm.ts`,
     external,
     plugins: [
       typescript({
@@ -189,7 +179,7 @@ export default [
   },
   // 6. Type declarations for CommonJS/UMD
   {
-    input: "src/dds.ts",
+    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
     external,
     plugins: [
       dts(),
@@ -209,7 +199,7 @@ export default [
   },
   // 7. Type declarations for ESM
   {
-    input: "dist/types/dds.bundle.esm.d.ts",
+    input: `${TYPES_PATH}/dds.bundle.esm.d.ts`,
     plugins: [
       dts(),
       {
