@@ -61,7 +61,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dynamsoft-capture-vision-bundle": "3.0.6000"
+    "dynamsoft-capture-vision-bundle": "3.0.6001-beta-202508261835"
   },
   "publishConfig": {
     "registry": "https://npm.scannerproxy.com:802/",
