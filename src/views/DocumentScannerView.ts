@@ -67,7 +67,7 @@ interface DCEElements {
 // Implementation
 export default class DocumentScannerView {
   // Capture Mode
-  private boundsDetectionEnabled: boolean = false;
+  private boundsDetectionEnabled: boolean = true;
   private smartCaptureEnabled: boolean = false;
   private autoCropEnabled: boolean = false;
 
@@ -141,7 +141,6 @@ export default class DocumentScannerView {
     // Set default value for autoCrop, smartCapture and boundsDetection modes
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
-    this.boundsDetectionEnabled = true;
 
     this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
 
