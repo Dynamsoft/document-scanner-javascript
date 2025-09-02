@@ -46,9 +46,9 @@ export interface DocumentScannerViewConfig {
   enableAutoCropMode?: boolean; // False by default
   enableSmartCaptureMode?: boolean; // False by default
 
-  scanRegion: ScanRegion;
+  scanRegion?: ScanRegion;
 
-  minVerifiedFramesForAutoCapture: number; // 2 by default. Min: 1, Max: 5
+  minVerifiedFramesForAutoCapture?: number; // 2 by default. Min: 1, Max: 5
 
   showSubfooter?: boolean; // True by default
   showPoweredByDynamsoft?: boolean; // True by default
