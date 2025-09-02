@@ -7,17 +7,17 @@
     "/LICENSE"
   ],
   "sideEffects": true,
-  "main": "./dist/dds.js",
-  "module": "./dist/dds.no-content-bundle.esm.js",
-  "types": "./dist/dds.d.ts",
+  "main": "./dist/dds.bundle.js",
+  "module": "./dist/dds.bundle.esm.js",
+  "types": "./dist/dds.bundle.d.ts",
   "exports": {
     "import": {
-      "types": "./dist/dds.esm.d.ts",
-      "default": "./dist/dds.no-content-bundle.esm.js"
+      "types": "./dist/dds.bundle.d.ts",
+      "default": "./dist/dds.bundle.esm.js"
     },
     "require": {
-      "types": "./dist/dds.d.ts",
-      "default": "./dist/dds.js"
+      "types": "./dist/dds.bundle.d.ts",
+      "default": "./dist/dds.bundle.js"
     }
   },
   "type": "module",
@@ -47,21 +47,20 @@
   ],
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://www.dynamsoft.com",
+  "dependencies": {},
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.6",
     "cors": "^2.8.5",
+    "dynamsoft-capture-vision-bundle": "3.0.6001",
     "express": "^4.21.2",
     "formidable": "^3.5.2",
     "rollup": "^4.9.5",
     "rollup-plugin-dts": "^6.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "dynamsoft-capture-vision-bundle": "3.0.6001"
   },
   "publishConfig": {
     "registry": "https://npm.scannerproxy.com:802/",

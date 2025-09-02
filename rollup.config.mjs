@@ -51,12 +51,8 @@ const copyFiles = () => ({
   },
 });
 
-const external = ["dynamsoft-capture-vision-bundle" ];
-
-const globals = { "dynamsoft-capture-vision-bundle": "Dynamsoft" };
-
 export default [
-  // 1. Full bundle
+  // 1. UMD bundle
   {
     input: `${BUNDLE_BUILD_PATH}/dds.bundle.ts`,
     plugins: [
@@ -88,32 +84,7 @@ export default [
       },
     ],
   },
-  // 2. Standard UMD bundle
-  {
-    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
-    external,
-    plugins: [
-      typescript({
-        tsconfig: "./tsconfig.json",
-        declaration: true,
-        sourceMap: false,
-      }),
-      plugin_terser_es5,
-    ],
-    output: [
-      {
-        file: "dist/dds.js",
-        format: "umd",
-        name: "Dynamsoft",
-        globals,
-        banner: banner,
-        exports: "named",
-        sourcemap: false,
-        extend: true,
-      },
-    ],
-  },
-  // 3. ESM bundle
+  // 2. ESM bundle
   {
     input: `${BUNDLE_BUILD_PATH}/dds.bundle.esm.ts`,
     plugins: [
@@ -121,6 +92,27 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
+        sourceMap: false,
+      }),
+      plugin_terser_es6,
+    ],
+    output: [
+      {
+        file: "dist/dds.bundle.esm.js",
+        format: "es",
+        banner: banner,
+        exports: "named",
+        sourcemap: false,
+      },
+    ],
+  },
+  // 3. ESM bundle as .mjs
+  {
+    input: `${BUNDLE_BUILD_PATH}/dds.bundle.esm.ts`,
+    plugins: [
+      nodeResolve({ browser: true }),
+      typescript({
+        tsconfig: "./tsconfig.json",
         sourceMap: false,
       }),
       plugin_terser_es6,
@@ -135,87 +127,24 @@ export default [
       },
     ],
   },
-  // 4. ESM with externals
-  {
-    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
-    external,
-    plugins: [
-      typescript({
-        tsconfig: "./tsconfig.json",
-        sourceMap: false,
-      }),
-      plugin_terser_es6,
-    ],
-    output: [
-      {
-        file: "dist/dds.mjs",
-        format: "es",
-        banner: banner,
-        exports: "named",
-        sourcemap: false,
-      },
-    ],
-  },
-  // 5. No-content ESM
-  {
-    input: `${BUNDLE_BUILD_PATH}/dds.no-content-bundle.esm.ts`,
-    external,
-    plugins: [
-      typescript({
-        tsconfig: "./tsconfig.json",
-        sourceMap: false,
-      }),
-      plugin_terser_es6,
-    ],
-    output: [
-      {
-        file: "dist/dds.no-content-bundle.esm.js",
-        format: "es",
-        banner: banner,
-        exports: "named",
-        sourcemap: false,
-      },
-    ],
-  },
-  // 6. Type declarations for CommonJS/UMD
-  {
-    input: `${BUNDLE_BUILD_PATH}/dds.ts`,
-    external,
-    plugins: [
-      dts(),
-      {
-        writeBundle(options, bundle) {
-          let txt = fs.readFileSync("dist/dds.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
-          fs.writeFileSync("dist/dds.d.ts", txt);
-        },
-      },
-    ],
-    output: [
-      {
-        file: "dist/dds.d.ts",
-        format: "es",
-      },
-    ],
-  },
-  // 7. Type declarations for ESM
+  // 4. Single type declarations file
   {
     input: `${TYPES_PATH}/dds.bundle.esm.d.ts`,
     plugins: [
-      dts(),
+      dts({ respectExternal:true }),
       {
-        // https://rollupjs.org/guide/en/#writebundle
         writeBundle(options, bundle) {
           fs.rmSync("dist/types", { recursive: true, force: true });
           // change `export { type A }` to `export { A }`,
           // so project use old typescript still works.
-          let txt = fs.readFileSync("dist/dds.bundle.esm.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
-          fs.writeFileSync("dist/dds.bundle.esm.d.ts", txt);
+          let txt = fs.readFileSync("dist/dds.bundle.d.ts", { encoding: "utf8" }).replace(/([{,]) type /g, "$1 ");
+          fs.writeFileSync("dist/dds.bundle.d.ts", txt);
         },
       },
     ],
     output: [
       {
-        file: "dist/dds.bundle.esm.d.ts",
+        file: "dist/dds.bundle.d.ts",
         format: "es",
       },
     ],
