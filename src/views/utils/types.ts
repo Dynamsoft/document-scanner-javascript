@@ -38,7 +38,7 @@ export type ResultStatus = {
 
 export interface DocumentResult {
   status: ResultStatus;
-  correctedImageResult?: DeskewedImageResultItem | DSImageData;
+  correctedImageResult?: DeskewedImageResultItem;
   originalImageResult?: DSImageData;
   detectedQuadrilateral?: Quadrilateral;
   _flowType?: EnumFlowType;
