@@ -2,7 +2,7 @@
 
 Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK designed for scanning single-page documents. MDS captures images of the documents and enhances their quality to professional standards, making it an ideal tool for mobile document scanning.
 
-> See it in action with the [Dynamsoft Document Scanner Demo](https://demo.dynamsoft.com/document-scanner/).
+> See it in action with the [Mobile Document Scanner Demo](https://demo.dynamsoft.com/document-scanner/).
 
 **Table of Contents**
 <!--toc:start-->
@@ -525,7 +525,7 @@ To scan an image file directly without displaying the `DocumentScannerView` UI a
 
 Then get the input file as a `File` object, and pass that file object to `launch()` MDS with:
 
-```js
+```javascript
 document.getElementById("initialFile").onchange = async function () {
   const files = Array.from(this.files || []);
   if (files.length) {
@@ -568,13 +568,13 @@ By default, Border Detection mode is enabled upon entering the Scanner View, whi
 
 For example, the following config enables all three scanning modes and hides the scanning mode sub-footer to prevent the viewer from changing or viewing the scanning modes:
 
-```js
+```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
     scannerViewConfig: {
         enableAutoCropMode: true,
         enableSmartCaptureMode: true,
-        false,
+        showSubfooter: false,
 }});
 ```
 
@@ -644,7 +644,7 @@ API Reference:
 
 We can customize the scanning region in the viewfinder with the `scanRegion` property in the configuration object. You may want to do this if you want to only scan your document in a specific sub-region in the viewfinder.
 
-```js
+```typescript
 interface ScanRegion {
   ratio: {
     width: number;
@@ -670,7 +670,7 @@ Here is how `ScanRegion` applies its settings to the viewfinder:
 
 For example:
 
-```js
+```javascript
 scanRegion {
   ratio: {
     width: 2;
@@ -713,7 +713,7 @@ interface DocumentCorrectionViewToolbarButtonsConfig {
 }
 ```
 
-We can use it to **change the icon and label** of each of the three buttons individually or even **hide the buttons*. Below is an example that sets a custom label and image icon for the "Detect Borders" button and hides the "Full Image" button:
+We can use it to **change the icon and label** of each of the three buttons individually or even **hide the buttons**. Below is an example that sets a custom label and image icon for the "Detect Borders" button and hides the "Full Image" button:
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -777,9 +777,9 @@ interface DocumentResultViewConfig {
 
 The `toolbarButtonsConfig` property, of type `DocumentResultViewToolbarButtonsConfig`, customizes the appearance and functionality of the UI buttons. Here is its definition:
 
-```javascript
+```typescript
 type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "label" | "isHidden">;
-interface interface DocumentResultViewToolbarButtonsConfig {
+interface DocumentResultViewToolbarButtonsConfig {
   retake?: ToolbarButtonConfig;
   correct?: ToolbarButtonConfig;
   share?: ToolbarButtonConfig;
