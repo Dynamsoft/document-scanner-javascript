@@ -14,11 +14,60 @@ export interface DocumentResultViewToolbarButtonsConfig {
   done?: ToolbarButtonConfig;
 }
 
+/**
+ * The `DocumentResultViewConfig` interface passes settings to the {@link DocumentScanner} constructor through the {@link DocumentScannerConfig} to apply UI and business logic customizations for the {@link DocumentResultView}.
+ * 
+ * @remarks
+ * Only rare and edge-case scenarios require editing MDS source code. MDS uses sane default values for all omitted properties.
+ * 
+ * @example
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+ *     resultViewConfig: {
+ *         onDone: async (result) =>
+ *         {
+ *             const canvas = result.correctedImageResult.toCanvas();
+ *             resultContainer.appendChild(canvas);
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * @public
+ */
 export interface DocumentResultViewConfig {
+  /**
+   * The HTML container element or selector for the {@link DocumentResultView} UI.
+   * 
+   * @public
+   */
   container?: HTMLElement | string;
+  /**
+   * Configures the appearance and labels of the buttons for the {@link DocumentResultView} UI.
+   * 
+   * @see {@link DocumentResultViewToolbarButtonsConfig}
+   * 
+   * @public
+   */
   toolbarButtonsConfig?: DocumentResultViewToolbarButtonsConfig;
-
+  /**
+   * Handler called when the user clicks the "Done" button.
+   * 
+   * @param result result of the scan, including the original image, corrected image, detected boundaries, and scan status
+   * @see {@link DocumentResult}
+   * 
+   * @public
+   */
   onDone?: (result: DocumentResult) => Promise<void>;
+  /**
+   * Handler called when the user clicks the "Upload" button.
+   * 
+   * @param result result of the scan, including the original image, corrected image, detected boundaries, and scan status
+   * @see {@link DocumentResult}
+   * 
+   * @public
+   */
   onUpload?: (result: DocumentResult) => Promise<void>;
 }
 

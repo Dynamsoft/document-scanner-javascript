@@ -30,14 +30,84 @@ export interface DocumentCorrectionViewToolbarButtonsConfig {
   apply?: ToolbarButtonConfig;
 }
 
+/**
+ * The `DocumentCorrectionViewConfig` interface passes settings to the {@link DocumentScanner} constructor through the {@link DocumentScannerConfig} to apply UI and business logic customizations for the {@link DocumentCorrectionView}.
+ * 
+ * @remarks
+ * Only rare and edge-case scenarios require editing MDS source code. MDS uses sane default values for all omitted properties.
+ * 
+ * @example
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+ *     correctionViewConfig: {
+ *         onFinish: (result) => {
+ *             const canvas = result.correctedImageResult.toCanvas();
+ *             resultContainer.appendChild(canvas);
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * @public
+ */
 export interface DocumentCorrectionViewConfig {
+  /**
+   * The HTML container element or selector for the {@link DocumentCorrectionView} UI.
+   * 
+   * @public
+   */
   container?: HTMLElement | string;
+  /**
+   * Configures the appearance and labels of the buttons for the {@link DocumentCorrectionView} UI.
+   * 
+   * @see {@link DocumentCorrectionViewToolbarButtonsConfig}
+   * 
+   * @public
+   */
   toolbarButtonsConfig?: DocumentCorrectionViewToolbarButtonsConfig;
+  /**
+   * Path to a Capture Vision template for scanning configuration.
+   * 
+   * @remarks
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+   * 
+   * @defaultValue {@link DEFAULT_DCE_UI_PATH}
+   * 
+   * @public
+   */
   templateFilePath?: string;
+  /**
+   * Capture Vision template names for detection and correction.
+   * 
+   * @remarks
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+   * 
+   * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
+   * 
+   * @public
+   */
   utilizedTemplateNames?: UtilizedTemplateNames;
+  /**
+   * Handler called when the user clicks the "Apply" button.
+   * 
+   * @param result result of the scan, including the original image, corrected image, detected boundaries, and scan status
+   * @see {@link DocumentResult}
+   * 
+   * @public
+   */
   onFinish?: (result: DocumentResult) => void;
-
-  _showResultView?: boolean; // Internal use, to change Apply -> Done if result view is not configured
+  /**
+   * @privateRemarks
+   * Changes the label of the "Apply" button to "Done" if the {@link DocumentResultView} is not configured.
+   * 
+   * @internal
+   */
+  _showResultView?: boolean;
 }
 
 export default class DocumentCorrectionView {
