@@ -25,16 +25,16 @@ import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
-  "https://npm.scannerproxy.com:802/cdn/dynamsoft-document-scanner@1.3.0-beta-202508210003/dist/document-scanner.ui.html"; //TODO: revert back to cdn link "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/dist/document-scanner.ui.html"
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.3.1/dist/document-scanner.ui.html";
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 /**
  * The `DocumentScannerConfig` interface passes settings to the {@link DocumentScanner} constructor to apply a comprehensive set of UI and business logic customizations.
- * 
+ *
  * @remarks
  * Only advanced require editing the UI template or MDS source code. {@link DocumentScannerConfig.license} is the only property required to be passed to instantiate a {@link DocumentScanner} object. MDS uses sane default values for all other omitted properties.
- * 
+ *
  * @example
  * ```typescript
  * const config = {
@@ -52,65 +52,65 @@ const DEFAULT_CONTAINER_HEIGHT = "100dvh";
  *     },
  * };
  * ```
- * 
+ *
  * @public
  * @stable
  */
 export interface DocumentScannerConfig {
   /**
    * The license key for using the {@link DocumentScanner}.
-   * 
+   *
    * @remarks
    * This is the only property required to be passed to instantiate a {@link DocumentScanner} object.
-   * 
+   *
    * @public
    */
   license?: string;
   /**
    * The container element or selector for the {@link DocumentScanner} UI.
-   * 
+   *
    * @public
    */
   container?: HTMLElement | string;
   /**
    * The file path to the document template used for scanning.
-   * 
+   *
    * @remarks
    * You may set custom paths to self-host the template, or fully self-host MDS.
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
-   * 
+   *
    * @public
    */
   templateFilePath?: string;
   /**
    * Capture Vision template names for detection and correction.
-   * 
+   *
    * @remarks
    * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
    * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
-   * 
+   *
    * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
-   * 
+   *
    * @public
    */
   utilizedTemplateNames?: UtilizedTemplateNames;
   /**
    * Paths to the necessary resources (such as `.wasm` files) for the scanning engine.
-   * 
+   *
    * @remarks
    * The default paths point to CDNs and so may be left unset. You may set custom paths to self-host resources, or fully self-host MDS.
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
-   * 
+   *
    * @public
    */
   engineResourcePaths?: EngineResourcePaths;
   /**
    * Configuration settings for the {@link DocumentScannerView}.
-   * 
+   *
    * @remarks
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
-   * 
+   *
    * @public
    */
   scannerViewConfig?: Omit<
@@ -119,10 +119,10 @@ export interface DocumentScannerConfig {
   >;
   /**
    * Configuration settings for the {@link DocumentResultView}.
-   * 
+   *
    * @remarks
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
-   * 
+   *
    * @public
    */
   resultViewConfig?: DocumentResultViewConfig;
@@ -131,15 +131,15 @@ export interface DocumentScannerConfig {
     "templateFilePath" | "utilizedTemplateNames" | "_showCorrectionView"
   >;
   /**
-  * Sets the visibility of the {@link DocumentResultView}.
-  * 
-  * @defaultValue true
-  * @public
-  */
+   * Sets the visibility of the {@link DocumentResultView}.
+   *
+   * @defaultValue true
+   * @public
+   */
   showResultView?: boolean;
   /**
    * Sets the visibility of the {@link DocumentCorrectionView}.
-   * 
+   *
    * @defaultValue true
    * @public
    */
@@ -175,7 +175,7 @@ class DocumentScanner {
   }
 
   /**
-   * 
+   *
    * @privateRemark
    */
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
@@ -192,9 +192,9 @@ class DocumentScanner {
 
   /**
    * Create a DocumentScanner instance with settings specified by a `DocumentScannerConfig` object.
-   * 
+   *
    * @param config {@link DocumentScannerConfig} set all main configurations, including UI toggles, data workflow callbacks, etc. You must set a valid license key with the `license` property. See {@link DocumentScannerConfig} for a complete description.
-   * 
+   *
    * @example
    * HTML:
    * ```html
@@ -209,7 +209,7 @@ class DocumentScanner {
    *     }
    * });
    * ```
-   * 
+   *
    * @public
    */
   constructor(private config: DocumentScannerConfig) {}
@@ -484,13 +484,13 @@ class DocumentScanner {
 
   /**
    * Clean up resources and hide UI components.
-   * 
+   *
    * @example
    * ```js
    * documentScanner.dispose();
    * console.log("Scanner resources released.");
    * ```
-   * 
+   *
    * @public
    */
   dispose(): void {
@@ -662,16 +662,16 @@ class DocumentScanner {
 
   /**
    * Start the document scanning workflow at the {@link DocumentScannerView | `DocumentScannerView`} by default.
-   * 
+   *
    * @remarks
    * {@link File | Passing a file path of an image} to `file` allows scanning from the image and bypassing camera input as well as the {@link DocumentScannerView | `DocumentScannerView`}.
-   * 
+   *
    * @param
    * `file` - process the file and skip the {@link DocumentScannerView | `DocumentScannerView`} if passed
-   * 
+   *
    * @returns
    * results of the scan, including the original image, corrected image, detected boundaries, and scan status
-   * 
+   *
    * @example
    * ```javascript
    * const result = await documentScanner.launch();
@@ -684,7 +684,7 @@ class DocumentScanner {
    *   resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
    * }
    * ```
-   * 
+   *
    * @public
    */
   async launch(file?: File): Promise<DocumentResult> {
