@@ -29,6 +29,11 @@ jobs:
         run: npm run build
         
       - name: Publish to npm
-        run: npm publish
+        run: |
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            npm publish --tag beta
+          else
+            npm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PAT }}
