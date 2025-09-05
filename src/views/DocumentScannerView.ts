@@ -3,10 +3,12 @@ import {
   EnumImagePixelFormat,
   OriginalImageResultItem,
   Quadrilateral,
-} from "dynamsoft-core";
-import { CapturedResultReceiver, CapturedResult } from "dynamsoft-capture-vision-router";
-import { DetectedQuadResultItem, NormalizedImageResultItem } from "dynamsoft-document-normalizer";
-import { MultiFrameResultCrossFilter } from "dynamsoft-utility";
+  CapturedResultReceiver,
+  CapturedResult,
+  DetectedQuadResultItem,
+  DeskewedImageResultItem,
+  MultiFrameResultCrossFilter,
+} from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
   DEFAULT_TEMPLATE_NAMES,
@@ -20,36 +22,194 @@ import { createStyle, findClosestResolutionLevel, getElement, isEmptyObject } fr
 
 const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
 
+/**
+ * Sets the scan region within the {@link DocumentScannerView} viewfinder for document scanning from the {@link @DocumentScannerViewConfig}.
+ *
+ * @remarks
+ * MDS determines the scan region with the following steps:
+ * 1. Use {@link ScanRegion.ratio} to set the height-to-width of the rectangular scanning region, then scale the rectangle up to fit within the viewfinder.
+ * 2. Translate the rectangular up by the number of pixels specified by {@link ScanRegion.regionBottomMargin}.
+ * 3. Create a visual border for the scanning region boundary on the viewfinder with a given stroke width in pixels, and a stroke color.
+ *
+ * @example
+ * Create a scan region with a height-to-width ratio of 3:2, translated upwards by 20 pixels, with a green, 3 pixel-wide border in the viewfinder:
+ *
+ * ```javascript
+ * scanRegion {
+ *   ratio: {
+ *     width: 2,
+ *     height: 3,
+ *   },
+ *   regionBottomMargin: 20,
+ *   style: {
+ *     strokeWidth: 3,
+ *     strokeColor: "green",
+ *   },
+ * }
+ * ```
+ *
+ * @public
+ */
 export interface ScanRegion {
+  /**
+   * The aspect ratio of the rectangular scan region.
+   *
+   * @public
+   */
   ratio: {
+    /**
+     * The width of the rectangular scan region.
+     */
     width: number;
+    /**
+     * The height of the rectangular scan region.
+     *
+     * @public
+     */
     height: number;
   };
-  regionBottomMargin: number; // Bottom margin calculated in pixel
+  /**
+   * Bottom margin below the scan region measured in pixels.
+   *
+   * @public
+   */
+  regionBottomMargin: number;
+  /**
+   * The styling for the scan region outline in the viewfinder.
+   *
+   * @public
+   */
   style: {
+    /**
+     * The pixel width of the outline of the scan region.
+     *
+     * @public
+     */
     strokeWidth: number;
+    /**
+     * The color of the outline of the scan region.
+     *
+     * @public
+     */
     strokeColor: string;
   };
 }
 
+/**
+ * The `DocumentScannerViewConfig` interface passes settings to the {@link DocumentScanner} constructor through the {@link DocumentScannerConfig} to apply UI and business logic customizations for the {@link DocumentScannerView}.
+ * 
+ * @remarks
+ * Only rare and edge-case scenarios require editing the UI template or MDS source code. MDS uses sane default values for all omitted properties.
+ * 
+ * @example
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE", // Replace with your actual license key
+ *     scannerViewConfig: {
+ *         cameraEnhancerUIPath: "../dist/document-scanner.ui.html", // Use the local file
+ *     },
+ * });
+ ```
+ 
+ @public
+ */
 export interface DocumentScannerViewConfig {
-  _showCorrectionView?: boolean; // Internal use, to remove Smart Capture if correctionView is not available
-
+  /**
+   * @privateRemarks
+   * Removes Smart Capture if the {@link DocumentCorrectionView} is not available.
+   *
+   * @internal
+   */
+  _showCorrectionView?: boolean;
+  /**
+   * Path to a Capture Vision template for scanning configuration.
+   *
+   * @public
+   */
   templateFilePath?: string;
+  /**
+   * Path to the UI definition file (`.html`) for the {@link DocumentScannerView}.
+   *
+   * @remarks
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom paths to self-host or customize the template, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   *
+   * @defaultValue {@link DEFAULT_DCE_UI_PATH}
+   *
+   * @public
+   */
   cameraEnhancerUIPath?: string;
+  /**
+   * The HTML container element or selector for the {@link DocumentScannerView} UI.
+   *
+   * @public
+   */
   container?: HTMLElement | string;
   // consecutiveResultFramesBeforeNormalization?: number;
+  /**
+   * Capture Vision template names for detection and correction.
+   *
+   * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
+   *
+   * @remarks
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+   *
+   * @public
+   */
   utilizedTemplateNames?: UtilizedTemplateNames;
-
-  enableAutoCropMode?: boolean; // False by default
-  enableSmartCaptureMode?: boolean; // False by default
-
-  scanRegion: ScanRegion;
-
-  minVerifiedFramesForAutoCapture: number; // 2 by default. Min: 1, Max: 5
-
-  showSubfooter?: boolean; // True by default
-  showPoweredByDynamsoft?: boolean; // True by default
+  /**
+   * Sets the Auto-Crop mode effective upon entering the {@link DocumentScannerView} UI.
+   *
+   * @defaultValue False
+   *
+   * @public
+   */
+  enableAutoCropMode?: boolean;
+  /**
+   * Sets the Smart Capture mode effective upon entering the {@link DocumentScannerView} UI.
+   *
+   * @defaultValue False
+   *
+   * @public
+   */
+  enableSmartCaptureMode?: boolean;
+  /**
+   * Defines the region within the viewport to detect documents.
+   *
+   * @see {@link ScanRegion}
+   *
+   * @public
+   */
+  scanRegion?: ScanRegion;
+  /**
+   * Sets minimum number of camera frames to detect document boundaries on Smart Capture mode.
+   *
+   * @remarks
+   * Takes integer values between 1 and 5, inclusive.
+   *
+   * @defaultValue 2
+   *
+   * @public
+   */
+  minVerifiedFramesForAutoCapture?: number;
+  /**
+   * Sets the visibility of the mode selector menu.
+   *
+   * @defaultValue True
+   *
+   * @public
+   */
+  showSubfooter?: boolean;
+  /**
+   * Sets the visibility of the Dynamsoft branding message.
+   *
+   * @defaultValue True
+   *
+   * @public
+   */
+  showPoweredByDynamsoft?: boolean;
 }
 
 interface DCEElements {
@@ -65,7 +225,7 @@ interface DCEElements {
 // Implementation
 export default class DocumentScannerView {
   // Capture Mode
-  private boundsDetectionEnabled: boolean = false;
+  private boundsDetectionEnabled: boolean = true;
   private smartCaptureEnabled: boolean = false;
   private autoCropEnabled: boolean = false;
 
@@ -139,7 +299,6 @@ export default class DocumentScannerView {
     // Set default value for autoCrop, smartCapture and boundsDetection modes
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
-    this.boundsDetectionEnabled = true;
 
     this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
 
@@ -177,8 +336,8 @@ export default class DocumentScannerView {
       }
 
       let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
-      newSettings.capturedResultItemTypes |= EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE;
-      newSettings.documentSettings.scaleDownThreshold = 1000;
+      newSettings.outputOriginalImage = true;
+      (newSettings as any).documentSettings.scaleDownThreshold = 1000;
       await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
       cvRouter.maxImageSideLength = Infinity;
@@ -964,7 +1123,8 @@ export default class DocumentScannerView {
       return;
     }
 
-    if ((result.detectedQuadResultItems[0] as any).crossVerificationStatus === 1) this.crossVerificationCount++;
+    if ((result.processedDocumentResult?.detectedQuadResultItems?.[0] as any)?.crossVerificationStatus === 1)
+      this.crossVerificationCount++;
 
     /**
      * In our case, we determine a good condition for "automatic normalization" to be
@@ -1019,7 +1179,7 @@ export default class DocumentScannerView {
   async normalizeImage(
     points: Quadrilateral["points"],
     originalImageData: OriginalImageResultItem["imageData"]
-  ): Promise<NormalizedImageResultItem> {
+  ): Promise<DeskewedImageResultItem> {
     const { cvRouter, cameraEnhancer } = this.resources;
 
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
@@ -1028,9 +1188,9 @@ export default class DocumentScannerView {
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
-    // If normalized result found
-    if (result?.normalizedImageResultItems?.[0]) {
-      return result.normalizedImageResultItems[0];
+    // If deskewed result found
+    if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
+      return result.processedDocumentResult.deskewedImageResultItems[0];
     }
   }
 }
