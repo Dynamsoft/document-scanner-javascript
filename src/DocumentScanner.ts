@@ -1,8 +1,14 @@
-import { LicenseManager } from "dynamsoft-license";
-import { CoreModule, EngineResourcePaths, EnumCapturedResultItemType, Quadrilateral } from "dynamsoft-core";
-import { CaptureVisionRouter } from "dynamsoft-capture-vision-router";
-import { CameraEnhancer, CameraView } from "dynamsoft-camera-enhancer";
-import { DetectedQuadResultItem } from "dynamsoft-document-normalizer";
+import {
+  LicenseManager,
+  CoreModule,
+  EngineResourcePaths,
+  EnumCapturedResultItemType,
+  Quadrilateral,
+  CaptureVisionRouter,
+  CameraEnhancer,
+  CameraView,
+  DetectedQuadResultItem,
+} from "dynamsoft-capture-vision-bundle";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
 import DocumentResultView, { DocumentResultViewConfig } from "./views/DocumentResultView";
@@ -19,31 +25,124 @@ import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.2.0/dist/document-scanner.ui.html";
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.3.0/dist/document-scanner.ui.html";
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
+/**
+ * The `DocumentScannerConfig` interface passes settings to the {@link DocumentScanner} constructor to apply a comprehensive set of UI and business logic customizations.
+ *
+ * @remarks
+ * Only advanced require editing the UI template or MDS source code. {@link DocumentScannerConfig.license} is the only property required to be passed to instantiate a {@link DocumentScanner} object. MDS uses sane default values for all other omitted properties.
+ *
+ * @example
+ * ```typescript
+ * const config = {
+ *     license: "YOUR_LICENSE_KEY_HERE",
+ *     scannerViewConfig: {
+ *         cameraEnhancerUIPath: "./dist/document-scanner.ui.html", // Use the local file
+ *     },
+ *     engineResourcePaths: {
+ *         std: "./dist/libs/dynamsoft-capture-vision-std/dist/",
+ *         dip: "./dist/libs/dynamsoft-image-processing/dist/",
+ *         core: "./dist/libs/dynamsoft-core/dist/",
+ *         license: "./dist/libs/dynamsoft-license/dist/",
+ *         cvr: "./dist/libs/dynamsoft-capture-vision-router/dist/",
+ *         ddn: "./dist/libs/dynamsoft-document-normalizer/dist/",
+ *     },
+ * };
+ * ```
+ *
+ * @public
+ * @stable
+ */
 export interface DocumentScannerConfig {
+  /**
+   * The license key for using the {@link DocumentScanner}.
+   *
+   * @remarks
+   * This is the only property required to be passed to instantiate a {@link DocumentScanner} object.
+   *
+   * @public
+   */
   license?: string;
+  /**
+   * The container element or selector for the {@link DocumentScanner} UI.
+   *
+   * @public
+   */
   container?: HTMLElement | string;
-
-  // DCV specific configs
+  /**
+   * The file path to the document template used for scanning.
+   *
+   * @remarks
+   * You may set custom paths to self-host the template, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   *
+   * @public
+   */
   templateFilePath?: string;
+  /**
+   * Capture Vision template names for detection and correction.
+   *
+   * @remarks
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+   *
+   * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
+   *
+   * @public
+   */
   utilizedTemplateNames?: UtilizedTemplateNames;
+  /**
+   * Paths to the necessary resources (such as `.wasm` files) for the scanning engine.
+   *
+   * @remarks
+   * The default paths point to CDNs and so may be left unset. You may set custom paths to self-host resources, or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   *
+   * @public
+   */
   engineResourcePaths?: EngineResourcePaths;
-
-  // Views Config
+  /**
+   * Configuration settings for the {@link DocumentScannerView}.
+   *
+   * @remarks
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
+   *
+   * @public
+   */
   scannerViewConfig?: Omit<
     DocumentScannerViewConfig,
     "templateFilePath" | "utilizedTemplateNames" | "_showCorrectionView"
   >;
-
+  /**
+   * Configuration settings for the {@link DocumentResultView}.
+   *
+   * @remarks
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
+   *
+   * @public
+   */
   resultViewConfig?: DocumentResultViewConfig;
   correctionViewConfig?: Omit<
     DocumentCorrectionViewConfig,
     "templateFilePath" | "utilizedTemplateNames" | "_showCorrectionView"
   >;
+  /**
+   * Sets the visibility of the {@link DocumentResultView}.
+   *
+   * @defaultValue true
+   * @public
+   */
   showResultView?: boolean;
+  /**
+   * Sets the visibility of the {@link DocumentCorrectionView}.
+   *
+   * @defaultValue true
+   * @public
+   */
   showCorrectionView?: boolean;
 }
 
@@ -55,6 +154,9 @@ export interface SharedResources {
   onResultUpdated?: (result: DocumentResult) => void;
 }
 
+/**
+ * {@label DOCUMENT_SCANNER}
+ */
 class DocumentScanner {
   private scannerView?: DocumentScannerView;
   private scanResultView?: DocumentResultView;
@@ -72,6 +174,10 @@ class DocumentScanner {
     configContainer.style.position = "relative";
   }
 
+  /**
+   *
+   * @privateRemark
+   */
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
     if (this.loadingScreen) {
       this.loadingScreen.hide();
@@ -84,6 +190,28 @@ class DocumentScanner {
     }
   }
 
+  /**
+   * Create a DocumentScanner instance with settings specified by a `DocumentScannerConfig` object.
+   *
+   * @param config {@link DocumentScannerConfig} set all main configurations, including UI toggles, data workflow callbacks, etc. You must set a valid license key with the `license` property. See {@link DocumentScannerConfig} for a complete description.
+   *
+   * @example
+   * HTML:
+   * ```html
+   * <div id="myDocumentScannerContainer" style="width: 80vw; height: 80vh;"></div>
+   * ```
+   * JavaScript:
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+   *     scannerViewConfig: {
+   *         container: document.getElementById("myDocumentScannerViewContainer") // Use this container for the scanner view
+   *     }
+   * });
+   * ```
+   *
+   * @public
+   */
   constructor(private config: DocumentScannerConfig) {}
 
   async initialize(): Promise<{
@@ -174,7 +302,7 @@ class DocumentScanner {
       LicenseManager.initLicense(this.config?.license || "", true);
 
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and document modules.
-      CoreModule.loadWasm(["DDN"]);
+      CoreModule.loadWasm();
 
       this.resources.cameraView = await CameraView.createInstance(this.config.scannerViewConfig?.cameraEnhancerUIPath);
       this.resources.cameraEnhancer = await CameraEnhancer.createInstance(this.resources.cameraView);
@@ -354,6 +482,17 @@ class DocumentScanner {
     }, {} as Record<string, HTMLElement>);
   }
 
+  /**
+   * Clean up resources and hide UI components.
+   *
+   * @example
+   * ```js
+   * documentScanner.dispose();
+   * console.log("Scanner resources released.");
+   * ```
+   *
+   * @public
+   */
   dispose(): void {
     if (this.scanResultView) {
       this.scanResultView.dispose();
@@ -491,7 +630,7 @@ class DocumentScanner {
         this.config.utilizedTemplateNames.normalize
       );
 
-      const correctedImageResult = normalizedResult?.normalizedImageResultItems?.[0];
+      const correctedImageResult = normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
 
       // Create result object
       const result: DocumentResult = {
@@ -522,10 +661,31 @@ class DocumentScanner {
   }
 
   /**
-   * Launches the document scanning process.
+   * Start the document scanning workflow at the {@link DocumentScannerView | `DocumentScannerView`} by default.
    *
-   * @param file Optional File object to process instead of using the camera
-   * @returns Promise<DocumentResult> containing scan results
+   * @remarks
+   * {@link File | Passing a file path of an image} to `file` allows scanning from the image and bypassing camera input as well as the {@link DocumentScannerView | `DocumentScannerView`}.
+   *
+   * @param
+   * `file` - process the file and skip the {@link DocumentScannerView | `DocumentScannerView`} if passed
+   *
+   * @returns
+   * results of the scan, including the original image, corrected image, detected boundaries, and scan status
+   *
+   * @example
+   * ```javascript
+   * const result = await documentScanner.launch();
+   *
+   * if (result?.correctedImageResult) {
+   * 	 resultContainer.innerHTML = "";
+   * 	 const canvas = result.correctedImageResult.toCanvas();
+   * 	 resultContainer.appendChild(canvas);
+   * } else {
+   *   resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+   * }
+   * ```
+   *
+   * @public
    */
   async launch(file?: File): Promise<DocumentResult> {
     if (this.isCapturing) {

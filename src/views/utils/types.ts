@@ -1,5 +1,4 @@
-import { DSImageData, Quadrilateral } from "dynamsoft-core";
-import { NormalizedImageResultItem } from "dynamsoft-document-normalizer";
+import { DSImageData, Quadrilateral, DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
 
 export enum EnumDDSViews {
   Scanner = "scanner",
@@ -12,7 +11,18 @@ export const DEFAULT_TEMPLATE_NAMES = {
   normalize: "NormalizeDocument_Default",
 };
 
-// Common types
+/**
+ * Capture Vision template names for detection and correction.
+ * 
+ * @remarks
+ * You may set custom names to self-host resources, or fully self-host MDS.
+ * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+ * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+ * 
+ * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
+ * 
+ * @public
+ */
 export interface UtilizedTemplateNames {
   detect: string;
   normalize: string;
@@ -37,14 +47,62 @@ export type ResultStatus = {
   message?: string;
 };
 
+/**
+ * Represents the output of a scan, including the original image, the corrected image, detected boundaries, and scan status.
+ * 
+ * @public
+ */
 export interface DocumentResult {
+  /**
+   * The status of the document scan (success, failed, canceled).
+   * 
+   * @see {@link ResultStatus}
+   * 
+   * @public
+   */
   status: ResultStatus;
-  correctedImageResult?: NormalizedImageResultItem | DSImageData;
+  /**
+   * The processed (corrected) image.
+   */
+  correctedImageResult?: DeskewedImageResultItem;
+  /**
+   * The original captured image before correction.
+   * 
+   * @public
+   */
   originalImageResult?: DSImageData;
+  /**
+   * The detected document boundaries.
+   * 
+   * @public
+   */
   detectedQuadrilateral?: Quadrilateral;
   _flowType?: EnumFlowType;
 }
 
+/**
+ * A simplified configuration type for toolbar buttons.
+ * 
+ * @example
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
+ *     correctionViewConfig: {
+ *         toolbarButtonsConfig: {
+ *             fullImage: {
+ *                 isHidden: true
+ *             },
+ *             detectBorders: {
+ *                 icon: "path/to/new_icon.png", // Change to the actual path of the new icon
+ *                 label: "Custom Label"
+ *             }
+ *         }
+ *     }
+ * });
+ * ```
+ *
+ * @public
+ */
 export type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">;
 
 export interface ToolbarButton {
