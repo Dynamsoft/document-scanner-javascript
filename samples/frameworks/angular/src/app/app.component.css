@@ -1,0 +1,19 @@
+.dds-hello-world-page {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.dds-title {
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.dds-title .dds-title-logo {
+  margin-left: 4px;
+  width: 30px;
+  height: 30px;
+}
