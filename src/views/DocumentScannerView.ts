@@ -160,21 +160,38 @@ export interface DocumentScannerViewConfig {
    */
   utilizedTemplateNames?: UtilizedTemplateNames;
   /**
-   * Sets the Auto-Crop mode effective upon entering the {@link DocumentScannerView} UI.
+   * Set the document Bounds-Detection mode effective upon entering the {@link DocumentScannerView} UI.
+   * 
+   * @remarks
+   * Bounds-Detection mode gets enabled when Smart Capture mode is enabled.
    *
-   * @defaultValue False
+   * @defaultValue True
    *
    * @public
    */
-  enableAutoCropMode?: boolean;
+  enableBoundsDetectionMode?: boolean;
   /**
-   * Sets the Smart Capture mode effective upon entering the {@link DocumentScannerView} UI.
+   * Set the Smart Capture mode effective upon entering the {@link DocumentScannerView} UI.
+   * 
+   * @remarks
+   * Enabling Smart Capture mode enables Bounds-Detection mode too. Smart Capture mode gets enabled when Auto-Capture mode is enabled.
    *
    * @defaultValue False
    *
    * @public
    */
   enableSmartCaptureMode?: boolean;
+  /**
+   * Set the Auto-Crop mode effective upon entering the {@link DocumentScannerView} UI.
+   * 
+   * @remarks
+   * Enabling Auto-Crop mode enables Smart Capture mode too.
+   *
+   * @defaultValue False
+   *
+   * @public
+   */
+  enableAutoCropMode?: boolean;
   /**
    * Defines the region within the viewport to detect documents.
    *
@@ -297,8 +314,9 @@ export default class DocumentScannerView {
 
   async initialize(): Promise<void> {
     // Set default value for autoCrop, smartCapture and boundsDetection modes
+    this.boundsDetectionEnabled = this.config?.enableBoundsDetectionMode ?? this.config?.enableSmartCaptureMode ?? this.config?.enableAutoCropMode ?? true; // Enabling any mode enables boundsDetection mode
+    this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop mode is enabled, smartCapture mode should be too
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
-    this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop is enabled, smartCapture should be too
 
     this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
 
