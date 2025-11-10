@@ -106,7 +106,7 @@ export interface ScanRegion {
  * const documentScanner = new Dynamsoft.DocumentScanner({
  *     license: "YOUR_LICENSE_KEY_HERE", // Replace with your actual license key
  *     scannerViewConfig: {
- *         cameraEnhancerUIPath: "../dist/document-scanner.ui.html", // Use the local file
+ *         cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use the local file
  *     },
  * });
  ```
@@ -135,7 +135,7 @@ export interface DocumentScannerViewConfig {
    */
   templateFilePath?: string;
   /**
-   * Path to the UI definition file (`.html`) for the {@link DocumentScannerView}.
+   * Path to the UI definition file (`.xml`) for the {@link DocumentScannerView}.
    *
    * @remarks
    * This typically does not need to be set as MDS provides a default template for general use. You may set custom paths to self-host or customize the template, or fully self-host MDS.

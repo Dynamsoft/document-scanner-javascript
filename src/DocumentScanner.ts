@@ -25,7 +25,7 @@ import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
 // Default DCE UI path
 const DEFAULT_DCE_UI_PATH =
-  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.3.1/dist/document-scanner.ui.html";
+  "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/document-scanner.ui.xml";
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
@@ -40,7 +40,7 @@ const DEFAULT_CONTAINER_HEIGHT = "100dvh";
  * const config = {
  *     license: "YOUR_LICENSE_KEY_HERE",
  *     scannerViewConfig: {
- *         cameraEnhancerUIPath: "./dist/document-scanner.ui.html", // Use the local file
+ *         cameraEnhancerUIPath: "./dist/document-scanner.ui.xml", // Use the local file
  *     },
  *     engineResourcePaths: {
  *         std: "./dist/libs/dynamsoft-capture-vision-std/dist/",
