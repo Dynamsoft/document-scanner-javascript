@@ -258,7 +258,7 @@ export default class DocumentCorrectionView {
 
     // Make circle transparent to show corner on drag
     fabricObject.on("mousedown", function (e: any) {
-      if (e.target && e.target.controls) {
+      if (e.target?.controls) {
         this.cornerColor = "transparent";
         this.dirty = true;
         this.canvas?.renderAll();
@@ -335,7 +335,11 @@ export default class DocumentCorrectionView {
         icon:
           toolbarButtonsConfig?.apply?.icon ||
           (this.config?._showResultView === false ? DDS_ICONS.complete : DDS_ICONS.finish),
-        label: toolbarButtonsConfig?.apply?.label || (this.config?._showResultView === false ? "Done" : "Apply"),
+        label: toolbarButtonsConfig?.apply?.label || (
+          this.resources.enableContinuousScanning && this.config?._showResultView === false
+            ? "Keep Scan"
+            : (this.config?._showResultView === false ? "Done" : "Apply")
+        ),
         className: `${toolbarButtonsConfig?.apply?.className || ""}`,
         isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
 
@@ -355,50 +359,59 @@ export default class DocumentCorrectionView {
       }
     } catch (error) {
       console.error("Error setting up correction controls:", error);
-      throw new Error(`Failed to setup correction controls: ${error.message}`);
+      throw new Error(`Failed to setup correction controls: ${error?.message || error}`);
     }
   }
 
   private async handleRetake() {
     try {
       if (!this.scannerView) {
-        console.error("Correction View not initialized");
+        console.error("Scanner View not initialized");
         return;
       }
 
       this.hideView();
+
+      // Show scanner view
+      if (this.scannerView) {
+        getElement((this.scannerView as any).config.container).style.display = "flex";
+      }
+
+      // Wait for new scan
       const result = await this.scannerView.launch();
 
-      if (result?.status?.code === EnumResultStatus.RS_FAILED) {
-        if (this.currentCorrectionResolver) {
-          this.currentCorrectionResolver(result);
-        }
+      // Handle cancelled or failed results - resolve and exit
+      if (result?.status?.code === EnumResultStatus.RS_CANCELLED || result?.status?.code === EnumResultStatus.RS_FAILED) {
+        this.currentCorrectionResolver?.(result);
         return;
       }
 
-      // Handle success case
-      if (this.resources.onResultUpdated) {
-        if (result?.status.code === EnumResultStatus.RS_CANCELLED) {
-          this.resources.onResultUpdated(this.resources.result);
-        } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
-          this.resources.onResultUpdated(result);
-        }
-      }
+      // Handle success case - update resources and re-enter correction flow
+      if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
+        this.resources.onResultUpdated?.(result);
 
-      this.dispose(true);
-      await this.initialize();
-      getElement(this.config.container).style.display = "flex";
+        // Stop capturing before hiding scanner view
+        this.scannerView?.stopCapturing();
+
+        // Hide scanner view
+        if (this.scannerView) {
+          getElement((this.scannerView as any).config.container).style.display = "none";
+        }
+
+        // Refresh the correction view with new data
+        this.dispose(true); // preserve resolver
+        await this.initialize();
+        getElement(this.config.container).style.display = "flex";
+      }
     } catch (error) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
-      if (this.currentCorrectionResolver) {
-        this.currentCorrectionResolver({
-          status: {
-            code: EnumResultStatus.RS_FAILED,
-            message: error?.message || error,
-          },
-        });
-      }
+      this.currentCorrectionResolver?.({
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: error?.message || error,
+        },
+      });
       throw error;
     }
   }
@@ -465,24 +478,16 @@ export default class DocumentCorrectionView {
         detectedQuadrilateral: quad,
       };
 
-      if (this.resources.onResultUpdated) {
-        // Update the result with new corrected image and quad
-        this.resources.onResultUpdated(updatedResult);
-      }
+      // Update the result with new corrected image and quad
+      this.resources.onResultUpdated?.(updatedResult);
 
       // Call onFinish callback if provided
-      if (this.config?.onFinish) {
-        this.config.onFinish(updatedResult);
-      }
+      this.config?.onFinish?.(updatedResult);
 
       // Resolve the promise with corrected image
-      if (this.currentCorrectionResolver) {
-        this.currentCorrectionResolver(updatedResult);
-      }
+      this.currentCorrectionResolver?.(updatedResult);
     } else {
-      if (this.currentCorrectionResolver) {
-        this.currentCorrectionResolver(this.resources.result);
-      }
+      this.currentCorrectionResolver?.(this.resources.result);
     }
 
     // Clean up and hide
@@ -557,9 +562,7 @@ export default class DocumentCorrectionView {
 
   dispose(preserveResolver: boolean = false): void {
     // Clean up resources
-    if (this.imageEditorView?.dispose) {
-      this.imageEditorView.dispose();
-    }
+    this.imageEditorView?.dispose?.();
     this.layer = null;
 
     // Clean up the container

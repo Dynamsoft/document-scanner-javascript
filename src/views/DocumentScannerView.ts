@@ -17,7 +17,7 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
 } from "./utils/types";
-import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
+import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen, showMinimalSpinner } from "./utils/LoadingScreen";
 import { createStyle, findClosestResolutionLevel, getElement, isEmptyObject } from "./utils";
 
 const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
@@ -122,6 +122,13 @@ export interface DocumentScannerViewConfig {
    */
   _showCorrectionView?: boolean;
   /**
+   * @privateRemarks
+   * Indicates if {@link DocumentResultView} is shown.
+   *
+   * @internal
+   */
+  _showResultView?: boolean;
+  /**
    * Path to a Capture Vision template for scanning configuration.
    *
    * @public
@@ -145,7 +152,6 @@ export interface DocumentScannerViewConfig {
    * @public
    */
   container?: HTMLElement | string;
-  // consecutiveResultFramesBeforeNormalization?: number;
   /**
    * Capture Vision template names for detection and correction.
    *
@@ -237,6 +243,11 @@ interface DCEElements {
   boundsDetectionBtn: HTMLElement | null;
   smartCaptureBtn: HTMLElement | null;
   autoCropBtn: HTMLElement | null;
+  continuousScanDoneBtn: HTMLElement | null;
+  thumbnailPreview: HTMLElement | null;
+  thumbnailImg: HTMLImageElement | null;
+  floatingImage: HTMLElement | null;
+  floatingImageImg: HTMLImageElement | null;
 }
 
 // Implementation
@@ -245,6 +256,7 @@ export default class DocumentScannerView {
   private boundsDetectionEnabled: boolean = true;
   private smartCaptureEnabled: boolean = false;
   private autoCropEnabled: boolean = false;
+  private isCapturing: boolean = false;
 
   private resizeTimer: number | null = null;
 
@@ -267,12 +279,19 @@ export default class DocumentScannerView {
     boundsDetectionBtn: null,
     smartCaptureBtn: null,
     autoCropBtn: null,
+    continuousScanDoneBtn: null,
+    thumbnailPreview: null,
+    thumbnailImg: null,
+    floatingImage: null,
+    floatingImageImg: null,
   };
 
   // Scan Resolve
   private currentScanResolver?: (result: DocumentResult) => void;
 
   private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
+  private minimalSpinner: ReturnType<typeof showMinimalSpinner> | null = null;
+  private toastObserver: MutationObserver | null = null;
 
   private showScannerLoadingOverlay(message?: string) {
     const configContainer = getElement(this.config.container);
@@ -282,13 +301,10 @@ export default class DocumentScannerView {
   }
 
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
-    if (this.loadingScreen) {
-      this.loadingScreen.hide();
-      this.loadingScreen = null;
+    this.loadingScreen?.hide();
 
-      if (hideContainer) {
-        getElement(this.config.container).style.display = "none";
-      }
+    if (hideContainer) {
+      getElement(this.config.container).style.display = "none";
     }
   }
 
@@ -304,12 +320,12 @@ export default class DocumentScannerView {
     return this.config?.minVerifiedFramesForAutoCapture;
   }
 
+
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
       normalize: config.utilizedTemplateNames?.normalize || DEFAULT_TEMPLATE_NAMES.normalize,
     };
-    // this.config.consecutiveResultFramesBeforeNormalization = config.consecutiveResultFramesBeforeNormalization || 15;
   }
 
   async initialize(): Promise<void> {
@@ -331,7 +347,6 @@ export default class DocumentScannerView {
       const { cameraView, cameraEnhancer, cvRouter } = this.resources;
 
       // Set up cameraView styling
-      // cameraView.getVideoElement().style.objectPosition = "center";
       cameraView.setScanRegionMaskStyle({
         ...cameraView.getScanRegionMaskStyle(),
         lineWidth: this.config?.scanRegion?.style?.strokeWidth ?? 2,
@@ -348,7 +363,6 @@ export default class DocumentScannerView {
       filter.enableResultDeduplication(EnumCapturedResultItemType.CRIT_DETECTED_QUAD, true);
       await cvRouter.addResultFilter(filter);
 
-      // Initialize the template parameters for DL scanning4
       if (this.config.templateFilePath) {
         await cvRouter.initSettings(this.config.templateFilePath);
       }
@@ -397,9 +411,17 @@ export default class DocumentScannerView {
       boundsDetectionBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-bounds-detection"),
       smartCaptureBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-smart-capture"),
       autoCropBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-auto-crop"),
+      continuousScanDoneBtn: DCEContainer.shadowRoot.querySelector(".dce-mn-continuous-scan-done-btn"),
+      thumbnailPreview: DCEContainer.shadowRoot.querySelector(".dce-mn-thumbnail-preview"),
+      thumbnailImg: DCEContainer.shadowRoot.querySelector(".dce-mn-thumbnail-img"),
+      floatingImage: DCEContainer.shadowRoot.querySelector(".dce-mn-floating-image"),
+      floatingImageImg: DCEContainer.shadowRoot.querySelector(".dce-mn-floating-image-img"),
     };
 
     this.assignDCEClickEvents();
+
+    // Setup toast observer to hide all toast messages on desktop
+    this.setupToastObserver(DCEContainer.shadowRoot);
 
     // If showCorrectionView is false, hide smartCapture
     if (this.config._showCorrectionView === false) {
@@ -420,7 +442,18 @@ export default class DocumentScannerView {
   }
 
   private assignDCEClickEvents() {
-    if (!Object.values(this.DCE_ELEMENTS).every(Boolean)) {
+    // Check that required elements exist (continuousScanDoneBtn is optional)
+    const requiredElements = [
+      this.DCE_ELEMENTS.selectCameraBtn,
+      this.DCE_ELEMENTS.uploadImageBtn,
+      this.DCE_ELEMENTS.closeScannerBtn,
+      this.DCE_ELEMENTS.takePhotoBtn,
+      this.DCE_ELEMENTS.boundsDetectionBtn,
+      this.DCE_ELEMENTS.smartCaptureBtn,
+      this.DCE_ELEMENTS.autoCropBtn,
+    ];
+    
+    if (!requiredElements.every(Boolean)) {
       throw new Error("Camera control elements not found");
     }
 
@@ -457,19 +490,232 @@ export default class DocumentScannerView {
     this.DCE_ELEMENTS.uploadImageBtn.onclick = () => {
       this.uploadImage();
     };
+
+    // Optional: continuous scan done button
+    if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+      this.DCE_ELEMENTS.continuousScanDoneBtn.onclick = () => {
+        this.handleContinuousScanDone();
+      };
+    }
+
+    // Prevent double-tap zoom on thumbnail
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('touchend', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+    });
+
+    // Add click handler for thumbnail
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      // Only invoke callback if it's defined and we have a result
+      if (this.resources.onThumbnailClicked && this.resources.result) {
+        await this.resources.onThumbnailClicked(this.resources.result);
+      }
+    });
+
+    // Prevent double-tap zoom on torch button
+    const DCEContainer = getElement(this.config.container).children[getElement(this.config.container).children.length - 1];
+    const torchButton = DCEContainer?.shadowRoot?.querySelector('.dce-mn-torch') as HTMLElement;
+    if (torchButton) {
+      torchButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      torchButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      torchButton.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+      });
+    }
+  }
+
+  private handleContinuousScanDone() {
+    // Don't allow closing if a capture is in progress
+    if (this.isCapturing) {
+      console.warn('Cannot close during image capture');
+      return;
+    }
+
+    // Stop continuous scanning by resolving with a cancelled status
+    this.closeCamera();
+    this.currentScanResolver?.({
+      status: {
+        code: EnumResultStatus.RS_CANCELLED,
+        message: "Continuous scanning stopped by user",
+      },
+    });
+  }
+
+  private updateContinuousScanDoneButton() {
+    if (!this.DCE_ELEMENTS.continuousScanDoneBtn) return;
+
+    // Show/hide button based on completedScansCount
+    if (this.resources.completedScansCount > 0) {
+      this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
+    } else {
+      this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "none";
+    }
+
+    const textEl = this.DCE_ELEMENTS.continuousScanDoneBtn?.querySelector('.dce-mn-continuous-scan-done-text');
+    if (textEl) {
+      textEl.textContent = `Done (${this.resources.completedScansCount || 0})`;
+    }
+  }
+
+  private updateThumbnail(canvas: HTMLCanvasElement) {
+    if (!this.DCE_ELEMENTS.thumbnailPreview || !this.DCE_ELEMENTS.thumbnailImg) return;
+    if (!this.resources.enableContinuousScanning) return;
+
+    // Convert canvas to data URL and set as thumbnail image source
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    this.DCE_ELEMENTS.thumbnailImg.src = dataUrl;
+    this.DCE_ELEMENTS.thumbnailPreview.style.display = "block";
+  }
+
+  private isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  private setupToastObserver(shadowRoot: ShadowRoot) {
+    const toastElement = shadowRoot.querySelector('.dce-mn-toast') as HTMLElement;
+    if (!toastElement) return;
+
+    // Check if device is desktop (fine pointer typically indicates mouse/trackpad)
+    const isDesktop = window.matchMedia('(pointer: fine)').matches;
+    const isIOSDevice = this.isIOS();
+
+    // Hide the toast element by default on iOS and desktop to prevent any flash
+    if (isIOSDevice || isDesktop) {
+      toastElement.style.display = 'none';
+    }
+
+    // Also hide torch button on desktop with inline styles to ensure it takes precedence
+    if (isDesktop) {
+      const torchElement = shadowRoot.querySelector('.dce-mn-torch') as HTMLElement;
+      if (torchElement) {
+        torchElement.style.display = 'none';
+      }
+    }
+
+    // Helper function to check and hide/show toast based on device type
+    const checkToastContent = () => {
+      // On desktop and iOS, always hide toast messages regardless of content
+      if (isDesktop || isIOSDevice) {
+        toastElement.style.display = 'none';
+      } else {
+        // On Android mobile, allow toast to show if it has content
+        const text = toastElement.textContent || '';
+        if (text.trim()) {
+          toastElement.style.display = '';
+        }
+      }
+    };
+
+    // Create observer to watch for toast content changes
+    this.toastObserver = new MutationObserver(() => {
+      checkToastContent();
+    });
+
+    // Observe changes to the toast element and its children
+    this.toastObserver.observe(toastElement, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+      attributes: true
+    });
+
+    // Run initial check
+    checkToastContent();
+  }
+
+  private async animateFloatingImage(canvas: HTMLCanvasElement): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.DCE_ELEMENTS.floatingImage || !this.DCE_ELEMENTS.floatingImageImg || !this.DCE_ELEMENTS.thumbnailPreview || !this.DCE_ELEMENTS.thumbnailImg) {
+        resolve();
+        return;
+      }
+
+      // Convert canvas to data URL and set as floating image source
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      this.DCE_ELEMENTS.floatingImageImg.src = dataUrl;
+
+      // Hide the thumbnail image during animation (but keep the border visible)
+      this.DCE_ELEMENTS.thumbnailImg.style.opacity = "0";
+
+      // Show the floating image first (before calculating positions)
+      this.DCE_ELEMENTS.floatingImage.style.display = "block";
+      this.DCE_ELEMENTS.floatingImage.classList.remove("animating");
+
+      // Use requestAnimationFrame to ensure layout is complete before calculating positions
+      requestAnimationFrame(() => {
+        if (!this.DCE_ELEMENTS.floatingImage || !this.DCE_ELEMENTS.thumbnailPreview) {
+          resolve();
+          return;
+        }
+
+        // Calculate exact position to move to
+        const floatingRect = this.DCE_ELEMENTS.floatingImage.getBoundingClientRect();
+        const thumbnailRect = this.DCE_ELEMENTS.thumbnailPreview.getBoundingClientRect();
+
+        // Calculate the center of both elements
+        const floatingCenterX = floatingRect.left + floatingRect.width / 2;
+        const floatingCenterY = floatingRect.top + floatingRect.height / 2;
+        const thumbnailCenterX = thumbnailRect.left + thumbnailRect.width / 2;
+        const thumbnailCenterY = thumbnailRect.top + thumbnailRect.height / 2;
+
+        // Calculate translation needed
+        const translateX = thumbnailCenterX - floatingCenterX;
+        const translateY = thumbnailCenterY - floatingCenterY;
+
+        // Calculate scale to match thumbnail size
+        const scale = Math.min(thumbnailRect.width / floatingRect.width, thumbnailRect.height / floatingRect.height);
+
+        // Set CSS custom properties for the animation
+        this.DCE_ELEMENTS.floatingImage.style.setProperty('--translate-x', `${translateX}px`);
+        this.DCE_ELEMENTS.floatingImage.style.setProperty('--translate-y', `${translateY}px`);
+        this.DCE_ELEMENTS.floatingImage.style.setProperty('--scale', `${scale}`);
+
+        // Trigger reflow to ensure the custom properties are set
+        void this.DCE_ELEMENTS.floatingImage.offsetWidth;
+
+        // Start the shrinking animation
+        this.DCE_ELEMENTS.floatingImage.classList.add("animating");
+
+        // Wait for animation to complete (0.5 seconds as defined in CSS)
+        setTimeout(() => {
+          if (this.DCE_ELEMENTS.floatingImage) {
+            this.DCE_ELEMENTS.floatingImage.style.display = "none";
+            this.DCE_ELEMENTS.floatingImage.classList.remove("animating");
+          }
+          // Show the thumbnail image now that the animation is complete
+          if (this.DCE_ELEMENTS.thumbnailImg) {
+            this.DCE_ELEMENTS.thumbnailImg.style.opacity = "1";
+          }
+          resolve();
+        }, 500);
+      });
+    });
   }
 
   async handleCloseBtn() {
     this.closeCamera();
 
-    if (this.currentScanResolver) {
-      this.currentScanResolver({
-        status: {
-          code: EnumResultStatus.RS_CANCELLED,
-          message: "Cancelled",
-        },
-      });
-    }
+    this.currentScanResolver?.({
+      status: {
+        code: EnumResultStatus.RS_CANCELLED,
+        message: "Cancelled",
+      },
+    });
   }
 
   private attachOptionClickListeners() {
@@ -487,16 +733,16 @@ export default class DocumentScannerView {
     // Add click handlers to all options
     [...cameraOptions, ...resolutionOptions].forEach((option) => {
       (option as HTMLElement).onclick = () => {
-        const deviceId = option.getAttribute("data-davice-id");
+        const deviceId = option.getAttribute("data-device-id");
         const resHeight = option.getAttribute("data-height");
         const resWidth = option.getAttribute("data-width");
         if (deviceId) {
-          this.resources.cameraEnhancer.selectCamera(deviceId).then(() => {
+          this.resources.cameraEnhancer?.selectCamera(deviceId).then(() => {
             this.toggleScanGuide(true);
           });
         } else if (resHeight && resWidth) {
           this.resources.cameraEnhancer
-            .setResolution({
+            ?.setResolution({
               width: parseInt(resWidth),
               height: parseInt(resHeight),
             })
@@ -523,12 +769,12 @@ export default class DocumentScannerView {
     const cameraOptions = settingsContainer.querySelectorAll(".dce-mn-camera-option");
     const resOptions = settingsContainer.querySelectorAll(".dce-mn-resolution-option");
 
-    const selectedCamera = this.resources.cameraEnhancer.getSelectedCamera();
-    const selectedResolution = this.resources.cameraEnhancer.getResolution();
+    const selectedCamera = this.resources.cameraEnhancer?.getSelectedCamera();
+    const selectedResolution = this.resources.cameraEnhancer?.getResolution();
 
     cameraOptions.forEach((options) => {
       const o = options as HTMLElement;
-      if (o.getAttribute("data-davice-id") === selectedCamera?.deviceId) {
+      if (o.getAttribute("data-device-id") === selectedCamera?.deviceId) {
         o.style.border = "2px solid #fe814a";
       } else {
         o.style.border = "none";
@@ -606,7 +852,13 @@ export default class DocumentScannerView {
         return;
       }
 
-      this.closeCamera(false);
+      // Only close camera in single scan mode
+      if (!this.resources.enableContinuousScanning) {
+        this.closeCamera(false);
+      } else {
+        // In continuous mode, stop capturing during upload processing
+        this.resources.cvRouter.stopCapturing();
+      }
 
       // Convert file to blob
       const { blob } = await this.fileToBlob(file);
@@ -655,11 +907,26 @@ export default class DocumentScannerView {
       // Update shared resources
       this.resources.onResultUpdated?.(result);
 
-      // Resolve scan promise
-      this.currentScanResolver(result);
+      // In continuous scanning mode, treat upload like a capture
+      if (this.resources.enableContinuousScanning) {
+        // Only show animation if not routing through correction/result views
+        if (!this.config._showCorrectionView && !this.config._showResultView) {
+          // No correction/result views - show animation and stay in scanner
+          const canvas = correctedImageResult.toCanvas();
+          this.updateThumbnail(canvas);
+          await this.animateFloatingImage(canvas);
 
-      // Done processing
-      this.hideScannerLoadingOverlay(true);
+          // Restart capturing after upload processing
+          await this.resources.cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+        }
+
+        this.hideScannerLoadingOverlay(false);
+      } else {
+        this.hideScannerLoadingOverlay(true);
+      }
+
+      // Resolve scan promise to go through correction/result views
+      this.currentScanResolver(result);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -732,6 +999,10 @@ export default class DocumentScannerView {
     // If we're turning off bounds detection, ensure smart capture is turned off
     if (!newBoundsDetectionState) {
       await this.toggleSmartCapture(false);
+      // Also turn off auto crop when correction view is disabled
+      if (this.config._showCorrectionView === false) {
+        await this.toggleAutoCrop(false);
+      }
     }
 
     const { cvRouter } = this.resources;
@@ -840,7 +1111,7 @@ export default class DocumentScannerView {
   private calculateScanRegion() {
     const { cameraEnhancer, cameraView } = this.resources;
 
-    if (!cameraEnhancer || !cameraEnhancer.isOpen()) return;
+    if (!cameraEnhancer?.isOpen()) return;
 
     // Get visible region of video
     const visibleRegion = cameraView.getVisibleRegionOfVideo({ inPixels: true });
@@ -927,32 +1198,70 @@ export default class DocumentScannerView {
 
   async openCamera(): Promise<void> {
     try {
+      const { cameraEnhancer, cameraView } = this.resources;
+      const configContainer = getElement(this.config.container);
+
+      // In continuous scanning mode, if camera is already open, skip reinitialization
+      if (this.resources.enableContinuousScanning && cameraEnhancer?.isOpen()) {
+        configContainer.style.display = "block";
+        // Just update the done button and return early
+        if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+          if (this.resources.completedScansCount > 0) {
+            this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
+            this.updateContinuousScanDoneButton();
+          } else {
+            this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "none";
+          }
+        }
+        // Restart capturing if it was stopped (when returning from correction/result view)
+        if ((this.resources.cvRouter as any)._isPauseScan) {
+          await this.resources.cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+        }
+        return;
+      }
+
       this.showScannerLoadingOverlay("Initializing camera...");
 
-      const { cameraEnhancer, cameraView } = this.resources;
-
-      const configContainer = getElement(this.config.container);
       configContainer.style.display = "block";
 
-      if (!cameraEnhancer.isOpen()) {
+      if (!cameraEnhancer?.isOpen()) {
         const currentCameraView = cameraView.getUIElement();
         if (!currentCameraView.parentElement) {
           configContainer.append(currentCameraView);
         }
 
-        await cameraEnhancer.open();
-      } else if (cameraEnhancer.isPaused()) {
-        await cameraEnhancer.resume();
+        try {
+          await cameraEnhancer.open();
+        } catch (error: any) {
+          // Handle camera access errors (e.g., camera already in use by another tab)
+          const errorMessage = error?.message || error;
+          if (errorMessage.includes('in use') || errorMessage.includes('not available')) {
+            throw new Error('Camera is already in use by another tab or application. Please close other tabs/applications using the camera and try again.');
+          }
+          throw error;
+        }
+      } else if (cameraEnhancer?.isPaused()) {
+        try {
+          await cameraEnhancer.resume();
+        } catch (error) {
+          console.warn('Camera error (openCamera - resume after pause):', error);
+        }
       }
 
       // Try to set default as 2k
-      await cameraEnhancer.setResolution({
-        width: 2560,
-        height: 1440,
-      });
+      if (cameraEnhancer?.isOpen()) {
+        try {
+          await cameraEnhancer.setResolution({
+            width: 2560,
+            height: 1440,
+          });
+        } catch (error) {
+          console.warn('Camera error (openCamera - setResolution):', error);
+        }
+      }
 
       // Assign boundsDetection, smartCapture, and takePhoto element
-      if (!this.initializedDCE && cameraEnhancer.isOpen()) {
+      if (!this.initializedDCE && cameraEnhancer?.isOpen()) {
         await this.initializeElements();
       }
 
@@ -963,6 +1272,16 @@ export default class DocumentScannerView {
       await this.toggleBoundsDetection(this.boundsDetectionEnabled);
       await this.toggleSmartCapture(this.smartCaptureEnabled);
       await this.toggleAutoCrop(this.autoCropEnabled);
+
+      // Show/hide and update continuous scan done button
+      if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+        if (this.resources.enableContinuousScanning && this.resources.completedScansCount > 0) {
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
+          this.updateContinuousScanDoneButton();
+        } else {
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "none";
+        }
+      }
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -984,10 +1303,10 @@ export default class DocumentScannerView {
     // Remove resize event listener
     window.removeEventListener("resize", this.handleResize);
     // Clear any existing resize timer
-    if (this.resizeTimer) {
-      window.clearTimeout(this.resizeTimer);
-      this.resizeTimer = null;
-    }
+    this.resizeTimer && window.clearTimeout(this.resizeTimer);
+
+    // Disconnect toast observer if it exists
+    this.toastObserver?.disconnect();
 
     const { cameraEnhancer, cameraView } = this.resources;
 
@@ -998,13 +1317,23 @@ export default class DocumentScannerView {
       configContainer.removeChild(cameraView.getUIElement());
     }
 
-    cameraEnhancer.close();
+    try {
+      cameraEnhancer?.close();
+    } catch (error) {
+      // Silently handle camera close errors - camera may already be closed
+      console.warn('Camera error (closeCamera):', error);
+    }
     this.stopCapturing();
   }
 
   pauseCamera() {
     const { cameraEnhancer } = this.resources;
-    cameraEnhancer.pause();
+    try {
+      cameraEnhancer?.pause();
+    } catch (error) {
+      // Silently handle camera pause errors
+      console.warn('Camera error (pauseCamera):', error);
+    }
   }
 
   stopCapturing() {
@@ -1024,6 +1353,12 @@ export default class DocumentScannerView {
   }
 
   async takePhoto() {
+    // Prevent concurrent captures
+    if (this.isCapturing) {
+      return;
+    }
+    this.isCapturing = true;
+
     try {
       const { cameraEnhancer, onResultUpdated } = this.resources;
 
@@ -1031,7 +1366,7 @@ export default class DocumentScannerView {
       const shouldUseLatestFrame =
         !this.boundsDetectionEnabled || (this.boundsDetectionEnabled && this.capturedResultItems?.length <= 1); // Starts at one bc result always includes original image
 
-      this.originalImageData = shouldUseLatestFrame ? cameraEnhancer.fetchImage() : this.originalImageData;
+      this.originalImageData = shouldUseLatestFrame ? cameraEnhancer?.fetchImage() : this.originalImageData;
 
       // Reset captured items if not using bounds detection
       let correctedImageResult = null;
@@ -1065,20 +1400,67 @@ export default class DocumentScannerView {
       }
 
       const flowType = this.getFlowType();
-      // turn off smart capture (and also auto crop) before closin camera
-      await this.toggleSmartCapture(false);
 
-      // Clean up camera and capture
-      this.closeCamera();
+      // Show loading indicator (use minimal spinner for continuous scanning, full overlay otherwise)
+      if (this.resources.enableContinuousScanning) {
+        // Clean up any existing spinner first
+        if (this.minimalSpinner) {
+          this.minimalSpinner.hide();
+          this.minimalSpinner = null;
+        }
 
-      // Show loading screen
-      this.showScannerLoadingOverlay("Processing image...");
+        const configContainer = getElement(this.config.container);
+        this.minimalSpinner = showMinimalSpinner(configContainer);
+        // Disable the capture button during processing
+        if (this.DCE_ELEMENTS.takePhotoBtn) {
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'none';
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '0.5';
+        }
+        // Disable the done button during processing
+        if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'none';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '0.5';
+        }
+      } else {
+        this.showScannerLoadingOverlay("Processing image...");
+      }
+
+      // Pause camera before normalizing image (only in continuous scanning mode)
+      if (this.resources.enableContinuousScanning) {
+        this.resources.cameraEnhancer?.pause();
+      }
 
       // Retrieve corrected image result
       correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
 
-      // Hide loading screen
-      this.hideScannerLoadingOverlay(true);
+      // Resume camera after normalization (only in continuous scanning mode)
+      if (this.resources.enableContinuousScanning) {
+        await this.resources.cameraEnhancer?.resume();
+      }
+
+      // Clean up camera and capture (only in single scan mode)
+      if (!this.resources.enableContinuousScanning) {
+        // turn off smart capture (and also auto crop) before closing camera
+        await this.toggleSmartCapture(false);
+        this.closeCamera();
+      }
+
+      // Hide loading indicator
+      if (this.resources.enableContinuousScanning) {
+        this.minimalSpinner?.hide();
+        // Re-enable the capture button after processing
+        if (this.DCE_ELEMENTS.takePhotoBtn) {
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'auto';
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '1';
+        }
+        // Re-enable the done button after processing
+        if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'auto';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '1';
+        }
+      } else {
+        this.hideScannerLoadingOverlay(true);
+      }
 
       const result: DocumentResult = {
         status: {
@@ -1091,6 +1473,26 @@ export default class DocumentScannerView {
         _flowType: flowType,
       };
 
+      // Show animation in continuous scanning mode
+      if (this.resources.enableContinuousScanning) {
+        // Only show animation if not routing through correction/result views
+        if (!this.config._showCorrectionView && !this.config._showResultView) {
+          const canvas = correctedImageResult.toCanvas();
+
+          // Update thumbnail first so we can calculate its position
+          this.updateThumbnail(canvas);
+
+          // Pause camera during animation
+          this.resources.cameraEnhancer?.pause();
+
+          // Show floating image animation and wait for it to complete
+          await this.animateFloatingImage(canvas);
+
+          // Resume camera after animation
+          await this.resources.cameraEnhancer?.resume();
+        }
+      }
+
       // Emit result through shared resources
       onResultUpdated?.(result);
 
@@ -1101,7 +1503,31 @@ export default class DocumentScannerView {
       console.error(errMsg);
       alert(errMsg);
 
-      this.closeCamera();
+      // Clean up spinner/overlay and re-enable button
+      if (this.resources.enableContinuousScanning) {
+        this.minimalSpinner?.hide();
+        // Re-enable the capture button
+        if (this.DCE_ELEMENTS.takePhotoBtn) {
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'auto';
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '1';
+        }
+        // Re-enable the done button
+        if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'auto';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '1';
+        }
+        // Resume camera if it was paused (check if camera enhancer still exists)
+        if (this.resources.cameraEnhancer?.isPaused()) {
+          try {
+            await this.resources.cameraEnhancer.resume();
+          } catch (error) {
+            console.warn('Camera error (after correction/result - resume):', error);
+          }
+        }
+      } else {
+        this.closeCamera();
+      }
+
       const result = {
         status: {
           code: EnumResultStatus.RS_FAILED,
@@ -1109,6 +1535,9 @@ export default class DocumentScannerView {
         },
       };
       this.currentScanResolver(result);
+    } finally {
+      // Reset capturing flag
+      this.isCapturing = false;
     }
   }
 
@@ -1120,7 +1549,7 @@ export default class DocumentScannerView {
     const originalImage = result.items.filter(
       (item) => item.type === EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE
     ) as OriginalImageResultItem[];
-    this.originalImageData = originalImage.length && originalImage[0].imageData;
+    this.originalImageData = originalImage[0]?.imageData;
 
     if (this.smartCaptureEnabled || this.autoCropEnabled) {
       this.handleAutoCaptureMode(result);
@@ -1175,7 +1604,13 @@ export default class DocumentScannerView {
 
         // By default, cameraEnhancer captures grayscale images to optimize performance.
         // To capture RGB Images, we set the Pixel Format to EnumImagePixelFormat.IPF_ABGR_8888
-        cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
+        if (cameraEnhancer?.isOpen()) {
+          try {
+            cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
+          } catch (error) {
+            console.warn('Camera error (takePhoto - setPixelFormat):', error);
+          }
+        }
 
         // Reset crossVerificationCount
         this.crossVerificationCount = 0;

@@ -7,7 +7,7 @@
     <title>Dynamsoft Document Scanner - Hello World</title>
     <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.3.1/dist/dds.bundle.js"></script> -->
     <!-- To use locally: -->
-    <script src="../dist/dds.bundle.js"></script>
+    <script src="../../dist/dds.bundle.js"></script>
   </head>
 
   <body>
@@ -21,24 +21,27 @@
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
         scannerViewConfig: {
-          cameraEnhancerUIPath: "../dist/document-scanner.ui.html", // Use local UI file
+          cameraEnhancerUIPath: "../../dist/document-scanner.ui.html", // Use local UI file
           enableAutoCropMode: true,
           enableSmartCaptureMode: true,
+          showSubfooter: false, // Hide the Detect Borders, Smart Capture, and Auto Crop buttons
         },
+        showCorrectionView: false, // Optional: skip correction view after each scan
+        showResultView: false, // Optional: skip result view after each scan
+        enableContinuousScanning: true,
+        onDocumentScanned: async (result) => {
+          // Process each scanned document
+          const canvas = result.correctedImageResult.toCanvas();
+          document.getElementById("results").appendChild(canvas);
+        },
+        onThumbnailClicked: async (result) => {
+          // Optional: handle thumbnail click event
+          console.log('Thumbnail clicked', result);
+        }
       });
       (async () => {
         // Launch the scanner and wait for the result
         const result = await documentScanner.launch();
-        console.log(result);
-
-        // Clear the result container and display the scanned result as a canvas
-        if (result?.correctedImageResult) {
-          resultContainer.innerHTML = ""; // Clear placeholder content
-          const canvas = result.correctedImageResult.toCanvas();
-          resultContainer.appendChild(canvas);
-        } else {
-          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
-        }
       })();
     </script>
   </body>

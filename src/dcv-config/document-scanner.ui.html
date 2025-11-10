@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; width: 100%; height: 100%; min-width: 100px; min-height: 100px; background: #000">
+  <div style="position: relative; width: 100%; height: 100%; min-width: 100px; min-height: 100px; background: #000; user-select: none">
     <div class="dce-macro-use-mobile-native-like-ui" style="display: none">
       <div class="dce-header">
         <div class="dce-mn-resolution-box" title="camera settings">720p</div>
@@ -292,6 +292,9 @@
             "
           ></div>
         </div>
+        <div class="dce-mn-floating-image" style="display: none;">
+          <img class="dce-mn-floating-image-img" alt="Captured" />
+        </div>
       </div>
       <div class="dce-subfooter">
         <div class="dce-mn-bounds-detection" title="Detect Borders">
@@ -487,20 +490,20 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathbounds-detection-on">
-                  <rect id="Rectangle_2800" data-name="Rectangle 2800" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathsmart-capture-on">
+                  <rect id="Rectangle_2800_smart_capture_on" data-name="Rectangle 2800" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+              <g id="Group_613_smart_capture_on" data-name="Group 613" clip-path="url(#clip-pathsmart-capture-on)">
+                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
                 <path
-                  id="Path_1575"
+                  id="Path_1575_smart_capture_on"
                   data-name="Path 1575"
                   d="M6.843,7.5a2.447,2.447,0,0,0-1.9.737A2.927,2.927,0,0,0,4.27,10.29a3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.431,2.431,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065A2.911,2.911,0,0,0,8.7,8.256,2.38,2.38,0,0,0,6.843,7.5m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372,1.171,1.171,0,0,1,1.047-.479Q8.2,8.439,8.2,10.29q0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1576"
+                  id="Path_1576_smart_capture_on"
                   data-name="Path 1576"
                   d="M13.509,7.5a2.32,2.32,0,0,0-1,.21,1.591,1.591,0,0,0-.693.6h-.059L11.6,7.6h-.9V13h1.148V10.31a2.371,2.371,0,0,1,.336-1.441,1.27,1.27,0,0,1,1.064-.43.974.974,0,0,1,.8.308,1.451,1.451,0,0,1,.252.933V13h1.152V9.48A1.733,1.733,0,0,0,13.509,7.5"
                   fill="#fff"
@@ -516,26 +519,26 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathdce-mn-bounds-off">
-                  <rect id="Rectangle_2801" data-name="Rectangle 2801" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathsmart-capture-off">
+                  <rect id="Rectangle_2801_smart_capture_off" data-name="Rectangle 2801" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+              <g id="Group_614_smart_capture_off" data-name="Group 614" clip-path="url(#clip-pathsmart-capture-off)">
+                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
                 <path
-                  id="Path_1578"
+                  id="Path_1578_smart_capture_off"
                   data-name="Path 1578"
                   d="M5.918,8.279a2.447,2.447,0,0,0-1.9.737,2.927,2.927,0,0,0-.673,2.051,3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.43,2.43,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065,2.915,2.915,0,0,0-.684-2.034,2.38,2.38,0,0,0-1.855-.754m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372A1.171,1.171,0,0,1,5.9,9.216q1.377,0,1.377,1.851,0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1579"
+                  id="Path_1579_smart_capture_off"
                   data-name="Path 1579"
                   d="M11.346,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532h1.152V9.245h1.319V8.376H11.167V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1580"
+                  id="Path_1580_smart_capture_off"
                   data-name="Path 1580"
                   d="M14.974,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532H14.8V9.245h1.319V8.376H14.8V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
@@ -589,20 +592,20 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathbounds-detection-on">
-                  <rect id="Rectangle_2800" data-name="Rectangle 2800" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathauto-crop-on">
+                  <rect id="Rectangle_2800_auto_crop_on" data-name="Rectangle 2800" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+              <g id="Group_613_auto_crop_on" data-name="Group 613" clip-path="url(#clip-pathauto-crop-on)">
+                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
                 <path
-                  id="Path_1575"
+                  id="Path_1575_auto_crop_on"
                   data-name="Path 1575"
                   d="M6.843,7.5a2.447,2.447,0,0,0-1.9.737A2.927,2.927,0,0,0,4.27,10.29a3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.431,2.431,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065A2.911,2.911,0,0,0,8.7,8.256,2.38,2.38,0,0,0,6.843,7.5m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372,1.171,1.171,0,0,1,1.047-.479Q8.2,8.439,8.2,10.29q0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1576"
+                  id="Path_1576_auto_crop_on"
                   data-name="Path 1576"
                   d="M13.509,7.5a2.32,2.32,0,0,0-1,.21,1.591,1.591,0,0,0-.693.6h-.059L11.6,7.6h-.9V13h1.148V10.31a2.371,2.371,0,0,1,.336-1.441,1.27,1.27,0,0,1,1.064-.43.974.974,0,0,1,.8.308,1.451,1.451,0,0,1,.252.933V13h1.152V9.48A1.733,1.733,0,0,0,13.509,7.5"
                   fill="#fff"
@@ -618,26 +621,26 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathdce-mn-bounds-off">
-                  <rect id="Rectangle_2801" data-name="Rectangle 2801" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathauto-crop-off">
+                  <rect id="Rectangle_2801_auto_crop_off" data-name="Rectangle 2801" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+              <g id="Group_614_auto_crop_off" data-name="Group 614" clip-path="url(#clip-pathauto-crop-off)">
+                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
                 <path
-                  id="Path_1578"
+                  id="Path_1578_auto_crop_off"
                   data-name="Path 1578"
                   d="M5.918,8.279a2.447,2.447,0,0,0-1.9.737,2.927,2.927,0,0,0-.673,2.051,3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.43,2.43,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065,2.915,2.915,0,0,0-.684-2.034,2.38,2.38,0,0,0-1.855-.754m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372A1.171,1.171,0,0,1,5.9,9.216q1.377,0,1.377,1.851,0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1579"
+                  id="Path_1579_auto_crop_off"
                   data-name="Path 1579"
                   d="M11.346,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532h1.152V9.245h1.319V8.376H11.167V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1580"
+                  id="Path_1580_auto_crop_off"
                   data-name="Path 1580"
                   d="M14.974,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532H14.8V9.245h1.319V8.376H14.8V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
@@ -673,6 +676,12 @@
               </g>
             </g>
           </svg>
+        </div>
+        <div class="dce-mn-continuous-scan-done-btn" title="Finish Scanning" style="display: none;">
+          <span class="dce-mn-continuous-scan-done-text">Done (0)</span>
+        </div>
+        <div class="dce-mn-thumbnail-preview" style="display: none;">
+          <img class="dce-mn-thumbnail-img" alt="Last captured" />
         </div>
       </div>
       <div class="dce-mn-zoom">- <span>1.0X</span> -</div>
@@ -820,6 +829,9 @@
       background-color: #323234;
       display: flex;
       align-items: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .dce-mn-torch {
@@ -859,6 +871,7 @@
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
       stroke: white;
+      stroke-width: 4;
     }
 
     .dce-mn-upload-image-icon {
@@ -1034,6 +1047,98 @@
       }
     }
 
+    .dce-mn-continuous-scan-done-btn {
+      position: absolute;
+      left: 75%;
+      bottom: 3rem;
+      background-color: #fe8e14;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 1.5rem;
+      font-family: Verdana;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s ease;
+      transform: translate(-50%, 50%);
+    }
+
+    .dce-mn-continuous-scan-done-btn:hover {
+      opacity: 0.9;
+    }
+
+    .dce-mn-continuous-scan-done-text {
+      white-space: nowrap;
+    }
+
+    .dce-mn-thumbnail-preview {
+      position: absolute;
+      left: 25%;
+      bottom: 3rem;
+      transform: translate(-50%, 50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid #fe8e14;
+      background-color: rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+
+    .dce-mn-thumbnail-preview:hover {
+      opacity: 0.8;
+    }
+
+    .dce-mn-thumbnail-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .dce-mn-floating-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dce-mn-floating-image-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    @keyframes shrinkToThumbnail {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0.3;
+        transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scale, 0.1));
+      }
+    }
+
+    .dce-mn-floating-image.animating {
+      animation: shrinkToThumbnail 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      transform-origin: center center;
+    }
+
     .dce-mn-zoom {
       position: absolute;
       font-size: max(1vmin, 8px);
@@ -1066,6 +1171,17 @@
       border-radius: max(0.5vmin, 4px);
       background: rgba(100, 100, 100, 0.5);
       pointer-events: none;
+    }
+
+    /* Hide toast and torch on desktop devices (fine pointer typically indicates desktop) */
+    @media (pointer: fine) {
+      .dce-mn-toast {
+        display: none;
+      }
+
+      .dce-mn-torch {
+        display: none !important;
+      }
     }
 
     .dce-mn-msg-poweredby {
@@ -1122,6 +1238,9 @@
 
       .dce-mn-close {
         top: 12px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
       }
 
       .dce-mn-select-camera-icon {
@@ -1156,6 +1275,17 @@
         bottom: 12px;
         left: 12px;
         width: 24px;
+      }
+
+      /* Hide toast and torch on desktop devices in landscape mode */
+      @media (pointer: fine) {
+        .dce-mn-toast {
+          display: none !important;
+        }
+
+        .dce-mn-torch {
+          display: none !important;
+        }
       }
 
       .dce-footer {
@@ -1224,6 +1354,27 @@
       .dce-mn-toast {
         bottom: auto;
         top: 3rem;
+      }
+
+      .dce-mn-continuous-scan-done-btn {
+        left: auto;
+        right: 3rem;
+        top: 75%;
+        bottom: auto;
+        transform: translate(50%, -50%);
+        padding: 0.4rem 1rem;
+        font-size: 11px;
+      }
+
+      .dce-mn-thumbnail-preview {
+        left: auto;
+        right: auto;
+        bottom: auto;
+        top: 25%;
+        left: 3rem;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
       }
     }
   </style>

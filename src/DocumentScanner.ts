@@ -144,6 +144,75 @@ export interface DocumentScannerConfig {
    * @public
    */
   showCorrectionView?: boolean;
+  /**
+   * Enable continuous scanning mode where the scanner loops back after each successful scan instead of exiting. {@link DocumentScanner.launch()} only resolves to the last scanned result. Use with {@link enableContinuousScanning} to get scan results.
+   *
+   * @remarks
+   * When enabled:
+   * - The scanner automatically loops back to capture another document after each successful scan
+   * - The {@link onDocumentScanned} callback triggers after each scan with the result; this is the only way to get the scanned results as {@link DocumentScanner.launch()} only gives the last scanned result
+   * - Users can exit by clicking the close button (X) or calling {@link DocumentScanner.stopContinuousScanning()}
+   * - The DocumentScanner only keeps the most recent scan result
+   *
+   * @defaultValue false
+   * @public
+   */
+  enableContinuousScanning?: boolean;
+  /**
+   * Callback invoked after each successful scan in continuous scanning mode.
+   *
+   * @remarks
+   * This callback is only called when {@link enableContinuousScanning} is true. The scanner loops back to capture another document after this callback completes, and the {@link DocumentResult} containing the original image, corrected image, detected boundaries, and scan status.
+   *
+   * @param result {@link DocumentResult} - The result of the scan
+   *
+   * @example
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE",
+   *     enableContinuousScanning: true,
+   *     onDocumentScanned: async (result) => {
+   *         // Process each scanned document
+   *         const canvas = result.correctedImageResult.toCanvas();
+   *         document.getElementById("results").appendChild(canvas);
+   *     }
+   * });
+   * ```
+   *
+   * @public
+   */
+  onDocumentScanned?: (result: DocumentResult) => void | Promise<void>;
+  /**
+   * Callback invoked when the thumbnail preview is clicked in continuous scanning mode.
+   *
+   * @remarks
+   * This callback is only invoked when:
+   * - {@link enableContinuousScanning} is enabled
+   * - {@link showCorrectionView} is disabled
+   * - {@link showResultView} is disabled
+   *
+   * The thumbnail preview shows the most recently scanned document. By default, clicking it does nothing unless this callback is defined, allowing you to implement custom behavior like re-editing the image.
+   *
+   * @param result {@link DocumentResult} - The result of the last scanned document
+   *
+   * @example
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE",
+   *     enableContinuousScanning: true,
+   *     showCorrectionView: false,
+   *     showResultView: false,
+   *     onThumbnailClicked: async (result) => {
+   *         // Handle thumbnail click event
+   *         console.log('Thumbnail clicked', result);
+   *         // Could open a custom editor, display metadata, etc.
+   *     }
+   * });
+   * ```
+   *
+   * @public
+   */
+  onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
 }
 
 export interface SharedResources {
@@ -152,6 +221,9 @@ export interface SharedResources {
   cameraView?: CameraView;
   result?: DocumentResult;
   onResultUpdated?: (result: DocumentResult) => void;
+  enableContinuousScanning?: boolean;
+  completedScansCount?: number;
+  onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
 }
 
 /**
@@ -164,6 +236,7 @@ class DocumentScanner {
   private resources: Partial<SharedResources> = {};
   private isInitialized = false;
   private isCapturing = false;
+  private shouldStopContinuousScanning = false; // Signals to break out of continuous scanning
 
   private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
 
@@ -179,14 +252,11 @@ class DocumentScanner {
    * @privateRemark
    */
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
-    if (this.loadingScreen) {
-      this.loadingScreen.hide();
-      this.loadingScreen = null;
+    this.loadingScreen?.hide();
 
-      if (hideContainer) {
-        const configContainer = getElement(this.config.scannerViewConfig.container);
-        configContainer.style.display = "none";
-      }
+    if (hideContainer) {
+      const configContainer = getElement(this.config.scannerViewConfig.container);
+      configContainer.style.display = "none";
     }
   }
 
@@ -241,6 +311,9 @@ class DocumentScanner {
       this.resources.onResultUpdated = (result) => {
         this.resources.result = result;
       };
+      this.resources.enableContinuousScanning = this.config.enableContinuousScanning || false;
+      this.resources.completedScansCount = 0;
+      this.resources.onThumbnailClicked = this.config.onThumbnailClicked;
 
       const components: {
         scannerView?: DocumentScannerView;
@@ -351,20 +424,23 @@ class DocumentScanner {
   }
 
   private validateViewConfigs() {
-    // Only validate if there's no main container
+    // Only validate if there's no main container AND default container won't be created
     if (!this.config.container) {
-      // Check correction view
-      if (this.config.showCorrectionView && !this.config.correctionViewConfig?.container) {
-        throw new Error(
-          "CorrectionView container is required when showCorrectionView is true and no main container is provided"
-        );
-      }
+      // Only throw errors if default container won't be created
+      if (!this.shouldCreateDefaultContainer()) {
+        // Check correction view
+        if (this.config.showCorrectionView && !this.config.correctionViewConfig?.container) {
+          throw new Error(
+            "CorrectionView container is required when showCorrectionView is true and no main container is provided"
+          );
+        }
 
-      // Check result view
-      if (this.config.showResultView && !this.config.resultViewConfig?.container) {
-        throw new Error(
-          "ResultView container is required when showResultView is true and no main container is provided"
-        );
+        // Check result view
+        if (this.config.showResultView && !this.config.resultViewConfig?.container) {
+          throw new Error(
+            "ResultView container is required when showResultView is true and no main container is provided"
+          );
+        }
       }
     }
   }
@@ -432,6 +508,7 @@ class DocumentScanner {
       templateFilePath: baseConfig.templateFilePath,
       utilizedTemplateNames: baseConfig.utilizedTemplateNames,
       _showCorrectionView: this.showCorrectionView(),
+      _showResultView: this.showResultView(),
     };
     const correctionViewConfig = this.showCorrectionView()
       ? {
@@ -474,12 +551,72 @@ class DocumentScanner {
         width: "100%",
         display: "none",
         position: "relative",
+        userSelect: "none",
       });
 
       mainContainer.append(viewContainer);
       containers[view] = viewContainer;
       return containers;
     }, {} as Record<string, HTMLElement>);
+  }
+
+  /**
+   * Stop continuous scanning and exit the scanning loop.
+   *
+   * @remarks
+   * When called with {@link DocumentScannerConfig.enableContinuousScanning} enabled and {@link launch} running, signal the scanner to stop looping and return from {@link launch} with the last scanned result.
+   *
+   * This provides an alternative to using the close button (X) for exiting continuous scanning mode,
+   * allowing you to implement custom exit logic based on conditions like:
+   * - Maximum number of scanned documents reached
+   * - Time limits
+   * - User interaction with custom UI elements
+   * - External events or triggers
+   *
+   * @example
+   * Stop after scanning 5 documents:
+   * ```javascript
+   * let scannedCount = 0;
+   * const scanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY",
+   *     enableContinuousScanning: true,
+   *     onDocumentScanned: async (result) => {
+   *         scannedCount++;
+   *         console.log(`Scanned document ${scannedCount}`);
+   *         
+   *         if (scannedCount >= 5) {
+   *             scanner.stopContinuousScanning();
+   *         }
+   *     }
+   * });
+   * 
+   * await scanner.launch(); // Exits after 5 scans
+   * ```
+   *
+   * @example
+   * Stop from external button:
+   * ```javascript
+   * const scanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY",
+   *     enableContinuousScanning: true,
+   *     onDocumentScanned: async (result) => {
+   *         // Process each scanned document
+   *         saveDocument(result);
+   *     }
+   * });
+   * 
+   * // Bind to custom stop button
+   * document.getElementById('stopBtn').addEventListener('click', () => {
+   *     scanner.stopContinuousScanning();
+   * });
+   * 
+   * await scanner.launch(); // Will exit when stopBtn is clicked
+   * ```
+   *
+   * @public
+   */
+  stopContinuousScanning(): void {
+    this.shouldStopContinuousScanning = true;
   }
 
   /**
@@ -494,33 +631,18 @@ class DocumentScanner {
    * @public
    */
   dispose(): void {
-    if (this.scanResultView) {
-      this.scanResultView.dispose();
-      this.scanResultView = null;
-    }
+    this.scanResultView?.dispose();
 
-    if (this.correctionView) {
-      this.correctionView.dispose();
-      this.correctionView = null;
-    }
+    this.correctionView?.dispose();
 
     this.scannerView = null;
 
     // Dispose resources
-    if (this.resources.cameraEnhancer) {
-      this.resources.cameraEnhancer.dispose();
-      this.resources.cameraEnhancer = null;
-    }
+    this.resources.cameraEnhancer?.dispose();
 
-    if (this.resources.cameraView) {
-      this.resources.cameraView.dispose();
-      this.resources.cameraView = null;
-    }
+    this.resources.cameraView?.dispose();
 
-    if (this.resources.cvRouter) {
-      this.resources.cvRouter.dispose();
-      this.resources.cvRouter = null;
-    }
+    this.resources.cvRouter?.dispose();
 
     this.resources.result = null;
     this.resources.onResultUpdated = null;
@@ -654,10 +776,103 @@ class DocumentScanner {
       return {
         status: {
           code: EnumResultStatus.RS_FAILED,
-          message: `Failed to process image: ${error.message || error}`,
+          message: `Failed to process image: ${error?.message || error}`,
         },
       };
     }
+  }
+
+  /**
+   * Perform a single scan operation.
+   * 
+   * @param file - Optional file to process instead of using camera
+   * @returns {@link DocumentResult} - Promise with the document result
+   * @private
+   */
+  private async performSingleScan(file?: File): Promise<DocumentResult> {
+    const { components } = await this.initialize();
+
+    if (this.config.container) {
+      getElement(this.config.container).style.display = "block";
+    }
+
+    // Handle direct file upload if provided
+    if (file) {
+      components.scannerView = null;
+      await this.processUploadedFile(file);
+    }
+
+    // Special case handling for direct views with existing results
+    if (!components.scannerView && this.resources.result) {
+      if (components.correctionView && !components.scanResultView) return await components.correctionView.launch();
+      if (components.scanResultView && !components.correctionView) return await components.scanResultView.launch();
+      if (components.scanResultView && components.correctionView) {
+        await components.correctionView.launch();
+        return await components.scanResultView.launch();
+      }
+    }
+
+    // Scanner view is required if no existing result
+    if (!components.scannerView && !this.resources.result) {
+      throw new Error("Scanner view is required when no previous result exists");
+    }
+
+    // Main Flow
+    if (components.scannerView) {
+      const scanResult = await components.scannerView.launch();
+
+      if (scanResult?.status.code !== EnumResultStatus.RS_SUCCESS) {
+        return {
+          status: {
+            code: scanResult?.status.code,
+            message: scanResult?.status.message || "Failed to capture image",
+          },
+        };
+      }
+
+      // Route based on enabled views
+      // All views enabled
+      if (components.correctionView && components.scanResultView) {
+        // Stop capturing before showing correction view
+        if (components.scannerView) {
+          components.scannerView.stopCapturing();
+        }
+        // Hide scanner view before showing correction view
+        if (components.scannerView && this.config.scannerViewConfig?.container) {
+          getElement(this.config.scannerViewConfig.container).style.display = "none";
+        }
+        await components.correctionView.launch();
+        return await components.scanResultView.launch();
+      }
+
+      // No result view
+      if (components.correctionView && !components.scanResultView) {
+        // Stop capturing before showing correction view
+        if (components.scannerView) {
+          components.scannerView.stopCapturing();
+        }
+        // Hide scanner view before showing correction view
+        if (components.scannerView && this.config.scannerViewConfig?.container) {
+          getElement(this.config.scannerViewConfig.container).style.display = "none";
+        }
+        return await components.correctionView.launch();
+      }
+      // No correction view
+      if (components.scanResultView && !components.correctionView) {
+        // Stop capturing before showing result view
+        if (components.scannerView) {
+          components.scannerView.stopCapturing();
+        }
+        // Hide scanner view before showing result view
+        if (components.scannerView && this.config.scannerViewConfig?.container) {
+          getElement(this.config.scannerViewConfig.container).style.display = "none";
+        }
+        return await components.scanResultView.launch();
+      }
+    }
+
+    // If no correction or result views, return current result
+    return this.resources.result;
   }
 
   /**
@@ -665,6 +880,8 @@ class DocumentScanner {
    *
    * @remarks
    * {@link File | Passing a file path of an image} to `file` allows scanning from the image and bypassing camera input as well as the {@link DocumentScannerView | `DocumentScannerView`}.
+   *
+   * With {@link DocumentScannerConfig.enableContinuousScanning} enabled, the scanner loops back after each successful scan, invoking the {@link DocumentScannerConfig.onDocumentScanned} callback with each result. The loop continues until the user clicks the close button (X) or {@link stopContinuousScanning} is called.
    *
    * @param
    * `file` - process the file and skip the {@link DocumentScannerView | `DocumentScannerView`} if passed
@@ -695,65 +912,53 @@ class DocumentScanner {
     try {
       this.isCapturing = true;
 
-      const { components } = await this.initialize();
+      // Disable body scrolling to prevent scrolling away from scanner view
+      document.body.style.overflow = 'hidden';
 
-      if (this.config.container) {
-        getElement(this.config.container).style.display = "block";
-      }
+      // Handle continuous scanning mode
+      if (this.config.enableContinuousScanning) {
+        this.shouldStopContinuousScanning = false;
 
-      // Handle direct file upload if provided
-      if (file) {
-        components.scannerView = null;
-        await this.processUploadedFile(file);
-      }
+        while (!this.shouldStopContinuousScanning) {
+          const result = await this.performSingleScan(file);
 
-      // Special case handling for direct views with existing results
-      if (!components.scannerView && this.resources.result) {
-        if (components.correctionView && !components.scanResultView) return await components.correctionView.launch();
-        if (components.scanResultView && !components.correctionView) return await components.scanResultView.launch();
-        if (components.scanResultView && components.correctionView) {
-          await components.correctionView.launch();
-          return await components.scanResultView.launch();
-        }
-      }
+          // Exit on cancellation (user clicked close button)
+          if (result.status.code === EnumResultStatus.RS_CANCELLED) {
+            break;
+          }
 
-      // Scanner view is required if no existing result
-      if (!components.scannerView && !this.resources.result) {
-        throw new Error("Scanner view is required when no previous result exists");
-      }
+          // Exit on failure
+          if (result.status.code === EnumResultStatus.RS_FAILED) {
+            return result;
+          }
 
-      // Main Flow
-      if (components.scannerView) {
-        const scanResult = await components.scannerView.launch();
-
-        if (scanResult?.status.code !== EnumResultStatus.RS_SUCCESS) {
-          return {
-            status: {
-              code: scanResult?.status.code,
-              message: scanResult?.status.message || "Failed to capture image",
-            },
-          };
-        }
-
-        // Route based on capture method
-        if (components.correctionView && components.scanResultView) {
-          if (shouldCorrectImage(scanResult._flowType)) {
-            await components.correctionView.launch();
-            return await components.scanResultView.launch();
+          // On success, invoke callback and continue loop
+          if (result.status.code === EnumResultStatus.RS_SUCCESS) {
+            this.resources.completedScansCount++;
+            await this.config.onDocumentScanned?.(result);
+            // Loop back to scan next document
+            continue;
           }
         }
 
-        // Default routing
-        if (components.correctionView && !components.scanResultView) {
-          return await components.correctionView.launch();
-        }
-        if (components.scanResultView) {
-          return await components.scanResultView.launch();
-        }
+        // Return the last scanned result
+        return this.resources.result || {
+          status: {
+            code: EnumResultStatus.RS_CANCELLED,
+            message: "Continuous scanning stopped",
+          },
+        };
       }
 
-      // If no additional views, return current result
-      return this.resources.result;
+      // Standard single-scan mode
+      const result = await this.performSingleScan(file);
+
+      // If onDocumentScanned callback is defined and scan was successful, invoke it
+      if (result.status.code === EnumResultStatus.RS_SUCCESS) {
+        await this.config.onDocumentScanned?.(result);
+      }
+
+      return result;
     } catch (error) {
       console.error("Document capture flow failed:", error?.message || error);
       return {
@@ -764,6 +969,8 @@ class DocumentScanner {
       };
     } finally {
       this.isCapturing = false;
+      // Re-enable body scrolling when scanning session ends
+      document.body.style.overflow = '';
       this.dispose();
     }
   }

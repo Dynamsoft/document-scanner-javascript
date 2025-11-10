@@ -18,18 +18,18 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
 
   // Add spinner
   const spinner = `
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="white" 
-      stroke-linecap="round" 
-      stroke-linejoin="round" 
-      width="${spinnerSize}" 
-      height="${spinnerSize}" 
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      width="${spinnerSize}"
+      height="${spinnerSize}"
       stroke-width="0.75"
-    > 
-      <path d="M12 3a9 9 0 1 0 9 9"></path> 
+    >
+      <path d="M12 3a9 9 0 1 0 9 9"></path>
     </svg>
   `;
   contentDiv.innerHTML = spinner;
@@ -69,11 +69,44 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
       }
     },
     hide: () => {
-      if (overlayDiv && overlayDiv.parentNode) {
+      if (overlayDiv?.parentNode) {
         overlayDiv.classList.add("fade-out");
         setTimeout(() => {
           overlayDiv.parentNode?.removeChild(overlayDiv);
         }, 200);
+      }
+    },
+  };
+}
+
+export function showMinimalSpinner(container: HTMLElement) {
+  const spinnerDiv = document.createElement("div");
+  spinnerDiv.className = "dds-minimal-spinner";
+
+  const spinner = `
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      width="24"
+      height="24"
+      stroke-width="2"
+    >
+      <path d="M12 3a9 9 0 1 0 9 9"></path>
+    </svg>
+  `;
+
+  spinnerDiv.innerHTML = spinner;
+  container.appendChild(spinnerDiv);
+
+  return {
+    element: spinnerDiv,
+    hide: () => {
+      if (spinnerDiv?.parentNode) {
+        spinnerDiv.parentNode.removeChild(spinnerDiv);
       }
     },
   };
@@ -124,6 +157,25 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
     max-width: 200px;
     line-height: 1.4;
     opacity: 0.9;
+  }
+
+  .dds-minimal-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dds-minimal-spinner svg {
+    animation: spin 1s linear infinite;
+    display: block;
   }
 
   @keyframes spin {

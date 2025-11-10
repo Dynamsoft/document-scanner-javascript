@@ -50,6 +50,10 @@ app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
+app.get("/continuous-scanning", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/scenarios/continuous-scanning.html"));
+});
+
 app.get("/scenarios/use-file-input", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/scenarios/use-file-input.html"));
 });
@@ -163,6 +167,7 @@ httpServer.listen(httpPort, () => {
   console.log("\x1b[90m-------------------\x1b[0m");
   console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
   console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
+  console.log("\x1b[33m Continuous Scanning:\x1b[0m    http://localhost:" + httpPort + "/continuous-scanning");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -179,9 +184,11 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   console.log("\n");
   console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  ipv4Addresses.forEach((localIP) => {
+  ipv4Addresses.forEach((localIP, index) => {
+    console.log("\x1b[32m----IP[" + index + "]: " + localIP + "----\x1b");
     console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
     console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
+    console.log("\x1b[32m Continuous Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/continuous-scanning");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");

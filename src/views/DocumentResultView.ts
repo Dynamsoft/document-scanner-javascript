@@ -1,7 +1,7 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls, createStyle, getElement, shouldCorrectImage } from "./utils";
+import { createControls, createStyle, getElement } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import { DocumentResult, EnumFlowType, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
@@ -131,36 +131,64 @@ export default class DocumentResultView {
         throw new Error("Failed to convert image to blob");
       }
 
-      // For Windows, we'll create a download fallback if sharing isn't supported
       const file = new File([blob], `document-${Date.now()}.png`, {
         type: blob.type,
       });
 
-      // Try Web Share API first
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "Dynamsoft Document Scanner Shared Image",
-        });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = file.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      // Detect mobile devices
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      // Try Web Share API only on mobile devices
+      if (isMobile && navigator.share) {
+        // Check if file sharing is supported
+        const canShareFiles = navigator.canShare?.({ files: [file] }) ?? false;
+
+        if (canShareFiles) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Dynamsoft Document Scanner Shared Image",
+            });
+            return true;
+          } catch (shareError: any) {
+            // Handle different error types per MDN documentation
+            if (shareError.name === "AbortError") {
+              // User cancelled the share dialog - this is normal, don't show error
+              return true;
+            } else if (shareError.name === "NotAllowedError") {
+              // Permission denied or no user activation - fall back to download
+              console.log("Share permission denied, falling back to download");
+            } else if (shareError.name === "TypeError") {
+              // Invalid data or unsupported file type - fall back to download
+              console.log("File type not supported for sharing, falling back to download");
+            } else if (shareError.name === "DataError") {
+              // Issue with share target - fall back to download
+              console.log("Share target error, falling back to download");
+            } else {
+              // Unknown error - log and fall back
+              console.warn("Share failed with unexpected error:", shareError);
+            }
+            // Fall through to download fallback
+          }
+        }
       }
+
+      // Fallback: download the file (always used on desktop)
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
       return true;
     } catch (ex: any) {
-      // Only show error if it's not a user cancellation
-      if (ex.name !== "AbortError") {
-        let errMsg = ex?.message || ex;
-        console.error("Error sharing image:", errMsg);
-        alert(`Error sharing image: ${errMsg}`);
-      }
+      // Unexpected error in the overall process
+      let errMsg = ex?.message || ex;
+      console.error("Error in share/download process:", errMsg);
+      alert(`Error processing image: ${errMsg}`);
     }
   }
 
@@ -177,12 +205,10 @@ export default class DocumentResultView {
       // After normalization is complete, show scan result view again with updated image
       if (result.correctedImageResult) {
         // Update the shared resources with new corrected result
-        if (this.resources.onResultUpdated) {
-          this.resources.onResultUpdated({
-            ...this.resources.result,
-            correctedImageResult: result.correctedImageResult,
-          });
-        }
+        this.resources.onResultUpdated?.({
+          ...this.resources.result,
+          correctedImageResult: result.correctedImageResult,
+        });
 
         // Clear current scan result view and reinitialize with new image
         this.dispose(true); // true = preserve resolver
@@ -192,14 +218,12 @@ export default class DocumentResultView {
     } catch (error) {
       console.error("DocumentResultView - Handle Correction View Error:", error);
       // Make sure to resolve with error if something goes wrong
-      if (this.currentScanResultViewResolver) {
-        this.currentScanResultViewResolver({
-          status: {
-            code: EnumResultStatus.RS_FAILED,
-            message: error?.message || error,
-          },
-        });
-      }
+      this.currentScanResultViewResolver?.({
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: error?.message || error,
+        },
+      });
       throw error;
     }
   }
@@ -207,63 +231,81 @@ export default class DocumentResultView {
   private async handleRetake() {
     try {
       if (!this.scannerView) {
-        console.error("Correction View not initialized");
+        console.error("Scanner View not initialized");
         return;
       }
 
       this.hideView();
+
+      // Show scanner view
+      if (this.scannerView) {
+        getElement((this.scannerView as any).config.container).style.display = "flex";
+      }
+
+      // Wait for new scan
       const result = await this.scannerView.launch();
 
-      if (result?.status?.code === EnumResultStatus.RS_FAILED) {
-        if (this.currentScanResultViewResolver) {
-          this.currentScanResultViewResolver(result);
-        }
+      // Handle cancelled or failed results - resolve and exit
+      if (result?.status?.code === EnumResultStatus.RS_CANCELLED || result?.status?.code === EnumResultStatus.RS_FAILED) {
+        this.currentScanResultViewResolver?.(result);
         return;
       }
 
-      // Handle success case
-      if (this.resources.onResultUpdated) {
-        if (result?.status.code === EnumResultStatus.RS_CANCELLED) {
-          this.resources.onResultUpdated(this.resources.result);
-        } else if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
-          this.resources.onResultUpdated(result);
-        }
-      }
+      // Handle success case - update resources and re-enter result flow
+      if (result?.status.code === EnumResultStatus.RS_SUCCESS) {
+        this.resources.onResultUpdated?.(result);
 
-      if (this.correctionView && result?._flowType) {
-        if (shouldCorrectImage(result?._flowType)) {
-          await this.handleCorrectImage();
+        // Stop capturing before hiding scanner view
+        if (this.scannerView) {
+          this.scannerView.stopCapturing();
         }
-      }
 
-      this.dispose(true);
-      await this.initialize();
-      getElement(this.config.container).style.display = "flex";
+        // Hide scanner view
+        if (this.scannerView) {
+          getElement((this.scannerView as any).config.container).style.display = "none";
+        }
+
+        // Route through correction view if it exists (always go through correction during retake when it's configured)
+        if (this.correctionView) {
+          // Hide result view temporarily
+          this.dispose(true); // preserve resolver
+
+          // Show and launch correction view
+          const correctionResult = await this.correctionView.launch();
+
+          // Handle cancelled/failed from correction view
+          if (correctionResult?.status?.code === EnumResultStatus.RS_CANCELLED || correctionResult?.status?.code === EnumResultStatus.RS_FAILED) {
+            this.currentScanResultViewResolver?.(correctionResult);
+            return;
+          }
+
+          // After correction completes successfully, resources are already updated by correction view's confirmCorrection
+        }
+
+        // Refresh the result view with new data
+        this.dispose(true); // preserve resolver
+        await this.initialize();
+        getElement(this.config.container).style.display = "flex";
+      }
     } catch (error) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
-      if (this.currentScanResultViewResolver) {
-        this.currentScanResultViewResolver({
-          status: {
-            code: EnumResultStatus.RS_FAILED,
-            message: error?.message || error,
-          },
-        });
-      }
+      this.currentScanResultViewResolver?.({
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: error?.message || error,
+        },
+      });
       throw error;
     }
   }
 
   private async handleDone() {
     try {
-      if (this.config?.onDone) {
-        await this.config.onDone(this.resources.result);
-      }
+      await this.config?.onDone?.(this.resources.result);
 
       // Resolve with current result
-      if (this.currentScanResultViewResolver && this.resources.result) {
-        this.currentScanResultViewResolver(this.resources.result);
-      }
+      this.currentScanResultViewResolver?.(this.resources.result);
 
       // Clean up
       this.hideView();
@@ -271,14 +313,12 @@ export default class DocumentResultView {
     } catch (error) {
       console.error("Error in done handler:", error);
       // Make sure to resolve with error if something goes wrong
-      if (this.currentScanResultViewResolver) {
-        this.currentScanResultViewResolver({
-          status: {
-            code: EnumResultStatus.RS_FAILED,
-            message: error?.message || error,
-          },
-        });
-      }
+      this.currentScanResultViewResolver?.({
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: error?.message || error,
+        },
+      });
       throw error;
     }
   }
@@ -286,10 +326,13 @@ export default class DocumentResultView {
   private createControls(): HTMLElement {
     const { toolbarButtonsConfig, onUpload } = this.config;
 
-    // Check if share is possible
+    // Helper to detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Check if share is possible - only enable on mobile devices
     const testImageBlob = new Blob(["mock-png-data"], { type: "image/png" });
     const testFile = new File([testImageBlob], "test.png", { type: "image/png" });
-    const canShare = "share" in navigator && navigator.canShare({ files: [testFile] });
+    const canShare = isMobile && "share" in navigator && navigator.canShare({ files: [testFile] });
 
     const buttons: ToolbarButton[] = [
       {
@@ -330,7 +373,7 @@ export default class DocumentResultView {
       {
         id: `dds-scanResult-done`,
         icon: toolbarButtonsConfig?.done?.icon || DDS_ICONS.complete,
-        label: toolbarButtonsConfig?.done?.label || "Done",
+        label: toolbarButtonsConfig?.done?.label || (this.resources.enableContinuousScanning ? "Keep Scan" : "Done"),
         className: `${toolbarButtonsConfig?.done?.className || ""}`,
         isHidden: toolbarButtonsConfig?.done?.isHidden || false,
         onClick: () => this.handleDone(),
