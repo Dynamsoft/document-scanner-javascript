@@ -233,6 +233,14 @@ export interface DocumentScannerViewConfig {
    * @public
    */
   showPoweredByDynamsoft?: boolean;
+  /**
+   * Enables automatic frame verification for best quality capture.
+   * When enabled, tracks clarity scores to find the clearest frame.
+   *
+   * @defaultValue true
+   * @public
+   */
+  enableFrameVerification?: boolean;
 }
 
 interface DCEElements {
@@ -262,6 +270,17 @@ export default class DocumentScannerView {
 
   // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
+
+  // Frame verification properties (for clarity-based capture)
+  private frameVerificationEnabled = true;
+  private currentFrameId = 0;
+  private maxClarity = 0;
+  private maxClarityTimestamp = 0;
+  private maxClarityImg: OriginalImageResultItem["imageData"] | null = null;
+  private maxClarityFrameId = 0;
+  private nonImprovingClarityFrameCount = 0;
+  private clearestFrameId = 0;
+  private clarityHistory: number[] = [];
 
   // Used for ImageEditorView (In NornalizerView)
   private capturedResultItems: CapturedResult["items"] = [];
@@ -333,6 +352,7 @@ export default class DocumentScannerView {
     this.boundsDetectionEnabled = this.config?.enableBoundsDetectionMode ?? this.config?.enableSmartCaptureMode ?? this.config?.enableAutoCropMode ?? true; // Enabling any mode enables boundsDetection mode
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop mode is enabled, smartCapture mode should be too
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
+    this.frameVerificationEnabled = this.config?.enableFrameVerification ?? true; // Default enabled
 
     this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
 
@@ -1352,6 +1372,47 @@ export default class DocumentScannerView {
       : EnumFlowType.MANUAL;
   }
 
+  private trackFrameClarity(result: CapturedResult) {
+    ++this.currentFrameId;
+    const clarity = (result as any)._clarity;
+
+    if (!clarity) return;
+
+    const currentTime = Date.now();
+    const maxClarityResetTimeoutMs = 3000;
+    const minStabilizationTimeMs = 1000;
+    const minNonImprovingClarityFramesToConfirm = 2;
+
+    if (this.maxClarityTimestamp < currentTime - maxClarityResetTimeoutMs) {
+      this.maxClarity = 0;
+    }
+
+    if (clarity > this.maxClarity) {
+      this.maxClarity = clarity;
+      this.maxClarityTimestamp = currentTime;
+      this.maxClarityImg = this.originalImageData;
+      this.maxClarityFrameId = this.currentFrameId;
+      this.nonImprovingClarityFrameCount = 0;
+    }
+
+    if (clarity <= this.clarityHistory[this.clarityHistory.length - 1]) {
+      ++this.nonImprovingClarityFrameCount;
+    } else {
+      this.nonImprovingClarityFrameCount = 0;
+    }
+
+    if (this.clearestFrameId != this.maxClarityFrameId &&
+        this.maxClarityTimestamp + minStabilizationTimeMs <= currentTime &&
+        this.nonImprovingClarityFrameCount >= minNonImprovingClarityFramesToConfirm) {
+      this.clearestFrameId = this.maxClarityFrameId;
+    }
+
+    this.clarityHistory.push(clarity);
+    if (this.clarityHistory.length > 50) {
+      this.clarityHistory.shift();
+    }
+  }
+
   async takePhoto() {
     // Prevent concurrent captures
     if (this.isCapturing) {
@@ -1362,11 +1423,14 @@ export default class DocumentScannerView {
     try {
       const { cameraEnhancer, onResultUpdated } = this.resources;
 
-      // Set the original image based on bounds detection and captured results
       const shouldUseLatestFrame =
-        !this.boundsDetectionEnabled || (this.boundsDetectionEnabled && this.capturedResultItems?.length <= 1); // Starts at one bc result always includes original image
+        !this.boundsDetectionEnabled || (this.boundsDetectionEnabled && this.capturedResultItems?.length <= 1);
 
-      this.originalImageData = shouldUseLatestFrame ? cameraEnhancer?.fetchImage() : this.originalImageData;
+      if (this.frameVerificationEnabled && this.maxClarityImg && !shouldUseLatestFrame) {
+        this.originalImageData = this.maxClarityImg;
+      } else {
+        this.originalImageData = shouldUseLatestFrame ? cameraEnhancer?.fetchImage() : this.originalImageData;
+      }
 
       // Reset captured items if not using bounds detection
       let correctedImageResult = null;
@@ -1550,6 +1614,10 @@ export default class DocumentScannerView {
       (item) => item.type === EnumCapturedResultItemType.CRIT_ORIGINAL_IMAGE
     ) as OriginalImageResultItem[];
     this.originalImageData = originalImage[0]?.imageData;
+
+    if (this.frameVerificationEnabled && this.boundsDetectionEnabled) {
+      this.trackFrameClarity(result);
+    }
 
     if (this.smartCaptureEnabled || this.autoCropEnabled) {
       this.handleAutoCaptureMode(result);

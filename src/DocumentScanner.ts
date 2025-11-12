@@ -8,6 +8,8 @@ import {
   CameraEnhancer,
   CameraView,
   DetectedQuadResultItem,
+  MultiFrameResultCrossFilter,
+  OriginalImageResultItem,
 } from "dynamsoft-capture-vision-bundle";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
@@ -64,12 +66,14 @@ export interface DocumentScannerConfig {
    * This is the only property required to be passed to instantiate a {@link DocumentScanner} object.
    *
    * @public
+   * @stable
    */
   license?: string;
   /**
    * The container element or selector for the {@link DocumentScanner} UI.
    *
    * @public
+   * @stable
    */
   container?: HTMLElement | string;
   /**
@@ -80,6 +84,7 @@ export interface DocumentScannerConfig {
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
    *
    * @public
+   * @stable
    */
   templateFilePath?: string;
   /**
@@ -93,6 +98,7 @@ export interface DocumentScannerConfig {
    * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
    *
    * @public
+   * @stable
    */
   utilizedTemplateNames?: UtilizedTemplateNames;
   /**
@@ -103,6 +109,7 @@ export interface DocumentScannerConfig {
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
    *
    * @public
+   * @stable
    */
   engineResourcePaths?: EngineResourcePaths;
   /**
@@ -112,6 +119,7 @@ export interface DocumentScannerConfig {
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
    *
    * @public
+   * @stable
    */
   scannerViewConfig?: Omit<
     DocumentScannerViewConfig,
@@ -124,6 +132,7 @@ export interface DocumentScannerConfig {
    * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
    *
    * @public
+   * @stable
    */
   resultViewConfig?: DocumentResultViewConfig;
   correctionViewConfig?: Omit<
@@ -135,6 +144,7 @@ export interface DocumentScannerConfig {
    *
    * @defaultValue true
    * @public
+   * @stable
    */
   showResultView?: boolean;
   /**
@@ -142,6 +152,7 @@ export interface DocumentScannerConfig {
    *
    * @defaultValue true
    * @public
+   * @stable
    */
   showCorrectionView?: boolean;
   /**
@@ -156,6 +167,7 @@ export interface DocumentScannerConfig {
    *
    * @defaultValue false
    * @public
+   * @stable
    */
   enableContinuousScanning?: boolean;
   /**
@@ -180,6 +192,7 @@ export interface DocumentScannerConfig {
    * ```
    *
    * @public
+   * @stable
    */
   onDocumentScanned?: (result: DocumentResult) => void | Promise<void>;
   /**
@@ -211,8 +224,21 @@ export interface DocumentScannerConfig {
    * ```
    *
    * @public
+   * @stable
    */
   onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
+  /**
+   * Enable automatic frame verification for best quality capture.
+   *
+   * @remarks
+   * When enabled, uses clarity detection and cross filtering to automatically find the clearest frame.
+   * This uses the same algorithm as the React reference implementation.
+   *
+   * @defaultValue true
+   * @public
+   * @stable
+   */
+  enableFrameVerification?: boolean;
 }
 
 export interface SharedResources {
@@ -509,6 +535,7 @@ class DocumentScanner {
       utilizedTemplateNames: baseConfig.utilizedTemplateNames,
       _showCorrectionView: this.showCorrectionView(),
       _showResultView: this.showResultView(),
+      enableFrameVerification: this.config.enableFrameVerification !== false, // Default true
     };
     const correctionViewConfig = this.showCorrectionView()
       ? {
@@ -533,6 +560,7 @@ class DocumentScanner {
       resultViewConfig,
     });
   }
+
 
   private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
     mainContainer.textContent = "";
