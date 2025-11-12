@@ -16,7 +16,7 @@
     "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "typescript": "~5.8.0",
-    "vite": "^7.0.6",
+    "vite": "^7.2.2",
     "vue-tsc": "^3.0.4"
   }
 }
