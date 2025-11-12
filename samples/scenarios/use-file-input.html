@@ -50,7 +50,7 @@
         const files = Array.from(this.files || []);
         if (files.length) {
           const result = await documentScanner.launch(files[0]);
-          console.log(result);
+
 
           // Clear the result container and display the scanned result as a canvas
           if (result?.correctedImageResult) {

@@ -29,7 +29,6 @@
       (async () => {
         // Launch the scanner and wait for the result
         const result = await documentScanner.launch();
-        console.log(result);
 
         // Clear the result container and display the scanned result as a canvas
         if (result?.correctedImageResult) {
