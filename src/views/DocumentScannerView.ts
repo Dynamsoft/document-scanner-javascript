@@ -167,7 +167,7 @@ export interface DocumentScannerViewConfig {
   utilizedTemplateNames?: UtilizedTemplateNames;
   /**
    * Set the document Bounds-Detection mode effective upon entering the {@link DocumentScannerView} UI.
-   * 
+   *
    * @remarks
    * Bounds-Detection mode gets enabled when Smart Capture mode is enabled.
    *
@@ -178,7 +178,7 @@ export interface DocumentScannerViewConfig {
   enableBoundsDetectionMode?: boolean;
   /**
    * Set the Smart Capture mode effective upon entering the {@link DocumentScannerView} UI.
-   * 
+   *
    * @remarks
    * Enabling Smart Capture mode enables Bounds-Detection mode too. Smart Capture mode gets enabled when Auto-Capture mode is enabled.
    *
@@ -189,7 +189,7 @@ export interface DocumentScannerViewConfig {
   enableSmartCaptureMode?: boolean;
   /**
    * Set the Auto-Crop mode effective upon entering the {@link DocumentScannerView} UI.
-   * 
+   *
    * @remarks
    * Enabling Auto-Crop mode enables Smart Capture mode too.
    *
@@ -339,7 +339,6 @@ export default class DocumentScannerView {
     return this.config?.minVerifiedFramesForAutoCapture;
   }
 
-
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
@@ -349,7 +348,11 @@ export default class DocumentScannerView {
 
   async initialize(): Promise<void> {
     // Set default value for autoCrop, smartCapture and boundsDetection modes
-    this.boundsDetectionEnabled = this.config?.enableBoundsDetectionMode ?? this.config?.enableSmartCaptureMode ?? this.config?.enableAutoCropMode ?? true; // Enabling any mode enables boundsDetection mode
+    this.boundsDetectionEnabled =
+      this.config?.enableBoundsDetectionMode ??
+      this.config?.enableSmartCaptureMode ??
+      this.config?.enableAutoCropMode ??
+      true; // Enabling any mode enables boundsDetection mode
     this.smartCaptureEnabled = (this.config?.enableSmartCaptureMode || this.config?.enableAutoCropMode) ?? false; // If autoCrop mode is enabled, smartCapture mode should be too
     this.autoCropEnabled = this.config?.enableAutoCropMode ?? false;
     this.frameVerificationEnabled = this.config?.enableFrameVerification ?? true; // Default enabled
@@ -472,7 +475,7 @@ export default class DocumentScannerView {
       this.DCE_ELEMENTS.smartCaptureBtn,
       this.DCE_ELEMENTS.autoCropBtn,
     ];
-    
+
     if (!requiredElements.every(Boolean)) {
       throw new Error("Camera control elements not found");
     }
@@ -519,20 +522,28 @@ export default class DocumentScannerView {
     }
 
     // Prevent double-tap zoom on thumbnail
-    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-    }, { passive: false });
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener(
+      "touchstart",
+      (e) => {
+        e.preventDefault();
+      },
+      { passive: false }
+    );
 
-    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('touchend', (e) => {
-      e.preventDefault();
-    }, { passive: false });
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener(
+      "touchend",
+      (e) => {
+        e.preventDefault();
+      },
+      { passive: false }
+    );
 
-    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('dblclick', (e) => {
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener("dblclick", (e) => {
       e.preventDefault();
     });
 
     // Add click handler for thumbnail
-    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener('click', async (e) => {
+    this.DCE_ELEMENTS.thumbnailPreview?.addEventListener("click", async (e) => {
       e.preventDefault();
       // Only invoke callback if it's defined and we have a result
       if (this.resources.onThumbnailClicked && this.resources.result) {
@@ -541,18 +552,28 @@ export default class DocumentScannerView {
     });
 
     // Prevent double-tap zoom on torch button
-    const DCEContainer = getElement(this.config.container).children[getElement(this.config.container).children.length - 1];
-    const torchButton = DCEContainer?.shadowRoot?.querySelector('.dce-mn-torch') as HTMLElement;
+    const DCEContainer = getElement(this.config.container).children[
+      getElement(this.config.container).children.length - 1
+    ];
+    const torchButton = DCEContainer?.shadowRoot?.querySelector(".dce-mn-torch") as HTMLElement;
     if (torchButton) {
-      torchButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-      }, { passive: false });
+      torchButton.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
 
-      torchButton.addEventListener('touchend', (e) => {
-        e.preventDefault();
-      }, { passive: false });
+      torchButton.addEventListener(
+        "touchend",
+        (e) => {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
 
-      torchButton.addEventListener('dblclick', (e) => {
+      torchButton.addEventListener("dblclick", (e) => {
         e.preventDefault();
       });
     }
@@ -561,7 +582,7 @@ export default class DocumentScannerView {
   private handleContinuousScanDone() {
     // Don't allow closing if a capture is in progress
     if (this.isCapturing) {
-      console.warn('Cannot close during image capture');
+      console.warn("Cannot close during image capture");
       return;
     }
 
@@ -585,7 +606,7 @@ export default class DocumentScannerView {
       this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "none";
     }
 
-    const textEl = this.DCE_ELEMENTS.continuousScanDoneBtn?.querySelector('.dce-mn-continuous-scan-done-text');
+    const textEl = this.DCE_ELEMENTS.continuousScanDoneBtn?.querySelector(".dce-mn-continuous-scan-done-text");
     if (textEl) {
       textEl.textContent = `Done (${this.resources.completedScansCount || 0})`;
     }
@@ -596,34 +617,36 @@ export default class DocumentScannerView {
     if (!this.resources.enableContinuousScanning) return;
 
     // Convert canvas to data URL and set as thumbnail image source
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
     this.DCE_ELEMENTS.thumbnailImg.src = dataUrl;
     this.DCE_ELEMENTS.thumbnailPreview.style.display = "block";
   }
 
   private isIOS(): boolean {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    );
   }
 
   private setupToastObserver(shadowRoot: ShadowRoot) {
-    const toastElement = shadowRoot.querySelector('.dce-mn-toast') as HTMLElement;
+    const toastElement = shadowRoot.querySelector(".dce-mn-toast") as HTMLElement;
     if (!toastElement) return;
 
     // Check if device is desktop (fine pointer typically indicates mouse/trackpad)
-    const isDesktop = window.matchMedia('(pointer: fine)').matches;
+    const isDesktop = window.matchMedia("(pointer: fine)").matches;
     const isIOSDevice = this.isIOS();
 
     // Hide the toast element by default on iOS and desktop to prevent any flash
     if (isIOSDevice || isDesktop) {
-      toastElement.style.display = 'none';
+      toastElement.style.display = "none";
     }
 
     // Also hide torch button on desktop with inline styles to ensure it takes precedence
     if (isDesktop) {
-      const torchElement = shadowRoot.querySelector('.dce-mn-torch') as HTMLElement;
+      const torchElement = shadowRoot.querySelector(".dce-mn-torch") as HTMLElement;
       if (torchElement) {
-        torchElement.style.display = 'none';
+        torchElement.style.display = "none";
       }
     }
 
@@ -631,12 +654,12 @@ export default class DocumentScannerView {
     const checkToastContent = () => {
       // On desktop and iOS, always hide toast messages regardless of content
       if (isDesktop || isIOSDevice) {
-        toastElement.style.display = 'none';
+        toastElement.style.display = "none";
       } else {
         // On Android mobile, allow toast to show if it has content
-        const text = toastElement.textContent || '';
+        const text = toastElement.textContent || "";
         if (text.trim()) {
-          toastElement.style.display = '';
+          toastElement.style.display = "";
         }
       }
     };
@@ -651,7 +674,7 @@ export default class DocumentScannerView {
       childList: true,
       characterData: true,
       subtree: true,
-      attributes: true
+      attributes: true,
     });
 
     // Run initial check
@@ -660,13 +683,18 @@ export default class DocumentScannerView {
 
   private async animateFloatingImage(canvas: HTMLCanvasElement): Promise<void> {
     return new Promise((resolve) => {
-      if (!this.DCE_ELEMENTS.floatingImage || !this.DCE_ELEMENTS.floatingImageImg || !this.DCE_ELEMENTS.thumbnailPreview || !this.DCE_ELEMENTS.thumbnailImg) {
+      if (
+        !this.DCE_ELEMENTS.floatingImage ||
+        !this.DCE_ELEMENTS.floatingImageImg ||
+        !this.DCE_ELEMENTS.thumbnailPreview ||
+        !this.DCE_ELEMENTS.thumbnailImg
+      ) {
         resolve();
         return;
       }
 
       // Convert canvas to data URL and set as floating image source
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
       this.DCE_ELEMENTS.floatingImageImg.src = dataUrl;
 
       // Hide the thumbnail image during animation (but keep the border visible)
@@ -701,9 +729,9 @@ export default class DocumentScannerView {
         const scale = Math.min(thumbnailRect.width / floatingRect.width, thumbnailRect.height / floatingRect.height);
 
         // Set CSS custom properties for the animation
-        this.DCE_ELEMENTS.floatingImage.style.setProperty('--translate-x', `${translateX}px`);
-        this.DCE_ELEMENTS.floatingImage.style.setProperty('--translate-y', `${translateY}px`);
-        this.DCE_ELEMENTS.floatingImage.style.setProperty('--scale', `${scale}`);
+        this.DCE_ELEMENTS.floatingImage.style.setProperty("--translate-x", `${translateX}px`);
+        this.DCE_ELEMENTS.floatingImage.style.setProperty("--translate-y", `${translateY}px`);
+        this.DCE_ELEMENTS.floatingImage.style.setProperty("--scale", `${scale}`);
 
         // Trigger reflow to ensure the custom properties are set
         void this.DCE_ELEMENTS.floatingImage.offsetWidth;
@@ -728,6 +756,11 @@ export default class DocumentScannerView {
   }
 
   async handleCloseBtn() {
+    if (this.isCapturing) {
+      console.warn("Cannot close during image capture");
+      return;
+    }
+
     this.closeCamera();
 
     this.currentScanResolver?.({
@@ -1255,8 +1288,10 @@ export default class DocumentScannerView {
         } catch (error: any) {
           // Handle camera access errors (e.g., camera already in use by another tab)
           const errorMessage = error?.message || error;
-          if (errorMessage.includes('in use') || errorMessage.includes('not available')) {
-            throw new Error('Camera is already in use by another tab or application. Please close other tabs/applications using the camera and try again.');
+          if (errorMessage.includes("in use") || errorMessage.includes("not available")) {
+            throw new Error(
+              "Camera is already in use by another tab or application. Please close other tabs/applications using the camera and try again."
+            );
           }
           throw error;
         }
@@ -1264,7 +1299,7 @@ export default class DocumentScannerView {
         try {
           await cameraEnhancer.resume();
         } catch (error) {
-          console.warn('Camera error (openCamera - resume after pause):', error);
+          console.warn("Camera error (openCamera - resume after pause):", error);
         }
       }
 
@@ -1276,7 +1311,7 @@ export default class DocumentScannerView {
             height: 1440,
           });
         } catch (error) {
-          console.warn('Camera error (openCamera - setResolution):', error);
+          console.warn("Camera error (openCamera - setResolution):", error);
         }
       }
 
@@ -1341,7 +1376,7 @@ export default class DocumentScannerView {
       cameraEnhancer?.close();
     } catch (error) {
       // Silently handle camera close errors - camera may already be closed
-      console.warn('Camera error (closeCamera):', error);
+      console.warn("Camera error (closeCamera):", error);
     }
     this.stopCapturing();
   }
@@ -1352,7 +1387,7 @@ export default class DocumentScannerView {
       cameraEnhancer?.pause();
     } catch (error) {
       // Silently handle camera pause errors
-      console.warn('Camera error (pauseCamera):', error);
+      console.warn("Camera error (pauseCamera):", error);
     }
   }
 
@@ -1401,9 +1436,11 @@ export default class DocumentScannerView {
       this.nonImprovingClarityFrameCount = 0;
     }
 
-    if (this.clearestFrameId != this.maxClarityFrameId &&
-        this.maxClarityTimestamp + minStabilizationTimeMs <= currentTime &&
-        this.nonImprovingClarityFrameCount >= minNonImprovingClarityFramesToConfirm) {
+    if (
+      this.clearestFrameId != this.maxClarityFrameId &&
+      this.maxClarityTimestamp + minStabilizationTimeMs <= currentTime &&
+      this.nonImprovingClarityFrameCount >= minNonImprovingClarityFramesToConfirm
+    ) {
       this.clearestFrameId = this.maxClarityFrameId;
     }
 
@@ -1477,13 +1514,13 @@ export default class DocumentScannerView {
         this.minimalSpinner = showMinimalSpinner(configContainer);
         // Disable the capture button during processing
         if (this.DCE_ELEMENTS.takePhotoBtn) {
-          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'none';
-          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '0.5';
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "none";
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = "0.5";
         }
         // Disable the done button during processing
         if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'none';
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '0.5';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = "none";
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = "0.5";
         }
       } else {
         this.showScannerLoadingOverlay("Processing image...");
@@ -1514,13 +1551,13 @@ export default class DocumentScannerView {
         this.minimalSpinner?.hide();
         // Re-enable the capture button after processing
         if (this.DCE_ELEMENTS.takePhotoBtn) {
-          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'auto';
-          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '1';
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "auto";
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = "1";
         }
         // Re-enable the done button after processing
         if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'auto';
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '1';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = "auto";
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = "1";
         }
       } else {
         this.hideScannerLoadingOverlay(true);
@@ -1572,20 +1609,20 @@ export default class DocumentScannerView {
         this.minimalSpinner?.hide();
         // Re-enable the capture button
         if (this.DCE_ELEMENTS.takePhotoBtn) {
-          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = 'auto';
-          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = '1';
+          this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "auto";
+          this.DCE_ELEMENTS.takePhotoBtn.style.opacity = "1";
         }
         // Re-enable the done button
         if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = 'auto';
-          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = '1';
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.pointerEvents = "auto";
+          this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = "1";
         }
         // Resume camera if it was paused (check if camera enhancer still exists)
         if (this.resources.cameraEnhancer?.isPaused()) {
           try {
             await this.resources.cameraEnhancer.resume();
           } catch (error) {
-            console.warn('Camera error (after correction/result - resume):', error);
+            console.warn("Camera error (after correction/result - resume):", error);
           }
         }
       } else {
@@ -1676,7 +1713,7 @@ export default class DocumentScannerView {
           try {
             cameraEnhancer.setPixelFormat(EnumImagePixelFormat.IPF_ABGR_8888);
           } catch (error) {
-            console.warn('Camera error (takePhoto - setPixelFormat):', error);
+            console.warn("Camera error (takePhoto - setPixelFormat):", error);
           }
         }
 
