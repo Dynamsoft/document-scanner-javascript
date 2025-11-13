@@ -11,7 +11,7 @@
     <script src="../../dist/dds.bundle.js"></script>
 
     <!-- Dynamsoft Document Viewer -->
-    <script src=" https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js "></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js"></script>
     <link
       href=" https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css "
       rel="stylesheet"
@@ -137,6 +137,14 @@
         },
       });
 
+      // Create a DDV Document
+      const doc = Dynamsoft.DDV.documentManager.createDocument({
+        name: `Doc-${Date.now()}`,
+      });
+      // Open the document in the edit viewer
+      editViewer.openDocument(doc.uid);
+      // Launch the document scanner on page load
+
       const scannerContainer = document.getElementById("scanner-container");
       // Initialize Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
@@ -217,13 +225,6 @@
 
       // Launch the document scanner from button press via DDV event system
       editViewer.on("handleScanClick", launchScannerFromViewer);
-      // Create a DDV Document
-      const doc = Dynamsoft.DDV.documentManager.createDocument({
-        name: `Doc-${Date.now()}`,
-      });
-      // Open the document in the edit viewer
-      editViewer.openDocument(doc.uid);
-      // Launch the document scanner on page load
       launchScannerFromViewer();
 
       console.log("DDV Document Scanner initialized successfully!");

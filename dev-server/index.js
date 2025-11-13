@@ -194,7 +194,7 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
     console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
     console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
     console.log("\x1b[32m Continuous Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/continuous-scanning");
-    console.log("\x1b[32m Continuous Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/ddv-scanner");
+    console.log("\x1b[32m Integrate with Document Viewer:\x1b[0m  https://" + localIP + ":" + httpsPort + "/ddv-scanner");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
