@@ -13,7 +13,7 @@
     <!-- Dynamsoft Document Viewer -->
     <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js"></script>
     <link
-      href=" https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css "
+      href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css"
       rel="stylesheet"
     />
     <style>
@@ -108,9 +108,9 @@
               },
             ],
           },
-          // Main view
+          // Main document container
           Dynamsoft.DDV.Elements.MainView,
-          // Footer with tools
+          // Footer
           {
             type: Dynamsoft.DDV.Elements.Layout,
             className: "ddv-edit-viewer-footer-mobile",
@@ -122,7 +122,7 @@
               Dynamsoft.DDV.Elements.Undo,
               Dynamsoft.DDV.Elements.DeleteCurrent,
               Dynamsoft.DDV.Elements.Load,
-              scanButton, // Scan button on left for mobile
+              scanButton, // Custom can button
             ],
           },
         ],
@@ -141,11 +141,11 @@
       const doc = Dynamsoft.DDV.documentManager.createDocument({
         name: `Doc-${Date.now()}`,
       });
-      // Open the document in the edit viewer
-      editViewer.openDocument(doc.uid);
-      // Launch the document scanner on page load
+      
+      editViewer.openDocument(doc.uid); // Open the document in the edit viewer
 
       const scannerContainer = document.getElementById("scanner-container");
+
       // Initialize Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         // Public trial license which is valid for 24 hours
@@ -187,11 +187,9 @@
 
       // Handle Scan Button Click
 
-      // Track scanner state
-      let isScannerOpen = false;
+      let isScannerOpen = false; // Track scanner state
 
-      // Get container elements
-      const editViewerContainer = document.getElementById("edit-viewer-container");
+      const editViewerContainer = document.getElementById("edit-viewer-container"); // Get container elements
 
       async function launchScannerFromViewer() {
         if (isScannerOpen) return;
@@ -199,14 +197,11 @@
         try {
           isScannerOpen = true;
 
-          // Hide DDV edit viewer
-          editViewerContainer.style.display = "none";
+          editViewerContainer.style.display = "none"; // Hide DDV edit viewer
 
-          // Show scanner container
-          scannerContainer.style.display = "block";
+          scannerContainer.style.display = "block"; // Show scanner container
 
-          // Launch scanner in continuous mode
-          await documentScanner.launch();
+          await documentScanner.launch(); // Launch scanner in continuous mode
 
           // When scanner exits, show DDV edit viewer again
           scannerContainer.style.display = "none";
