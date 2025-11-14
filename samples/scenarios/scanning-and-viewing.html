@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <link rel="icon" href="data:," />
@@ -60,9 +60,7 @@
 
     <script type="module">
       // Responsive UI
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
       // Initialize DDV (Dynamsoft Document Viewer)
       // Public trial license which is valid for 24 hours
@@ -168,7 +166,7 @@
       const documentScanner = new Dynamsoft.DocumentScanner({
         // Public trial license which is valid for 24 hours
         // You can request a 30-day trial key from https://www.dynamsoft.com/customer/license/trialLicense/?product=mds
-        license: "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9", // Replace this with your actual license key
+        license: "YOUR_LICENSE_KEY_HERE", // Replace this with your actual license key
         container: scannerContainer,
         scannerViewConfig: {
           cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
@@ -202,38 +200,33 @@
       });
 
       // Handle Scan Button Click
-
-      let isScannerOpen = false; // Track scanner state
-
-      const editViewerContainer = document.getElementById("edit-viewer-container"); // Get container elements
+      // Track scanner state
+      let isScannerOpen = false;
+      // Get container elements
+      const editViewerContainer = document.getElementById("edit-viewer-container");
 
       async function launchScannerFromViewer() {
         if (isScannerOpen) return;
-
         try {
           isScannerOpen = true;
-
-          editViewerContainer.style.display = "none"; // Hide DDV edit viewer
-
-          scannerContainer.style.display = "block"; // Show scanner container
-
-          await documentScanner.launch(); // Launch scanner in continuous mode
-
+          // Hide DDV edit viewer
+          editViewerContainer.style.display = "none";
+          // Show scanner container
+          scannerContainer.style.display = "block";
+          // Launch scanner in continuous mode
+          await documentScanner.launch();
           // When scanner exits, show DDV edit viewer again
           scannerContainer.style.display = "none";
           editViewerContainer.style.display = "block";
-
           isScannerOpen = false;
         } catch (error) {
           console.error("Scanner error:", error);
-
           // Restore visibility on error
           scannerContainer.style.display = "none";
           editViewerContainer.style.display = "block";
           isScannerOpen = false;
         }
       }
-
       // Launch the document scanner from button press via DDV event system
       editViewer.on("handleScanClick", launchScannerFromViewer);
       // On closing DDV, export the document as PDF and display the result
@@ -261,14 +254,14 @@
             iframe.style.height = '100vh';
             iframe.style.border = 'none';
             iframe.title = 'Exported PDF Document';
-            
+
             // Clear container and append iframe
             resultContainer.innerHTML = '';
             resultContainer.appendChild(iframe);
           }
         } catch (error) {
           console.error("Error exporting PDF:", error);
-          
+
           // Show error message to user
           const resultContainer = document.getElementById("result-pdf-container");
           resultContainer.innerHTML = `
@@ -281,7 +274,8 @@
         }
       });
 
-      launchScannerFromViewer(); // Launch the scanner on page load
+      // Launch the scanner on page load
+      launchScannerFromViewer();
     </script>
   </body>
 </html>

@@ -21,28 +21,26 @@
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
         scannerViewConfig: {
-          cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml", // Use local UI file
+          cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
           enableAutoCropMode: true,
           enableSmartCaptureMode: true,
-          showSubfooter: false, // Hide the Detect Borders, Smart Capture, and Auto Crop buttons
         },
-        showCorrectionView: false, // Optional: skip correction view after each scan
-        showResultView: false, // Optional: skip result view after each scan
+        showCorrectionView: false, // Skip correction view after each scan
+        showResultView: false, // Skip result view after each scan
         enableContinuousScanning: true,
-        onDocumentScanned: async (result) => {
+        onDocumentScanned: (result) => {
           // Process each scanned document
           const canvas = result.correctedImageResult.toCanvas();
-          document.getElementById("results").appendChild(canvas);
+          resultContainer.appendChild(canvas);
         },
-        onThumbnailClicked: async (result) => {
-          // Optional: handle thumbnail click event
-          console.log('Thumbnail clicked', result);
-        }
+        onThumbnailClicked: (result) => {
+          // Handle thumbnail click event
+          console.log("Thumbnail clicked", result);
+        },
       });
-      (async () => {
-        // Launch the scanner and wait for the result
-        const result = await documentScanner.launch();
-      })();
+
+      // Launch the scanner
+      documentScanner.launch();
     </script>
   </body>
   <style>
