@@ -36,6 +36,7 @@ app.use("/dist", express.static(distPath));
 app.use("/assets", express.static(path.join(__dirname, "../samples/demo/assets")));
 app.use("/css", express.static(path.join(__dirname, "../samples/demo/css")));
 app.use("/font", express.static(path.join(__dirname, "../samples/demo/font")));
+app.use("/samples", express.static(path.join(__dirname, "../samples")));
 
 // Routes
 app.get("/", (req, res) => {
