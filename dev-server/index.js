@@ -172,7 +172,7 @@ httpServer.listen(httpPort, () => {
   console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
   console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
   console.log("\x1b[33m Continuous Scanning:\x1b[0m    http://localhost:" + httpPort + "/continuous-scanning");
-  console.log("\x1b[33m Continuous Scanning:\x1b[0m    http://localhost:" + httpPort + "/ddv-scanner");
+  console.log("\x1b[33m Integrate with Document Viewer:\x1b[0m    http://localhost:" + httpPort + "/ddv-scanner");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
