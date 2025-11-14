@@ -242,20 +242,32 @@
       editViewer.on("close", async () => {
         try {
           editViewerContainer.style.display = "none";
-          const pdfBlob = await doc.saveToPdf();
-
-          // Create a blob URL for the PDF
-          const pdfUrl = URL.createObjectURL(pdfBlob);
-
-          // Display the PDF in the result container
           const resultContainer = document.getElementById("result-pdf-container");
-          resultContainer.innerHTML = `
-            <iframe 
-              src="${pdfUrl}" 
-              style="width: 100vw; height: 100vh; border: none;"
-              title="Exported PDF Document">
-            </iframe>
-          `;
+
+          // Check if document has any pages, display message if no images scanned
+          if (!doc.pages || doc.pages.length === 0) {
+            resultContainer.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;">
+                <p style="font-size: 18px;">No image scanned</p>
+              </div>
+            `;
+          } else {
+            const pdfBlob = await doc.saveToPdf(); // Export to PDF only if there are pages
+
+            const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
+
+            // Create iframe element and set blob URL directly
+            const iframe = document.createElement('iframe');
+            iframe.src = pdfUrl;
+            iframe.style.width = '100vw';
+            iframe.style.height = '100vh';
+            iframe.style.border = 'none';
+            iframe.title = 'Exported PDF Document';
+            
+            // Clear container and append iframe
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(iframe);
+          }
         } catch (error) {
           console.error("Error exporting PDF:", error);
           
