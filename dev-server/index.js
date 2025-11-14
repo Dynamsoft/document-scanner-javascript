@@ -46,6 +46,10 @@ app.get("/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/demo/index.html"));
 });
 
+app.get("/samples", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/index.html"));
+});
+
 app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
@@ -167,11 +171,12 @@ httpServer.listen(httpPort, () => {
   console.log("\n\x1b[1m Dynamsoft Document Scanner Samples\x1b[0m\n");
   console.log("\x1b[36m HTTP URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
-  console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
-  console.log("\x1b[33m Multi-Page Scanning:\x1b[0m    http://localhost:" + httpPort + "/multi-page-scanning");
-  console.log("\x1b[33m Scanning and Viewing:\x1b[0m    http://localhost:" + httpPort + "/scanning-and-viewing");
-  console.log("\x1b[33m Image File Scanning:\x1b[0m    http://localhost:" + httpPort + "/image-file-scanning");
+  console.log("\x1b[1m\x1b[35m → Samples Index:\x1b[0m    \x1b[1mhttp://localhost:" + httpPort + "/samples\x1b[0m");
+  console.log("\x1b[33m   Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
+  console.log("\x1b[33m   Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
+  console.log("\x1b[33m   Multi-Page Scanning:\x1b[0m    http://localhost:" + httpPort + "/multi-page-scanning");
+  console.log("\x1b[33m   Scanning and Viewing:\x1b[0m    http://localhost:" + httpPort + "/scanning-and-viewing");
+  console.log("\x1b[33m   Image File Scanning:\x1b[0m    http://localhost:" + httpPort + "/image-file-scanning");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -189,12 +194,14 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   ipv4Addresses.forEach((localIP, index) => {
+    if (index > 0) console.log(""); // Add spacing between different IPs
     console.log("\x1b[32m----IP[" + index + "]: " + localIP + "----\x1b");
-    console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
-    console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
-    console.log("\x1b[32m Multi-Page Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/multi-page-scanning");
-    console.log("\x1b[32m Scanning and Viewing:\x1b[0m  https://" + localIP + ":" + httpsPort + "/scanning-and-viewing");
-    console.log("\x1b[32m Image File Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/image-file-scanning");
+    console.log("\x1b[1m\x1b[35m → Samples Index:\x1b[0m  \x1b[1mhttps://" + localIP + ":" + httpsPort + "/samples\x1b[0m");
+    console.log("\x1b[32m   Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
+    console.log("\x1b[32m   Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
+    console.log("\x1b[32m   Multi-Page Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/multi-page-scanning");
+    console.log("\x1b[32m   Scanning and Viewing:\x1b[0m  https://" + localIP + ":" + httpsPort + "/scanning-and-viewing");
+    console.log("\x1b[32m   Image File Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/image-file-scanning");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
