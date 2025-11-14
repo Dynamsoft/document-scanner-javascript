@@ -606,7 +606,7 @@ class DocumentScanner {
    * ```javascript
    * let scannedCount = 0;
    * const scanner = new Dynamsoft.DocumentScanner({
-   *     license: "YOUR_LICENSE_KEY",
+   *     license: "YOUR_LICENSE_KEY_HERE",
    *     enableContinuousScanning: true,
    *     onDocumentScanned: async (result) => {
    *         scannedCount++;
@@ -625,7 +625,7 @@ class DocumentScanner {
    * Stop from external button:
    * ```javascript
    * const scanner = new Dynamsoft.DocumentScanner({
-   *     license: "YOUR_LICENSE_KEY",
+   *     license: "YOUR_LICENSE_KEY_HERE",
    *     enableContinuousScanning: true,
    *     onDocumentScanned: async (result) => {
    *         // Process each scanned document

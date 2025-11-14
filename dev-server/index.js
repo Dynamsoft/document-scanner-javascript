@@ -46,16 +46,24 @@ app.get("/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/demo/index.html"));
 });
 
+app.get("/samples", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/index.html"));
+});
+
 app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
 
-app.get("/continuous-scanning", (req, res) => {
-  res.sendFile(path.join(__dirname, "../samples/scenarios/continuous-scanning.html"));
+app.get("/multi-page-scanning", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/scenarios/multi-page-scanning.html"));
 });
 
-app.get("/scenarios/use-file-input", (req, res) => {
-  res.sendFile(path.join(__dirname, "../samples/scenarios/use-file-input.html"));
+app.get("/scanning-and-viewing", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/scenarios/scanning-and-viewing.html"));
+});
+
+app.get("/image-file-scanning", (req, res) => {
+  res.sendFile(path.join(__dirname, "../samples/scenarios/image-file-scanning.html"));
 });
 
 // Allow upload feature
@@ -78,11 +86,9 @@ app.post("/upload", function (req, res) {
         return res.status(400).json({ success: false, message: "No file uploaded" });
       }
 
-      // Get current timestamp
-      let dt = new Date();
-
-      const fileSavePath = path.join(__dirname, "\\");
-      const newFileName = uploadedFile.originalFilename;
+      // Sanitize filename to prevent path traversal
+      const newFileName = path.basename(uploadedFile.originalFilename);
+      const fileSavePath = __dirname;
       const newFilePath = path.join(fileSavePath, newFileName);
 
       // Move the uploaded file to the desired directory
@@ -92,11 +98,11 @@ app.post("/upload", function (req, res) {
           return res.status(500).send("Error saving the file.");
         }
         console.log(`\x1b[33m ${newFileName} \x1b[0m uploaded successfully!`);
-      });
-      res.status(200).json({
-        success: true,
-        message: `${newFileName} uploaded successfully`,
-        filename: newFileName,
+        res.status(200).json({
+          success: true,
+          message: `${newFileName} uploaded successfully`,
+          filename: newFileName,
+        });
       });
     });
   } catch (error) {
@@ -155,7 +161,7 @@ httpsServer.on("error", (error) => {
     console.log(`2. Close any other applications using port ${httpsPort}`);
     console.log(`3. Wait a few moments and try again - the port might be in a cleanup state\n`);
   } else {
-    console.error("\x1b[31mHTTP Server error:\x1b[0m", error);
+    console.error("\x1b[31mHTTPS Server error:\x1b[0m", error);
   }
   process.exit(1);
 });
@@ -165,9 +171,12 @@ httpServer.listen(httpPort, () => {
   console.log("\n\x1b[1m Dynamsoft Document Scanner Samples\x1b[0m\n");
   console.log("\x1b[36m HTTP URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
-  console.log("\x1b[33m Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
-  console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
-  console.log("\x1b[33m Continuous Scanning:\x1b[0m    http://localhost:" + httpPort + "/continuous-scanning");
+  console.log("\x1b[1m\x1b[35m → Samples Index:\x1b[0m    \x1b[1mhttp://localhost:" + httpPort + "/samples\x1b[0m");
+  console.log("\x1b[33m   Hello World:\x1b[0m    http://localhost:" + httpPort + "/hello-world");
+  console.log("\x1b[33m   Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
+  console.log("\x1b[33m   Multi-Page Scanning:\x1b[0m    http://localhost:" + httpPort + "/multi-page-scanning");
+  console.log("\x1b[33m   Scanning and Viewing:\x1b[0m    http://localhost:" + httpPort + "/scanning-and-viewing");
+  console.log("\x1b[33m   Image File Scanning:\x1b[0m    http://localhost:" + httpPort + "/image-file-scanning");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -185,10 +194,14 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
   console.log("\x1b[36m HTTPS URLs:\x1b[0m");
   console.log("\x1b[90m-------------------\x1b[0m");
   ipv4Addresses.forEach((localIP, index) => {
+    if (index > 0) console.log(""); // Add spacing between different IPs
     console.log("\x1b[32m----IP[" + index + "]: " + localIP + "----\x1b");
-    console.log("\x1b[32m Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
-    console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
-    console.log("\x1b[32m Continuous Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/continuous-scanning");
+    console.log("\x1b[1m\x1b[35m → Samples Index:\x1b[0m  \x1b[1mhttps://" + localIP + ":" + httpsPort + "/samples\x1b[0m");
+    console.log("\x1b[32m   Hello World:\x1b[0m  https://" + localIP + ":" + httpsPort + "/hello-world");
+    console.log("\x1b[32m   Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
+    console.log("\x1b[32m   Multi-Page Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/multi-page-scanning");
+    console.log("\x1b[32m   Scanning and Viewing:\x1b[0m  https://" + localIP + ":" + httpsPort + "/scanning-and-viewing");
+    console.log("\x1b[32m   Image File Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/image-file-scanning");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
