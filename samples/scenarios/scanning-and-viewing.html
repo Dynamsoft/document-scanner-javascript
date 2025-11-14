@@ -11,17 +11,26 @@
     <script src="../../dist/dds.bundle.js"></script>
 
     <!-- Dynamsoft Document Viewer -->
-    <script src=" https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js "></script>
-    <link href=" https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css " rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css"
+      rel="stylesheet"
+    />
     <style>
-      body {
+      html, body {
         margin: 0;
         padding: 0;
+        width: 100%;
+        height: 100%;
+        position: fixed;
       }
 
       #edit-viewer-container {
-        width: 100vw;
-        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
 
       #scanner-container {
@@ -47,6 +56,7 @@
   <body>
     <div id="edit-viewer-container"></div>
     <div id="scanner-container"></div>
+    <div id="result-pdf-container"></div>
 
     <script type="module">
       // Responsive UI
@@ -56,7 +66,8 @@
       // Public trial license which is valid for 24 hours
       // You can request a 30-day trial key from https://www.dynamsoft.com/customer/license/trialLicense/?product=mds
       Dynamsoft.DDV.Core.license = "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9";
-      Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
+      Dynamsoft.DDV.Core.engineResourcePath =
+        "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/engine";
 
       // Initialize DDV
       await Dynamsoft.DDV.Core.loadWasm();
@@ -72,12 +83,23 @@
           click: "handleScanClick",
         },
       };
+      
+      // Define custom close button
+      const closeButton = {
+        type: Dynamsoft.DDV.Elements.Button,
+        className: "ddv-button-close", // Set button icon
+        tooltip: "close viewer", // Set button tooltip
+        events: {
+          click: "close", // Set click event
+        },
+      };
 
       // Create desktop and mobile UI configuration for Edit Viewer
 
-      // Desktop UI configuration
+      // Get default desktop UI configuration and add scan and close button to the header toolbar
       const editViewerUiConfig = Dynamsoft.DDV.getDefaultUiConfig("editViewer");
-      editViewerUiConfig?.children?.[0]?.children?.[1]?.children?.unshift?.(scanButton);
+      editViewerUiConfig?.children?.[0]?.children?.[1]?.children?.push?.(scanButton);
+      editViewerUiConfig?.children?.[0]?.children?.[1]?.children?.push?.(closeButton);
 
       // Mobile UI configuration
       const mobileEditViewerUiConfig = {
@@ -93,18 +115,18 @@
               {
                 type: Dynamsoft.DDV.Elements.Layout,
                 children: [
-                  Dynamsoft.DDV.Elements.Blank,
-                  Dynamsoft.DDV.Elements.Blank,
-                  Dynamsoft.DDV.Elements.Pagination,
                   Dynamsoft.DDV.Elements.Print,
                   Dynamsoft.DDV.Elements.Download,
+                  Dynamsoft.DDV.Elements.Pagination,
+                  Dynamsoft.DDV.Elements.Blank,
+                  closeButton,
                 ],
               },
             ],
           },
-          // Main view
+          // Main document container
           Dynamsoft.DDV.Elements.MainView,
-          // Footer with tools
+          // Footer
           {
             type: Dynamsoft.DDV.Elements.Layout,
             className: "ddv-edit-viewer-footer-mobile",
@@ -116,7 +138,7 @@
               Dynamsoft.DDV.Elements.Undo,
               Dynamsoft.DDV.Elements.DeleteCurrent,
               Dynamsoft.DDV.Elements.Load,
-              scanButton, // Scan button on left for mobile
+              scanButton, // Custom can button
             ],
           },
         ],
@@ -131,7 +153,15 @@
         },
       });
 
+      // Create a DDV Document
+      const doc = Dynamsoft.DDV.documentManager.createDocument({
+        name: `Doc-${Date.now()}`,
+      });
+      
+      editViewer.openDocument(doc.uid); // Open the document in the edit viewer
+
       const scannerContainer = document.getElementById("scanner-container");
+
       // Initialize Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         // Public trial license which is valid for 24 hours
@@ -162,8 +192,6 @@
                   fileData: blob,
                 },
               ]);
-
-              console.log(`Scan added to document. Total pages: ${doc.pages.length}`);
             }
           } catch (error) {
             console.error("Error adding scanned page to DDV:", error);
@@ -201,15 +229,53 @@
       }
       // Launch the document scanner from button press via DDV event system
       editViewer.on("handleScanClick", launchScannerFromViewer);
-      // Create a DDV Document
-      const doc = Dynamsoft.DDV.documentManager.createDocument({
-        name: `Doc-${Date.now()}`,
+      // On closing DDV, export the document as PDF and display the result
+      editViewer.on("close", async () => {
+        try {
+          editViewerContainer.style.display = "none";
+          const resultContainer = document.getElementById("result-pdf-container");
+
+          // Check if document has any pages, display message if no images scanned
+          if (!doc.pages || doc.pages.length === 0) {
+            resultContainer.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;">
+                <p style="font-size: 18px;">No image scanned</p>
+              </div>
+            `;
+          } else {
+            const pdfBlob = await doc.saveToPdf(); // Export to PDF only if there are pages
+
+            const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
+
+            // Create iframe element and set blob URL directly
+            const iframe = document.createElement('iframe');
+            iframe.src = pdfUrl;
+            iframe.style.width = '100vw';
+            iframe.style.height = '100vh';
+            iframe.style.border = 'none';
+            iframe.title = 'Exported PDF Document';
+
+            // Clear container and append iframe
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(iframe);
+          }
+        } catch (error) {
+          console.error("Error exporting PDF:", error);
+
+          // Show error message to user
+          const resultContainer = document.getElementById("result-pdf-container");
+          resultContainer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;">
+              <p style="color: red; font-size: 18px;">Error exporting PDF: ${error.message}</p>
+            </div>
+          `;
+        } finally {
+          editViewer.destroy();
+        }
       });
-      // Open the document in the edit viewer
-      editViewer.openDocument(doc.uid);
-      // Launch the document scanner on page load
+
+      // Launch the scanner on page load
       launchScannerFromViewer();
-      console.log("DDV Document Scanner initialized successfully!");
     </script>
   </body>
 </html>
