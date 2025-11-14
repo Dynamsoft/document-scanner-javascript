@@ -88,6 +88,13 @@
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
+        resultViewConfig: {
+          toolbarButtonsConfig: {
+            done: {
+              "label": "Return Home"
+            }
+          }
+        },
       });
 
       (async () => {
