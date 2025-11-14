@@ -53,7 +53,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.6",
     "cors": "^2.8.5",
-    "dynamsoft-capture-vision-bundle": "3.2.2000",
+    "dynamsoft-capture-vision-bundle": "3.2.4000",
     "express": "^4.21.2",
     "formidable": "^3.5.2",
     "rollup": "^4.9.5",
