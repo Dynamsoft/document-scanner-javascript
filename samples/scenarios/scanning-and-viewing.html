@@ -12,12 +12,10 @@
 
     <!-- Dynamsoft Document Viewer -->
     <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.js"></script>
-    <link
-      href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/ddv.min.css" rel="stylesheet" />
     <style>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         width: 100%;
@@ -66,8 +64,7 @@
       // Public trial license which is valid for 24 hours
       // You can request a 30-day trial key from https://www.dynamsoft.com/customer/license/trialLicense/?product=mds
       Dynamsoft.DDV.Core.license = "DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9";
-      Dynamsoft.DDV.Core.engineResourcePath =
-        "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/engine";
+      Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.1.0/dist/engine";
 
       // Initialize DDV
       await Dynamsoft.DDV.Core.loadWasm();
@@ -83,7 +80,7 @@
           click: "handleScanClick",
         },
       };
-      
+
       // Define custom close button
       const closeButton = {
         type: Dynamsoft.DDV.Elements.Button,
@@ -157,7 +154,7 @@
       const doc = Dynamsoft.DDV.documentManager.createDocument({
         name: `Doc-${Date.now()}`,
       });
-      
+
       editViewer.openDocument(doc.uid); // Open the document in the edit viewer
 
       const scannerContainer = document.getElementById("scanner-container");
@@ -172,6 +169,7 @@
           cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
           enableAutoCropMode: true,
           enableSmartCaptureMode: true,
+          showSubfooter: false,
         },
         showCorrectionView: false, // Skip correction, feed directly to DDV
         showResultView: false, // Skip result view, DDV will show results
@@ -248,15 +246,15 @@
             const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
 
             // Create iframe element and set blob URL directly
-            const iframe = document.createElement('iframe');
+            const iframe = document.createElement("iframe");
             iframe.src = pdfUrl;
-            iframe.style.width = '100vw';
-            iframe.style.height = '100vh';
-            iframe.style.border = 'none';
-            iframe.title = 'Exported PDF Document';
+            iframe.style.width = "100vw";
+            iframe.style.height = "100vh";
+            iframe.style.border = "none";
+            iframe.title = "Exported PDF Document";
 
             // Clear container and append iframe
-            resultContainer.innerHTML = '';
+            resultContainer.innerHTML = "";
             resultContainer.appendChild(iframe);
           }
         } catch (error) {
