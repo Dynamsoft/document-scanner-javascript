@@ -58,7 +58,7 @@ app.get("/scanning-and-viewing", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/scenarios/scanning-and-viewing.html"));
 });
 
-app.get("/scenarios/image-file-scanning", (req, res) => {
+app.get("/image-file-scanning", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/scenarios/image-file-scanning.html"));
 });
 
@@ -171,7 +171,7 @@ httpServer.listen(httpPort, () => {
   console.log("\x1b[33m Demo:\x1b[0m    http://localhost:" + httpPort + "/demo");
   console.log("\x1b[33m Multi-Page Scanning:\x1b[0m    http://localhost:" + httpPort + "/multi-page-scanning");
   console.log("\x1b[33m Scanning and Viewing:\x1b[0m    http://localhost:" + httpPort + "/scanning-and-viewing");
-  console.log("\x1b[33m Image File Scanning:\x1b[0m    http://localhost:" + httpPort + "/scenarios/image-file-scanning");
+  console.log("\x1b[33m Image File Scanning:\x1b[0m    http://localhost:" + httpPort + "/image-file-scanning");
 });
 
 httpsServer.listen(httpsPort, "0.0.0.0", () => {
@@ -194,7 +194,7 @@ httpsServer.listen(httpsPort, "0.0.0.0", () => {
     console.log("\x1b[32m Demo:\x1b[0m  https://" + localIP + ":" + httpsPort + "/demo");
     console.log("\x1b[32m Multi-Page Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/multi-page-scanning");
     console.log("\x1b[32m Scanning and Viewing:\x1b[0m  https://" + localIP + ":" + httpsPort + "/scanning-and-viewing");
-    console.log("\x1b[32m Image File Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/scenarios/image-file-scanning");
+    console.log("\x1b[32m Image File Scanning:\x1b[0m  https://" + localIP + ":" + httpsPort + "/image-file-scanning");
   });
   console.log("\n");
   console.log("\x1b[90mPress Ctrl+C to stop the server\x1b[0m\n");
