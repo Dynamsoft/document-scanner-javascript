@@ -194,8 +194,6 @@
                   fileData: blob,
                 },
               ]);
-
-              console.log(`Scan added to document. Total pages: ${doc.pages.length}`);
             }
           } catch (error) {
             console.error("Error adding scanned page to DDV:", error);
@@ -284,8 +282,6 @@
       });
 
       launchScannerFromViewer(); // Launch the scanner on page load
-
-      console.log("DDV Document Scanner initialized successfully!");
     </script>
   </body>
 </html>
