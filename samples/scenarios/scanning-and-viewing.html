@@ -245,16 +245,24 @@
 
             const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
 
+            // Display success message and PDF preview
+            resultContainer.innerHTML = `
+              <div style="padding: 20px; background-color: #f0f9ff; border-bottom: 1px solid #0066cc;">
+                <p style="margin: 0; color: #0066cc; font-size: 16px; text-align: center;">
+                  ✓ Document successfully exported to PDF
+                </p>
+              </div>
+            `;
+
             // Create iframe element and set blob URL directly
             const iframe = document.createElement("iframe");
             iframe.src = pdfUrl;
             iframe.style.width = "100vw";
-            iframe.style.height = "100vh";
+            iframe.style.height = "calc(100vh - 61px)"; // Adjust for message height
             iframe.style.border = "none";
             iframe.title = "Exported PDF Document";
 
-            // Clear container and append iframe
-            resultContainer.innerHTML = "";
+            // Append iframe to container
             resultContainer.appendChild(iframe);
           }
         } catch (error) {
