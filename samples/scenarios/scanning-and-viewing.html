@@ -246,10 +246,14 @@
             const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
 
             // Display success message
+            const successMessage = isMobile
+              ? "✓ Document successfully exported to PDF, tap below to download"
+              : "✓ Document successfully exported to PDF, see below";
+
             resultContainer.innerHTML = `
               <div style="padding: 20px; background-color: #f0f9ff; border-bottom: 1px solid #0066cc;">
                 <p style="margin: 0; color: #0066cc; font-size: 16px; text-align: center;">
-                  ✓ Document successfully exported to PDF
+                  ${successMessage}
                 </p>
               </div>
             `;
@@ -261,7 +265,6 @@
               downloadContainer.style.cssText = "display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 20px;";
 
               const message = document.createElement("p");
-              message.textContent = "Your PDF is ready!";
               message.style.cssText = "font-size: 18px; font-weight: 500; margin: 0;";
 
               const downloadLink = document.createElement("a");
