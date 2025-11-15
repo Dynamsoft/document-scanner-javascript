@@ -245,7 +245,7 @@
 
             const pdfUrl = URL.createObjectURL(pdfBlob); // Create blob URL for PDF
 
-            // Display success message and PDF preview
+            // Display success message
             resultContainer.innerHTML = `
               <div style="padding: 20px; background-color: #f0f9ff; border-bottom: 1px solid #0066cc;">
                 <p style="margin: 0; color: #0066cc; font-size: 16px; text-align: center;">
@@ -254,16 +254,37 @@
               </div>
             `;
 
-            // Create iframe element and set blob URL directly
-            const iframe = document.createElement("iframe");
-            iframe.src = pdfUrl;
-            iframe.style.width = "100vw";
-            iframe.style.height = "calc(100vh - 61px)"; // Adjust for message height
-            iframe.style.border = "none";
-            iframe.title = "Exported PDF Document";
+            // iOS Safari doesn't support blob URLs in iframes, so provide download link for mobile
+            if (isMobile) {
+              // Create download link for mobile devices
+              const downloadContainer = document.createElement("div");
+              downloadContainer.style.cssText = "display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 20px;";
 
-            // Append iframe to container
-            resultContainer.appendChild(iframe);
+              const message = document.createElement("p");
+              message.textContent = "Your PDF is ready!";
+              message.style.cssText = "font-size: 18px; font-weight: 500; margin: 0;";
+
+              const downloadLink = document.createElement("a");
+              downloadLink.href = pdfUrl;
+              downloadLink.download = `document-${Date.now()}.pdf`;
+              downloadLink.textContent = "Download PDF";
+              downloadLink.style.cssText = "display: inline-block; padding: 12px 24px; background-color: #0066cc; color: white; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500;";
+
+              downloadContainer.appendChild(message);
+              downloadContainer.appendChild(downloadLink);
+              resultContainer.appendChild(downloadContainer);
+            } else {
+              // Create iframe element for desktop browsers
+              const iframe = document.createElement("iframe");
+              iframe.src = pdfUrl;
+              iframe.style.width = "100vw";
+              iframe.style.height = "calc(100vh - 61px)"; // Adjust for message height
+              iframe.style.border = "none";
+              iframe.title = "Exported PDF Document";
+
+              // Append iframe to container
+              resultContainer.appendChild(iframe);
+            }
           }
         } catch (error) {
           console.error("Error exporting PDF:", error);
