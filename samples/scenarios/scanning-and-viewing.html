@@ -277,16 +277,24 @@
               downloadContainer.appendChild(downloadLink);
               resultContainer.appendChild(downloadContainer);
             } else {
-              // Create iframe element for desktop browsers
+              // Create iframe container for desktop browsers
+              const iframeWrapper = document.createElement("div");
+              iframeWrapper.style.cssText = "display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #f5f5f5; min-height: calc(100vh - 61px);";
+
               const iframe = document.createElement("iframe");
               iframe.src = pdfUrl;
-              iframe.style.width = "100vw";
-              iframe.style.height = "calc(100vh - 61px)"; // Adjust for message height
-              iframe.style.border = "none";
+              iframe.style.width = "90%";
+              iframe.style.maxWidth = "900px";
+              iframe.style.height = "80vh";
+              iframe.style.maxHeight = "800px";
+              iframe.style.border = "1px solid #d1d5da";
+              iframe.style.borderRadius = "4px";
+              iframe.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
               iframe.title = "Exported PDF Document";
 
-              // Append iframe to container
-              resultContainer.appendChild(iframe);
+              // Append iframe to wrapper, then wrapper to container
+              iframeWrapper.appendChild(iframe);
+              resultContainer.appendChild(iframeWrapper);
             }
           }
         } catch (error) {
