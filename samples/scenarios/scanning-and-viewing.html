@@ -264,16 +264,12 @@
               const downloadContainer = document.createElement("div");
               downloadContainer.style.cssText = "display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 20px;";
 
-              const message = document.createElement("p");
-              message.style.cssText = "font-size: 18px; font-weight: 500; margin: 0;";
-
               const downloadLink = document.createElement("a");
               downloadLink.href = pdfUrl;
               downloadLink.download = `document-${Date.now()}.pdf`;
               downloadLink.textContent = "Download PDF";
               downloadLink.style.cssText = "display: inline-block; padding: 12px 24px; background-color: #0066cc; color: white; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500;";
 
-              downloadContainer.appendChild(message);
               downloadContainer.appendChild(downloadLink);
               resultContainer.appendChild(downloadContainer);
             } else {
@@ -301,7 +297,6 @@
           console.error("Error exporting PDF:", error);
 
           // Show error message to user
-          const resultContainer = document.getElementById("result-pdf-container");
           resultContainer.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;">
               <p style="color: red; font-size: 18px;">Error exporting PDF: ${error.message}</p>
