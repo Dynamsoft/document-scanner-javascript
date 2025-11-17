@@ -47,10 +47,6 @@ app.get("/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/demo/index.html"));
 });
 
-app.get("/samples", (req, res) => {
-  res.sendFile(path.join(__dirname, "../samples/index.html"));
-});
-
 app.get("/hello-world", (req, res) => {
   res.sendFile(path.join(__dirname, "../samples/hello-world.html"));
 });
