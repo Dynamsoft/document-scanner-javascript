@@ -1173,12 +1173,8 @@
       pointer-events: none;
     }
 
-    /* Hide toast and torch on desktop devices (fine pointer typically indicates desktop) */
+    /* Hide torch on desktop devices*/
     @media (pointer: fine) {
-      .dce-mn-toast {
-        display: none;
-      }
-
       .dce-mn-torch {
         display: none !important;
       }
