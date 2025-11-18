@@ -443,8 +443,8 @@ export default class DocumentScannerView {
 
     this.assignDCEClickEvents();
 
-    // Setup toast observer to hide all toast messages on desktop
-    this.setupToastObserver(DCEContainer.shadowRoot);
+    // Temporary: Setup toast message filtering until DCE updates
+    this.setupSmartToastFilter(DCEContainer.shadowRoot);
 
     // If showCorrectionView is false, hide smartCapture
     if (this.config._showCorrectionView === false) {
@@ -629,55 +629,51 @@ export default class DocumentScannerView {
     );
   }
 
-  private setupToastObserver(shadowRoot: ShadowRoot) {
+  /**
+   * Temporary toast message filter - can be removed when DCE updates toast behavior
+   * @internal
+   */
+  private setupSmartToastFilter(shadowRoot: ShadowRoot) {
     const toastElement = shadowRoot.querySelector(".dce-mn-toast") as HTMLElement;
     if (!toastElement) return;
 
-    // Check if device is desktop (fine pointer typically indicates mouse/trackpad)
-    const isDesktop = window.matchMedia("(pointer: fine)").matches;
-    const isIOSDevice = this.isIOS();
-
-    // Hide the toast element by default on iOS and desktop to prevent any flash
-    if (isIOSDevice || isDesktop) {
-      toastElement.style.display = "none";
-    }
-
-    // Also hide torch button on desktop with inline styles to ensure it takes precedence
-    if (isDesktop) {
-      const torchElement = shadowRoot.querySelector(".dce-mn-torch") as HTMLElement;
-      if (torchElement) {
-        torchElement.style.display = "none";
-      }
-    }
-
-    // Helper function to check and hide/show toast based on device type
     const checkToastContent = () => {
-      // On desktop and iOS, always hide toast messages regardless of content
-      if (isDesktop || isIOSDevice) {
-        toastElement.style.display = "none";
-      } else {
-        // On Android mobile, allow toast to show if it has content
-        const text = toastElement.textContent || "";
-        if (text.trim()) {
-          toastElement.style.display = "";
+      const text = toastElement.textContent?.trim() || "";
+
+      if (text === "Torch Not Supported") {
+        const { cameraEnhancer } = this.resources;
+        if (cameraEnhancer?.isOpen()) {
+          try {
+            const capabilities = cameraEnhancer.getCapabilities?.() as any;
+            const isTorchSupported = !!capabilities?.torch;
+
+            if (isTorchSupported) {
+              toastElement.style.display = "none";
+              return;
+            }
+          } catch (error) {
+            console.warn("Error checking torch capabilities:", error);
+          }
         }
+      }
+
+      if (text) {
+        toastElement.style.display = "";
+      } else {
+        toastElement.style.display = "none";
       }
     };
 
-    // Create observer to watch for toast content changes
     this.toastObserver = new MutationObserver(() => {
       checkToastContent();
     });
 
-    // Observe changes to the toast element and its children
     this.toastObserver.observe(toastElement, {
       childList: true,
       characterData: true,
       subtree: true,
-      attributes: true,
     });
 
-    // Run initial check
     checkToastContent();
   }
 
@@ -1360,7 +1356,7 @@ export default class DocumentScannerView {
     // Clear any existing resize timer
     this.resizeTimer && window.clearTimeout(this.resizeTimer);
 
-    // Disconnect toast observer if it exists
+    // Temporary: Cleanup toast observer (can be removed when DCE updates)
     this.toastObserver?.disconnect();
 
     const { cameraEnhancer, cameraView } = this.resources;
