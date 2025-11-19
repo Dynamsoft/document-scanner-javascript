@@ -342,6 +342,10 @@ export default class DocumentScannerView {
   // Used for Smart Capture Mode - use crossVerificationStatus
   private crossVerificationCount: number;
 
+  // Continuous scanning cooldown
+  private lastCaptureTimestamp = 0;
+  private readonly CONTINUOUS_SCAN_COOLDOWN_MS = 2000;
+
   // Frame verification properties (for clarity-based capture)
   private frameVerificationEnabled = true;
   private currentFrameId = 0;
@@ -2621,6 +2625,13 @@ export default class DocumentScannerView {
       return;
     }
 
+    if (this.resources.enableContinuousScanning) {
+      const timeSinceLastCapture = Date.now() - this.lastCaptureTimestamp;
+      if (timeSinceLastCapture < this.CONTINUOUS_SCAN_COOLDOWN_MS) {
+        return;
+      }
+    }
+
     if ((result.processedDocumentResult?.detectedQuadResultItems?.[0] as any)?.crossVerificationStatus === 1)
       this.crossVerificationCount++;
 
@@ -2630,6 +2641,7 @@ export default class DocumentScannerView {
      */
     if (this.crossVerificationCount >= this.config?.minVerifiedFramesForAutoCapture) {
       this.crossVerificationCount = 0;
+      this.lastCaptureTimestamp = Date.now();
 
       await this.takePhoto();
     }
