@@ -1,8 +1,42 @@
+/**
+ * Configuration options for the loading screen.
+ *
+ * @public
+ */
 interface LoadingScreenOptions {
+  /**
+   * Optional message to display below the spinner.
+   *
+   * @public
+   */
   message?: string;
+  /**
+   * Spinner size in pixels.
+   *
+   * @defaultValue 32
+   *
+   * @public
+   */
   spinnerSize?: number;
 }
 
+/**
+ * Display a full-screen loading overlay with spinner and optional message.
+ *
+ * @param container - The container element to append the loading screen to
+ * @param options - Configuration options for the loading screen
+ *
+ * @returns An object with methods to control the loading screen
+ *
+ * @remarks
+ * The loading screen covers the entire container with a dark overlay and centered spinner.
+ * The returned object provides methods to update the message or hide the overlay with a fade-out animation.
+ *
+ * @see {@link showMinimalSpinner} for a lightweight alternative
+ * @see {@link LoadingScreenOptions} for configuration details
+ *
+ * @public
+ */
 export function showLoadingScreen(container: HTMLElement, options: LoadingScreenOptions = {}) {
   const { message, spinnerSize = 32 } = options;
 
@@ -47,7 +81,19 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
   container.appendChild(overlayDiv);
 
   return {
+    /**
+     * The loading screen overlay element.
+     *
+     * @public
+     */
     element: overlayDiv,
+    /**
+     * Update or remove the loading message.
+     *
+     * @param newMessage - The new message to display, or null to remove the message
+     *
+     * @public
+     */
     updateMessage: (newMessage: string | null) => {
       let messageEl = loadingDiv.querySelector(".dds-loading-message");
 
@@ -68,6 +114,14 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
         contentDiv.appendChild(messageEl);
       }
     },
+    /**
+     * Hide the loading screen with a fade-out animation.
+     *
+     * @remarks
+     * The overlay is removed from the DOM after a 200ms fade-out transition.
+     *
+     * @public
+     */
     hide: () => {
       if (overlayDiv?.parentNode) {
         overlayDiv.classList.add("fade-out");
@@ -79,6 +133,21 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
   };
 }
 
+/**
+ * Display a compact spinner overlay without a full-screen background.
+ *
+ * @param container - The container element to append the spinner to
+ *
+ * @returns An object with methods to control the spinner
+ *
+ * @remarks
+ * Shows a small centered spinner with a semi-transparent circular background.
+ * Unlike {@link showLoadingScreen}, this does not block the entire container.
+ *
+ * @see {@link showLoadingScreen} for a full-screen loading overlay
+ *
+ * @public
+ */
 export function showMinimalSpinner(container: HTMLElement) {
   const spinnerDiv = document.createElement("div");
   spinnerDiv.className = "dds-minimal-spinner";
@@ -103,7 +172,17 @@ export function showMinimalSpinner(container: HTMLElement) {
   container.appendChild(spinnerDiv);
 
   return {
+    /**
+     * The spinner element.
+     *
+     * @public
+     */
     element: spinnerDiv,
+    /**
+     * Remove the spinner from the DOM.
+     *
+     * @public
+     */
     hide: () => {
       if (spinnerDiv?.parentNode) {
         spinnerDiv.parentNode.removeChild(spinnerDiv);
@@ -112,6 +191,15 @@ export function showMinimalSpinner(container: HTMLElement) {
   };
 }
 
+/**
+ * Default CSS styles for loading screens and spinners.
+ *
+ * @remarks
+ * Defines styles for both {@link showLoadingScreen} and {@link showMinimalSpinner}.
+ * Includes fade-out animation for smooth transitions.
+ *
+ * @public
+ */
 export const DEFAULT_LOADING_SCREEN_STYLE = `
   .dds-loading-screen {
     position: absolute;

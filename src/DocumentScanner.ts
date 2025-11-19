@@ -25,17 +25,51 @@ import {
 import { getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
 import { showLoadingScreen } from "./views/utils/LoadingScreen";
 
-// Default DCE UI path
+/**
+ * Default path to the Dynamsoft Camera Enhancer UI XML configuration file.
+ *
+ * @remarks
+ * This CDN-hosted XML file defines the camera view UI layout and controls for the scanner view.
+ * You can override this by setting {@link DocumentScannerConfig.scannerViewConfig.cameraEnhancerUIPath} to self-host or customize the resource.
+ *
+ * @defaultValue "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/document-scanner.ui.xml"
+ *
+ * @internal
+ */
 const DEFAULT_DCE_UI_PATH =
   "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/document-scanner.ui.xml";
+
+/**
+ * Default paths to Dynamsoft Capture Vision engine resources (WASM files and dependencies).
+ *
+ * @remarks
+ * Points to the `jsDelivr` CDN root directory where engine resources are hosted.
+ * You can override this by setting {@link DocumentScannerConfig.engineResourcePaths} to self-host or customize the resource.
+ *
+ * @defaultValue { rootDirectory: "https://cdn.jsdelivr.net/npm/" }
+ *
+ * @internal
+ */
 const DEFAULT_DCV_ENGINE_RESOURCE_PATHS = { rootDirectory: "https://cdn.jsdelivr.net/npm/" };
+
+/**
+ * Default height for the main {@link DocumentScanner} container.
+ *
+ * @remarks
+ * Uses dynamic viewport height (`100dvh`) to fill the entire viewport height,
+ * accounting for browser UI elements on mobile devices.
+ *
+ * @defaultValue "100dvh"
+ *
+ * @internal
+ */
 const DEFAULT_CONTAINER_HEIGHT = "100dvh";
 
 /**
  * The `DocumentScannerConfig` interface passes settings to the {@link DocumentScanner} constructor to apply a comprehensive set of UI and business logic customizations.
  *
  * @remarks
- * Only advanced require editing the UI template or MDS source code. {@link DocumentScannerConfig.license} is the only property required to be passed to instantiate a {@link DocumentScanner} object. MDS uses sane default values for all other omitted properties.
+ * Only advanced scenarios require editing the UI template or MDS source code. {@link DocumentScannerConfig.license} is the only property required to instantiate a {@link DocumentScanner} object. MDS uses sensible default values for all other omitted properties.
  *
  * @example
  * ```typescript
@@ -63,7 +97,7 @@ export interface DocumentScannerConfig {
    * The license key for using the {@link DocumentScanner}.
    *
    * @remarks
-   * This is the only property required to be passed to instantiate a {@link DocumentScanner} object.
+   * This is the only required property to instantiate a {@link DocumentScanner} object.
    *
    * @public
    * @stable
@@ -77,23 +111,23 @@ export interface DocumentScannerConfig {
    */
   container?: HTMLElement | string;
   /**
-   * The file path to the document template used for scanning.
+   * The file path to the Capture Vision template used for document scanning.
    *
    * @remarks
-   * You may set custom paths to self-host the template, or fully self-host MDS.
-   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * You may set custom paths to self-host the template or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | Self-hosting resources}
    *
    * @public
    * @stable
    */
   templateFilePath?: string;
   /**
-   * Capture Vision template names for detection and correction.
+   * Capture Vision template names for document detection and normalization.
    *
    * @remarks
-   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources, or fully self-host MDS.
-   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
-   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV Templates}
+   * This typically does not need to be set as MDS provides a default template for general use. You may set custom names to self-host resources or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | Self-hosting resources}
+   * @see {@link https://www.dynamsoft.com/capture-vision/docs/core/parameters/file/capture-vision-template.html?lang=javascript | DCV templates}
    *
    * @defaultValue {@link DEFAULT_TEMPLATE_NAMES}
    *
@@ -102,11 +136,11 @@ export interface DocumentScannerConfig {
    */
   utilizedTemplateNames?: UtilizedTemplateNames;
   /**
-   * Paths to the necessary resources (such as `.wasm` files) for the scanning engine.
+   * Paths to the necessary engine resources (such as `.wasm` files) for the scanning engine.
    *
    * @remarks
-   * The default paths point to CDNs and so may be left unset. You may set custom paths to self-host resources, or fully self-host MDS.
-   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | self-hosting resources}
+   * The default paths point to CDNs so this may be left unset. You may set custom paths to self-host resources or fully self-host MDS.
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#self-host-resources | Self-hosting resources}
    *
    * @public
    * @stable
@@ -116,7 +150,7 @@ export interface DocumentScannerConfig {
    * Configuration settings for the {@link DocumentScannerView}.
    *
    * @remarks
-   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | Workflow customization}
    *
    * @public
    * @stable
@@ -129,7 +163,7 @@ export interface DocumentScannerConfig {
    * Configuration settings for the {@link DocumentResultView}.
    *
    * @remarks
-   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | workflow customization}
+   * @see {@link https://www.dynamsoft.com/mobile-document-scanner/docs/web/guide/index.html#workflow-customization | Workflow customization}
    *
    * @public
    * @stable
@@ -156,14 +190,14 @@ export interface DocumentScannerConfig {
    */
   showCorrectionView?: boolean;
   /**
-   * Enable continuous scanning mode where the scanner loops back after each successful scan instead of exiting. {@link DocumentScanner.launch()} only resolves to the last scanned result. Use with {@link enableContinuousScanning} to get scan results.
+   * Enable continuous scanning mode where the scanner loops back after each successful scan instead of exiting. {@link DocumentScanner.launch} only resolves to the last scanned result. Use {@link onDocumentScanned} callback to get scan results.
    *
    * @remarks
    * When enabled:
    * - The scanner automatically loops back to capture another document after each successful scan
-   * - The {@link onDocumentScanned} callback triggers after each scan with the result; this is the only way to get the scanned results as {@link DocumentScanner.launch()} only gives the last scanned result
-   * - Users can exit by clicking the close button (X) or calling {@link DocumentScanner.stopContinuousScanning()}
-   * - The DocumentScanner only keeps the most recent scan result
+   * - The {@link onDocumentScanned} callback triggers after each scan with the result; this is the only way to get the scanned results as {@link DocumentScanner.launch} only returns the last scanned result
+   * - Users can exit by clicking the close button (X) or by calling {@link DocumentScanner.stopContinuousScanning}
+   * - The DocumentScanner only retains the most recent scan result
    *
    * @defaultValue false
    * @public
@@ -174,9 +208,9 @@ export interface DocumentScannerConfig {
    * Callback invoked after each successful scan in continuous scanning mode.
    *
    * @remarks
-   * This callback is only called when {@link enableContinuousScanning} is true. The scanner loops back to capture another document after this callback completes, and the {@link DocumentResult} containing the original image, corrected image, detected boundaries, and scan status.
+   * This callback is only called when {@link enableContinuousScanning} is true. The scanner loops back to capture another document after this callback completes. The callback receives a {@link DocumentResult} containing the original image, corrected image, detected boundaries, and scan status.
    *
-   * @param result {@link DocumentResult} - The result of the scan
+   * @param result - The {@link DocumentResult} of the scan
    *
    * @example
    * ```javascript
@@ -204,9 +238,9 @@ export interface DocumentScannerConfig {
    * - {@link showCorrectionView} is disabled
    * - {@link showResultView} is disabled
    *
-   * The thumbnail preview shows the most recently scanned document. By default, clicking it does nothing unless this callback is defined, allowing you to implement custom behavior like re-editing the image.
+   * The thumbnail preview displays the most recently scanned document. By default, clicking it does nothing unless this callback is defined, allowing you to implement custom behavior such as re-editing the image.
    *
-   * @param result {@link DocumentResult} - The result of the last scanned document
+   * @param result - The {@link DocumentResult} of the last scanned document
    *
    * @example
    * ```javascript
@@ -231,7 +265,7 @@ export interface DocumentScannerConfig {
    * Enable automatic frame verification for best quality capture.
    *
    * @remarks
-   * When enabled, uses clarity detection and cross filtering to automatically find the clearest frame.
+   * When enabled, uses clarity detection and cross-filtering to automatically find the clearest frame.
    * This uses the same algorithm as the React reference implementation.
    *
    * @defaultValue true
@@ -241,19 +275,129 @@ export interface DocumentScannerConfig {
   enableFrameVerification?: boolean;
 }
 
+/**
+ * Internal interface for shared resources used across different views in the {@link DocumentScanner}.
+ *
+ * @remarks
+ * This interface manages the coordination of resources between {@link DocumentScannerView}, {@link DocumentCorrectionView}, and {@link DocumentResultView}. It holds references to the Dynamsoft Capture Vision components, the current scan result, and callbacks for handling result updates and user interactions.
+ *
+ * @internal
+ */
 export interface SharedResources {
+  /**
+   * The Capture Vision Router instance for processing images and detecting document boundaries.
+   *
+   * @internal
+   */
   cvRouter?: CaptureVisionRouter;
+  /**
+   * The Camera Enhancer instance for camera control and video streaming.
+   *
+   * @internal
+   */
   cameraEnhancer?: CameraEnhancer;
+  /**
+   * The Camera View instance for displaying the camera feed and UI overlays.
+   *
+   * @internal
+   */
   cameraView?: CameraView;
+  /**
+   * The current document scan result containing the original image, corrected image, and detected boundaries.
+   *
+   * @internal
+   */
   result?: DocumentResult;
+  /**
+   * Callback invoked when the scan result is updated.
+   *
+   * @param result - The updated {@link DocumentResult}
+   *
+   * @internal
+   */
   onResultUpdated?: (result: DocumentResult) => void;
+  /**
+   * Flag indicating whether continuous scanning mode is enabled.
+   *
+   * @remarks
+   * Corresponds to {@link DocumentScannerConfig.enableContinuousScanning}.
+   *
+   * @internal
+   */
   enableContinuousScanning?: boolean;
+  /**
+   * Counter tracking the number of successfully completed scans in continuous scanning mode.
+   *
+   * @internal
+   */
   completedScansCount?: number;
+  /**
+   * Callback invoked when the thumbnail preview is clicked in continuous scanning mode.
+   *
+   * @remarks
+   * Corresponds to {@link DocumentScannerConfig.onThumbnailClicked}.
+   *
+   * @param result - The {@link DocumentResult} associated with the thumbnail
+   *
+   * @internal
+   */
   onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
 }
 
 /**
- * {@label DOCUMENT_SCANNER}
+ * Main class for document scanning functionality with camera capture, document detection, perspective correction, and result management.
+ *
+ * @remarks
+ * The `DocumentScanner` class provides a complete document scanning solution that integrates camera access, real-time document boundary detection, manual boundary adjustment, and image perspective correction. It orchestrates three main views:
+ * - {@link DocumentScannerView}: Camera interface with document detection and capture modes
+ * - {@link DocumentCorrectionView}: Manual boundary adjustment interface
+ * - {@link DocumentResultView}: Result preview and action interface
+ *
+ * The class supports both single-scan and continuous scanning modes. In continuous mode, the scanner loops back after each successful scan, allowing multiple documents to be captured in sequence.
+ *
+ * @example
+ * Basic usage with default configuration:
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE"
+ * });
+ *
+ * const result = await documentScanner.launch();
+ * if (result?.correctedImageResult) {
+ *     const canvas = result.correctedImageResult.toCanvas();
+ *     document.body.appendChild(canvas);
+ * }
+ * ```
+ *
+ * @example
+ * Continuous scanning mode:
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE",
+ *     enableContinuousScanning: true,
+ *     onDocumentScanned: async (result) => {
+ *         // Process each scanned document
+ *         await uploadToServer(result.correctedImageResult);
+ *     }
+ * });
+ *
+ * await documentScanner.launch();
+ * ```
+ *
+ * @example
+ * Process an existing image file:
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE"
+ * });
+ *
+ * const fileInput = document.querySelector('input[type="file"]');
+ * const file = fileInput.files[0];
+ * const result = await documentScanner.launch(file);
+ * ```
+ *
+ * @public
+ * @stable
  */
 class DocumentScanner {
   private scannerView?: DocumentScannerView;
@@ -266,6 +410,20 @@ class DocumentScanner {
 
   private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
 
+  /**
+   * Display a loading overlay on top of the {@link DocumentScannerView}.
+   *
+   * @param message - Optional message to display in the loading overlay
+   *
+   * @remarks
+   * This method shows a loading screen over the scanner container with an optional custom message.
+   * It also ensures the container is visible and properly positioned.
+   * 
+   * Used internally during {@link initialize} and when processing uploaded files via {@link processUploadedFile}.
+   * Call {@link hideScannerLoadingOverlay} to remove the overlay.
+   *
+   * @internal
+   */
   private showScannerLoadingOverlay(message?: string) {
     const configContainer = getElement(this.config.scannerViewConfig.container);
     this.loadingScreen = showLoadingScreen(configContainer, { message });
@@ -274,8 +432,15 @@ class DocumentScanner {
   }
 
   /**
+   * Hide the loading overlay displayed over the scanner view.
    *
-   * @privateRemark
+   * @param hideContainer - Whether to also hide the scanner container.
+   *
+   * @remarks
+   * This method removes the loading screen overlay created by {@link showScannerLoadingOverlay}. 
+   * If `hideContainer` is true, it also hides the entire scanner container element.
+   *
+   * @internal
    */
   private hideScannerLoadingOverlay(hideContainer: boolean = false) {
     this.loadingScreen?.hide();
@@ -287,9 +452,9 @@ class DocumentScanner {
   }
 
   /**
-   * Create a DocumentScanner instance with settings specified by a `DocumentScannerConfig` object.
+   * Create a DocumentScanner instance with settings specified by a {@link DocumentScannerConfig} object.
    *
-   * @param config {@link DocumentScannerConfig} set all main configurations, including UI toggles, data workflow callbacks, etc. You must set a valid license key with the `license` property. See {@link DocumentScannerConfig} for a complete description.
+   * @param config - The {@link DocumentScannerConfig} to set all main configurations, including UI toggles, data workflow callbacks, etc. You must set a valid license key with the `license` property. See {@link DocumentScannerConfig} for a complete description.
    *
    * @example
    * HTML:
@@ -310,6 +475,43 @@ class DocumentScanner {
    */
   constructor(private config: DocumentScannerConfig) {}
 
+  /**
+   * Initialize the DocumentScanner by setting up Dynamsoft Capture Vision resources and view components.
+   *
+   * @remarks
+   * **This method is called automatically by {@link launch} and typically does not need to be invoked manually.**
+   *
+   * This method performs the following initialization steps:
+   * 1. Validates and processes the configuration provided to the constructor
+   * 2. Initializes Dynamsoft Capture Vision engine resources (license, camera, router)
+   * 3. Creates and initializes the configured view components (scanner, correction, result)
+   * 4. Sets up shared resources and callbacks for communication between views
+   *
+   * The method is idempotent - calling it multiple times will return the same resources and components without re-initialization.
+   *
+   * @returns A promise that resolves to an object containing:
+   * - `resources`: The {@link SharedResources} object containing camera, router, and state
+   * - `components`: An object with references to the initialized view components ({@link DocumentScannerView | scannerView}, {@link DocumentCorrectionView | correctionView}, {@link DocumentResultView | scanResultView})
+   *
+   * @throws {Error} If initialization fails due to invalid configuration, missing license, or resource loading errors
+   *
+   * @example
+   * Manual initialization (**rarely needed**):
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE"
+   * });
+   *
+   * try {
+   *     const { resources, components } = await documentScanner.initialize();
+   *     console.log("Scanner initialized successfully");
+   * } catch (error) {
+   *     console.error("Initialization failed:", error);
+   * }
+   * ```
+   *
+   * @public
+   */
   async initialize(): Promise<{
     resources: SharedResources;
     components: {
@@ -384,6 +586,24 @@ class DocumentScanner {
     }
   }
 
+  /**
+   * Initialize Dynamsoft Capture Vision (DCV) engine resources.
+   *
+   * @remarks
+   * This method sets up the core Dynamsoft SDK components:
+   * - Configures engine resource paths (WASM files and dependencies) using {@link DocumentScannerConfig.engineResourcePaths} or {@link DEFAULT_DCV_ENGINE_RESOURCE_PATHS}
+   * - Initializes the license manager with the provided license key from {@link DocumentScannerConfig.license}
+   * - Pre-loads WASM resources to reduce latency
+   * - Creates instances of {@link CameraView}, {@link CameraEnhancer}, and {@link CaptureVisionRouter}
+   * - Stores references in {@link SharedResources}
+   *
+   * The method customizes the trial license URL to specify the product type and deployment context.
+   * Called automatically by {@link initialize}.
+   *
+   * @throws {Error} If resource initialization fails due to network issues, invalid license, or SDK errors
+   *
+   * @internal
+   */
   private async initializeDCVResources(): Promise<void> {
     try {
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
@@ -412,6 +632,16 @@ class DocumentScanner {
     }
   }
 
+  /**
+   * Determine whether to create a default container for the {@link DocumentScanner} instance automatically.
+   *
+   * @returns `true` if no containers are specified in the configuration, `false` otherwise
+   *
+   * @remarks
+   * Returns true when no main container and no individual view containers are specified.
+   *
+   * @internal
+   */
   private shouldCreateDefaultContainer(): boolean {
     const hasNoMainContainer = !this.config.container;
     const hasNoViewContainers = !(
@@ -422,6 +652,25 @@ class DocumentScanner {
     return hasNoMainContainer && hasNoViewContainers;
   }
 
+  /**
+   * Create a default container element for the {@link DocumentScanner}.
+   *
+   * @returns The created container element
+   *
+   * @remarks
+   * This method creates a full-screen overlay container with the following characteristics:
+   * - Class name: `dds-main-container`
+   * - Positioned absolutely at the top-left corner of the viewport
+   * - Full width and dynamic viewport height using {@link DEFAULT_CONTAINER_HEIGHT}
+   * - High z-index (999) to appear above other page content
+   * - Initially hidden (display: none)
+   *
+   * The container is automatically appended to the document body and serves as the
+   * parent for all view containers when no custom container is provided.
+   * Called by {@link initializeDDSConfig} when {@link shouldCreateDefaultContainer} returns true.
+   *
+   * @internal
+   */
   private createDefaultDDSContainer(): HTMLElement {
     const container = document.createElement("div");
     container.className = "dds-main-container";
@@ -439,6 +688,24 @@ class DocumentScanner {
     return container;
   }
 
+  /**
+   * Check if the provided license is a temporary/trial license and return an appropriate license key.
+   *
+   * @param license - The license key to check
+   * @returns The validated license key or a default trial license
+   *
+   * @remarks
+   * This method detects temporary/trial licenses by checking if the license:
+   * - Is empty or undefined
+   * - Starts with specific prefixes: "A", "L", "P", or "Y"
+   *
+   * If a temporary license is detected, it returns a default trial license key.
+   * Otherwise, it returns the original license unchanged.
+   * 
+   * Called by {@link initializeDDSConfig} during configuration initialization to check key from {@link DocumentScannerConfig.license}
+   *
+   * @internal
+   */
   private checkForTemporaryLicense(license?: string) {
     return !license?.length ||
       license?.startsWith("A") ||
@@ -449,6 +716,16 @@ class DocumentScanner {
       : license;
   }
 
+  /**
+   * Validate that required view containers are properly configured.
+   *
+   * @throws {Error} If a view is enabled but has no container and no default container will be created
+   *
+   * @remarks
+   * Ensures enabled views have valid containers when no main container and no default container will be created.
+   *
+   * @internal
+   */
   private validateViewConfigs() {
     // Only validate if there's no main container AND default container won't be created
     if (!this.config.container) {
@@ -471,6 +748,24 @@ class DocumentScanner {
     }
   }
 
+  /**
+   * Determine whether the {@link DocumentCorrectionView} should be displayed.
+   *
+   * @returns `true` if the correction view should be shown
+   *
+   * @remarks
+   * The correction view is shown when:
+   * - {@link DocumentScannerConfig.showCorrectionView} is explicitly set to true, OR
+   * - {@link DocumentScannerConfig.showCorrectionView} is undefined **AND** a {@link DocumentCorrectionViewConfig.container} is configured
+   *
+   * The correction view is **NOT** shown when:
+   * - {@link DocumentScannerConfig.showCorrectionView} is explicitly set to false
+   * - No main {@link DocumentScannerConfig.container} **AND** no {@link DocumentCorrectionViewConfig.container} is provided
+   *
+   * Called by {@link initializeDDSConfig} to determine whether to create the correction view configuration.
+   *
+   * @internal
+   */
   private showCorrectionView() {
     if (this.config.showCorrectionView === false) return false;
 
@@ -489,6 +784,24 @@ class DocumentScanner {
     return this.config.showCorrectionView && !!this.config.correctionViewConfig?.container;
   }
 
+  /**
+   * Determine whether the {@link DocumentResultView} should be displayed.
+   *
+   * @returns true if the result view should be shown
+   *
+   * @remarks
+   * The result view is shown when:
+   * - {@link DocumentScannerConfig.showResultView} is explicitly set to true, **OR**
+   * - {@link DocumentScannerConfig.showResultView} is undefined **AND** a {@link DocumentResultViewConfig.container} is configured
+   *
+   * The result view is NOT shown when:
+   * - {@link DocumentScannerConfig.showResultView} is explicitly set to false
+   * - No main {@link DocumentScannerConfig.container} **AND** no {@link DocumentResultViewConfig.container} is provided
+   *
+   * Called by {@link initializeDDSConfig} to determine whether to create the result view configuration.
+   *
+   * @internal
+   */
   private showResultView() {
     if (this.config.showResultView === false) return false;
 
@@ -507,6 +820,24 @@ class DocumentScanner {
     return this.config.showResultView && !!this.config.resultViewConfig?.container;
   }
 
+  /**
+   * Initialize and normalize the {@link DocumentScanner} configuration.
+   *
+   * @remarks
+   * This method performs comprehensive configuration initialization:
+   * 1. Validates view container requirements via {@link validateViewConfigs}
+   * 2. Creates a default container if needed via {@link shouldCreateDefaultContainer} and {@link createDefaultDDSContainer}
+   * 3. Creates individual view containers within the main container via {@link createViewContainers}
+   * 4. Sets up base configuration (license via {@link checkForTemporaryLicense}, template names from {@link DocumentScannerConfig.utilizedTemplateNames}, template file path)
+   * 5. Configures each view ({@link DocumentScannerView}, {@link DocumentCorrectionView}, {@link DocumentResultView}) with merged settings
+   *
+   * The configuration is normalized to ensure all views have proper containers,
+   * default values are applied (like {@link DEFAULT_DCE_UI_PATH} for {@link DocumentScannerView} camera UI), and internal flags are set correctly.
+   * 
+   * Called by {@link initialize} before creating view instances.
+   *
+   * @internal
+   */
   private initializeDDSConfig() {
     this.validateViewConfigs();
 
@@ -562,6 +893,30 @@ class DocumentScanner {
   }
 
 
+  /**
+   * Create individual view containers within the main container.
+   *
+   * @param mainContainer - The main container element
+   * @returns A record mapping {@link EnumDDSViews} view names to their container elements
+   *
+   * @remarks
+   * This method creates container elements for each enabled view:
+   * - {@link DocumentScannerView} (always created)
+   * - {@link DocumentCorrectionView} (if {@link showCorrectionView} returns true)
+   * - {@link DocumentResultView} (if {@link showResultView} returns true)
+   *
+   * Each view container:
+   * - Has a class name in the format `dds-{viewName}-view-container`
+   * - Is initially hidden (display: none)
+   * - Takes full width and height of the parent
+   * - Is positioned relatively
+   * - Has user selection disabled
+   *
+   * The main container is cleared before creating the view containers.
+   * Called by {@link initializeDDSConfig} when a main container is available.
+   *
+   * @internal
+   */
   private createViewContainers(mainContainer: HTMLElement): Record<string, HTMLElement> {
     mainContainer.textContent = "";
 
@@ -595,7 +950,7 @@ class DocumentScanner {
    * When called with {@link DocumentScannerConfig.enableContinuousScanning} enabled and {@link launch} running, signal the scanner to stop looping and return from {@link launch} with the last scanned result.
    *
    * This provides an alternative to using the close button (X) for exiting continuous scanning mode,
-   * allowing you to implement custom exit logic based on conditions like:
+   * allowing you to implement custom exit logic based on conditions such as:
    * - Maximum number of scanned documents reached
    * - Time limits
    * - User interaction with custom UI elements
@@ -648,12 +1003,32 @@ class DocumentScanner {
   }
 
   /**
-   * Clean up resources and hide UI components.
+   * Clean up and release all resources used by the DocumentScanner.
+   *
+   * @remarks
+   * **This method is called automatically at the end of {@link launch}, so manual invocation is typically only needed if you want to clean up resources before the scanning workflow completes.**
+   * 
+   * This method performs comprehensive cleanup by:
+   * - Disposing all view components (scanner, correction, result)
+   * - Releasing Dynamsoft Capture Vision resources (camera, router)
+   * - Clearing all container elements
+   * - Resetting internal state
+   *
+   * After calling dispose, you can create a new DocumentScanner instance if you need to scan again.
    *
    * @example
-   * ```js
+   * Manual cleanup:
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE"
+   * });
+   *
+   * await documentScanner.launch();
+   *
+   * // Clean up is automatic after launch completes
+   * // But you can also call it manually if needed:
    * documentScanner.dispose();
-   * console.log("Scanner resources released.");
+   * console.log("Scanner resources released");
    * ```
    *
    * @public
@@ -693,9 +1068,17 @@ class DocumentScanner {
   }
 
   /**
-   * Process a File object to extract image information
-   * @param file The File object to process
-   * @returns Promise with the processed image blob and dimensions
+   * Process a File object to extract image information as a blob.
+   *
+   * @param file - The File object to process (must be an image file)
+   * @returns Promise resolving to blob with dimensions
+   *
+   * @throws {Error} If the file is not an image or if blob creation fails
+   *
+   * @remarks
+   * Validates MIME type, loads image, draws to canvas, and converts to blob.
+   *
+   * @internal
    */
   private async processFileToBlob(file: File): Promise<{ blob: Blob; width: number; height: number }> {
     return new Promise((resolve, reject) => {
@@ -726,9 +1109,16 @@ class DocumentScanner {
   }
 
   /**
-   * Processes an uploaded image file
-   * @param file The file to process
-   * @returns Promise with the document result
+   * Process an uploaded image file for document detection and normalization.
+   *
+   * @param file - The image file to process
+   * @returns Promise resolving to a {@link DocumentResult}
+   *
+   * @remarks
+   * Converts to blob, detects boundaries (or uses full image), performs normalization, and updates shared result.
+   * Returns failed status on error.
+   *
+   * @internal
    */
   private async processUploadedFile(file: File): Promise<DocumentResult> {
     try {
@@ -811,11 +1201,29 @@ class DocumentScanner {
   }
 
   /**
-   * Perform a single scan operation.
+   * Perform a single scan operation through the complete workflow.
+   *
+   * @param file - Optional image file to process instead of using camera
+   * @returns Promise resolving to the {@link DocumentResult}
+   *
+   * @remarks
+   * This method orchestrates a complete single-scan workflow:
+   * 1. Initializes all components via {@link initialize} if not already initialized
+   * 2. Shows the main container ({@link DocumentScannerConfig.container})
+   * 3. If a file is provided, processes it via {@link processUploadedFile} instead of using the camera
+   * 4. Routes through the enabled views in sequence:
+   *    - {@link DocumentScannerView}: Camera capture and document detection
+   *    - {@link DocumentCorrectionView}: Manual boundary adjustment (if enabled by {@link showCorrectionView})
+   *    - {@link DocumentResultView}: Result preview and actions (if enabled by {@link showResultView})
+   * 5. Returns the final {@link DocumentResult}
+   *
+   * The method handles various combinations of enabled/disabled views and ensures
+   * proper transitions between them (stopping capture, hiding containers, etc.).
    * 
-   * @param file - Optional file to process instead of using camera
-   * @returns {@link DocumentResult} - Promise with the document result
-   * @private
+   * Called by {@link launch} for single-scan mode, or repeatedly in continuous scanning mode 
+   * when {@link DocumentScannerConfig.enableContinuousScanning} is true.
+   *
+   * @internal
    */
   private async performSingleScan(file?: File): Promise<DocumentResult> {
     const { components } = await this.initialize();
@@ -904,30 +1312,78 @@ class DocumentScanner {
   }
 
   /**
-   * Start the document scanning workflow at the {@link DocumentScannerView | `DocumentScannerView`} by default.
+   * Start the document scanning workflow.
    *
    * @remarks
-   * {@link File | Passing a file path of an image} to `file` allows scanning from the image and bypassing camera input as well as the {@link DocumentScannerView | `DocumentScannerView`}.
+   * This is the primary method for initiating document scanning. It performs the following:
+   * 1. Automatically calls {@link initialize} if not already initialized
+   * 2. Opens the camera and displays the {@link DocumentScannerView} (unless a file is provided)
+   * 3. Guides the user through the configured workflow (scan → correction → result)
+   * 4. Returns the final {@link DocumentResult} when the workflow completes
+   * 5. Automatically calls {@link dispose} to clean up resources
    *
-   * With {@link DocumentScannerConfig.enableContinuousScanning} enabled, the scanner loops back after each successful scan, invoking the {@link DocumentScannerConfig.onDocumentScanned} callback with each result. The loop continues until the user clicks the close button (X) or {@link stopContinuousScanning} is called.
+   * **Scanning Modes:**
+   * - **Single-scan mode (default)**: Captures one document and returns the result
+   * - **Continuous scanning mode** ({@link DocumentScannerConfig.enableContinuousScanning}): Loops after each scan, invoking {@link DocumentScannerConfig.onDocumentScanned} with each result. The loop continues until the user clicks the close button (X) or {@link stopContinuousScanning} is called. Returns the last scanned result.
    *
-   * @param
-   * `file` - process the file and skip the {@link DocumentScannerView | `DocumentScannerView`} if passed
+   * **File Processing:**
+   * Passing a {@link File} object allows processing an existing image file, bypassing camera input and the {@link DocumentScannerView}.
    *
-   * @returns
-   * results of the scan, including the original image, corrected image, detected boundaries, and scan status
+   * @param file - Optional image file to process instead of using the camera
+   *
+   * @returns Promise resolving to the {@link DocumentResult}, which includes:
+   * - `status`: Scan status (success, cancelled, or failed)
+   * - `correctedImageResult`: Perspective-corrected document image
+   * - `originalImageResult`: Original captured image
+   * - `detectedQuadrilateral`: Detected document boundaries
+   *
+   * @throws {Error} If a capture session is already in progress
    *
    * @example
+   * Basic single-scan usage:
    * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE"
+   * });
+   *
    * const result = await documentScanner.launch();
    *
    * if (result?.correctedImageResult) {
-   * 	 resultContainer.innerHTML = "";
-   * 	 const canvas = result.correctedImageResult.toCanvas();
-   * 	 resultContainer.appendChild(canvas);
+   *     resultContainer.innerHTML = "";
+   *     const canvas = result.correctedImageResult.toCanvas();
+   *     resultContainer.appendChild(canvas);
    * } else {
-   *   resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+   *     resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
    * }
+   * ```
+   *
+   * @example
+   * Process an existing image file:
+   * ```javascript
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE"
+   * });
+   *
+   * const fileInput = document.querySelector('input[type="file"]');
+   * const file = fileInput.files[0];
+   * const result = await documentScanner.launch(file);
+   * ```
+   *
+   * @example
+   * Continuous scanning mode:
+   * ```javascript
+   * const scannedDocs = [];
+   * const documentScanner = new Dynamsoft.DocumentScanner({
+   *     license: "YOUR_LICENSE_KEY_HERE",
+   *     enableContinuousScanning: true,
+   *     onDocumentScanned: async (result) => {
+   *         scannedDocs.push(result);
+   *         console.log(`Scanned ${scannedDocs.length} documents`);
+   *     }
+   * });
+   *
+   * // This will return the last scanned result when user exits
+   * const lastResult = await documentScanner.launch();
    * ```
    *
    * @public

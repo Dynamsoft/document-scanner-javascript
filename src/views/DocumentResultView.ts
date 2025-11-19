@@ -6,19 +6,108 @@ import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import { DocumentResult, EnumFlowType, EnumResultStatus, ToolbarButton, ToolbarButtonConfig } from "./utils/types";
 
+/**
+ * Configuration interface for customizing toolbar buttons in the {@link DocumentResultView}.
+ *
+ * @remarks
+ * This interface allows you to customize the appearance and behavior of the toolbar buttons displayed in the {@link DocumentResultView}. Each button can be configured using a {@link ToolbarButtonConfig} object to modify its icon, label, CSS class, or visibility.
+ *
+ * The behaviors described for each button below are the default behaviors. You can override the default behavior by providing a custom {@link ToolbarButton.onClick} handler through the {@link ToolbarButtonConfig}.
+ *
+ * @example
+ * Customize button appearance:
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE",
+ *     resultViewConfig: {
+ *         toolbarButtonsConfig: {
+ *             retake: {
+ *                 isHidden: true
+ *             },
+ *             share: {
+ *                 icon: "path/to/new_icon.png",
+ *                 label: "Custom Label"
+ *             }
+ *         }
+ *     }
+ * });
+ * ```
+ *
+ * @example
+ * Override button behavior with custom onClick handler:
+ * ```javascript
+ * const documentScanner = new Dynamsoft.DocumentScanner({
+ *     license: "YOUR_LICENSE_KEY_HERE",
+ *     resultViewConfig: {
+ *         toolbarButtonsConfig: {
+ *             done: {
+ *                 label: "Save",
+ *                 onClick: async () => {
+ *                     // Custom save logic
+ *                     await saveToServer(documentScanner.result);
+ *                     console.log("Document saved!");
+ *                 }
+ *             },
+ *             share: {
+ *                 onClick: async () => {
+ *                     // Custom share logic
+ *                     await sendViaEmail(documentScanner.result);
+ *                 }
+ *             }
+ *         }
+ *     }
+ * });
+ * ```
+ *
+ * @public
+ */
 export interface DocumentResultViewToolbarButtonsConfig {
+  /**
+   * Configuration for the retake button. Default behavior: returns to the {@link DocumentScannerView} to capture a new image.
+   *
+   * @public
+   */
   retake?: ToolbarButtonConfig;
+  /**
+   * Configuration for the correct button. Default behavior: enters the {@link DocumentCorrectionView} to adjust document boundaries.
+   *
+   * @public
+   */
   correct?: ToolbarButtonConfig;
+  /**
+   * Configuration for the share button. Default behavior: shares or downloads the scanned document.
+   *
+   * @remarks
+   * On mobile devices with Web Share API support, this button triggers the native share dialog. On desktop or devices without share support, it downloads the image instead.
+   *
+   * @public
+   */
   share?: ToolbarButtonConfig;
+  /**
+   * Configuration for the upload button. Default behavior: triggers the {@link DocumentResultViewConfig.onUpload} callback.
+   *
+   * @remarks
+   * This button is only visible when {@link DocumentResultViewConfig.onUpload} is defined.
+   *
+   * @public
+   */
   upload?: ToolbarButtonConfig;
+  /**
+   * Configuration for the done button. Default behavior: completes the scanning workflow.
+   *
+   * @remarks
+   * In continuous scanning mode ({@link DocumentScannerConfig.enableContinuousScanning}), this button is labeled "Keep Scan" by default and returns to the {@link DocumentScannerView} for the next scan.
+   *
+   * @public
+   */
   done?: ToolbarButtonConfig;
 }
 
 /**
  * The `DocumentResultViewConfig` interface passes settings to the {@link DocumentScanner} constructor through the {@link DocumentScannerConfig} to apply UI and business logic customizations for the {@link DocumentResultView}.
- * 
+ *
  * @remarks
- * Only rare and edge-case scenarios require editing MDS source code. MDS uses sane default values for all omitted properties.
+ * Only rare and edge-case scenarios require editing MDS source code. MDS uses sensible default values for all omitted properties.
  * 
  * @example
  * ```javascript
@@ -44,28 +133,26 @@ export interface DocumentResultViewConfig {
    */
   container?: HTMLElement | string;
   /**
-   * Configures the appearance and labels of the buttons for the {@link DocumentResultView} UI.
-   * 
+   * Configure the appearance and labels of the buttons for the {@link DocumentResultView} UI.
+   *
    * @see {@link DocumentResultViewToolbarButtonsConfig}
-   * 
+   *
    * @public
    */
   toolbarButtonsConfig?: DocumentResultViewToolbarButtonsConfig;
   /**
    * Handler called when the user clicks the "Done" button.
-   * 
-   * @param result result of the scan, including the original image, corrected image, detected boundaries, and scan status
-   * @see {@link DocumentResult}
-   * 
+   *
+   * @param result - The {@link DocumentResult} of the scan, including the original image, corrected image, detected boundaries, and scan status
+   *
    * @public
    */
   onDone?: (result: DocumentResult) => Promise<void>;
   /**
    * Handler called when the user clicks the "Upload" button.
-   * 
-   * @param result result of the scan, including the original image, corrected image, detected boundaries, and scan status
-   * @see {@link DocumentResult}
-   * 
+   *
+   * @param result - The {@link DocumentResult} of the scan, including the original image, corrected image, detected boundaries, and scan status
+   *
    * @public
    */
   onUpload?: (result: DocumentResult) => Promise<void>;
@@ -98,6 +185,18 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Handle upload or share button actions.
+   *
+   * @param mode - The action mode: "share" to share/download the image, "upload" to trigger the upload callback
+   *
+   * @returns Promise that resolves when the operation completes
+   *
+   * @remarks
+   * Validates image exists, then invokes callback or delegates to {@link handleShare}.
+   *
+   * @internal
+   */
   private async handleUploadAndShareBtn(mode?: "share" | "upload") {
     try {
       const { result } = this.resources;
@@ -116,6 +215,39 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Share or download the corrected document image.
+   *
+   * @returns Promise resolving to `true` if successful, `undefined` on error
+   *
+   * @remarks
+   * This method attempts to share or download the corrected document image using platform-appropriate mechanisms:
+   *
+   * **On Mobile Devices:**
+   * - Detects mobile platforms via user agent string
+   * - Attempts to use the Web Share API ({@link https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share | navigator.share}) if available
+   * - Checks file sharing support via {@link https://developer.mozilla.org/en-US/docs/Web/API/Navigator/canShare | navigator.canShare}
+   * - Handles various error scenarios (AbortError, NotAllowedError, TypeError, DataError) gracefully
+   * - Falls back to download if sharing is not supported or fails
+   *
+   * **On Desktop or Fallback:**
+   * - Creates a temporary download link with a timestamped filename
+   * - Triggers automatic download by simulating a click
+   * - Cleans up the temporary object URL after download
+   *
+   * The corrected image is converted to a PNG blob using {@link DeskewedImageResultItem.toBlob} before sharing/downloading.
+   * If the user cancels the share dialog (AbortError), the operation is considered successful and returns without error.
+   *
+   * @throws {Error} If no corrected image result is available
+   * @throws {Error} If blob conversion fails
+   *
+   * @see {@link handleUploadAndShareBtn} which invokes this method in "share" mode
+   * @see {@link DeskewedImageResultItem.toBlob} for image conversion
+   * @see {@link SharedResources.result} for the source of the corrected image
+   * @see {@link createControls} where the share button is configured
+   *
+   * @internal
+   */
   private async handleShare() {
     try {
       const { result } = this.resources;
@@ -192,6 +324,16 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Launch the correction view to manually adjust document boundaries.
+   *
+   * @returns Promise that resolves when the correction is complete
+   *
+   * @remarks
+   * Hides result view, launches {@link DocumentCorrectionView}, updates result and reinitializes on success.
+   *
+   * @internal
+   */
   private async handleCorrectImage() {
     try {
       if (!this.correctionView) {
@@ -228,6 +370,43 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Return to the scanner view to capture a new document.
+   *
+   * @returns Promise that resolves when the retake workflow completes
+   *
+   * @remarks
+   * This method is invoked when the user clicks the "Re-take" button in the {@link DocumentResultView} toolbar.
+   * It performs the following workflow:
+   * 
+   * 1. **Validation**: Checks that {@link DocumentScannerView} is initialized
+   * 2. **View Transition**: Hides the result view via {@link hideView} and shows the {@link DocumentScannerView}
+   * 3. **Capture**: Launches {@link DocumentScannerView.launch} to capture a new document
+   * 4. **Result Handling**:
+   *    - If cancelled ({@link EnumResultStatus.RS_CANCELLED}) or failed ({@link EnumResultStatus.RS_FAILED}): Resolves with the status and exits
+   *    - If successful ({@link EnumResultStatus.RS_SUCCESS}):
+   *      - Updates {@link SharedResources.result} via {@link SharedResources.onResultUpdated}
+   *      - Stops camera capture via {@link DocumentScannerView.stopCapturing}
+   *      - Hides the {@link DocumentScannerView}
+   *      - If {@link DocumentCorrectionView} is configured: Routes through correction view
+   *      - Refreshes the result view with the new image via {@link dispose} and {@link initialize}
+   * 
+   * **Correction View Integration:**
+   * When {@link DocumentCorrectionView} is configured, the retake workflow automatically routes through the correction view
+   * before returning to the result view. This allows the user to adjust boundaries on the newly captured document.
+   * If the user cancels or encounters an error in the correction view, the workflow exits and resolves with the error status.
+   *
+   * @throws {Error} If the {@link DocumentScannerView} is not initialized
+   * @throws {Error} If an error occurs during the retake workflow
+   *
+   * @see {@link DocumentScannerView} for the scanner view implementation
+   * @see {@link DocumentScannerView.launch} which is called to capture a new document
+   * @see {@link DocumentCorrectionView} for optional boundary adjustment after capture
+   * @see {@link SharedResources.onResultUpdated} for result update notification
+   * @see {@link createControls} where the retake button is created and this handler is attached
+   *
+   * @internal
+   */
   private async handleRetake() {
     try {
       if (!this.scannerView) {
@@ -300,6 +479,16 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Complete the scanning workflow and finalize the result.
+   *
+   * @returns Promise that resolves when the done handler completes
+   *
+   * @remarks
+   * Invokes {@link DocumentResultViewConfig.onDone} callback, resolves promise, cleans up.
+   *
+   * @internal
+   */
   private async handleDone() {
     try {
       await this.config?.onDone?.(this.resources.result);
@@ -323,6 +512,16 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Create the toolbar controls for the result view.
+   *
+   * @returns The HTMLElement containing the toolbar with all configured buttons
+   *
+   * @remarks
+   * Detects mobile/share capability, creates retake/correction/share/upload/done buttons. Customizable via {@link DocumentResultViewToolbarButtonsConfig}.
+   *
+   * @internal
+   */
   private createControls(): HTMLElement {
     const { toolbarButtonsConfig, onUpload } = this.config;
 
@@ -439,10 +638,28 @@ export default class DocumentResultView {
     }
   }
 
+  /**
+   * Hide the result view by setting its container display to "none".
+   *
+   * @remarks
+   * Sets container display to "none" without disposing contents.
+   *
+   * @internal
+   */
   hideView(): void {
     getElement(this.config.container).style.display = "none";
   }
 
+  /**
+   * Dispose of the result view by cleaning up the container and optionally clearing the resolver.
+   *
+   * @param preserveResolver - If `true`, preserves the {@link currentScanResultViewResolver} for reuse; if `false`, clears it. Defaults to `false`.
+   *
+   * @remarks
+   * Clears container contents. Optionally preserves resolver for {@link handleCorrectImage} and {@link handleRetake}.
+   *
+   * @internal
+   */
   dispose(preserveResolver: boolean = false): void {
     // Clean up the container
     getElement(this.config.container).textContent = "";
