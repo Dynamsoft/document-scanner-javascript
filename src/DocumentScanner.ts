@@ -1266,43 +1266,27 @@ class DocumentScanner {
         };
       }
 
-      // Route based on enabled views
-      // All views enabled
-      if (components.correctionView && components.scanResultView) {
-        // Stop capturing before showing correction view
-        if (components.scannerView) {
-          components.scannerView.stopCapturing();
-        }
-        // Hide scanner view before showing correction view
-        if (components.scannerView && this.config.scannerViewConfig?.container) {
+      // Stop capturing and hide scanner before showing next view
+      if (components.scannerView) {
+        components.scannerView.stopCapturing();
+        if (this.config.scannerViewConfig?.container) {
           getElement(this.config.scannerViewConfig.container).style.display = "none";
         }
-        await components.correctionView.launch();
-        return await components.scanResultView.launch();
       }
 
-      // No result view
+      // Route based on capture method
+      if (components.correctionView && components.scanResultView) {
+        if (shouldCorrectImage(scanResult._flowType)) {
+          await components.correctionView.launch();
+          return await components.scanResultView.launch();
+        }
+      }
+
+      // Default routing
       if (components.correctionView && !components.scanResultView) {
-        // Stop capturing before showing correction view
-        if (components.scannerView) {
-          components.scannerView.stopCapturing();
-        }
-        // Hide scanner view before showing correction view
-        if (components.scannerView && this.config.scannerViewConfig?.container) {
-          getElement(this.config.scannerViewConfig.container).style.display = "none";
-        }
         return await components.correctionView.launch();
       }
-      // No correction view
-      if (components.scanResultView && !components.correctionView) {
-        // Stop capturing before showing result view
-        if (components.scannerView) {
-          components.scannerView.stopCapturing();
-        }
-        // Hide scanner view before showing result view
-        if (components.scannerView && this.config.scannerViewConfig?.container) {
-          getElement(this.config.scannerViewConfig.container).style.display = "none";
-        }
+      if (components.scanResultView) {
         return await components.scanResultView.launch();
       }
     }
