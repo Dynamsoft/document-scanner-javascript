@@ -17,7 +17,7 @@ import {
   EnumResultStatus,
   UtilizedTemplateNames,
 } from "./utils/types";
-import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen, showMinimalSpinner } from "./utils/LoadingScreen";
+import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
 import { createStyle, findClosestResolutionLevel, getElement, isEmptyObject } from "./utils";
 
 const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
@@ -384,7 +384,6 @@ export default class DocumentScannerView {
   private currentScanResolver?: (result: DocumentResult) => void;
 
   private loadingScreen: ReturnType<typeof showLoadingScreen> | null = null;
-  private minimalSpinner: ReturnType<typeof showMinimalSpinner> | null = null;
   private toastObserver: MutationObserver | null = null;
 
   /**
@@ -1363,47 +1362,7 @@ export default class DocumentScannerView {
     });
   }
 
-  /**
-   * Toggle the visual auto-capture loading animation indicator.
-   *
-   * @param enabled - Whether to show the animation (`true`) or hide it (`false`)
-   *
-   * @remarks
-   * This method controls a subtle loading animation that appears when Smart Capture or
-   * Auto Crop mode is enabled, providing visual feedback that the scanner is actively
-   * analyzing frames for automatic document capture.
-   *
-   * The animation is a spinning indicator that appears near the capture button. When enabled,
-   * the animation's border colors are set to transparent (hiding the animation). When disabled,
-   * the border colors are set to orange (#fe8e14), making the animation visible.
-   *
-   * **Note:** The parameter naming appears inverted - passing `true` actually hides the animation
-   * by making it transparent, while `false` shows it with orange coloring. This is called with
-   * `false` when {@link toggleBoundsDetection} is triggered to hide the animation, and with
-   * `true`/`false` by {@link toggleSmartCapture} to control visibility based on Smart Capture state.
-   *
-   * Called by:
-   * - {@link toggleBoundsDetection} - Hides animation when bounds detection changes
-   * - {@link toggleSmartCapture} - Shows/hides animation based on Smart Capture state
-   *
-   * @see {@link toggleSmartCapture} - Enables/disables Smart Capture mode
-   * @see {@link toggleBoundsDetection} - Enables/disables bounds detection mode
-   *
-   * @internal
-   */
-  async toggleAutoCaptureAnimation(enabled?: boolean) {
-    const configContainer = getElement(this.config.container);
-    const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
-    if (!DCEContainer?.shadowRoot) return;
-
-    const loadingAnimation = DCEContainer.shadowRoot.querySelector(
-      ".dce-loading-auto-capture-animation"
-    ) as HTMLElement;
-
-    loadingAnimation.style.borderLeftColor = enabled ? "transparent" : "#fe8e14";
-    loadingAnimation.style.borderBottomColor = enabled ? "transparent" : "#fe8e14";
-  }
 
   /**
    * Toggle bounds detection mode to enable/disable real-time document boundary detection.
@@ -1431,7 +1390,6 @@ export default class DocumentScannerView {
    * - Also disables Auto Crop if {@link DocumentScannerViewConfig._showCorrectionView} is `false`
    * - Stops frame capture via {@link stopCapturing}
    * - Changes UI button color to white (#fff) to indicate inactive state
-   * - Hides the auto-capture animation via {@link toggleAutoCaptureAnimation}
    *
    * This mode can be configured as the default via {@link DocumentScannerViewConfig.enableBoundsDetectionMode}.
    *
@@ -1461,7 +1419,6 @@ export default class DocumentScannerView {
 
     if (!onIcon || !offIcon) return;
 
-    this.toggleAutoCaptureAnimation(false);
     const newBoundsDetectionState = enabled !== undefined ? enabled : !this.boundsDetectionEnabled;
 
     // If we're turning off bounds detection, ensure smart capture is turned off
@@ -1512,14 +1469,12 @@ export default class DocumentScannerView {
    *
    * **Enabling Smart Capture:**
    * - Automatically enables Bounds Detection via {@link toggleBoundsDetection} if not already enabled
-   * - Shows the auto-capture animation via {@link toggleAutoCaptureAnimation}
    * - Changes UI button color to orange (#fe814a) to indicate active state
    * - Swaps button icon from "off" to "on" state
    * - Resets {@link crossVerificationCount} to start fresh verification tracking
    *
    * **Disabling Smart Capture:**
    * - Automatically disables Auto Crop (when correction view is enabled)
-   * - Hides the auto-capture animation via {@link toggleAutoCaptureAnimation}
    * - Changes UI button color to white (#fff) to indicate inactive state
    * - Resets {@link crossVerificationCount}
    *
@@ -1554,7 +1509,6 @@ export default class DocumentScannerView {
     if (!onIcon || !offIcon) return;
 
     const newSmartCaptureState = mode !== undefined ? mode : !this.smartCaptureEnabled;
-    this.toggleAutoCaptureAnimation(newSmartCaptureState);
 
     // If trying to turn on auto capture, ensure bounds detection is on
     // If turning off auto capture, ensure auto crop is off
@@ -2452,16 +2406,8 @@ export default class DocumentScannerView {
 
       const flowType = this.getFlowType();
 
-      // Show loading indicator (use minimal spinner for continuous scanning, full overlay otherwise)
+      // Show loading indicator and disable buttons
       if (this.resources.enableContinuousScanning) {
-        // Clean up any existing spinner first
-        if (this.minimalSpinner) {
-          this.minimalSpinner.hide();
-          this.minimalSpinner = null;
-        }
-
-        const configContainer = getElement(this.config.container);
-        this.minimalSpinner = showMinimalSpinner(configContainer);
         // Disable the capture button during processing
         if (this.DCE_ELEMENTS.takePhotoBtn) {
           this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "none";
@@ -2496,9 +2442,8 @@ export default class DocumentScannerView {
         this.closeCamera();
       }
 
-      // Hide loading indicator
+      // Hide loading indicator and re-enable buttons
       if (this.resources.enableContinuousScanning) {
-        this.minimalSpinner?.hide();
         // Re-enable the capture button after processing
         if (this.DCE_ELEMENTS.takePhotoBtn) {
           this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "auto";
@@ -2554,9 +2499,8 @@ export default class DocumentScannerView {
       console.error(errMsg);
       alert(errMsg);
 
-      // Clean up spinner/overlay and re-enable button
+      // Clean up overlay and re-enable buttons
       if (this.resources.enableContinuousScanning) {
-        this.minimalSpinner?.hide();
         // Re-enable the capture button
         if (this.DCE_ELEMENTS.takePhotoBtn) {
           this.DCE_ELEMENTS.takePhotoBtn.style.pointerEvents = "auto";

@@ -32,7 +32,6 @@ interface LoadingScreenOptions {
  * The loading screen covers the entire container with a dark overlay and centered spinner.
  * The returned object provides methods to update the message or hide the overlay with a fade-out animation.
  *
- * @see {@link showMinimalSpinner} for a lightweight alternative
  * @see {@link LoadingScreenOptions} for configuration details
  *
  * @public
@@ -133,69 +132,13 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
   };
 }
 
-/**
- * Display a compact spinner overlay without a full-screen background.
- *
- * @param container - The container element to append the spinner to
- *
- * @returns An object with methods to control the spinner
- *
- * @remarks
- * Shows a small centered spinner with a semi-transparent circular background.
- * Unlike {@link showLoadingScreen}, this does not block the entire container.
- *
- * @see {@link showLoadingScreen} for a full-screen loading overlay
- *
- * @public
- */
-export function showMinimalSpinner(container: HTMLElement) {
-  const spinnerDiv = document.createElement("div");
-  spinnerDiv.className = "dds-minimal-spinner";
 
-  const spinner = `
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      width="24"
-      height="24"
-      stroke-width="2"
-    >
-      <path d="M12 3a9 9 0 1 0 9 9"></path>
-    </svg>
-  `;
-
-  spinnerDiv.innerHTML = spinner;
-  container.appendChild(spinnerDiv);
-
-  return {
-    /**
-     * The spinner element.
-     *
-     * @public
-     */
-    element: spinnerDiv,
-    /**
-     * Remove the spinner from the DOM.
-     *
-     * @public
-     */
-    hide: () => {
-      if (spinnerDiv?.parentNode) {
-        spinnerDiv.parentNode.removeChild(spinnerDiv);
-      }
-    },
-  };
-}
 
 /**
- * Default CSS styles for loading screens and spinners.
+ * Default CSS styles for loading screens.
  *
  * @remarks
- * Defines styles for both {@link showLoadingScreen} and {@link showMinimalSpinner}.
+ * Defines styles for {@link showLoadingScreen}.
  * Includes fade-out animation for smooth transitions.
  *
  * @public
@@ -245,25 +188,6 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
     max-width: 200px;
     line-height: 1.4;
     opacity: 0.9;
-  }
-
-  .dds-minimal-spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 999;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .dds-minimal-spinner svg {
-    animation: spin 1s linear infinite;
-    display: block;
   }
 
   @keyframes spin {
