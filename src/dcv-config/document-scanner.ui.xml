@@ -1072,9 +1072,7 @@
       height: 60px;
       border-radius: 6px;
       overflow: hidden;
-      border: 2px solid #fe8e14;
       background-color: rgba(0, 0, 0, 0.5);
-      cursor: pointer;
       transition: opacity 0.2s ease;
       user-select: none;
       -webkit-user-select: none;
