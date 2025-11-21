@@ -336,6 +336,7 @@ export default class DocumentScannerView {
   private smartCaptureEnabled: boolean = false;
   private autoCropEnabled: boolean = false;
   private isCapturing: boolean = false;
+  private isClosing: boolean = false;
 
   private resizeTimer: number | null = null;
 
@@ -729,13 +730,11 @@ export default class DocumentScannerView {
    * @internal
    */
   private handleContinuousScanDone() {
-    // Don't allow closing if a capture is in progress
-    if (this.isCapturing) {
-      console.warn("Cannot close during image capture");
+    if (this.isCapturing || this.isClosing) {
       return;
     }
 
-    // Stop continuous scanning by resolving with a cancelled status
+    this.isClosing = true;
     this.closeCamera();
     this.currentScanResolver?.({
       status: {
@@ -2128,10 +2127,10 @@ export default class DocumentScannerView {
     try {
       cameraEnhancer?.close();
     } catch (error) {
-      // Silently handle camera close errors - camera may already be closed
       console.warn("Camera error (closeCamera):", error);
     }
     this.stopCapturing();
+    this.isClosing = false;
   }
 
   /**
