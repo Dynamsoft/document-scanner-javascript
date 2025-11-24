@@ -23,6 +23,17 @@ if (!fs.existsSync(distPath)) {
 
 const app = express();
 
+// Rate limit to 100 req/min per IP
+const rateLimit = new Map();
+setInterval(() => rateLimit.clear(), 60000); // Clear every minute to prevent memory growth
+app.use((req, res, next) => {
+  const ip = req.ip;
+  const count = (rateLimit.get(ip) || 0) + 1;
+  rateLimit.set(ip, count);
+  if (count > 100) return res.status(429).send("Too many requests");
+  next();
+});
+
 app.use(
   cors({
     origin: (origin, callback) => {
