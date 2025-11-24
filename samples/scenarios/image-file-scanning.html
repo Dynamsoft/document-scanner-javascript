@@ -75,7 +75,9 @@
           }
         } catch (ex) {
           console.error("File scan error:", ex);
-          resultContainer.innerHTML = `<p>Error: ${ex?.message || ex}</p>`;
+          const p = document.createElement("p");
+          p.textContent = `Error: ${ex?.message || ex}`;
+          resultContainer.replaceChildren(p);
         }
       };
     </script>

@@ -23,6 +23,17 @@ if (!fs.existsSync(distPath)) {
 
 const app = express();
 
+// Rate limit to 100 req/min per IP
+const rateLimit = new Map();
+setInterval(() => rateLimit.clear(), 60000); // Clear every minute to prevent memory growth
+app.use((req, res, next) => {
+  const ip = req.ip;
+  const count = (rateLimit.get(ip) || 0) + 1;
+  rateLimit.set(ip, count);
+  if (count > 100) return res.status(429).send("Too many requests");
+  next();
+});
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -86,7 +97,12 @@ app.post("/upload", function (req, res) {
       // Sanitize filename to prevent path traversal
       const newFileName = path.basename(uploadedFile.originalFilename);
       const fileSavePath = __dirname;
-      const newFilePath = path.join(fileSavePath, newFileName);
+      const newFilePath = path.resolve(fileSavePath, newFileName);
+
+      // Verify path is within allowed directory
+      if (!newFilePath.startsWith(fileSavePath + path.sep)) {
+        return res.status(400).json({ success: false, message: "Invalid filename" });
+      }
 
       // Move the uploaded file to the desired directory
       fs.rename(uploadedFile.filepath, newFilePath, (err) => {
