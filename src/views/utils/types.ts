@@ -212,7 +212,7 @@ export interface DocumentResult {
  *
  * @public
  */
-export type ToolbarButtonConfig = Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">;
+ export type ToolbarButtonConfig = Partial<Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">>;
 
 /**
  * Interface defining toolbar button properties and behavior.
