@@ -33,7 +33,7 @@ const banner = `/*!
 * @copyright Copyright ${new Date().getUTCFullYear()}, Dynamsoft Corporation
 * @author Dynamsoft
 * @version ${version}
-* @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v3.0.6000.
+* @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v3.2.2000.
 * More info on DDS JS: https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/
 */`;
 
@@ -47,7 +47,7 @@ const TYPES_PATH = `dist/types/build`;
 const copyFiles = () => ({
   name: "copy-files",
   writeBundle() {
-    fs.copyFileSync(`${DCV_CONFIG_PATH}/document-scanner.ui.html`, "dist/document-scanner.ui.html");
+    fs.copyFileSync(`${DCV_CONFIG_PATH}/document-scanner.ui.xml`, "dist/document-scanner.ui.xml");
   },
 });
 

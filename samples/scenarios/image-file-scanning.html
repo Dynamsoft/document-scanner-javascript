@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image File Scanning | Dynamsoft Document Scanner</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/dds.bundle.js"></script> -->
+    <!-- To use locally: -->
+    <script src="../../dist/dds.bundle.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      input[type="file"] {
+        margin-bottom: 20px;
+      }
+      #results canvas {
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Scan An Existing Image</h1>
+    <input type="file" id="initialFile" accept="image/png,image/jpeg,image/jpg" />
+    <div id="results"></div>
+
+    <script>
+      const resultContainer = document.querySelector("#results");
+
+      let documentScanner;
+
+      // Initialize the Dynamsoft Document Scanner
+      (async () => {
+        try {
+          console.log("Initializing Dynamsoft Document Scanner...");
+
+          documentScanner = new Dynamsoft.DocumentScanner({
+            license:
+              "YOUR_LICENSE_KEY_HERE", // Replace with your actual license key
+            scannerViewConfig: {
+              cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
+            },
+          });
+
+          console.log("Initialization complete!");
+        } catch (ex) {
+          alert(`Failed to initialize: ${ex?.message || ex}`);
+          throw ex;
+        }
+      })();
+
+      // File input handler
+      document.getElementById("initialFile").onchange = async function () {
+        try {
+          const files = Array.from(this.files || []);
+          if (files.length) {
+            const result = await documentScanner.launch(files[0]);
+
+            // Clear the result container and display the scanned result as a canvas
+            if (result?.correctedImageResult) {
+              resultContainer.innerHTML = ""; // Clear placeholder content
+              const canvas = result.correctedImageResult.toCanvas();
+              resultContainer.appendChild(canvas);
+            } else {
+              resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+            }
+          }
+        } catch (ex) {
+          console.error("File scan error:", ex);
+          resultContainer.innerHTML = `<p>Error: ${ex?.message || ex}</p>`;
+        }
+      };
+    </script>
+  </body>
+</html>

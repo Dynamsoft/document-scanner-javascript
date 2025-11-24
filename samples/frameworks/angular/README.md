@@ -51,16 +51,16 @@ npm install
 ### Start the App
 
 ```shell
-ng serve
+npm start
 ```
 
 > [!TIP]
-> If you installed Angular locally, you can call the local version with
+> This runs `ng serve --ssl`. If you want to run without SSL, use:
 > ```shell
 > npx ng serve
 > ```
 
-Open `http://localhost:4200/` to view the sample app.
+Open `https://localhost:4200/` to view the sample app.
 
 ## Customization
 

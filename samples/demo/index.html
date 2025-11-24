@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamsoft Document Scanner</title>
     <link rel="stylesheet" href="./css/index.css" />
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.3.1/dist/dds.bundle.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/dds.bundle.js"></script> -->
     <!-- To use locally: -->
     <script src="../../dist/dds.bundle.js"></script>
   </head>
@@ -30,14 +30,8 @@
       <div class="header">Dynamsoft Document Scanner</div>
 
       <div class="description">
-        Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a
-        corrected scan.
-        <a
-          class="description-link"
-          href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html"
-          target="_blank"
-          >Learn more.</a
-        >
+        Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping to produce a corrected scan.
+        <a class="description-link" href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html" target="_blank">Learn more.</a>
       </div>
 
       <div class="qr-container">
@@ -50,9 +44,7 @@
           <div>Quick Start Option:</div>
           <button class="desktop-button" id="desktop-proceed">Continue on Desktop</button>
         </div>
-        <div class="note">
-          Note: Desktop cameras may have limited performance. Mobile scanning is recommended for best results.
-        </div>
+        <div class="note">Note: Desktop cameras may have limited performance. Mobile scanning is recommended for best results.</div>
       </div>
     </div>
 
@@ -61,17 +53,13 @@
     <script>
       const mobileView = document.getElementById("mobile-view");
       const desktopView = document.getElementById("desktop-view");
-      const resultsView = document.getElementById("results-view");
       const startScanButton = document.getElementById("start-scan");
       const desktopProceedButton = document.getElementById("desktop-proceed");
-      const backButton = document.getElementById("back-button");
 
-      let result = null;
       let firstLoad = true;
 
       // Handle view switching based on device type
       function detectDeviceAndSetView() {
-        // Check if mobile or desktop based on screen width
         if (window.innerWidth < 1024 || !firstLoad) {
           mobileView.style.display = "flex";
           desktopView.style.display = "none";
@@ -81,39 +69,42 @@
         }
       }
 
-      // Call function on page load and window resize
+      // Call function on page load
       window.addEventListener("load", detectDeviceAndSetView);
-      window.addEventListener("resize", detectDeviceAndSetView);
 
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
+        scannerViewConfig: {
+          cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
+        },
+        resultViewConfig: {
+          toolbarButtonsConfig: {
+            done: {
+              "label": "Return Home"
+            }
+          }
+        },
       });
 
-      (async () => {
-        // Start scan button handler
-        startScanButton.addEventListener("click", async function () {
-          mobileView.style.display = "none";
-          desktopView.style.display = "none";
+      // Start scan button handler
+      startScanButton.addEventListener("click", async function () {
+        mobileView.style.display = "none";
+        desktopView.style.display = "none";
 
-          try {
-            // Launch the scanner and wait for the result
-            result = await documentScanner.launch();
-            console.log(result);
-
-            detectDeviceAndSetView(); // Return to appropriate view based on device
-          } catch (error) {
-            console.error("Error scanning:", error);
-            detectDeviceAndSetView();
-          }
-        });
-      })();
+        try {
+          await documentScanner.launch();
+          detectDeviceAndSetView();
+        } catch (error) {
+          console.error("Error scanning:", error);
+          detectDeviceAndSetView();
+        }
+      });
 
       // Desktop proceed button handler
-      desktopProceedButton.addEventListener("click", async function () {
+      desktopProceedButton.addEventListener("click", function () {
         desktopView.style.display = "none";
         mobileView.style.display = "flex";
-
         firstLoad = false;
       });
     </script>
