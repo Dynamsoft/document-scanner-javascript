@@ -61,5 +61,9 @@
     "rollup-plugin-dts": "^6.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.scannerproxy.com:802/",
+    "tag": "latest"
   }
 }
