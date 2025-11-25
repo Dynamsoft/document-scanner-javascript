@@ -1,11 +1,12 @@
-import formidable from "formidable";
+import cors from "cors";
 import express from "express";
+import rateLimit from "express-rate-limit";
+import formidable from "formidable";
 import fs from "fs";
 import http from "http";
 import https from "https";
-import cors from "cors";
-import path from "path";
 import os from "os";
+import path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,16 +24,14 @@ if (!fs.existsSync(distPath)) {
 
 const app = express();
 
-// Rate limit to 100 req/min per IP
-const rateLimit = new Map();
-setInterval(() => rateLimit.clear(), 60000); // Clear every minute to prevent memory growth
-app.use((req, res, next) => {
-  const ip = req.ip;
-  const count = (rateLimit.get(ip) || 0) + 1;
-  rateLimit.set(ip, count);
-  if (count > 100) return res.status(429).send("Too many requests");
-  next();
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
 });
+
+app.use(limiter);
 
 app.use(
   cors({
@@ -81,6 +80,8 @@ app.post("/upload", function (req, res) {
     const form = formidable({
       multiples: false,
       keepExtensions: true,
+      maxFileSize: 25 * 1024 * 1024, // 25MB limit
+      maxFiles: 1,
     });
 
     form.parse(req, (err, fields, files) => {
@@ -96,12 +97,24 @@ app.post("/upload", function (req, res) {
 
       // Sanitize filename to prevent path traversal
       const newFileName = path.basename(uploadedFile.originalFilename);
-      const fileSavePath = __dirname;
-      const newFilePath = path.resolve(fileSavePath, newFileName);
 
-      // Verify path is within allowed directory
-      if (!newFilePath.startsWith(fileSavePath + path.sep)) {
-        return res.status(400).json({ success: false, message: "Invalid filename" });
+      // Validate file extension (whitelist for document scanner)
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf', '.bmp', '.tiff', '.tif'];
+      const fileExt = path.extname(newFileName).toLowerCase();
+      if (!allowedExtensions.includes(fileExt)) {
+        return res.status(400).json({ success: false, message: "File type not allowed. Allowed types: jpg, jpeg, png, pdf, bmp, tiff" });
+      }
+
+      // Sanitize filename to remove potentially dangerous characters
+      const sanitizedName = newFileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
+      const fileSavePath = __dirname;
+      const newFilePath = path.resolve(fileSavePath, sanitizedName);
+
+      // Verify path is within allowed directory (robust check using relative path)
+      const relativePath = path.relative(fileSavePath, newFilePath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+        return res.status(400).json({ success: false, message: "Invalid filename - path traversal detected" });
       }
 
       // Move the uploaded file to the desired directory
