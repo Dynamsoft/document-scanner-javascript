@@ -1,5 +1,14 @@
 import { EnumFlowType, ToolbarButton } from "./types";
 
+/**
+ * Retrieves a DOM element from either a CSS selector string or an HTMLElement instance.
+ *
+ * @param element - A CSS selector string or an HTMLElement instance
+ * @returns The HTMLElement if found, or null if the input is invalid
+ * @throws {Error} If a CSS selector string is provided but no matching element is found
+ *
+ * @public
+ */
 export function getElement(element: string | HTMLElement): HTMLElement | null {
   if (typeof element === "string") {
     const el = document.querySelector(element) as HTMLElement;
@@ -77,6 +86,20 @@ const DEFAULT_CONTROLS_STYLE = `
   }
 `;
 
+/**
+ * Creates a toolbar control panel with buttons from an array of button definitions.
+ *
+ * @remarks
+ * Generates responsive toolbar UI used in {@link DocumentCorrectionView} and {@link DocumentResultView}.
+ * Adapts to orientation: horizontal (portrait) or vertical (landscape ≤ 1024px).
+ * Supports image/SVG icons, custom classes, disabled/hidden states.
+ *
+ * @param buttons - Array of button definitions conforming to {@link ToolbarButton} interface
+ * @param containerStyle - Optional CSS style properties to apply to the container element
+ * @returns A styled HTMLElement containing the toolbar buttons
+ *
+ * @public
+ */
 export function createControls(buttons: ToolbarButton[], containerStyle?: Partial<CSSStyleDeclaration>): HTMLElement {
   createStyle("dds-controls-style", DEFAULT_CONTROLS_STYLE);
 
@@ -138,10 +161,33 @@ export function createControls(buttons: ToolbarButton[], containerStyle?: Partia
   return container;
 }
 
+/**
+ * Determines whether automatic perspective correction should be applied based on the capture flow type.
+ *
+ * @remarks
+ * Returns `true` for {@link EnumFlowType.SMART_CAPTURE}, {@link EnumFlowType.UPLOADED_IMAGE}, and {@link EnumFlowType.MANUAL}.
+ * Returns `false` for {@link EnumFlowType.AUTO_CROP} (already corrected) and {@link EnumFlowType.STATIC_FILE}.
+ *
+ * @param flow - The capture flow type from {@link EnumFlowType}
+ * @returns `true` if the image should be corrected, `false` otherwise
+ *
+ * @public
+ */
 export function shouldCorrectImage(flow: EnumFlowType) {
   return [EnumFlowType.SMART_CAPTURE, EnumFlowType.UPLOADED_IMAGE, EnumFlowType.MANUAL].includes(flow);
 }
 
+/**
+ * Creates and injects a CSS style element into the document head.
+ *
+ * @remarks
+ * Idempotent: if a style element with the given `id` already exists, no new element is created.
+ *
+ * @param id - Unique identifier for the style element
+ * @param style - CSS content to inject
+ *
+ * @public
+ */
 export function createStyle(id: string, style: string) {
   // Initialize styles if not already done
   if (!document.getElementById(id)) {
@@ -152,14 +198,41 @@ export function createStyle(id: string, style: string) {
   }
 }
 
+/**
+ * Checks if a string contains SVG markup.
+ *
+ * @remarks
+ * Checks if trimmed string starts with `<svg` and ends with `</svg>`.
+ *
+ * @param str - The string to check for SVG content
+ * @returns `true` if the string is an SVG, `false` otherwise
+ *
+ * @public
+ */
 export function isSVGString(str: string): boolean {
   return str.trim().startsWith("<svg") && str.trim().endsWith("</svg>");
 }
 
+/**
+ * Checks if an object is empty, null, or undefined.
+ *
+ * @param obj - The object to check
+ * @returns `true` if the object is empty, null, or undefined; `false` otherwise
+ *
+ * @public
+ */
 export const isEmptyObject = (obj: object | null | undefined): boolean => {
   return !obj || Object.keys(obj).length === 0;
 };
 
+/**
+ * Constant object defining standard video resolutions for camera constraints.
+ *
+ * @remarks
+ * 4k (3840×2160), 2k (2560×1440), 1080p (1920×1080), 720p (1280×720), 480p (640×480).
+ *
+ * @public
+ */
 export const STANDARD_RESOLUTIONS = {
   "4k": { width: 3840, height: 2160 },
   "2k": { width: 2560, height: 1440 },
@@ -168,8 +241,24 @@ export const STANDARD_RESOLUTIONS = {
   "480p": { width: 640, height: 480 },
 } as const;
 
+/**
+ * Type representing the keys of {@link STANDARD_RESOLUTIONS}.
+ *
+ * @public
+ */
 type ResolutionLevel = keyof typeof STANDARD_RESOLUTIONS;
 
+/**
+ * Finds the closest standard resolution level to a given resolution.
+ *
+ * @remarks
+ * Uses weighted scoring: 70% pixel count difference, 30% aspect ratio difference.
+ *
+ * @param selectedResolution - An object with `width` and `height` properties in pixels
+ * @returns The key from {@link STANDARD_RESOLUTIONS} representing the closest match
+ *
+ * @public
+ */
 export function findClosestResolutionLevel(selectedResolution: { width: number; height: number }): ResolutionLevel {
   // Calculate the total pixels for the input resolution
   const inputPixels = selectedResolution.width * selectedResolution.height;

@@ -4,10 +4,10 @@
     <link rel="icon" href="data:," />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamsoft Document Scanner | Hello World</title>
+    <title>Multi-Page Scanning | Dynamsoft Document Scanner</title>
     <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.0/dist/dds.bundle.js"></script> -->
     <!-- To use locally: -->
-    <script src="../dist/dds.bundle.js"></script>
+    <script src="../../dist/dds.bundle.js"></script>
   </head>
 
   <body>
@@ -21,24 +21,20 @@
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
         scannerViewConfig: {
-          cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use local UI file
+          cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
           enableAutoCropMode: true,
           enableSmartCaptureMode: true,
         },
-      });
-      (async () => {
-        // Launch the scanner and wait for the result
-        const result = await documentScanner.launch();
-
-        // Clear the result container and display the scanned result as a canvas
-        if (result?.correctedImageResult) {
-          resultContainer.innerHTML = ""; // Clear placeholder content
+        enableContinuousScanning: true,
+        onDocumentScanned: (result) => {
+          // Process each scanned document
           const canvas = result.correctedImageResult.toCanvas();
           resultContainer.appendChild(canvas);
-        } else {
-          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
-        }
-      })();
+        },
+      });
+
+      // Launch the scanner
+      documentScanner.launch();
     </script>
   </body>
   <style>

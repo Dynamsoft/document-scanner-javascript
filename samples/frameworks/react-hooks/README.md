@@ -50,10 +50,10 @@ npm install
 ### Start the App
 
 ```shell
-npm start
+npm run dev
 ```
 
-Then open https://localhost:3000/ to view the sample app.
+Then open https://localhost:5173/ to view the sample app.
 
 ## Customization
 

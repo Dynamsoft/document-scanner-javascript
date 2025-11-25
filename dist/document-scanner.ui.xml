@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; width: 100%; height: 100%; min-width: 100px; min-height: 100px; background: #000">
+  <div style="position: relative; width: 100%; height: 100%; min-width: 100px; min-height: 100px; background: #000; user-select: none">
     <div class="dce-macro-use-mobile-native-like-ui" style="display: none">
       <div class="dce-header">
         <div class="dce-mn-resolution-box" title="camera settings">720p</div>
@@ -292,6 +292,9 @@
             "
           ></div>
         </div>
+        <div class="dce-mn-floating-image" style="display: none;">
+          <img class="dce-mn-floating-image-img" alt="Captured" />
+        </div>
       </div>
       <div class="dce-subfooter">
         <div class="dce-mn-bounds-detection" title="Detect Borders">
@@ -487,20 +490,20 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathbounds-detection-on">
-                  <rect id="Rectangle_2800" data-name="Rectangle 2800" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathsmart-capture-on">
+                  <rect id="Rectangle_2800_smart_capture_on" data-name="Rectangle 2800" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+              <g id="Group_613_smart_capture_on" data-name="Group 613" clip-path="url(#clip-pathsmart-capture-on)">
+                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
                 <path
-                  id="Path_1575"
+                  id="Path_1575_smart_capture_on"
                   data-name="Path 1575"
                   d="M6.843,7.5a2.447,2.447,0,0,0-1.9.737A2.927,2.927,0,0,0,4.27,10.29a3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.431,2.431,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065A2.911,2.911,0,0,0,8.7,8.256,2.38,2.38,0,0,0,6.843,7.5m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372,1.171,1.171,0,0,1,1.047-.479Q8.2,8.439,8.2,10.29q0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1576"
+                  id="Path_1576_smart_capture_on"
                   data-name="Path 1576"
                   d="M13.509,7.5a2.32,2.32,0,0,0-1,.21,1.591,1.591,0,0,0-.693.6h-.059L11.6,7.6h-.9V13h1.148V10.31a2.371,2.371,0,0,1,.336-1.441,1.27,1.27,0,0,1,1.064-.43.974.974,0,0,1,.8.308,1.451,1.451,0,0,1,.252.933V13h1.152V9.48A1.733,1.733,0,0,0,13.509,7.5"
                   fill="#fff"
@@ -516,26 +519,26 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathdce-mn-bounds-off">
-                  <rect id="Rectangle_2801" data-name="Rectangle 2801" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathsmart-capture-off">
+                  <rect id="Rectangle_2801_smart_capture_off" data-name="Rectangle 2801" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+              <g id="Group_614_smart_capture_off" data-name="Group 614" clip-path="url(#clip-pathsmart-capture-off)">
+                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
                 <path
-                  id="Path_1578"
+                  id="Path_1578_smart_capture_off"
                   data-name="Path 1578"
                   d="M5.918,8.279a2.447,2.447,0,0,0-1.9.737,2.927,2.927,0,0,0-.673,2.051,3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.43,2.43,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065,2.915,2.915,0,0,0-.684-2.034,2.38,2.38,0,0,0-1.855-.754m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372A1.171,1.171,0,0,1,5.9,9.216q1.377,0,1.377,1.851,0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1579"
+                  id="Path_1579_smart_capture_off"
                   data-name="Path 1579"
                   d="M11.346,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532h1.152V9.245h1.319V8.376H11.167V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1580"
+                  id="Path_1580_smart_capture_off"
                   data-name="Path 1580"
                   d="M14.974,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532H14.8V9.245h1.319V8.376H14.8V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
@@ -589,20 +592,20 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathbounds-detection-on">
-                  <rect id="Rectangle_2800" data-name="Rectangle 2800" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathauto-crop-on">
+                  <rect id="Rectangle_2800_auto_crop_on" data-name="Rectangle 2800" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+              <g id="Group_613_auto_crop_on" data-name="Group 613" clip-path="url(#clip-pathauto-crop-on)">
+                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
                 <path
-                  id="Path_1575"
+                  id="Path_1575_auto_crop_on"
                   data-name="Path 1575"
                   d="M6.843,7.5a2.447,2.447,0,0,0-1.9.737A2.927,2.927,0,0,0,4.27,10.29a3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.431,2.431,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065A2.911,2.911,0,0,0,8.7,8.256,2.38,2.38,0,0,0,6.843,7.5m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372,1.171,1.171,0,0,1,1.047-.479Q8.2,8.439,8.2,10.29q0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1576"
+                  id="Path_1576_auto_crop_on"
                   data-name="Path 1576"
                   d="M13.509,7.5a2.32,2.32,0,0,0-1,.21,1.591,1.591,0,0,0-.693.6h-.059L11.6,7.6h-.9V13h1.148V10.31a2.371,2.371,0,0,1,.336-1.441,1.27,1.27,0,0,1,1.064-.43.974.974,0,0,1,.8.308,1.451,1.451,0,0,1,.252.933V13h1.152V9.48A1.733,1.733,0,0,0,13.509,7.5"
                   fill="#fff"
@@ -618,26 +621,26 @@
               viewBox="0 0 20 20"
             >
               <defs>
-                <clipPath id="clip-pathdce-mn-bounds-off">
-                  <rect id="Rectangle_2801" data-name="Rectangle 2801" width="20" height="20" fill="none" />
+                <clipPath id="clip-pathauto-crop-off">
+                  <rect id="Rectangle_2801_auto_crop_off" data-name="Rectangle 2801" width="20" height="20" fill="none" />
                 </clipPath>
               </defs>
-              <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+              <g id="Group_614_auto_crop_off" data-name="Group 614" clip-path="url(#clip-pathauto-crop-off)">
+                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
                 <path
-                  id="Path_1578"
+                  id="Path_1578_auto_crop_off"
                   data-name="Path 1578"
                   d="M5.918,8.279a2.447,2.447,0,0,0-1.9.737,2.927,2.927,0,0,0-.673,2.051,3.345,3.345,0,0,0,.312,1.484,2.257,2.257,0,0,0,.894.982,2.594,2.594,0,0,0,1.337.341,2.43,2.43,0,0,0,1.89-.742,2.945,2.945,0,0,0,.679-2.065,2.915,2.915,0,0,0-.684-2.034,2.38,2.38,0,0,0-1.855-.754m-.01,4.658q-1.382,0-1.382-1.87a2.438,2.438,0,0,1,.325-1.372A1.171,1.171,0,0,1,5.9,9.216q1.377,0,1.377,1.851,0,1.87-1.367,1.87"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1579"
+                  id="Path_1579_auto_crop_off"
                   data-name="Path 1579"
                   d="M11.346,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532h1.152V9.245h1.319V8.376H11.167V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
                 />
                 <path
-                  id="Path_1580"
+                  id="Path_1580_auto_crop_off"
                   data-name="Path 1580"
                   d="M14.974,7.3a.657.657,0,0,1,.568-.242,2.648,2.648,0,0,1,.811.137l.3-.87a3.673,3.673,0,0,0-1.192-.2,1.836,1.836,0,0,0-1.372.462,1.965,1.965,0,0,0-.449,1.418v.352l-.889.351v.537h.889v4.532H14.8V9.245h1.319V8.376H14.8V8.025a1.212,1.212,0,0,1,.179-.725"
                   fill="#fff"
@@ -650,29 +653,45 @@
       </div>
       <div class="dce-footer">
         <div class="dce-mn-take-photo" title="Take Photo">
-          <div class="dce-loading-auto-capture-animation"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70">
-            <g id="capture" transform="translate(-49 -577)">
-              <circle
-                id="Ellipse_6"
-                data-name="Ellipse 6"
-                cx="35"
-                cy="35"
-                r="35"
-                transform="translate(49 577)"
-                fill="#fe8e14"
+        <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+          <g id="capture" transform="translate(-49 -577)">
+            <circle
+              id="Ellipse_6"
+              data-name="Ellipse 6"
+              cx="48"
+              cy="48"
+              r="35"
+              transform="translate(49 577)"
+              fill="#fe8e14"
+            />
+            <!-- Annulus ring around the button -->
+            <circle
+              cx="48"
+              cy="48"
+              r="45"
+              transform="translate(49 577)"
+              fill="none"
+              stroke="#fe8e14"
+              stroke-width="6"
+              opacity="1"
+            />
+            <g id="Camera_button" data-name="Camera button" transform="translate(68.25 599.4)">
+              <path
+                id="Camera_Icon"
+                data-name="Camera Icon"
+                d="M27.792,23.334H2.924l-.246,0a4.573,4.573,0,0,1-.713-.063,2.419,2.419,0,0,1-.677-.225,2.282,2.282,0,0,1-.577-.424,2.255,2.255,0,0,1-.418-.582,2.414,2.414,0,0,1-.224-.687,4.749,4.749,0,0,1-.063-.719c0-.066,0-.131,0-.2,0-.047,0-.091,0-.136,0-.13,0-.26,0-.391V7.615c0-.132,0-.261,0-.392,0-.043,0-.086,0-.128,0-.07,0-.137,0-.2a4.745,4.745,0,0,1,.063-.72,2.4,2.4,0,0,1,.224-.686A2.266,2.266,0,0,1,.711,4.9a2.229,2.229,0,0,1,.577-.424,2.42,2.42,0,0,1,.677-.225,4.573,4.573,0,0,1,.713-.063c.111,0,.218,0,.328,0H5.674c.149,0,.3,0,.443,0l.058,0s0,0,.054-.005l.109,0a4.342,4.342,0,0,0,.7-.05,2.635,2.635,0,0,0,.772-.279,2.512,2.512,0,0,0,.658-.48A3.714,3.714,0,0,0,8.9,2.372c.069-.2.135-.393.2-.548a2.7,2.7,0,0,1,.139-.335A2.606,2.606,0,0,1,10.37.334a2.669,2.669,0,0,1,.773-.258A5.34,5.34,0,0,1,11.954,0c.064,0,1.808,0,3.4,0s3.336,0,3.4,0a5.348,5.348,0,0,1,.813.073A2.6,2.6,0,0,1,21,.821a2.706,2.706,0,0,1,.476.669,1.922,1.922,0,0,1,.079.185c.017.044.036.093.061.152.069.162.143.377.222.6a3.638,3.638,0,0,0,.407.951,2.552,2.552,0,0,0,.657.479,2.723,2.723,0,0,0,.774.28,3.278,3.278,0,0,0,.463.039l.146.006h3.508c.109,0,.219,0,.328,0a4.558,4.558,0,0,1,.713.063,2.434,2.434,0,0,1,.678.225,2.237,2.237,0,0,1,.576.424,2.335,2.335,0,0,1,.421.582l.038.077a1.619,1.619,0,0,1,.184.5,6.443,6.443,0,0,1,.063.828c0,.111,0,.222,0,.332,0,.131,0,.261,0,.392V19.9c0,.132,0,.261,0,.391,0,.111,0,.22,0,.332a4.89,4.89,0,0,1-.063.719,2.541,2.541,0,0,1-.222.687,2.323,2.323,0,0,1-.421.582,2.291,2.291,0,0,1-.576.424,2.434,2.434,0,0,1-.678.225,4.56,4.56,0,0,1-.713.063l-.246,0ZM15.4,6.113a6.956,6.956,0,1,0,6.941,6.955A6.956,6.956,0,0,0,15.4,6.113Zm8.885-.072a.943.943,0,1,0,.934.943A.941.941,0,0,0,24.287,6.041ZM15.41,18.654A5.607,5.607,0,1,1,21,13.047,5.606,5.606,0,0,1,15.41,18.654Z"
+                transform="translate(13.5 13.5)"
+                fill="#fff"
               />
-              <g id="Camera_button" data-name="Camera button" transform="translate(68.25 599.4)">
-                <path
-                  id="Camera_Icon"
-                  data-name="Camera Icon"
-                  d="M27.792,23.334H2.924l-.246,0a4.573,4.573,0,0,1-.713-.063,2.419,2.419,0,0,1-.677-.225,2.282,2.282,0,0,1-.577-.424,2.255,2.255,0,0,1-.418-.582,2.414,2.414,0,0,1-.224-.687,4.749,4.749,0,0,1-.063-.719c0-.066,0-.131,0-.2,0-.047,0-.091,0-.136,0-.13,0-.26,0-.391V7.615c0-.132,0-.261,0-.392,0-.043,0-.086,0-.128,0-.07,0-.137,0-.2a4.745,4.745,0,0,1,.063-.72,2.4,2.4,0,0,1,.224-.686A2.266,2.266,0,0,1,.711,4.9a2.229,2.229,0,0,1,.577-.424,2.42,2.42,0,0,1,.677-.225,4.573,4.573,0,0,1,.713-.063c.111,0,.218,0,.328,0H5.674c.149,0,.3,0,.443,0l.058,0s0,0,.054-.005l.109,0a4.342,4.342,0,0,0,.7-.05,2.635,2.635,0,0,0,.772-.279,2.512,2.512,0,0,0,.658-.48A3.714,3.714,0,0,0,8.9,2.372c.069-.2.135-.393.2-.548a2.7,2.7,0,0,1,.139-.335A2.606,2.606,0,0,1,10.37.334a2.669,2.669,0,0,1,.773-.258A5.34,5.34,0,0,1,11.954,0c.064,0,1.808,0,3.4,0s3.336,0,3.4,0a5.348,5.348,0,0,1,.813.073A2.6,2.6,0,0,1,21,.821a2.706,2.706,0,0,1,.476.669,1.922,1.922,0,0,1,.079.185c.017.044.036.093.061.152.069.162.143.377.222.6a3.638,3.638,0,0,0,.407.951,2.552,2.552,0,0,0,.657.479,2.723,2.723,0,0,0,.774.28,3.278,3.278,0,0,0,.463.039l.146.006h3.508c.109,0,.219,0,.328,0a4.558,4.558,0,0,1,.713.063,2.434,2.434,0,0,1,.678.225,2.237,2.237,0,0,1,.576.424,2.335,2.335,0,0,1,.421.582l.038.077a1.619,1.619,0,0,1,.184.5,6.443,6.443,0,0,1,.063.828c0,.111,0,.222,0,.332,0,.131,0,.261,0,.392V19.9c0,.132,0,.261,0,.391,0,.111,0,.22,0,.332a4.89,4.89,0,0,1-.063.719,2.541,2.541,0,0,1-.222.687,2.323,2.323,0,0,1-.421.582,2.291,2.291,0,0,1-.576.424,2.434,2.434,0,0,1-.678.225,4.56,4.56,0,0,1-.713.063l-.246,0ZM15.4,6.113a6.956,6.956,0,1,0,6.941,6.955A6.956,6.956,0,0,0,15.4,6.113Zm8.885-.072a.943.943,0,1,0,.934.943A.941.941,0,0,0,24.287,6.041ZM15.41,18.654A5.607,5.607,0,1,1,21,13.047,5.606,5.606,0,0,1,15.41,18.654Z"
-                  transform="translate(0 0)"
-                  fill="#fff"
-                />
-              </g>
-            </g>
-          </svg>
+          </g>
+        </svg>
+
+        </div>
+        <div class="dce-mn-continuous-scan-done-btn" title="Finish Scanning" style="display: none;">
+          <span class="dce-mn-continuous-scan-done-text">Done (0)</span>
+        </div>
+        <div class="dce-mn-thumbnail-preview" style="display: none;">
+          <img class="dce-mn-thumbnail-img" alt="Last captured" />
         </div>
       </div>
       <div class="dce-mn-zoom">- <span>1.0X</span> -</div>
@@ -820,6 +839,9 @@
       background-color: #323234;
       display: flex;
       align-items: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .dce-mn-torch {
@@ -859,6 +881,7 @@
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
       stroke: white;
+      stroke-width: 4;
     }
 
     .dce-mn-upload-image-icon {
@@ -1013,25 +1036,96 @@
       opacity: 0.9;
     }
 
-    .dce-loading-auto-capture-animation {
+
+
+    .dce-mn-continuous-scan-done-btn {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: 4px solid transparent;
-      border-top-color: #fe8e14;
-      border-right-color: #fe8e14;
-      animation: rotate 1.5s linear infinite;
-      transition: border-color 0.2s cubic-bezier(0.36, -0.17, 1, 1);
+      left: 75%;
+      bottom: 3rem;
+      background-color: #fe8e14;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 1.5rem;
+      font-family: Verdana;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s ease;
+      transform: translate(-50%, 50%);
     }
 
-    @keyframes rotate {
+    .dce-mn-continuous-scan-done-btn:hover {
+      opacity: 0.9;
+    }
+
+    .dce-mn-continuous-scan-done-text {
+      white-space: nowrap;
+    }
+
+    .dce-mn-thumbnail-preview {
+      position: absolute;
+      left: 25%;
+      bottom: 3rem;
+      transform: translate(-50%, 50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0.5);
+      transition: opacity 0.2s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+
+    .dce-mn-thumbnail-preview:hover {
+      opacity: 0.8;
+    }
+
+    .dce-mn-thumbnail-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .dce-mn-floating-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dce-mn-floating-image-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    @keyframes shrinkToThumbnail {
       0% {
-        transform: rotate(0deg);
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
       }
       100% {
-        transform: rotate(360deg);
+        opacity: 0.3;
+        transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scale, 0.1));
       }
+    }
+
+    .dce-mn-floating-image.animating {
+      animation: shrinkToThumbnail 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      transform-origin: center center;
     }
 
     .dce-mn-zoom {
@@ -1066,6 +1160,13 @@
       border-radius: max(0.5vmin, 4px);
       background: rgba(100, 100, 100, 0.5);
       pointer-events: none;
+    }
+
+    /* Hide torch on desktop devices*/
+    @media (pointer: fine) {
+      .dce-mn-torch {
+        display: none !important;
+      }
     }
 
     .dce-mn-msg-poweredby {
@@ -1122,6 +1223,9 @@
 
       .dce-mn-close {
         top: 12px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
       }
 
       .dce-mn-select-camera-icon {
@@ -1158,6 +1262,17 @@
         width: 24px;
       }
 
+      /* Hide toast and torch on desktop devices in landscape mode */
+      @media (pointer: fine) {
+        .dce-mn-toast {
+          display: none !important;
+        }
+
+        .dce-mn-torch {
+          display: none !important;
+        }
+      }
+
       .dce-footer {
         height: 100%;
         width: 6rem;
@@ -1174,11 +1289,6 @@
       .dce-mn-take-photo > svg {
         width: 45px;
         height: 45px;
-      }
-
-      .dce-loading-auto-capture-animation {
-        width: 50px;
-        height: 50px;
       }
 
       .dce-subfooter {
@@ -1224,6 +1334,27 @@
       .dce-mn-toast {
         bottom: auto;
         top: 3rem;
+      }
+
+      .dce-mn-continuous-scan-done-btn {
+        left: auto;
+        right: 3rem;
+        top: 75%;
+        bottom: auto;
+        transform: translate(50%, -50%);
+        padding: 0.4rem 1rem;
+        font-size: 11px;
+      }
+
+      .dce-mn-thumbnail-preview {
+        left: auto;
+        right: auto;
+        bottom: auto;
+        top: 25%;
+        left: 3rem;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
       }
     }
   </style>
