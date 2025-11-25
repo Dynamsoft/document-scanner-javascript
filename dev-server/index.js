@@ -23,7 +23,7 @@ if (!fs.existsSync(distPath)) {
 
 const app = express();
 
-// Rate limit to 100 req/min per IP
+// Rate limit to 100 req/min per IP (dev-only implementation)
 const rateLimit = new Map();
 setInterval(() => rateLimit.clear(), 60000); // Clear every minute to prevent memory growth
 app.use((req, res, next) => {
@@ -81,6 +81,8 @@ app.post("/upload", function (req, res) {
     const form = formidable({
       multiples: false,
       keepExtensions: true,
+      maxFileSize: 25 * 1024 * 1024, // 25MB limit
+      maxFiles: 1,
     });
 
     form.parse(req, (err, fields, files) => {
@@ -96,12 +98,24 @@ app.post("/upload", function (req, res) {
 
       // Sanitize filename to prevent path traversal
       const newFileName = path.basename(uploadedFile.originalFilename);
-      const fileSavePath = __dirname;
-      const newFilePath = path.resolve(fileSavePath, newFileName);
 
-      // Verify path is within allowed directory
-      if (!newFilePath.startsWith(fileSavePath + path.sep)) {
-        return res.status(400).json({ success: false, message: "Invalid filename" });
+      // Validate file extension (whitelist for document scanner)
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf', '.bmp', '.tiff', '.tif'];
+      const fileExt = path.extname(newFileName).toLowerCase();
+      if (!allowedExtensions.includes(fileExt)) {
+        return res.status(400).json({ success: false, message: "File type not allowed. Allowed types: jpg, jpeg, png, pdf, bmp, tiff" });
+      }
+
+      // Sanitize filename to remove potentially dangerous characters
+      const sanitizedName = newFileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
+      const fileSavePath = __dirname;
+      const newFilePath = path.resolve(fileSavePath, sanitizedName);
+
+      // Verify path is within allowed directory (robust check using relative path)
+      const relativePath = path.relative(fileSavePath, newFilePath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+        return res.status(400).json({ success: false, message: "Invalid filename - path traversal detected" });
       }
 
       // Move the uploaded file to the desired directory
