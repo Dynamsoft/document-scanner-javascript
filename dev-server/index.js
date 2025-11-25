@@ -1,11 +1,12 @@
-import formidable from "formidable";
+import cors from "cors";
 import express from "express";
+import rateLimit from "express-rate-limit";
+import formidable from "formidable";
 import fs from "fs";
 import http from "http";
 import https from "https";
-import cors from "cors";
-import path from "path";
 import os from "os";
+import path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,16 +24,14 @@ if (!fs.existsSync(distPath)) {
 
 const app = express();
 
-// Rate limit to 100 req/min per IP (dev-only implementation)
-const rateLimit = new Map();
-setInterval(() => rateLimit.clear(), 60000); // Clear every minute to prevent memory growth
-app.use((req, res, next) => {
-  const ip = req.ip;
-  const count = (rateLimit.get(ip) || 0) + 1;
-  rateLimit.set(ip, count);
-  if (count > 100) return res.status(429).send("Too many requests");
-  next();
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
 });
+
+app.use(limiter);
 
 app.use(
   cors({
