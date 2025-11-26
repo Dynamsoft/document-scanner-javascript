@@ -7,7 +7,9 @@ import {
   CapturedResult,
   DetectedQuadResultItem,
   DeskewedImageResultItem,
+  EnhancedImageResultItem,
   MultiFrameResultCrossFilter,
+  EnumImageColourMode,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
@@ -2644,16 +2646,24 @@ export default class DocumentScannerView {
   async normalizeImage(
     points: Quadrilateral["points"],
     originalImageData: OriginalImageResultItem["imageData"]
-  ): Promise<DeskewedImageResultItem> {
-    const { cvRouter, cameraEnhancer } = this.resources;
+  ): Promise<DeskewedImageResultItem | EnhancedImageResultItem> {
+    const { cvRouter } = this.resources;
 
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;
+    if (this.resources.binaryImage) {
+      settings.documentSettings.colourMode = EnumImageColourMode.ICM_BINARY;
+    }
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
     const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
-    // If deskewed result found
+    
+    // When binaryImage is enabled, the result is in enhancedImageResultItems (from ST_IMAGE_ENHANCEMENT stage)
+    // Otherwise, it's in deskewedImageResultItems (from ST_DOCUMENT_DESKEWING stage)
+    if (this.resources.binaryImage && result?.processedDocumentResult?.enhancedImageResultItems?.[0]) {
+      return result.processedDocumentResult.enhancedImageResultItems[0];
+    }
     if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
       return result.processedDocumentResult.deskewedImageResultItems[0];
     }

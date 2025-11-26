@@ -10,6 +10,7 @@ import {
   DetectedQuadResultItem,
   MultiFrameResultCrossFilter,
   OriginalImageResultItem,
+  EnumImageColourMode,
 } from "dynamsoft-capture-vision-bundle";
 import DocumentCorrectionView, { DocumentCorrectionViewConfig } from "./views/DocumentCorrectionView";
 import DocumentScannerView, { DocumentScannerViewConfig } from "./views/DocumentScannerView";
@@ -273,6 +274,19 @@ export interface DocumentScannerConfig {
    * @stable
    */
   enableFrameVerification?: boolean;
+  /**
+   * Output the scanned document as a binary (black and white) image.
+   *
+   * @remarks
+   * When enabled, uses the Document Normalizer's binary colour mode (ICM_BINARY) to binarize
+   * the result of the scan. This is useful for documents that need high contrast output,
+   * such as text documents for OCR processing.
+   *
+   * @defaultValue false
+   * @public
+   * @stable
+   */
+  binaryImage?: boolean;
 }
 
 /**
@@ -342,6 +356,15 @@ export interface SharedResources {
    * @internal
    */
   onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
+  /**
+   * Flag indicating whether to output binary (black and white) images.
+   *
+   * @remarks
+   * Corresponds to {@link DocumentScannerConfig.binaryImage}.
+   *
+   * @internal
+   */
+  binaryImage?: boolean;
 }
 
 /**
@@ -542,6 +565,7 @@ class DocumentScanner {
       this.resources.enableContinuousScanning = this.config.enableContinuousScanning || false;
       this.resources.completedScansCount = 0;
       this.resources.onThumbnailClicked = this.config.onThumbnailClicked;
+      this.resources.binaryImage = this.config.binaryImage || false;
 
       const components: {
         scannerView?: DocumentScannerView;
@@ -1163,6 +1187,9 @@ class DocumentScanner {
       const settings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
       settings.roiMeasuredInPercentage = false;
       settings.roi.points = detectedQuadrilateral.points;
+      if (this.config.binaryImage) {
+        settings.documentSettings.colourMode = EnumImageColourMode.ICM_BINARY;
+      }
       await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
       const normalizedResult = await this.resources.cvRouter.capture(
@@ -1170,7 +1197,12 @@ class DocumentScanner {
         this.config.utilizedTemplateNames.normalize
       );
 
-      const correctedImageResult = normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
+      // When binaryImage is enabled, the result is in enhancedImageResultItems (from ST_IMAGE_ENHANCEMENT stage)
+      // Otherwise, it's in deskewedImageResultItems (from ST_DOCUMENT_DESKEWING stage)
+      const correctedImageResult = this.config.binaryImage
+        ? normalizedResult?.processedDocumentResult?.enhancedImageResultItems?.[0] ||
+          normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0]
+        : normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
 
       // Create result object
       const result: DocumentResult = {

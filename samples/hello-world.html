@@ -20,10 +20,12 @@
       // Initialize the Dynamsoft Document Scanner
       const documentScanner = new Dynamsoft.DocumentScanner({
         license: "YOUR_LICENSE_KEY_HERE",
+        binaryImage: true,
         scannerViewConfig: {
           cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use local UI file
           enableAutoCropMode: true,
           enableSmartCaptureMode: true,
+          binaryImage: true,
         },
       });
       (async () => {

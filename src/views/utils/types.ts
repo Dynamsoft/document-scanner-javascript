@@ -1,4 +1,4 @@
-import { DSImageData, Quadrilateral, DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
+import { DSImageData, Quadrilateral, DeskewedImageResultItem, EnhancedImageResultItem } from "dynamsoft-capture-vision-bundle";
 
 /**
  * Enumeration of available view types in the Document Scanner system.
@@ -169,9 +169,10 @@ export interface DocumentResult {
   status: ResultStatus;
   /**
    * Perspective-corrected and enhanced image.
+   * When binaryImage is enabled, this will be an EnhancedImageResultItem.
    * @public
    */
-  correctedImageResult?: DeskewedImageResultItem;
+  correctedImageResult?: DeskewedImageResultItem | EnhancedImageResultItem;
   /**
    * Original captured image before processing.
    * @public

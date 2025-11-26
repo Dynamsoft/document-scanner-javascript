@@ -7,7 +7,9 @@ import {
   ImageEditorView, 
   QuadDrawingItem,
   DetectedQuadResultItem,
-  DeskewedImageResultItem
+  DeskewedImageResultItem,
+  EnhancedImageResultItem,
+  EnumImageColourMode,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import { createControls, createStyle, getElement } from "./utils";
@@ -745,6 +747,12 @@ export default class DocumentCorrectionView {
     newSettings.outputOriginalImage = true;
     await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
 
+    if (this.resources.binaryImage) {
+      const normalizeSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
+      normalizeSettings.documentSettings.colourMode = EnumImageColourMode.ICM_BINARY;
+      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, normalizeSettings);
+    }
+
     this.resources.cvRouter.maxImageSideLength = Infinity;
 
     const result = await this.resources.cvRouter.capture(
@@ -860,7 +868,7 @@ export default class DocumentCorrectionView {
    *
    * @public
    */
-  async correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem> {
+  async correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem | EnhancedImageResultItem> {
     const { cvRouter } = this.resources;
 
     if (this.config.templateFilePath) {
@@ -870,6 +878,9 @@ export default class DocumentCorrectionView {
     const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;
+    if (this.resources.binaryImage) {
+      settings.documentSettings.colourMode = EnumImageColourMode.ICM_BINARY;
+    }
     await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
 
     const result = await cvRouter.capture(
@@ -877,7 +888,11 @@ export default class DocumentCorrectionView {
       this.config.utilizedTemplateNames.normalize
     );
 
-    // If deskewed result found by DDN
+    // When binaryImage is enabled, the result is in enhancedImageResultItems (from ST_IMAGE_ENHANCEMENT stage)
+    // Otherwise, it's in deskewedImageResultItems (from ST_DOCUMENT_DESKEWING stage)
+    if (this.resources.binaryImage && result?.processedDocumentResult?.enhancedImageResultItems?.[0]) {
+      return result.processedDocumentResult.enhancedImageResultItems[0];
+    }
     if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
       return result.processedDocumentResult.deskewedImageResultItems[0];
     }

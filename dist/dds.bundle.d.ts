@@ -4717,9 +4717,10 @@ interface DocumentResult {
     status: ResultStatus;
     /**
      * Perspective-corrected and enhanced image.
+     * When binaryImage is enabled, this will be an EnhancedImageResultItem.
      * @public
      */
-    correctedImageResult?: DeskewedImageResultItem;
+    correctedImageResult?: DeskewedImageResultItem | EnhancedImageResultItem;
     /**
      * Original captured image before processing.
      * @public
@@ -5960,7 +5961,7 @@ declare class DocumentScannerView {
      */
     private handleAutoCaptureMode;
     launch(): Promise<DocumentResult>;
-    normalizeImage(points: Quadrilateral["points"], originalImageData: OriginalImageResultItem["imageData"]): Promise<DeskewedImageResultItem>;
+    normalizeImage(points: Quadrilateral["points"], originalImageData: OriginalImageResultItem["imageData"]): Promise<DeskewedImageResultItem | EnhancedImageResultItem>;
 }
 
 /**
@@ -6398,7 +6399,7 @@ declare class DocumentCorrectionView {
      *
      * @public
      */
-    correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem>;
+    correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem | EnhancedImageResultItem>;
     /**
      * Clean up and release resources.
      *
@@ -6913,6 +6914,19 @@ interface DocumentScannerConfig {
      * @stable
      */
     enableFrameVerification?: boolean;
+    /**
+     * Output the scanned document as a binary (black and white) image.
+     *
+     * @remarks
+     * When enabled, uses the Document Normalizer's binary colour mode (ICM_BINARY) to binarize
+     * the result of the scan. This is useful for documents that need high contrast output,
+     * such as text documents for OCR processing.
+     *
+     * @defaultValue false
+     * @public
+     * @stable
+     */
+    binaryImage?: boolean;
 }
 /**
  * Internal interface for shared resources used across different views in the {@link DocumentScanner}.
@@ -6981,6 +6995,15 @@ interface SharedResources {
      * @internal
      */
     onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
+    /**
+     * Flag indicating whether to output binary (black and white) images.
+     *
+     * @remarks
+     * Corresponds to {@link DocumentScannerConfig.binaryImage}.
+     *
+     * @internal
+     */
+    binaryImage?: boolean;
 }
 /**
  * Main class for document scanning functionality with camera capture, document detection, perspective correction, and result management.
