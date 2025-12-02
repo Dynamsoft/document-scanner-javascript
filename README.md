@@ -17,9 +17,10 @@ Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK de
     - [Use Precompiled Script](#use-precompiled-script)
     - [Self-Host Resources](#self-host-resources)
       - [Download Resources](#download-resources)
-      - [Point to Resources](#point-to-resources)
       - [Modify the Build Script](#modify-the-build-script)
+      - [Point to Resources](#point-to-resources)
       - [Build the Project](#build-the-project)
+      - [Host `node` Packages](#host-node-packages)
       - [Serve the Project Locally](#serve-the-project-locally)
       - [Serve over HTTPS](#serve-over-https)
       - [Set MIME Type](#set-mime-type)
@@ -180,7 +181,11 @@ Alternatively, you can use other methods like `IIS` or `Apache` to serve the pro
 
 ### Self-Host Resources
 
-By default, the MDS library (whether pre-compiled or self-compiled) fetches resource files (Dynamsoft `node` dependencies and an HTML UI template) from CDNs. Self-hosting library resources gives you full control over hosting your application. Rather than using CDNs to serve these resources, you can instead host these resources on your own servers to deliver to your users directly when they use your application. You can also use this option to host MDS fully offline by pointing to local resources.
+By default, the MDS library (whether pre-compiled or self-compiled) fetches resource files (Dynamsoft `node` dependencies and an HTML UI template) from CDNs. Self-hosting library resources gives you full control over hosting your application. Rather than using CDNs to serve these resources, you can instead host these resources on your own servers to deliver to your users directly when they use your application. You can also use this option to host MDS fully offline by pointing to local resources. Here are the resources to self-host:
+
+1. `document-scanner.ui.xml` - the UI template for the `DocumentScannerView`/viewfinder.
+2. `dynamsoft-capture-vision-bundle` - the `node` package for the Dynamsoft Capture Vision (DCV) engine resources.
+3. `dynamsoft-capture-vision-data` - the `node` package for DCV engine configuration templates.
 
 #### Download Resources
 
@@ -199,12 +204,29 @@ First, download a copy of the resources:
 4. In the terminal, navigate to the project root directory and run the following to install project dependencies:
 
    ```shell
+   npm install dynamsoft-capture-vision-data@1.1.0
    npm install
    ```
+   
+   > [!NOTE]
+   > We install `dynamsoft-capture-vision-data` as MDS does not use it as a build dependency.
+
+#### Modify the Build Script
+
+Add a script by updating the `scripts` property in `package.json` that automatically copies the two `node` dependencies to the output `dist` directory during the build process. We will configure MDS to request the resources here.
+
+```json
+"scripts": {
+  "serve": "node dev-server/index.js",
+  "build": "rollup -c",
+  "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-capture-vision-bundle/**/*\" dist/libs/dynamsoft-capture-vision-bundle@3.2.4000/ -L && npx cpx \"node_modules/dynamsoft-capture-vision-data/**/*\" dist/libs/dynamsoft-capture-vision-data@1.1.0/ -L",
+  "build:production": "rollup -c --environment BUILD:production"
+},
+```
 
 #### Point to Resources
 
-The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. The library also uses `scannerViewConfig.cameraEnhancerUIPath` similarly to set the path for the HTML UI template of the `ScannerView`. Later steps will place both the `node` dependencies and the HTML template in the local `dist` directory. Therefore, set `engineResourcePaths` in the MDS constructor to point to the local `dist` directory (along with setting your license key, and all other configurations):
+The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. The library also uses `scannerViewConfig.cameraEnhancerUIPath` similarly to set the path for the HTML UI template of the `ScannerView`.Therefore, set `engineResourcePaths` in the MDS constructor to point to the local `dist` directory, where the resources are located (along with setting your license key, and all other configurations):
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -213,12 +235,8 @@ const documentScanner = new Dynamsoft.DocumentScanner({
     cameraEnhancerUIPath: "./dist/document-scanner.ui.xml", // Use the local file
   },
   engineResourcePaths: {
-    std: "./dist/libs/dynamsoft-capture-vision-std/dist/",
-    dip: "./dist/libs/dynamsoft-image-processing/dist/",
-    core: "./dist/libs/dynamsoft-core/dist/",
-    license: "./dist/libs/dynamsoft-license/dist/",
-    cvr: "./dist/libs/dynamsoft-capture-vision-router/dist/",
-    ddn: "./dist/libs/dynamsoft-document-normalizer/dist/",
+    bundle: "./dist/libs/dynamsoft-capture-vision-bundle/dist/",
+    data: "./dist/libs/dynamsoft-capture-vision-data/",
   },
 });
 ```
@@ -231,25 +249,20 @@ API Reference:
 - [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths)
 - [`cameraEnhancerUIPath`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#cameraenhanceruipaths)
 
-#### Modify the Build Script
-
-Update the `scripts` section in `package.json` to automatically copy resources to the output `dist` directory during the build process.
-
-```json
-"scripts": {
-    "serve": "node dev-server/index.js",
-    "build": "rollup -c && npm run copy-libs",
-    "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-*/**/*\" dist/libs/ --dereference",
-    "build:production": "rollup -c --environment BUILD:production"
-},
-```
-
 #### Build the Project
 
 Build the project by running:
 
 ```shell
 npm run build
+```
+
+#### Host `node` Packages
+
+Move the resources to the set location by running the new `npm` script:
+
+```shell
+npm run copy-libs
 ```
 
 #### Serve the Project Locally
