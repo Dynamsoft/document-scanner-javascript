@@ -22,6 +22,9 @@ if (!fs.existsSync(distPath)) {
   process.exit(1);
 }
 
+const srcPath = path.join(__dirname, "../src");
+const nodeModulesPath = path.join(__dirname, "../node_modules");
+
 const app = express();
 
 // Rate limiting
@@ -41,8 +44,23 @@ app.use(
   })
 );
 
+let httpPort = 3000;
+let httpsPort = 3001;
+
 // Serve static files
-app.use("/dist", express.static(distPath));
+// Use setHeaders to inject the SourceMap header pointing to the HTTP port
+// This works around the Firefox self-signed certificate issue for source maps
+app.use("/dist", express.static(distPath, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+      const filename = path.basename(filePath);
+      res.setHeader("SourceMap", `http://localhost:${httpPort}/dist/${filename}.map`);
+    }
+  }
+}));
+
+app.use("/src", express.static(srcPath));
+app.use("/node_modules", express.static(nodeModulesPath));
 app.use("/assets", express.static(path.join(__dirname, "../samples/demo/assets")));
 app.use("/css", express.static(path.join(__dirname, "../samples/demo/css")));
 app.use("/font", express.static(path.join(__dirname, "../samples/demo/font")));
@@ -135,9 +153,6 @@ app.post("/upload", function (req, res) {
     res.status(500).send("An error occurred during file upload.");
   }
 });
-
-let httpPort = 3000;
-let httpsPort = 3001;
 
 // redirect handling
 app.use((req, res, next) => {

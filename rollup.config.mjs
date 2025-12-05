@@ -8,6 +8,10 @@ import { dts } from "rollup-plugin-dts";
 const pkg = JSON.parse(await fs.promises.readFile("./package.json"));
 const version = pkg.version;
 
+// Check build mode from environment variable
+const isDev = process.env.BUILD === "development";
+const enableSourceMaps = isDev; // Enable source maps in dev mode
+
 fs.rmSync("dist", { recursive: true, force: true });
 
 const strProduct = "Dynamsoft Document Scanner JS Edition Bundle";
@@ -60,7 +64,7 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
-        sourceMap: false,
+        sourceMap: enableSourceMaps,
       }),
       plugin_terser_es5,
       copyFiles(),
@@ -80,7 +84,7 @@ export default [
         name: "Dynamsoft",
         banner: banner,
         exports: "named",
-        sourcemap: false,
+        sourcemap: enableSourceMaps,
       },
     ],
   },
@@ -92,7 +96,7 @@ export default [
       typescript({
         tsconfig: "./tsconfig.json",
         declaration: true,
-        sourceMap: false,
+        sourceMap: enableSourceMaps,
       }),
       plugin_terser_es6,
     ],
@@ -102,7 +106,7 @@ export default [
         format: "es",
         banner: banner,
         exports: "named",
-        sourcemap: false,
+        sourcemap: enableSourceMaps,
       },
     ],
   },
@@ -113,7 +117,7 @@ export default [
       nodeResolve({ browser: true }),
       typescript({
         tsconfig: "./tsconfig.json",
-        sourceMap: false,
+        sourceMap: enableSourceMaps,
       }),
       plugin_terser_es6,
     ],
@@ -123,7 +127,7 @@ export default [
         format: "es",
         banner: banner,
         exports: "named",
-        sourcemap: false,
+        sourcemap: enableSourceMaps,
       },
     ],
   },

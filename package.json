@@ -24,6 +24,7 @@
   "scripts": {
     "serve": "node dev-server/index.js",
     "build": "rollup -c",
+    "build:development": "rollup -c --environment BUILD:development",
     "build:production": "rollup -c --environment BUILD:production"
   },
   "repository": {
