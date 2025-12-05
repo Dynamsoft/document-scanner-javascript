@@ -1,6 +1,6 @@
 # Scan Documents with Mobile Document Scanner
 
-Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK designed for scanning documents. MDS captures images of the documents and enhances their quality to professional standards, making it an ideal tool for mobile document scanning.
+Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK for building document-scanning applications. It captures document images and automatically enhances them to professional quality, making it an ideal fit for mobile scanning workflows.
 
 > See it in action with the [Mobile Document Scanner Demo](https://demo.dynamsoft.com/document-scanner/).
 
@@ -17,8 +17,8 @@ Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK de
     - [Use Precompiled Script](#use-precompiled-script)
     - [Self-Host Resources](#self-host-resources)
       - [Download Resources](#download-resources)
+      - [Add Build Scripts](#add-build-scripts)
       - [Point to Resources](#point-to-resources)
-      - [Modify the Build Script](#modify-the-build-script)
       - [Build the Project](#build-the-project)
       - [Serve the Project Locally](#serve-the-project-locally)
       - [Serve over HTTPS](#serve-over-https)
@@ -70,23 +70,23 @@ To purchase a full license, [contact us](https://www.dynamsoft.com/company/conta
 
 ## Quick Start
 
-The following section explains how to quickly run a simple, single-page web application to scan **single page documents**. See the [**multi-page scanning guide**](#multi-page-scanning) to scan multi-page documents.
+This section shows you how to run a simple single-page web application for scanning **single-page documents**. For multi-page workflows, see the [**multi-page scanning guide**](#multi-page-scanning).
 
-To use the **Mobile Document Scanner**, first obtain its library files. You can acquire them from one of the following sources:
+To use **MDS**, start by obtaining the library files from one of the following sources:
 
 1. [**GitHub**](https://github.com/Dynamsoft/document-scanner-javascript) – contains the source files for the **MDS** SDK, which can be compiled into library files.
 2. [**npm**](https://www.npmjs.com/package/dynamsoft-document-scanner) – provides precompiled library files via npm for easier installation.
 3. [**CDN**](https://www.jsdelivr.com/package/npm/dynamsoft-document-scanner) – delivers precompiled library files through a CDN for quick and seamless integration.
 
-You can choose one of the following methods to set up a Hello World page:
+Choose one of the following approaches to set up a Hello World page:
 
 1. **Build from source** – download the source files from GitHub and compile the library files yourself.
 2. **Use precompiled scripts** – use the precompiled resource scripts from npm or the CDN for a quicker setup.
-3. **Self-host resources** - self-host both MDS and its dependencies on your web server.
+3. **Self-host resources** - host both MDS and its dependencies on your web server.
 
 ### Build from Source
 
-This method retrieves all **MDS** source files from its [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs a _ready-made_ Hello World sample page included in the repository:
+This approach pulls the **MDS** source files from the [GitHub repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs the _ready-made_ Hello World sample page included in the repository:
 
 1. Download **MDS** from [GitHub](https://github.com/Dynamsoft/document-scanner-javascript) as a compressed folder.
 
@@ -180,7 +180,11 @@ Alternatively, you can use other methods like `IIS` or `Apache` to serve the pro
 
 ### Self-Host Resources
 
-By default, the MDS library (whether pre-compiled or self-compiled) fetches resource files (Dynamsoft `node` dependencies and an HTML UI template) from CDNs. Self-hosting library resources gives you full control over hosting your application. Rather than using CDNs to serve these resources, you can instead host these resources on your own servers to deliver to your users directly when they use your application. You can also use this option to host MDS fully offline by pointing to local resources.
+By default, the MDS library (whether pre-compiled or self-compiled) fetches resource files (Dynamsoft `node` dependencies and an HTML UI template) from CDNs. Self-hosting library resources gives you full control over hosting your application. Rather than using CDNs to serve these resources, you can instead host these resources on your own servers to deliver to your users directly when they use your application. You can also use this option to host MDS fully offline by pointing to local resources. Here are the resources to self-host:
+
+1. `document-scanner.ui.xml` - the UI template for the `DocumentScannerView`/viewfinder.
+2. `dynamsoft-capture-vision-bundle` - the `node` package for the Dynamsoft Capture Vision (DCV) engine resources.
+3. `dynamsoft-capture-vision-data` - the `node` package for DCV engine configuration templates.
 
 #### Download Resources
 
@@ -199,26 +203,38 @@ First, download a copy of the resources:
 4. In the terminal, navigate to the project root directory and run the following to install project dependencies:
 
    ```shell
-   npm install
+   npm install dynamsoft-capture-vision-data@1.1.0
    ```
+   
+   > [!NOTE]
+   > We explicitly install the extra `dynamsoft-capture-vision-data` package because MDS does not use it as a build dependency.
+
+#### Add Build Scripts
+
+Add scripts by updating the `scripts` property in `package.json` that automatically copy the two `node` dependencies to the output `dist` directory during the build process. Later on we configure MDS to request the resources at this path.
+
+```json
+"scripts": {
+  "serve": "node dev-server/index.js",
+  "build": "rollup -c",
+  "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-capture-vision-bundle/**/*\" dist/libs/dynamsoft-capture-vision-bundle@3.2.4000/ && npx cpx \"node_modules/dynamsoft-capture-vision-data/**/*\" dist/libs/dynamsoft-capture-vision-data@1.1.0/",
+  "build:self-hosted": "npm run build && npm run copy-libs",
+  "build:production": "rollup -c --environment BUILD:production"
+},
+```
 
 #### Point to Resources
 
-The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. The library also uses `scannerViewConfig.cameraEnhancerUIPath` similarly to set the path for the HTML UI template of the `ScannerView`. Later steps will place both the `node` dependencies and the HTML template in the local `dist` directory. Therefore, set `engineResourcePaths` in the MDS constructor to point to the local `dist` directory (along with setting your license key, and all other configurations):
+The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. The library also uses `scannerViewConfig.cameraEnhancerUIPath` similarly to set the path for the HTML UI template of the `ScannerView`. Therefore, set `engineResourcePaths` in the MDS constructor to point to the local `dist` directory, where the resources are located (along with setting your license key, and all other configurations):
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
   license: "YOUR_LICENSE_KEY_HERE",
   scannerViewConfig: {
-    cameraEnhancerUIPath: "./dist/document-scanner.ui.xml", // Use the local file
+    cameraEnhancerUIPath: "dist/document-scanner.ui.xml", // Use the local file
   },
   engineResourcePaths: {
-    std: "./dist/libs/dynamsoft-capture-vision-std/dist/",
-    dip: "./dist/libs/dynamsoft-image-processing/dist/",
-    core: "./dist/libs/dynamsoft-core/dist/",
-    license: "./dist/libs/dynamsoft-license/dist/",
-    cvr: "./dist/libs/dynamsoft-capture-vision-router/dist/",
-    ddn: "./dist/libs/dynamsoft-document-normalizer/dist/",
+    rootDirectory: "dist/libs/"
   },
 });
 ```
@@ -231,25 +247,12 @@ API Reference:
 - [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths)
 - [`cameraEnhancerUIPath`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#cameraenhanceruipaths)
 
-#### Modify the Build Script
-
-Update the `scripts` section in `package.json` to automatically copy resources to the output `dist` directory during the build process.
-
-```json
-"scripts": {
-    "serve": "node dev-server/index.js",
-    "build": "rollup -c && npm run copy-libs",
-    "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-*/**/*\" dist/libs/ --dereference",
-    "build:production": "rollup -c --environment BUILD:production"
-},
-```
-
 #### Build the Project
 
-Build the project by running:
+Build the project and move the resources to the set location with the following script:
 
 ```shell
-npm run build
+npm run build:self-hosted
 ```
 
 #### Serve the Project Locally
@@ -433,7 +436,7 @@ This section builds on the Hello World sample to demonstrate how to configure **
 
 Furthermore, we explore three main (non-mutually-exclusive) avenues of customization with `DocumentScannerConfig`:
 
-1. [**Multi-Page Scanning](#multi-page-scanning): through configuration objects and container definitions.
+1. [**Multi-Page Scanning**](#multi-page-scanning): through configuration objects and container definitions.
 2. [**Workflow Customization**](#workflow-customization): through container definitions.
 3. [**View-Based Customization**](#view-based-customization): through configuration objects.
 
