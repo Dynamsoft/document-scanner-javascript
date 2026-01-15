@@ -1,0 +1,105 @@
+name: Full Development Cycle
+description: End-to-end development cycle
+title: "Release {solution} vX.y.z"
+labels:
+  - release
+body:
+  - type: textarea
+    attributes:
+      label: Heading
+      value: |
+        # {solution} vX.y.z Full Development Cycle
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Required Linked Issues
+        Use the dedicated templates instead of duplicating content here.
+
+        - Change Request Report (draft): `.github/ISSUE_TEMPLATE/change-request-report.yml`
+        - Release Checklist: `.github/ISSUE_TEMPLATE/release-checklist.yml`
+
+  - type: input
+    attributes:
+      label: Change Request Issue URL
+      description: Link to the issue created from the Change Request Report template.
+      placeholder: https://github.com/Dynamsoft/mrz-scanner-javascript-dev/issues/123
+
+  - type: input
+    attributes:
+      label: Release Checklist Issue URL
+      description: Link to the issue created from the Release Checklist template.
+      placeholder: https://github.com/Dynamsoft/mrz-scanner-javascript-dev/issues/124
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Summary
+        Briefly describe scope, goals, and notable risks. Do not restate the full change request content.
+
+  - type: textarea
+    attributes:
+      label: Summary
+      description: High-level context only; full details live in the linked change request issue.
+      placeholder: Key goals, primary risks, notable constraints.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Milestones
+        Reference milestones from the change request; list only the key dates or checkpoints here.
+
+  - type: textarea
+    attributes:
+      label: Milestones
+      description: Condensed milestones (e.g., code complete, beta start/end, release date). Full schedule is in the change request issue.
+      placeholder: 2026-01-05 Dev start; 2026-01-06–2026-01-09 Internal testing; 2026-01-12 Release.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Coordination Notes
+        Call out owners, reviewers, and dependencies. Keep this concise; details stay in linked issues.
+
+  - type: textarea
+    attributes:
+      label: Coordination
+      description: Owners, reviewers, cross-team dependencies, and any blockers to track at a glance.
+      placeholder: 'Owner: Alice; Review: Tim; Dependencies: DCV update; Blockers: pending SARIF run.'
+
+  - type: checkboxes
+    attributes:
+      label: Status Gates
+      description: Track high-level gates; underlying tasks remain in linked issues.
+      options:
+        - label: Change Request approved
+        - label: Beta validated (internal registry)
+        - label: Production release validated
+        - label: Audit artifacts attached (npm audit, CodeQL)
+        - label: Release announcement posted
+        - label: Backports complete (if any)
+        - label: Cleanup done (branches, PRs, artifacts)
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Notes / Decisions
+        Use for key decisions or deviations; avoid repeating checklist details.
+
+  - type: textarea
+    attributes:
+      label: Notes
+      description: Record decisions, exceptions, or follow-ups not captured in linked issues.
+      placeholder: Decision logs, deviations from plan, sign-offs.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Attachments
+        Link artifacts stored in the linked issues (e.g., SARIF, audit output, screenshots). No need to paste content here.
+
+  - type: textarea
+    attributes:
+      label: Attachment Links
+      description: URLs to artifacts already stored in the linked issues.
+      placeholder: SARIF report URL, npm audit screenshot, release notes.
