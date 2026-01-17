@@ -5,12 +5,7 @@ labels: ["build", "release"]
 body:
   - type: textarea
     attributes:
-      label: Heading
-      value: |
-        # {solution} vX.y.z Release Checklist
-
-  - type: markdown
-    attributes:
+      label: Release Checklist
       value: |
         - [ ] 1. Check release notes, using git history where possible
         - [ ] 2. Check README formatting in the development repository (including nested READMEs); note that the `npm` website does not render GitHub alerts but our documentation site does, so they should be stripped out for the READMEs only
