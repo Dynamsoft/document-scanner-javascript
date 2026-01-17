@@ -1,8 +1,12 @@
 # Scan Documents with Mobile Document Scanner
 
-Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK for building document-scanning applications. It captures document images and automatically enhances them to professional quality, making it an ideal fit for mobile scanning workflows.
+> Read the [Introduction](https://www.dynamsoft.com/mobile-document-scanner/docs/web/introduction/index.html) for common use cases, an overview of the SDK architecture, and system requirements.
+
+Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK designed for scanning documents. MDS captures images of the documents and enhances their quality to professional standards, making it an ideal tool for mobile document scanning.
 
 > See it in action with the [Mobile Document Scanner Demo](https://demo.dynamsoft.com/document-scanner/).
+
+This guide walks you through building a web application that scans single-page documents using **MDS** with pre-defined configurations. See the [**multi-page scanning guide**](#multi-page-scanning) to scan multi-page documents.
 
 **Table of Contents**
 
@@ -62,11 +66,11 @@ Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK fo
 
 ### Get a Trial License
 
-Try **MDS** by requesting a trial license through our [customer portal](https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&source=guide). The trial can be renewed twice, providing a total of two months of free access.
+You can request a trial license for **Mobile Document Scanner** through our [customer portal](https://www.dynamsoft.com/customer/license/trialLicense?product=mwc&source=guide). The trial license can be renewed twice for a total of two months of free access.
 
 ### Get a Full License
 
-To purchase a full license, [contact us](https://www.dynamsoft.com/company/contact/).
+[Contact us](https://www.dynamsoft.com/company/contact/) to purchase a full license.
 
 ## Quick Start
 
@@ -78,46 +82,45 @@ To use **MDS**, start by obtaining the library files from one of the following s
 2. [**npm**](https://www.npmjs.com/package/dynamsoft-document-scanner) – provides precompiled library files via npm for easier installation.
 3. [**CDN**](https://www.jsdelivr.com/package/npm/dynamsoft-document-scanner) – delivers precompiled library files through a CDN for quick and seamless integration.
 
-Choose one of the following approaches to set up a Hello World page:
+You can choose one of the following methods to set up a Hello World page:
 
 1. **Build from source** – download the source files from GitHub and compile the library files yourself.
 2. **Use precompiled scripts** – use the precompiled resource scripts from npm or the CDN for a quicker setup.
-3. **Self-host resources** - host both MDS and its dependencies on your web server.
+3. **Self-host resources** - self-host both MDS and its dependencies on your web server.
 
 ### Build from Source
 
-This approach pulls the **MDS** source files from the [GitHub repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs the _ready-made_ Hello World sample page included in the repository:
+This method retrieves all **MDS** source files from its [GitHub Repository](https://github.com/Dynamsoft/document-scanner-javascript), compiles them into a distributable package, and then runs a _ready-made_ Hello World sample page included in the repository:
 
 1. Download **MDS** from [GitHub](https://github.com/Dynamsoft/document-scanner-javascript) as a compressed folder.
 
 2. Extract the contents of the archive, and open the extracted directory in a code editor.
 
 3. Set your [license key](#get-a-trial-license) in the Hello World sample:
-
-   1. Open the Hello World sample at [`/samples/hello-world.html`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/hello-world.html).
-   2. Search for `"YOUR_LICENSE_KEY_HERE"`, then replace it with your actual license key.
+    1. Open the Hello World sample at [`/samples/hello-world.html`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/hello-world.html).
+    2. Search for `"YOUR_LICENSE_KEY_HERE"`, then replace it with your actual license key.
 
 4. In the terminal, navigate to the project root directory and run the following to install project dependencies:
 
-   ```shell
-   npm install
-   ```
+    ```shell
+    npm install
+    ```
 
 5. After installing dependencies, build the project by running:
 
-   ```shell
-   npm run build
-   ```
+    ```shell
+    npm run build
+    ```
 
 6. Start the local server by running the following to serve the project locally:
 
-   ```shell
-   npm run serve
-   ```
+    ```shell
+    npm run serve
+    ```
 
-   Once the server is running, open the application in a browser using the address provided in the terminal output after running `npm run serve`.
+    Once the server is running, open the application in a browser using the address provided in the terminal output after running `npm run serve`.
 
-   > See the server configuration details in [`/dev-server/index.js`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/dev-server/index.js).
+    > See the server configuration details in [`/dev-server/index.js`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/dev-server/index.js).
 
 ### Use Precompiled Script
 
@@ -200,14 +203,11 @@ First, download a copy of the resources:
 
    2. Search for `"YOUR_LICENSE_KEY_HERE"`, then replace it with your actual license key.
 
-4. In the terminal, navigate to the project root directory and run the following to install project dependencies:
+4. Install node packages locally, along with the extra `dynamsoft-capture-vision-data` package. You must add this extra package explicitly as MDS does not include this package by default as it is not a build dependency. In the terminal, navigate to the project root directory and run the following to install the packages:
 
    ```shell
    npm install dynamsoft-capture-vision-data@1.1.0
    ```
-   
-   > [!NOTE]
-   > We explicitly install the extra `dynamsoft-capture-vision-data` package because MDS does not use it as a build dependency.
 
 #### Add Build Scripts
 
@@ -217,7 +217,7 @@ Add scripts by updating the `scripts` property in `package.json` that automatica
 "scripts": {
   "serve": "node dev-server/index.js",
   "build": "rollup -c",
-  "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-capture-vision-bundle/**/*\" dist/libs/dynamsoft-capture-vision-bundle@3.2.4000/ && npx cpx \"node_modules/dynamsoft-capture-vision-data/**/*\" dist/libs/dynamsoft-capture-vision-data@1.1.0/",
+  "copy-libs": "npx mkdirp dist/libs && npx cpx \"node_modules/dynamsoft-capture-vision-bundle/**/*\" dist/libs/dynamsoft-capture-vision-bundle@3.2.5000/ && npx cpx \"node_modules/dynamsoft-capture-vision-data/**/*\" dist/libs/dynamsoft-capture-vision-data@1.1.0/",
   "build:self-hosted": "npm run build && npm run copy-libs",
   "build:production": "rollup -c --environment BUILD:production"
 },
@@ -225,7 +225,7 @@ Add scripts by updating the `scripts` property in `package.json` that automatica
 
 #### Point to Resources
 
-The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. The library also uses `scannerViewConfig.cameraEnhancerUIPath` similarly to set the path for the HTML UI template of the `ScannerView`. Therefore, set `engineResourcePaths` in the MDS constructor to point to the local `dist` directory, where the resources are located (along with setting your license key, and all other configurations):
+The library uses [`engineResourcePaths`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#engineresourcepaths) to locate required Dynamsoft `node` dependencies by pointing to the location of the resources on your web server. Similarly, `scannerViewConfig.cameraEnhancerUIPath` also sets the path for the HTML UI template of the `ScannerView`. To use the local resources in the Hello World, set `engineResourcePaths` in the `hello-world.html` to point to the local `dist` directory, where the resources are located (along with setting your license key, and all other configurations):
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -271,7 +271,7 @@ Once the server is running, open the application in a browser using the address 
 
 1. **Browser Security Restrictions** – Most browsers only allow access to camera video streams in a secure context.
 
-   > Some browsers like Chrome may grant access to camera video streams for `http://127.0.0.1`, `http://localhost`, or even pages opened directly from the local file system (`file:///...`). This can be helpful during development and testing.
+    > Some browsers like Chrome may grant access to camera video streams for `http://127.0.0.1`, `http://localhost`, or even pages opened directly from the local file system (`file:///...`). This can be helpful during development and testing.
 
 2. **Dynamsoft License Requirements** – A secure context is required for **Dynamsoft licenses** to function properly.
 
@@ -340,7 +340,9 @@ const documentScanner = new Dynamsoft.DocumentScanner({
 });
 ```
 
-API Reference: [`DocumentScanner()`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#documentscanner)
+API Reference: 
+
+- [`DocumentScanner()`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#documentscanner)
 
 This step creates the **MDS** UI, which by default occupies the entire visible area of the browser window when launched. If needed, you can restrict the UI to a specific container. For more details, refer to [Confine DocumentScanner UI to a Specific Container](#example-1-confine-documentscanner-ui-to-a-specific-container).
 
@@ -489,9 +491,8 @@ API Reference:
 There are two essential components to multi-page scanning - enabling continuous scanning mode, and providing your handler to process the scanned pages.
 
 1. We enable continuous scanning with the [`enableContinuousScanning`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#enableContinuousScanning) property - this is responsible for changing the user workflow, automatically going back to the scanner view to take more scans after confirming each scan.
-2. We can then provide a handler to process the document pages to [`onDocumentScanned`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#ondocumentscanned). This handler gets called on confirming every scan. In this example, we simply display the result image to the page.
+2. Provide a handler to [`onDocumentScanned`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#ondocumentscanned) to process each scanned page. This handler runs after each confirmed scan. In this example, we display the result image on the page.
 
-> [!NOTE]
 > Just as in single-scan mode, `launch()` returns a `DocumentResult` promise. In continuous scanning mode, `launch()` returns a **`DocumentResult` promise to the last page scanned**.
 
 ##### Optional Settings
@@ -505,7 +506,6 @@ To enhance the scanning process, you may also choose to use the following settin
 
 #### Multi-Page Scanning with DDV
 
-> [!TIP]
 > You can find the full set of comprehensive documentation Dynamsoft Document Viewer [on our website](https://www.dynamsoft.com/document-viewer/docs/introduction/index.html).
 
 [**Full Sample Source Code**](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/samples/scenarios/scanning-to-pdf.html)
@@ -562,7 +562,7 @@ API Reference:
 - [`enableSmartCaptureMode`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#enablesmartcapturemode)
 - [`DocumentScannerConfig.enableContinuousScanning`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#enableContinuousScanning)
 - [`onDocumentScanned`](https://www.dynamsoft.com/mobile-document-scanner/docs/web/api/index.html#ondocumentscanned)
-- [`loadsource()`](https://www.dynamsoft.com/document-viewer/docs/api/interface/idocument/index.html#loadsource)
+- [`loadSource()`](https://www.dynamsoft.com/document-viewer/docs/api/interface/idocument/index.html#loadsource)
 
 ##### Explanation
 
@@ -574,8 +574,8 @@ For brevity, we outline the key steps in this sample implementation:
 4. Create a DDV document
 5. Create a `DocumentScanner` instance
   1. Enable continuous scanning
-  2. On confirming a scan, convert and send the image to the DDV document with [`loadsource()`](https://www.dynamsoft.com/document-viewer/docs/api/interface/idocument/index.html#loadsource) in the MDS event handler
-6. Add an event to launch MDS from clicking the custom scan button added to ddv
+  2. On confirming a scan, convert and send the image to the DDV document with [`loadSource()`](https://www.dynamsoft.com/document-viewer/docs/api/interface/idocument/index.html#loadsource) in the MDS event handler
+6. Add an event to launch MDS when clicking the custom scan button added to DDV
 7. Add an event to DDV that outputs a PDF of the scanned documents from DDV on close using [`saveToPdf()`](https://www.dynamsoft.com/document-viewer/docs/api/interface/idocument/#savetopdf)
 
 ### Workflow Customization
@@ -697,7 +697,7 @@ This hides the `DocumentScannerView` UI entirely and brings up the `DocumentCorr
 
 > `launch()` can accept images or PDFs. If launching with a PDF, MDS will **only process the first page**.
 
-> You can completely disable all UI and use MDS to scan a file completely statically by hiding both the `DocumentCorrectionView` and the `DocumentResultView` in [example 2](#example-2-only-show-documentscannerview).
+> You can disable all UI and run MDS headlessly by hiding both the `DocumentCorrectionView` and the `DocumentResultView` in [example 2](#example-2-only-show-documentscannerview).
 
 #### Example 5: Configure Scan Modes
 
@@ -713,9 +713,9 @@ By default, Border Detection mode is enabled upon entering the Scanner View, whi
 2. Set the default state of Smart Capture mode with `enableSmartCaptureMode`
 3. Set the visibility of the scanning mode sub-footer with `showSubfooter`
 
-> Border Detection Mode is always enabled upon the Scanner View, and the scanning sub-footer is visible by default.
+> Border Detection Mode is always enabled in the Scanner View, and the scanning sub-footer is visible by default.
 
-For example, the following config enables all three scanning modes and hides the scanning mode sub-footer to prevent the viewer from changing or viewing the scanning modes:
+For example, the following config enables all three scanning modes and hides the scanning mode sub-footer to prevent the user from changing or viewing the scanning modes:
 
 ```javascript
 const documentScanner = new Dynamsoft.DocumentScanner({
@@ -769,20 +769,20 @@ This file defines the UI for `DocumentScannerView`. Since files on the CDN **can
 
 3. Build the project to generate the updated file in `/dist/document-scanner.ui.xml`:
 
-   ```shell
-   npm run build
-   ```
+    ```shell
+    npm run build
+    ```
 
 4. Update the configuration to use the local file instead of the CDN version:
 
-   ```javascript
-   const documentScanner = new Dynamsoft.DocumentScanner({
-     license: "YOUR_LICENSE_KEY_HERE", // Replace with your actual license key
-     scannerViewConfig: {
-       cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use the local file
-     },
-   });
-   ```
+    ```javascript
+    const documentScanner = new Dynamsoft.DocumentScanner({
+      license: "YOUR_LICENSE_KEY_HERE", // Replace with your actual license key
+      scannerViewConfig: {
+        cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use the local file
+      },
+    });
+    ```
 
 API Reference:
 
@@ -815,23 +815,23 @@ API Reference:
 Here is how `ScanRegion` applies its settings to the viewfinder:
 
 1. Use the `ratio` property to set the height-to-width of the rectangular scanning region, then scale the rectangle up to fit within the viewfinder.
-2. Translate the rectangular up by the number of pixels specified by `regionBottomMargin`.
+2. Translate the rectangular region up by the number of pixels specified by `regionBottomMargin`.
 3. Create a visual border for the scanning region boundary on the viewfinder with a given stroke width in pixels, and a stroke color.
 
 For example:
 
 ```javascript
-scanRegion {
+const scanRegion = {
   ratio: {
-    width: 2;
-    height: 3;
-  };
-  regionBottomMargin: 20;
+    width: 2,
+    height: 3,
+  },
+  regionBottomMargin: 20,
   style: {
-    strokeWidth: 3;
-    strokeColor: "green";
-  };
-}
+    strokeWidth: 3,
+    strokeColor: "green",
+  },
+};
 ```
 
 This creates a scan region with a height-to-width ratio of 3:2, translated upwards by 20 pixels, with a green, 3 pixel-wide border in the viewfinder.
