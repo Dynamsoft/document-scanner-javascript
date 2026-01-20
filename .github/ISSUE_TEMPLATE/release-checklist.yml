@@ -11,14 +11,14 @@ body:
         - [ ] 2. Check README formatting in the development repository (including nested READMEs); note that the `npm` website does not render GitHub alerts but our documentation site does, so they should be stripped out for the READMEs only
         - [ ] 3. Deploy beta release to internal `npm` repository (`https://npm.scannerproxy.com:802`)
           - [ ] 3.1. Create beta releases with git branches and tags in the development repository
-            - 3.1.1. Create a release branch from the main branch of the development repository for version `X.Y.z beta a` with beta versioning: `git checkout -b release/vX.Y/vX.Y.z-beta{4 digit year}{two digit month}{two digit date}{4 digit a}`, e.g. `git checkout -b release/vX.Y/vX.Y.z-beta202010290001` for the first beta release on 2020 October 29th (the beta number `a` resets every day) - some source code needs to be changed for beta publishing only
+            - 3.1.1. Create a release branch from the main branch of the development repository for version `vX.Y.z beta a` with beta versioning: `git checkout -b release/vX.Y/vX.Y.z-beta{4 digit year}{two digit month}{two digit date}{4 digit a}`, e.g. `git checkout -b release/vX.Y/vX.Y.z-beta202010290001` for the first beta release on 2020 October 29th (the beta number `a` resets every day) - some source code needs to be changed for beta publishing only
             - 3.1.2. Replace regular CDN links (e.g. `https://cdn.jsdelivr.net/npm/`) with links to internal the `npm` repository (e.g. `https://npm.scannerproxy.com:802/cdn/`), e.g. `https://cdn.jsdelivr.net/npm/dynamsoft-mrz-scanner@3.0.3-beta-202509150001/dist/mrz-scanner.ui.html` -> `https://npm.scannerproxy.com:802/cdn/dynamsoft-mrz-scanner@3.0.3-beta-202509150001/dist/mrz-scanner.ui.html`
-            - 3.1.3. Replace the version from the intended `X.Y.z` with beta versioning where necessary, e.g. `package.json`
+            - 3.1.3. Replace the version from the intended `vX.Y.z` with beta versioning where necessary, e.g. `package.json`
             - 3.1.4. Run `npm install` and `npm run build`
             - 3.1.5. Verify that the build works, samples work, framework samples work, etc. **using local resources** (testing the internal `npm` repository comes in step 3.3)
             - 3.1.6. Create a signed git tag with beta versioning: `git tag -a v{beta version} -m "{product name} SDK v{beta version}" -s`
             - 3.1.7. Commit changes with message: `git commit -am "release v{beta version}`
-            - 3.1.8. Push the new beta branch and beta tag to the development repository: `git push origin -u {branch name}`, `git push tag origin {beta version}`
+            - 3.1.8. Push the new beta branch and beta tag to the development repository: `git push origin -u {branch name}`, `git push origin tag v{beta version}`
             - 3.1.9. Create a pull request from the beta branch to main to confirm the changes, but **never merge this pull request**
           - [ ] 3.2. Publish to the internal `npm` repository from the beta branch
             - 3.2.1. First time set-up: create an npmjs account, and run `npm adduser` to add the account, then log in to the internal repository with `npm login --registry https://npm.scannerproxy.com:802/` (verify login with `npm whoami --registry https://npm.scannerproxy.com:802/`)
@@ -30,7 +30,7 @@ body:
             - 3.4.1. Run local code scanning on the main branch with the local code scanning automation, then add the resulting SARIF report and HTML report summary to the audit
             - 3.4.2. Run `npm audit` on the main branch and add the result to the audit
         - [ ] 4. Create beta release in the production repository and deploy them to `npm`
-          - [ ] 4.1. Create a **release branch** from main branch of the production repository for version `X.Y.z`: `git checkout -b release/vX.y/vX.Y.z`
+          - [ ] 4.1. Create a **release branch** from main branch of the production repository for version `vX.Y.z`: `git checkout -b release/vX.y/vX.Y.z`
           - [ ] 4.2. Copy over code from the **development repository main branch** to the **production repository release branch**; some code is specific to the development repository and should not be copied over, including but **not limited to**:
             - 4.2.1. The distributables (development repositories track the distributables)
             - 4.2.2. Metadata such as `package-lock.json` that should be regenerated in the production repository
