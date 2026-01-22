@@ -16,7 +16,7 @@
     "@angular/platform-browser": "^20.3.16",
     "@angular/platform-browser-dynamic": "^20.3.16",
     "@angular/router": "^20.3.16",
-    "dynamsoft-document-scanner": "1.4.2",
+    "dynamsoft-document-scanner": "1.4.2-beta202601220001",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "^0.15.1"
