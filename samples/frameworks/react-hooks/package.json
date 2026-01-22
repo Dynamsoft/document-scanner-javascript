@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dynamsoft-document-scanner": "1.4.2",
+    "dynamsoft-document-scanner": "1.4.2-beta202601220001",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
