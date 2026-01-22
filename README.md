@@ -129,7 +129,7 @@ We publish **MDS** library files on [npm](https://www.npmjs.com/package/dynamsof
 To use the precompiled script, simply include the following URL in a `<script>` tag:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/dds.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script>
 ```
 
 Below is the complete Hello World sample page that uses this precompiled script from a CDN.
@@ -145,7 +145,7 @@ Below is the complete Hello World sample page that uses this precompiled script 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mobile Document Scanner - Hello World</title>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/dds.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script>
   </head>
   <body>
     <h1 style="font-size: large">Mobile Document Scanner</h1>
@@ -310,7 +310,7 @@ Here we walk through the code in the Hello World sample to explain its function 
     <title>Mobile Document Scanner - Hello World</title>
     <script src="../dist/dds.bundle.js"></script>
     <!--Alternatively, reference the script from CDN
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/dds.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script>
     -->
   </head>
 </html>
@@ -325,7 +325,7 @@ In this step, we reference MDS with a relative path to the local file in the `<h
 Alternatively, you can reference the script hosted on a CDN, for example, on JSDelivr:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/dds.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script>
 ```
 
 **MDS** wraps all its dependency scripts, so a **MDS** project only needs to include **MDS** itself as a single script. No additional dependency scripts are required.
@@ -757,7 +757,7 @@ Of these three properties, we focus on `cameraEnhancerUIPath`. Here we omit `con
 > If the performance of **MDS** does not meet your needs, you may require an algorithm template **customized for your usage scenario** for better results. Please contact our experienced [Technical Support Team](https://www.dynamsoft.com/company/contact/) to discuss your requirements. We can tailor a suitable template for you, which you can then apply by updating `templateFilePath`.
 
 `cameraEnhancerUIPath` points to a file hosted on the jsDelivr CDN by default (see [Self-Host Resources: Point to Resources](#point-to-resources)):
-[https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/document-scanner.ui.xml](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.1/dist/document-scanner.ui.xml).
+[https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/document-scanner.ui.xml](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/document-scanner.ui.xml).
 
 This file defines the UI for `DocumentScannerView`. Since files on the CDN **cannot be modified directly**, you must use a **local version** to customize the UI. `cameraEnhancerUIPath` specifies the file path to this local version of the UI.
 
