@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "esnext",
+    "target": "es2019",
     "outDir": "dist",
     "moduleResolution": "bundler",
+    "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "sourceMap": false,
     "declaration": true,
     "declarationMap": true,
@@ -15,5 +14,4 @@
     "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**"]
 }
