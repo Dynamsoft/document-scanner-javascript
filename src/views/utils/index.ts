@@ -3,13 +3,14 @@ import { EnumFlowType, ToolbarButton } from "./types";
 /**
  * Retrieves a DOM element from either a CSS selector string or an HTMLElement instance.
  *
- * @param element - A CSS selector string or an HTMLElement instance
- * @returns The HTMLElement if found, or null if the input is invalid
+ * @param element - A CSS selector string or an HTMLElement instance, or `null`/`undefined`
+ * @returns The HTMLElement if found, or null if the input is nullish or invalid
  * @throws {Error} If a CSS selector string is provided but no matching element is found
  *
  * @public
  */
-export function getElement(element: string | HTMLElement): HTMLElement | null {
+export function getElement(element?: string | HTMLElement | null): HTMLElement | null {
+  if (!element) return null;
   if (typeof element === "string") {
     const el = document.querySelector(element) as HTMLElement;
     if (!el) throw new Error("Element not found");

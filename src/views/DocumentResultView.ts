@@ -164,15 +164,17 @@ export default class DocumentResultView {
   constructor(
     private resources: SharedResources,
     private config: DocumentResultViewConfig,
-    private scannerView: DocumentScannerView,
-    private correctionView: DocumentCorrectionView
+    private scannerView?: DocumentScannerView,
+    private correctionView?: DocumentCorrectionView
   ) {}
 
   async launch(): Promise<DocumentResult> {
     try {
-      getElement(this.config.container).textContent = "";
+      const container = getElement(this.config.container);
+      if (!container) throw new Error("Result view container not found");
+      container.textContent = "";
       await this.initialize();
-      getElement(this.config.container).style.display = "flex";
+      container.style.display = "flex";
 
       // Return promise that resolves when user clicks done
       return new Promise((resolve) => {
@@ -347,17 +349,20 @@ export default class DocumentResultView {
       // After normalization is complete, show scan result view again with updated image
       if (result.correctedImageResult) {
         // Update the shared resources with new corrected result
-        this.resources.onResultUpdated?.({
-          ...this.resources.result,
-          correctedImageResult: result.correctedImageResult,
-        });
+        if (this.resources.result) {
+          this.resources.onResultUpdated?.({
+            ...this.resources.result,
+            correctedImageResult: result.correctedImageResult,
+          });
+        }
 
         // Clear current scan result view and reinitialize with new image
         this.dispose(true); // true = preserve resolver
         await this.initialize();
-        getElement(this.config.container).style.display = "flex";
+        const container = getElement(this.config.container);
+        if (container) container.style.display = "flex";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("DocumentResultView - Handle Correction View Error:", error);
       // Make sure to resolve with error if something goes wrong
       this.currentScanResultViewResolver?.({
@@ -418,7 +423,8 @@ export default class DocumentResultView {
 
       // Show scanner view
       if (this.scannerView) {
-        getElement((this.scannerView as any).config.container).style.display = "flex";
+        const scannerContainer = getElement((this.scannerView as any).config.container);
+        if (scannerContainer) scannerContainer.style.display = "flex";
       }
 
       // Wait for new scan
@@ -441,7 +447,8 @@ export default class DocumentResultView {
 
         // Hide scanner view
         if (this.scannerView) {
-          getElement((this.scannerView as any).config.container).style.display = "none";
+          const scannerContainer = getElement((this.scannerView as any).config.container);
+          if (scannerContainer) scannerContainer.style.display = "none";
         }
 
         // Route through correction view if it exists (always go through correction during retake when it's configured)
@@ -464,9 +471,10 @@ export default class DocumentResultView {
         // Refresh the result view with new data
         this.dispose(true); // preserve resolver
         await this.initialize();
-        getElement(this.config.container).style.display = "flex";
+        const container = getElement(this.config.container);
+        if (container) container.style.display = "flex";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
       this.currentScanResultViewResolver?.({
@@ -491,15 +499,18 @@ export default class DocumentResultView {
    */
   private async handleDone() {
     try {
-      await this.config?.onDone?.(this.resources.result);
+      const result = this.resources.result ?? {
+        status: { code: EnumResultStatus.RS_FAILED, message: "No scan result available" },
+      };
+      await this.config?.onDone?.(result);
 
       // Resolve with current result
-      this.currentScanResultViewResolver?.(this.resources.result);
+      this.currentScanResultViewResolver?.(result);
 
       // Clean up
       this.hideView();
       this.dispose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in done handler:", error);
       // Make sure to resolve with error if something goes wrong
       this.currentScanResultViewResolver?.({
@@ -624,7 +635,8 @@ export default class DocumentResultView {
       const controlContainer = this.createControls();
       resultViewWrapper.appendChild(controlContainer);
 
-      getElement(this.config.container).appendChild(resultViewWrapper);
+      const container = getElement(this.config.container);
+      if (container) container.appendChild(resultViewWrapper);
 
       // Hide retake button on flow.STATIC_FILE
       if (this.resources.result._flowType === EnumFlowType.STATIC_FILE) {
@@ -647,7 +659,8 @@ export default class DocumentResultView {
    * @internal
    */
   hideView(): void {
-    getElement(this.config.container).style.display = "none";
+    const container = getElement(this.config.container);
+    if (container) container.style.display = "none";
   }
 
   /**
@@ -662,7 +675,8 @@ export default class DocumentResultView {
    */
   dispose(preserveResolver: boolean = false): void {
     // Clean up the container
-    getElement(this.config.container).textContent = "";
+    const container = getElement(this.config.container);
+    if (container) container.textContent = "";
 
     // Clear resolver only if not preserving
     if (!preserveResolver) {

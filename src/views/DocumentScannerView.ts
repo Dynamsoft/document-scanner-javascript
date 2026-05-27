@@ -8,6 +8,9 @@ import {
   DetectedQuadResultItem,
   DeskewedImageResultItem,
   MultiFrameResultCrossFilter,
+  CameraView,
+  CameraEnhancer,
+  CaptureVisionRouter,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import {
@@ -341,7 +344,7 @@ export default class DocumentScannerView {
   private resizeTimer: number | null = null;
 
   // Used for Smart Capture Mode - use crossVerificationStatus
-  private crossVerificationCount: number;
+  private crossVerificationCount: number = 0;
 
   // Continuous scanning cooldown
   private lastCaptureTimestamp = 0;
@@ -399,6 +402,7 @@ export default class DocumentScannerView {
    */
   private showScannerLoadingOverlay(message?: string) {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     this.loadingScreen = showLoadingScreen(configContainer, { message });
     configContainer.style.display = "block";
     configContainer.style.position = "relative";
@@ -427,7 +431,8 @@ export default class DocumentScannerView {
     this.loadingScreen?.hide();
 
     if (hideContainer) {
-      getElement(this.config.container).style.display = "none";
+      const configContainer = getElement(this.config.container);
+      if (configContainer) configContainer.style.display = "none";
     }
   }
 
@@ -451,6 +456,46 @@ export default class DocumentScannerView {
       return DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE;
 
     return this.config?.minVerifiedFramesForAutoCapture;
+  }
+
+  /**
+   * The Capture Vision Router, guaranteed present after {@link initialize}.
+   * @throws {Error} If accessed before the shared resources are initialized.
+   */
+  private get cvRouter(): CaptureVisionRouter {
+    if (!this.resources.cvRouter) {
+      throw new Error("Capture Vision Router is not initialized");
+    }
+    return this.resources.cvRouter;
+  }
+
+  /**
+   * The Camera View, guaranteed present after {@link initialize}.
+   * @throws {Error} If accessed before the shared resources are initialized.
+   */
+  private get cameraView(): CameraView {
+    if (!this.resources.cameraView) {
+      throw new Error("Camera View is not initialized");
+    }
+    return this.resources.cameraView;
+  }
+
+  /**
+   * The Camera Enhancer, guaranteed present after {@link initialize}.
+   * @throws {Error} If accessed before the shared resources are initialized.
+   */
+  private get cameraEnhancer(): CameraEnhancer {
+    if (!this.resources.cameraEnhancer) {
+      throw new Error("Camera Enhancer is not initialized");
+    }
+    return this.resources.cameraEnhancer;
+  }
+
+  /**
+   * The template names for detection and normalization, falling back to defaults.
+   */
+  private get templateNames(): UtilizedTemplateNames {
+    return this.config.utilizedTemplateNames ?? DEFAULT_TEMPLATE_NAMES;
   }
 
   constructor(private resources: SharedResources, private config: DocumentScannerViewConfig) {
@@ -481,7 +526,9 @@ export default class DocumentScannerView {
     createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);
 
     try {
-      const { cameraView, cameraEnhancer, cvRouter } = this.resources;
+      const cameraView = this.cameraView;
+      const cameraEnhancer = this.cameraEnhancer;
+      const cvRouter = this.cvRouter;
 
       // Set up cameraView styling
       cameraView.setScanRegionMaskStyle({
@@ -504,10 +551,10 @@ export default class DocumentScannerView {
         await cvRouter.initSettings(this.config.templateFilePath);
       }
 
-      let newSettings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+      let newSettings = await cvRouter.getSimplifiedSettings(this.templateNames.detect);
       newSettings.outputOriginalImage = true;
       newSettings.documentSettings.scaleDownThreshold = 1000;
-      await cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+      await cvRouter.updateSettings(this.templateNames.detect, newSettings);
 
       cvRouter.maxImageSideLength = Infinity;
 
@@ -527,7 +574,7 @@ export default class DocumentScannerView {
           message: "DDS Init error",
         },
       };
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     }
   }
 
@@ -544,6 +591,9 @@ export default class DocumentScannerView {
    */
   private async initializeElements() {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) {
+      throw new Error("Scanner container not found");
+    }
 
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
@@ -573,7 +623,7 @@ export default class DocumentScannerView {
 
     // If showCorrectionView is false, hide smartCapture
     if (this.config._showCorrectionView === false) {
-      this.DCE_ELEMENTS.smartCaptureBtn.style.display = "none";
+      if (this.DCE_ELEMENTS.smartCaptureBtn) this.DCE_ELEMENTS.smartCaptureBtn.style.display = "none";
     }
 
     // Hide subfooter or showPoweredByDynamsoft message
@@ -608,17 +658,25 @@ export default class DocumentScannerView {
    */
   private assignDCEClickEvents() {
     // Check that required elements exist (continuousScanDoneBtn is optional)
-    const requiredElements = [
-      this.DCE_ELEMENTS.selectCameraBtn,
-      this.DCE_ELEMENTS.uploadImageBtn,
-      this.DCE_ELEMENTS.closeScannerBtn,
-      this.DCE_ELEMENTS.takePhotoBtn,
-      this.DCE_ELEMENTS.boundsDetectionBtn,
-      this.DCE_ELEMENTS.smartCaptureBtn,
-      this.DCE_ELEMENTS.autoCropBtn,
-    ];
+    const {
+      selectCameraBtn,
+      uploadImageBtn,
+      closeScannerBtn,
+      takePhotoBtn,
+      boundsDetectionBtn,
+      smartCaptureBtn,
+      autoCropBtn,
+    } = this.DCE_ELEMENTS;
 
-    if (!requiredElements.every(Boolean)) {
+    if (
+      !selectCameraBtn ||
+      !uploadImageBtn ||
+      !closeScannerBtn ||
+      !takePhotoBtn ||
+      !boundsDetectionBtn ||
+      !smartCaptureBtn ||
+      !autoCropBtn
+    ) {
       throw new Error("Camera control elements not found");
     }
 
@@ -629,30 +687,30 @@ export default class DocumentScannerView {
     this.closeCamera = this.closeCamera.bind(this);
 
     // Using onclick instead of addEventListener
-    this.DCE_ELEMENTS.takePhotoBtn.onclick = this.takePhoto;
+    takePhotoBtn.onclick = this.takePhoto;
 
-    this.DCE_ELEMENTS.boundsDetectionBtn.onclick = async () => {
+    boundsDetectionBtn.onclick = async () => {
       await this.toggleBoundsDetection();
     };
 
-    this.DCE_ELEMENTS.smartCaptureBtn.onclick = async () => {
+    smartCaptureBtn.onclick = async () => {
       await this.toggleSmartCapture();
     };
 
-    this.DCE_ELEMENTS.autoCropBtn.onclick = async () => {
+    autoCropBtn.onclick = async () => {
       await this.toggleAutoCrop();
     };
 
-    this.DCE_ELEMENTS.closeScannerBtn.onclick = async () => {
+    closeScannerBtn.onclick = async () => {
       await this.handleCloseBtn();
     };
 
-    this.DCE_ELEMENTS.selectCameraBtn.onclick = (event) => {
+    selectCameraBtn.onclick = (event) => {
       event.stopPropagation();
       this.toggleSelectCameraBox();
     };
 
-    this.DCE_ELEMENTS.uploadImageBtn.onclick = () => {
+    uploadImageBtn.onclick = () => {
       this.uploadImage();
     };
 
@@ -694,9 +752,10 @@ export default class DocumentScannerView {
     });
 
     // Prevent double-tap zoom on torch button
-    const DCEContainer = getElement(this.config.container).children[
-      getElement(this.config.container).children.length - 1
-    ];
+    const torchContainer = getElement(this.config.container);
+    const DCEContainer = torchContainer
+      ? torchContainer.children[torchContainer.children.length - 1]
+      : undefined;
     const torchButton = DCEContainer?.shadowRoot?.querySelector(".dce-mn-torch") as HTMLElement;
     if (torchButton) {
       torchButton.addEventListener(
@@ -756,7 +815,7 @@ export default class DocumentScannerView {
     if (!this.DCE_ELEMENTS.continuousScanDoneBtn) return;
 
     // Show/hide button based on completedScansCount
-    if (this.resources.completedScansCount > 0) {
+    if ((this.resources.completedScansCount ?? 0) > 0) {
       this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
     } else {
       this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "none";
@@ -978,6 +1037,7 @@ export default class DocumentScannerView {
    */
   private attachOptionClickListeners() {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
@@ -1050,6 +1110,7 @@ export default class DocumentScannerView {
    */
   private highlightCameraAndResolutionOption() {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
     if (!DCEContainer?.shadowRoot) return;
 
@@ -1078,7 +1139,7 @@ export default class DocumentScannerView {
       "2k": "1440",
       "4k": "2160",
     };
-    const resolutionLvl = findClosestResolutionLevel(selectedResolution);
+    const resolutionLvl = selectedResolution ? findClosestResolutionLevel(selectedResolution) : "";
 
     resOptions.forEach((options) => {
       const o = options as HTMLElement;
@@ -1124,6 +1185,7 @@ export default class DocumentScannerView {
    */
   private toggleSelectCameraBox() {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
@@ -1223,19 +1285,19 @@ export default class DocumentScannerView {
         this.closeCamera(false);
       } else {
         // In continuous mode, stop capturing during upload processing
-        this.resources.cvRouter.stopCapturing();
+        this.cvRouter.stopCapturing();
       }
 
       // Convert file to blob
       const { blob } = await this.fileToBlob(file);
 
       this.capturedResultItems = (
-        await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)
+        await this.cvRouter.capture(blob, this.templateNames.detect)
       ).items;
       this.originalImageData = (this.capturedResultItems[0] as OriginalImageResultItem)?.imageData;
 
       // Reset captured items if not using bounds detection
-      let detectedQuadrilateral: Quadrilateral = null;
+      let detectedQuadrilateral: Quadrilateral;
       const useImageDimensions = this.capturedResultItems?.length <= 1;
       if (useImageDimensions) {
         this.capturedResultItems = [];
@@ -1283,7 +1345,7 @@ export default class DocumentScannerView {
           await this.animateFloatingImage(canvas);
 
           // Restart capturing after upload processing
-          await this.resources.cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+          await this.cvRouter.startCapturing(this.templateNames.detect);
         }
 
         this.hideScannerLoadingOverlay(false);
@@ -1292,7 +1354,7 @@ export default class DocumentScannerView {
       }
 
       // Resolve scan promise to go through correction/result views
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -1305,7 +1367,7 @@ export default class DocumentScannerView {
           message: "Error processing uploaded image",
         },
       };
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     } finally {
       document.body.removeChild(input);
     }
@@ -1414,6 +1476,7 @@ export default class DocumentScannerView {
    */
   async toggleBoundsDetection(enabled?: boolean) {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
@@ -1435,7 +1498,7 @@ export default class DocumentScannerView {
       }
     }
 
-    const { cvRouter } = this.resources;
+    const cvRouter = this.cvRouter;
 
     this.boundsDetectionEnabled = newBoundsDetectionState;
     container.style.color = this.boundsDetectionEnabled ? "#fe814a" : "#fff";
@@ -1443,7 +1506,7 @@ export default class DocumentScannerView {
     onIcon.style.display = this.boundsDetectionEnabled ? "block" : "none";
 
     if (this.initialized && this.boundsDetectionEnabled) {
-      await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+      await cvRouter.startCapturing(this.templateNames.detect);
 
       this.toggleScanGuide(true);
     } else if (this.initialized && !this.boundsDetectionEnabled) {
@@ -1503,6 +1566,7 @@ export default class DocumentScannerView {
    */
   async toggleSmartCapture(mode?: boolean) {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
@@ -1592,6 +1656,7 @@ export default class DocumentScannerView {
    */
   async toggleAutoCrop(mode?: boolean) {
     const configContainer = getElement(this.config.container);
+    if (!configContainer) return;
     const DCEContainer = configContainer.children[configContainer.children.length - 1];
 
     if (!DCEContainer?.shadowRoot) return;
@@ -1785,7 +1850,7 @@ export default class DocumentScannerView {
   private calculateScanRegion() {
     const { cameraEnhancer, cameraView } = this.resources;
 
-    if (!cameraEnhancer?.isOpen()) return;
+    if (!cameraEnhancer?.isOpen() || !cameraView) return;
 
     // Get visible region of video
     const visibleRegion = cameraView.getVisibleRegionOfVideo({ inPixels: true });
@@ -1800,6 +1865,7 @@ export default class DocumentScannerView {
     // Get the document ratio for the specific document type
 
     const targetRatio = this.config?.scanRegion?.ratio;
+    if (!targetRatio) return;
 
     // Calculate the base unit to scale the document dimensions
     let baseUnit: number;
@@ -1945,15 +2011,19 @@ export default class DocumentScannerView {
    */
   async openCamera(): Promise<void> {
     try {
-      const { cameraEnhancer, cameraView } = this.resources;
+      const cameraEnhancer = this.cameraEnhancer;
+      const cameraView = this.cameraView;
       const configContainer = getElement(this.config.container);
+      if (!configContainer) {
+        throw new Error("Scanner container not found");
+      }
 
       // In continuous scanning mode, if camera is already open, skip reinitialization
       if (this.resources.enableContinuousScanning && cameraEnhancer?.isOpen()) {
         configContainer.style.display = "block";
         // Just update the done button and return early
         if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
-          if (this.resources.completedScansCount > 0) {
+          if ((this.resources.completedScansCount ?? 0) > 0) {
             this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
             this.updateContinuousScanDoneButton();
           } else {
@@ -1962,7 +2032,7 @@ export default class DocumentScannerView {
         }
         // Restart capturing if it was stopped (when returning from correction/result view)
         if ((this.resources.cvRouter as any)._isPauseScan) {
-          await this.resources.cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+          await this.cvRouter.startCapturing(this.templateNames.detect);
         }
         return;
       }
@@ -2024,7 +2094,7 @@ export default class DocumentScannerView {
 
       // Show/hide and update continuous scan done button
       if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
-        if (this.resources.enableContinuousScanning && this.resources.completedScansCount > 0) {
+        if (this.resources.enableContinuousScanning && (this.resources.completedScansCount ?? 0) > 0) {
           this.DCE_ELEMENTS.continuousScanDoneBtn.style.display = "block";
           this.updateContinuousScanDoneButton();
         } else {
@@ -2042,7 +2112,7 @@ export default class DocumentScannerView {
           message: "DDS Open Camera Error",
         },
       };
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     } finally {
       this.hideScannerLoadingOverlay();
     }
@@ -2118,10 +2188,12 @@ export default class DocumentScannerView {
     const { cameraEnhancer, cameraView } = this.resources;
 
     const configContainer = getElement(this.config.container);
-    configContainer.style.display = hideContainer ? "none" : "block";
+    if (configContainer) {
+      configContainer.style.display = hideContainer ? "none" : "block";
 
-    if (cameraView.getUIElement().parentElement) {
-      configContainer.removeChild(cameraView.getUIElement());
+      if (cameraView && cameraView.getUIElement().parentElement) {
+        configContainer.removeChild(cameraView.getUIElement());
+      }
     }
 
     try {
@@ -2212,8 +2284,8 @@ export default class DocumentScannerView {
   stopCapturing() {
     const { cameraView, cvRouter } = this.resources;
 
-    cvRouter.stopCapturing();
-    cameraView.clearAllInnerDrawingItems();
+    cvRouter?.stopCapturing();
+    cameraView?.clearAllInnerDrawingItems();
   }
 
   /**
@@ -2375,15 +2447,20 @@ export default class DocumentScannerView {
       if (this.frameVerificationEnabled && this.maxClarityImg && !shouldUseLatestFrame) {
         this.originalImageData = this.maxClarityImg;
       } else {
-        this.originalImageData = shouldUseLatestFrame ? cameraEnhancer?.fetchImage() : this.originalImageData;
+        this.originalImageData = shouldUseLatestFrame ? (cameraEnhancer?.fetchImage() ?? null) : this.originalImageData;
       }
+
+      if (!this.originalImageData) {
+        throw new Error("Failed to capture image frame");
+      }
+      const originalImageData = this.originalImageData;
 
       // Reset captured items if not using bounds detection
       let correctedImageResult = null;
-      let detectedQuadrilateral: Quadrilateral = null;
+      let detectedQuadrilateral: Quadrilateral;
       if (shouldUseLatestFrame) {
         this.capturedResultItems = [];
-        const { width, height } = this.originalImageData;
+        const { width, height } = originalImageData;
         detectedQuadrilateral = {
           points: [
             { x: 0, y: 0 },
@@ -2433,7 +2510,7 @@ export default class DocumentScannerView {
       }
 
       // Retrieve corrected image result
-      correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, this.originalImageData);
+      correctedImageResult = await this.normalizeImage(detectedQuadrilateral.points, originalImageData);
 
       // Resume camera after normalization (only in continuous scanning mode)
       if (this.resources.enableContinuousScanning) {
@@ -2468,7 +2545,7 @@ export default class DocumentScannerView {
           code: EnumResultStatus.RS_SUCCESS,
           message: "Success",
         },
-        originalImageResult: this.originalImageData,
+        originalImageResult: originalImageData,
         correctedImageResult,
         detectedQuadrilateral,
         _flowType: flowType,
@@ -2498,7 +2575,7 @@ export default class DocumentScannerView {
       onResultUpdated?.(result);
 
       // Resolve scan promise
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
@@ -2534,7 +2611,7 @@ export default class DocumentScannerView {
           message: "Error capturing image",
         },
       };
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
     } finally {
       // Reset capturing flag
       this.isCapturing = false;
@@ -2588,7 +2665,7 @@ export default class DocumentScannerView {
      * In our case, we determine a good condition for "automatic normalization" to be
      * "getting document boundary detected after 2 cross verified results".
      */
-    if (this.crossVerificationCount >= this.config?.minVerifiedFramesForAutoCapture) {
+    if (this.crossVerificationCount >= this.getMinVerifiedFramesForAutoCapture()) {
       this.crossVerificationCount = 0;
       this.lastCaptureTimestamp = Date.now();
 
@@ -2600,7 +2677,8 @@ export default class DocumentScannerView {
     try {
       await this.initialize();
 
-      const { cvRouter, cameraEnhancer } = this.resources;
+      const cvRouter = this.cvRouter;
+      const cameraEnhancer = this.cameraEnhancer;
 
       return new Promise(async (resolve) => {
         this.currentScanResolver = resolve;
@@ -2609,7 +2687,7 @@ export default class DocumentScannerView {
         await this.openCamera();
 
         if (this.boundsDetectionEnabled) {
-          await cvRouter.startCapturing(this.config.utilizedTemplateNames.detect);
+          await cvRouter.startCapturing(this.templateNames.detect);
         }
 
         this.toggleScanGuide(true);
@@ -2637,7 +2715,8 @@ export default class DocumentScannerView {
           message: "DDS Launch error",
         },
       };
-      this.currentScanResolver(result);
+      this.currentScanResolver?.(result);
+      return result;
     }
   }
 
@@ -2645,17 +2724,18 @@ export default class DocumentScannerView {
     points: Quadrilateral["points"],
     originalImageData: OriginalImageResultItem["imageData"]
   ): Promise<DeskewedImageResultItem> {
-    const { cvRouter, cameraEnhancer } = this.resources;
+    const cvRouter = this.cvRouter;
 
-    const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
+    const settings = await cvRouter.getSimplifiedSettings(this.templateNames.normalize);
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;
-    await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
+    await cvRouter.updateSettings(this.templateNames.normalize, settings);
 
-    const result = await cvRouter.capture(originalImageData, this.config.utilizedTemplateNames.normalize);
+    const result = await cvRouter.capture(originalImageData, this.templateNames.normalize);
     // If deskewed result found
     if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
       return result.processedDocumentResult.deskewedImageResultItems[0];
     }
+    throw new Error("Failed to normalize image");
   }
 }

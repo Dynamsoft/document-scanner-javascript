@@ -1,13 +1,14 @@
-import { 
-  EnumCapturedResultItemType, 
-  Point, 
+import {
+  EnumCapturedResultItemType,
+  Point,
   Quadrilateral,
-  DrawingLayer, 
-  DrawingStyleManager, 
-  ImageEditorView, 
+  DrawingLayer,
+  DrawingStyleManager,
+  ImageEditorView,
   QuadDrawingItem,
   DetectedQuadResultItem,
-  DeskewedImageResultItem
+  DeskewedImageResultItem,
+  DSImageData
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
 import { createControls, createStyle, getElement } from "./utils";
@@ -182,14 +183,39 @@ export interface DocumentCorrectionViewConfig {
 }
 
 export default class DocumentCorrectionView {
-  private imageEditorView: ImageEditorView = null;
-  private layer: DrawingLayer = null;
+  private imageEditorView!: ImageEditorView;
+  private layer!: DrawingLayer;
   private currentCorrectionResolver?: (result: DocumentResult) => void;
+
+  /**
+   * The current scan result, guaranteed present while the correction view is active.
+   *
+   * @throws {Error} If no image has been captured yet.
+   */
+  private get result(): DocumentResult {
+    if (!this.resources.result) {
+      throw new Error("Captured image is missing. Please capture an image first!");
+    }
+    return this.resources.result;
+  }
+
+  /**
+   * The original captured image, required for boundary detection and correction.
+   *
+   * @throws {Error} If the scan result has no original image.
+   */
+  private get originalImage(): DSImageData {
+    const image = this.result.originalImageResult;
+    if (!image) {
+      throw new Error("Original image is missing from the scan result");
+    }
+    return image;
+  }
 
   constructor(
     private resources: SharedResources,
     private config: DocumentCorrectionViewConfig,
-    private scannerView: DocumentScannerView
+    private scannerView?: DocumentScannerView
   ) {
     this.config.utilizedTemplateNames = {
       detect: config.utilizedTemplateNames?.detect || DEFAULT_TEMPLATE_NAMES.detect,
@@ -220,11 +246,12 @@ export default class DocumentCorrectionView {
     });
 
     correctionViewWrapper.appendChild(imageEditorViewElement);
-    getElement(this.config.container).appendChild(correctionViewWrapper);
+    const container = getElement(this.config.container);
+    if (container) container.appendChild(correctionViewWrapper);
 
     this.imageEditorView = await ImageEditorView.createInstance(imageEditorViewElement);
     this.layer = this.imageEditorView.createDrawingLayer();
-    this.imageEditorView.setOriginalImage(this.resources.result.originalImageResult);
+    this.imageEditorView.setOriginalImage(this.originalImage);
 
     this.setupDrawingLayerStyle(); // Set style for drawing layer
     this.setupInitialDetectedQuad();
@@ -370,9 +397,7 @@ export default class DocumentCorrectionView {
 
     const fabricObject = newQuad._getFabricObject();
 
-    const cornerSize =
-      Math.min(this.resources.result.originalImageResult?.width, this.resources.result.originalImageResult?.height) *
-      0.1;
+    const cornerSize = Math.min(this.originalImage.width, this.originalImage.height) * 0.1;
 
     fabricObject.cornerSize = cornerSize;
 
@@ -381,7 +406,7 @@ export default class DocumentCorrectionView {
     fabricObject.lockMovementY = true;
 
     // Make circle transparent to show corner on drag
-    fabricObject.on("mousedown", function (e: any) {
+    fabricObject.on("mousedown", function (this: any, e: any) {
       if (e.target?.controls) {
         this.cornerColor = "transparent";
         this.dirty = true;
@@ -389,7 +414,7 @@ export default class DocumentCorrectionView {
       }
     });
 
-    fabricObject.on("mouseup", function () {
+    fabricObject.on("mouseup", function (this: any) {
       this.cornerColor = "#FE8E14";
       this.dirty = true;
       this.canvas?.renderAll();
@@ -435,11 +460,11 @@ export default class DocumentCorrectionView {
   private setupInitialDetectedQuad() {
     let quad: QuadDrawingItem;
     // Draw the detected quadrilateral
-    if (this.resources.result.detectedQuadrilateral) {
-      quad = new QuadDrawingItem(this.resources.result.detectedQuadrilateral);
+    if (this.result.detectedQuadrilateral) {
+      quad = new QuadDrawingItem(this.result.detectedQuadrilateral);
     } else {
       // If no quad detected, draw full image quad
-      const { width, height } = this.resources.result.originalImageResult;
+      const { width, height } = this.originalImage;
       quad = new QuadDrawingItem({
         points: [
           { x: 0, y: 0 },
@@ -555,11 +580,11 @@ export default class DocumentCorrectionView {
   private setupCorrectionControls() {
     try {
       const controlContainer = this.createControls();
-      const wrapper = getElement(this.config.container).firstElementChild as HTMLElement;
+      const wrapper = getElement(this.config.container)?.firstElementChild as HTMLElement;
       if (wrapper) {
         wrapper.appendChild(controlContainer);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error setting up correction controls:", error);
       throw new Error(`Failed to setup correction controls: ${error?.message || error}`);
     }
@@ -610,7 +635,8 @@ export default class DocumentCorrectionView {
 
       // Show scanner view
       if (this.scannerView) {
-        getElement((this.scannerView as any).config.container).style.display = "flex";
+        const scannerContainer = getElement((this.scannerView as any).config.container);
+        if (scannerContainer) scannerContainer.style.display = "flex";
       }
 
       // Wait for new scan
@@ -631,15 +657,17 @@ export default class DocumentCorrectionView {
 
         // Hide scanner view
         if (this.scannerView) {
-          getElement((this.scannerView as any).config.container).style.display = "none";
+          const scannerContainer = getElement((this.scannerView as any).config.container);
+          if (scannerContainer) scannerContainer.style.display = "none";
         }
 
         // Refresh the correction view with new data
         this.dispose(true); // preserve resolver
         await this.initialize();
-        getElement(this.config.container).style.display = "flex";
+        const container = getElement(this.config.container);
+        if (container) container.style.display = "flex";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in retake handler:", error);
       // Make sure to resolve with error if something goes wrong
       this.currentCorrectionResolver?.({
@@ -688,7 +716,7 @@ export default class DocumentCorrectionView {
     }
 
     // Reset quad to full image
-    const { width, height } = this.resources.result.originalImageResult;
+    const { width, height } = this.originalImage;
     const fullQuad = new QuadDrawingItem({
       points: [
         { x: 0, y: 0 },
@@ -736,21 +764,24 @@ export default class DocumentCorrectionView {
    * @public
    */
   async setBoundaryAutomatically() {
-    // Auto detect bounds
-    if (this.config.templateFilePath) {
-      await this.resources.cvRouter.initSettings(this.config.templateFilePath);
+    const { cvRouter } = this.resources;
+    const templateNames = this.config.utilizedTemplateNames;
+    if (!cvRouter || !templateNames) {
+      throw new Error("Correction view resources are not initialized");
     }
 
-    let newSettings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.detect);
+    // Auto detect bounds
+    if (this.config.templateFilePath) {
+      await cvRouter.initSettings(this.config.templateFilePath);
+    }
+
+    let newSettings = await cvRouter.getSimplifiedSettings(templateNames.detect);
     newSettings.outputOriginalImage = true;
-    await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.detect, newSettings);
+    await cvRouter.updateSettings(templateNames.detect, newSettings);
 
-    this.resources.cvRouter.maxImageSideLength = Infinity;
+    cvRouter.maxImageSideLength = Infinity;
 
-    const result = await this.resources.cvRouter.capture(
-      this.resources.result.originalImageResult,
-      "DetectDocumentBoundaries_Default"
-    );
+    const result = await cvRouter.capture(this.originalImage, "DetectDocumentBoundaries_Default");
 
     const quad = (
       result.items.find((item) => item.type === EnumCapturedResultItemType.CRIT_DETECTED_QUAD) as DetectedQuadResultItem
@@ -782,7 +813,7 @@ export default class DocumentCorrectionView {
     const correctedImg = await this.correctImage(quad?.points);
     if (correctedImg) {
       const updatedResult = {
-        ...this.resources.result,
+        ...this.result,
         correctedImageResult: correctedImg,
         detectedQuadrilateral: quad,
       };
@@ -796,7 +827,7 @@ export default class DocumentCorrectionView {
       // Resolve the promise with corrected image
       this.currentCorrectionResolver?.(updatedResult);
     } else {
-      this.currentCorrectionResolver?.(this.resources.result);
+      this.currentCorrectionResolver?.(this.result);
     }
 
     // Clean up and hide
@@ -815,9 +846,11 @@ export default class DocumentCorrectionView {
         };
       }
 
-      getElement(this.config.container).textContent = "";
+      const container = getElement(this.config.container);
+      if (!container) throw new Error("Correction view container not found");
+      container.textContent = "";
       await this.initialize();
-      getElement(this.config.container).style.display = "flex";
+      container.style.display = "flex";
 
       // Return promise that resolves when user clicks finish
       return new Promise((resolve) => {
@@ -826,14 +859,12 @@ export default class DocumentCorrectionView {
     } catch (ex: any) {
       let errMsg = ex?.message || ex;
       console.error(errMsg);
-      if (!this.resources.result?.correctedImageResult) {
-        return {
-          status: {
-            code: EnumResultStatus.RS_FAILED,
-            message: errMsg,
-          },
-        };
-      }
+      return {
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: errMsg,
+        },
+      };
     }
   }
 
@@ -846,7 +877,8 @@ export default class DocumentCorrectionView {
    * @public
    */
   hideView(): void {
-    getElement(this.config.container).style.display = "none";
+    const container = getElement(this.config.container);
+    if (container) container.style.display = "none";
   }
 
   /**
@@ -860,22 +892,23 @@ export default class DocumentCorrectionView {
    *
    * @public
    */
-  async correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem> {
+  async correctImage(points: Quadrilateral["points"]): Promise<DeskewedImageResultItem | undefined> {
     const { cvRouter } = this.resources;
-
-    if (this.config.templateFilePath) {
-      await this.resources.cvRouter.initSettings(this.config.templateFilePath);
+    const templateNames = this.config.utilizedTemplateNames;
+    if (!cvRouter || !templateNames) {
+      throw new Error("Correction view resources are not initialized");
     }
 
-    const settings = await cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
+    if (this.config.templateFilePath) {
+      await cvRouter.initSettings(this.config.templateFilePath);
+    }
+
+    const settings = await cvRouter.getSimplifiedSettings(templateNames.normalize);
     settings.roiMeasuredInPercentage = false;
     settings.roi.points = points;
-    await cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
+    await cvRouter.updateSettings(templateNames.normalize, settings);
 
-    const result = await cvRouter.capture(
-      this.resources.result.originalImageResult,
-      this.config.utilizedTemplateNames.normalize
-    );
+    const result = await cvRouter.capture(this.originalImage, templateNames.normalize);
 
     // If deskewed result found by DDN
     if (result?.processedDocumentResult?.deskewedImageResultItems?.[0]) {
@@ -896,12 +929,10 @@ export default class DocumentCorrectionView {
   dispose(preserveResolver: boolean = false): void {
     // Clean up resources
     this.imageEditorView?.dispose?.();
-    this.layer = null;
 
     // Clean up the container
-    if (this.config?.container) {
-      getElement(this.config.container).textContent = "";
-    }
+    const container = getElement(this.config?.container);
+    if (container) container.textContent = "";
 
     // Clear resolver only if not preserving
     if (!preserveResolver) {

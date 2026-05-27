@@ -425,7 +425,8 @@ class DocumentScanner {
    * @internal
    */
   private showScannerLoadingOverlay(message?: string) {
-    const configContainer = getElement(this.config.scannerViewConfig.container);
+    const configContainer = getElement(this.config.scannerViewConfig?.container);
+    if (!configContainer) return;
     this.loadingScreen = showLoadingScreen(configContainer, { message });
     configContainer.style.display = "block";
     configContainer.style.position = "relative";
@@ -446,8 +447,8 @@ class DocumentScanner {
     this.loadingScreen?.hide();
 
     if (hideContainer) {
-      const configContainer = getElement(this.config.scannerViewConfig.container);
-      configContainer.style.display = "none";
+      const configContainer = getElement(this.config.scannerViewConfig?.container);
+      if (configContainer) configContainer.style.display = "none";
     }
   }
 
@@ -609,7 +610,7 @@ class DocumentScanner {
       //The following code uses the jsDelivr CDN, feel free to change it to your own location of these files
       CoreModule.engineResourcePaths = isEmptyObject(this.config?.engineResourcePaths)
         ? DEFAULT_DCV_ENGINE_RESOURCE_PATHS
-        : this.config.engineResourcePaths;
+        : this.config.engineResourcePaths!;
 
       // Change trial link to include product and deploymenttype
       (LicenseManager as any)._onAuthMessage = (message: string) =>
@@ -844,9 +845,10 @@ class DocumentScanner {
     if (this.shouldCreateDefaultContainer()) {
       this.config.container = this.createDefaultDDSContainer();
     } else if (this.config.container) {
-      this.config.container = getElement(this.config.container);
+      this.config.container = getElement(this.config.container) ?? undefined;
     }
-    const viewContainers = this.config.container ? this.createViewContainers(getElement(this.config.container)) : {};
+    const mainContainer = getElement(this.config.container);
+    const viewContainers = mainContainer ? this.createViewContainers(mainContainer) : {};
 
     const baseConfig = {
       license: this.checkForTemporaryLicense(this.config.license),
@@ -1038,7 +1040,7 @@ class DocumentScanner {
 
     this.correctionView?.dispose();
 
-    this.scannerView = null;
+    this.scannerView = undefined;
 
     // Dispose resources
     this.resources.cameraEnhancer?.dispose();
@@ -1047,8 +1049,8 @@ class DocumentScanner {
 
     this.resources.cvRouter?.dispose();
 
-    this.resources.result = null;
-    this.resources.onResultUpdated = null;
+    this.resources.result = undefined;
+    this.resources.onResultUpdated = undefined;
 
     // Hide and clean containers
     const cleanContainer = (container?: HTMLElement | string) => {
@@ -1124,11 +1126,17 @@ class DocumentScanner {
     try {
       this.showScannerLoadingOverlay("Processing image...");
 
+      const { cvRouter } = this.resources;
+      const templateNames = this.config.utilizedTemplateNames;
+      if (!cvRouter || !templateNames) {
+        throw new Error("Scanner resources are not initialized");
+      }
+
       // Process the file to get blob
       const { blob } = await this.processFileToBlob(file);
 
       // Use CaptureVisionRouter to process the image
-      const resultItems = (await this.resources.cvRouter.capture(blob, this.config.utilizedTemplateNames.detect)).items;
+      const resultItems = (await cvRouter.capture(blob, templateNames.detect)).items;
 
       // Get the original image data from the first result item
       const originalImageData = (resultItems[0] as any)?.imageData;
@@ -1160,15 +1168,12 @@ class DocumentScanner {
       }
 
       // Normalize the image (perspective correction)
-      const settings = await this.resources.cvRouter.getSimplifiedSettings(this.config.utilizedTemplateNames.normalize);
+      const settings = await cvRouter.getSimplifiedSettings(templateNames.normalize);
       settings.roiMeasuredInPercentage = false;
       settings.roi.points = detectedQuadrilateral.points;
-      await this.resources.cvRouter.updateSettings(this.config.utilizedTemplateNames.normalize, settings);
+      await cvRouter.updateSettings(templateNames.normalize, settings);
 
-      const normalizedResult = await this.resources.cvRouter.capture(
-        originalImageData,
-        this.config.utilizedTemplateNames.normalize
-      );
+      const normalizedResult = await cvRouter.capture(originalImageData, templateNames.normalize);
 
       const correctedImageResult = normalizedResult?.processedDocumentResult?.deskewedImageResultItems?.[0];
 
@@ -1189,7 +1194,9 @@ class DocumentScanner {
 
       // Done processing
       this.hideScannerLoadingOverlay(true);
-    } catch (error) {
+
+      return result;
+    } catch (error: any) {
       console.error("Failed to process uploaded file:", error);
       return {
         status: {
@@ -1229,12 +1236,13 @@ class DocumentScanner {
     const { components } = await this.initialize();
 
     if (this.config.container) {
-      getElement(this.config.container).style.display = "block";
+      const container = getElement(this.config.container);
+      if (container) container.style.display = "block";
     }
 
     // Handle direct file upload if provided
     if (file) {
-      components.scannerView = null;
+      components.scannerView = undefined;
       await this.processUploadedFile(file);
     }
 
@@ -1269,14 +1277,13 @@ class DocumentScanner {
       // Stop capturing and hide scanner before showing next view
       if (components.scannerView) {
         components.scannerView.stopCapturing();
-        if (this.config.scannerViewConfig?.container) {
-          getElement(this.config.scannerViewConfig.container).style.display = "none";
-        }
+        const scannerContainer = getElement(this.config.scannerViewConfig?.container);
+        if (scannerContainer) scannerContainer.style.display = "none";
       }
 
       // Route based on capture method
       if (components.correctionView && components.scanResultView) {
-        if (shouldCorrectImage(scanResult._flowType)) {
+        if (scanResult._flowType !== undefined && shouldCorrectImage(scanResult._flowType)) {
           await components.correctionView.launch();
           return await components.scanResultView.launch();
         }
@@ -1292,7 +1299,14 @@ class DocumentScanner {
     }
 
     // If no correction or result views, return current result
-    return this.resources.result;
+    return (
+      this.resources.result ?? {
+        status: {
+          code: EnumResultStatus.RS_FAILED,
+          message: "Failed to capture image",
+        },
+      }
+    );
   }
 
   /**
@@ -1402,7 +1416,7 @@ class DocumentScanner {
 
           // On success, invoke callback and continue loop
           if (result.status.code === EnumResultStatus.RS_SUCCESS) {
-            this.resources.completedScansCount++;
+            this.resources.completedScansCount = (this.resources.completedScansCount ?? 0) + 1;
             await this.config.onDocumentScanned?.(result);
             // Loop back to scan next document
             continue;
@@ -1427,7 +1441,7 @@ class DocumentScanner {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Document capture flow failed:", error?.message || error);
       return {
         status: {
