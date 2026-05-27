@@ -39,8 +39,8 @@ We publish **MDS** library files on [npm](https://www.npmjs.com/package/dynamsof
 2. Extract the contents of the archive, and open the extracted directory in a code editor.
 
 3. Set your [license key](#get-a-trial-license) in the **Angular framework sample**:
-    1. Open the sample at [`/samples/frameworks/angular/src/app/app.component.ts`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/document-scanner-javascript-dev/samples/frameworks/angular/src/app/app.component.ts).
-    2. Search for `"YOUR_LICENSE_KEY_HERE"`, then replace it with your actual license key.
+   1. Open the sample at [`/samples/frameworks/angular/src/app/app.component.ts`](https://github.com/Dynamsoft/document-scanner-javascript/blob/main/document-scanner-javascript-dev/samples/frameworks/angular/src/app/app.component.ts).
+   2. Search for `"YOUR_LICENSE_KEY_HERE"`, then replace it with your actual license key.
 
 ### Install Dependencies
 
@@ -56,6 +56,7 @@ npm start
 
 > [!TIP]
 > This runs `ng serve --ssl`. If you want to run without SSL, use:
+>
 > ```shell
 > npx ng serve
 > ```

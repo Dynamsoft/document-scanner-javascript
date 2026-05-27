@@ -1,5 +1,5 @@
 export const DDS_ICONS = {
-  fullImage: `
+	fullImage: `
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 25 25">
   <defs>
     <clipPath id="fullImageclip-path">
@@ -29,7 +29,7 @@ export const DDS_ICONS = {
 </svg>
 
 `,
-  autoBounds: `<svg xmlns="http://www.w3.org/2000/svg" width="25.04" height="25" viewBox="0 0 25.04 25">
+	autoBounds: `<svg xmlns="http://www.w3.org/2000/svg" width="25.04" height="25" viewBox="0 0 25.04 25">
   <g id="bounds-detection" transform="translate(0.02)">
     <g id="Group_306" data-name="Group 306" transform="translate(-0.02)">
       <path id="Path_982" data-name="Path 982" d="M.791,8.146h.02a.468.468,0,0,0,.516-.416.455.455,0,0,0,0-.063V1.927a1,1,0,0,1,1-1H7.957A.468.468,0,0,0,8.436.492.468.468,0,0,0,7.977.013H2.247A1.913,1.913,0,0,0,.333,1.927v5.74A.468.468,0,0,0,.791,8.146Z" transform="translate(-0.293 -0.012)" fill="#fff"/>
@@ -44,7 +44,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+	finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
   <defs>
     <clipPath id="finishclip-path">
       <rect id="Rectangle_2775" data-name="Rectangle 2775" width="24" height="24" fill="currentColor"/>
@@ -56,7 +56,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  upload: `<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+	upload: `<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
   <defs>
     <style>
       .cls-1 {
@@ -79,7 +79,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  share: `
+	share: `
 <svg id="sharePng" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
   <defs>
     <style>
@@ -102,7 +102,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  normalize: `<svg id="normalize" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="24" viewBox="0 0 19 24">
+	normalize: `<svg id="normalize" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="24" viewBox="0 0 19 24">
 <defs>
   <clipPath id="normalizeclip-path">
     <rect id="Rectangle_2772" data-name="Rectangle 2772" width="19" height="24" fill="#fff"/>
@@ -124,7 +124,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  retake: `<svg id="re-take" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.761" height="23" viewBox="0 0 28.761 23">
+	retake: `<svg id="re-take" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.761" height="23" viewBox="0 0 28.761 23">
 <defs>
 <clipPath id="retakeclip-path">
   <rect id="Rectangle_2773" data-name="Rectangle 2773" width="28.761" height="23" fill="#fff"/>
@@ -136,7 +136,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  complete: `
+	complete: `
 <svg id="continue" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
 <defs>
 <clipPath id="continueclip-path">
@@ -149,7 +149,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  downloadPNG: `
+	downloadPNG: `
 <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
 <defs>
 <style>

@@ -1,50 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <link rel="icon" href="data:," />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamsoft Document Scanner | Hello World</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script> -->
-    <!-- To use locally: -->
-    <script src="../dist/dds.bundle.js"></script>
-  </head>
+	<head>
+		<link rel="icon" href="data:," />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dynamsoft Document Scanner | Hello World</title>
+		<!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script> -->
+		<!-- To use locally: -->
+		<script src="../dist/dds.bundle.js"></script>
+	</head>
 
-  <body>
-    <h1 style="font-size: large">Dynamsoft Document Scanner</h1>
-    <div id="results"></div>
+	<body>
+		<h1 style="font-size: large">Dynamsoft Document Scanner</h1>
+		<div id="results"></div>
 
-    <script>
-      const resultContainer = document.querySelector("#results");
+		<script>
+			const resultContainer = document.querySelector("#results");
 
-      // Initialize the Dynamsoft Document Scanner
-      const documentScanner = new Dynamsoft.DocumentScanner({
-        license: "YOUR_LICENSE_KEY_HERE",
-        scannerViewConfig: {
-          cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use local UI file
-          enableAutoCropMode: true,
-          enableSmartCaptureMode: true,
-        },
-      });
-      (async () => {
-        // Launch the scanner and wait for the result
-        const result = await documentScanner.launch();
+			// Initialize the Dynamsoft Document Scanner
+			const documentScanner = new Dynamsoft.DocumentScanner({
+				license: "YOUR_LICENSE_KEY_HERE",
+				scannerViewConfig: {
+					cameraEnhancerUIPath: "../dist/document-scanner.ui.xml", // Use local UI file
+					enableAutoCropMode: true,
+					enableSmartCaptureMode: true,
+				},
+			});
+			(async () => {
+				// Launch the scanner and wait for the result
+				const result = await documentScanner.launch();
 
-        // Clear the result container and display the scanned result as a canvas
-        if (result?.correctedImageResult) {
-          resultContainer.innerHTML = ""; // Clear placeholder content
-          const canvas = result.correctedImageResult.toCanvas();
-          resultContainer.appendChild(canvas);
-        } else {
-          resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
-        }
-      })();
-    </script>
-  </body>
-  <style>
-    #results canvas {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+				// Clear the result container and display the scanned result as a canvas
+				if (result?.correctedImageResult) {
+					resultContainer.innerHTML = ""; // Clear placeholder content
+					const canvas = result.correctedImageResult.toCanvas();
+					resultContainer.appendChild(canvas);
+				} else {
+					resultContainer.innerHTML = "<p>No image scanned. Please try again.</p>";
+				}
+			})();
+		</script>
+	</body>
+	<style>
+		#results canvas {
+			width: 100%;
+			height: 100%;
+		}
+	</style>
 </html>

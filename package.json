@@ -1,76 +1,76 @@
 {
-  "name": "dynamsoft-document-scanner",
-  "version": "1.4.2",
-  "description": "Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows.",
-  "files": [
-    "/dist",
-    "/LICENSE"
-  ],
-  "sideEffects": true,
-  "//": "DEPRECATED: 'main' and 'module' are kept for legacy compatibility (Node < 12.7, Webpack 4). Modern consumers should use 'exports'. Remove in a future major release.",
-  "main": "./dist/dds.bundle.js",
-  "module": "./dist/dds.bundle.esm.js",
-  "types": "./dist/dds.bundle.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/dds.bundle.d.ts",
-        "default": "./dist/dds.bundle.esm.js"
-      },
-      "require": {
-        "types": "./dist/dds.bundle.d.ts",
-        "default": "./dist/dds.bundle.js"
-      }
-    }
-  },
-  "unpkg": "./dist/dds.bundle.js",
-  "jsdelivr": "./dist/dds.bundle.js",
-  "type": "module",
-  "scripts": {
-    "build": "vite build && vite build --mode bundle",
-    "build:dev": "vite build --sourcemap && vite build --mode bundle --sourcemap",
-    "build:demo": "vite build --config samples/demo/vite.config.ts samples/demo",
-    "dev": "vite",
-    "pack:local": "npm run build && npm pack --pack-destination samples"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Dynamsoft/document-scanner-javascript"
-  },
-  "keywords": [
-    "document scanning",
-    "js",
-    "javascript"
-  ],
-  "author": {
-    "name": "Dynamsoft",
-    "url": "https://www.dynamsoft.com"
-  },
-  "maintainers": [
-    {
-      "name": "Dynamsoft",
-      "email": "support@dynamsoft.com"
-    }
-  ],
-  "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://www.dynamsoft.com",
-  "devDependencies": {
-    "@microsoft/api-extractor": "^7.58.7",
-    "@types/node": "^24.12.0",
-    "@vitejs/plugin-basic-ssl": "^2.3.0",
-    "typescript": "^5.9.3",
-    "unplugin-dts": "^1.0.0",
-    "vite": "^8.0.13"
-  },
-  "dependencies": {
-    "dynamsoft-capture-vision-bundle": "^3.2.5000"
-  },
-  "engines": {
-    "node": "^24.0.0",
-    "npm": "^11.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://npm.scannerproxy.com:802/",
-    "tag": "latest"
-  }
+	"name": "dynamsoft-document-scanner",
+	"version": "1.4.2",
+	"description": "Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows.",
+	"files": [
+		"/dist",
+		"/LICENSE"
+	],
+	"sideEffects": true,
+	"//": "DEPRECATED: 'main' and 'module' are kept for legacy compatibility (Node < 12.7, Webpack 4). Modern consumers should use 'exports'. Remove in a future major release.",
+	"main": "./dist/dds.bundle.js",
+	"module": "./dist/dds.bundle.esm.js",
+	"types": "./dist/dds.bundle.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/dds.bundle.d.ts",
+				"default": "./dist/dds.bundle.esm.js"
+			},
+			"require": {
+				"types": "./dist/dds.bundle.d.ts",
+				"default": "./dist/dds.bundle.js"
+			}
+		}
+	},
+	"unpkg": "./dist/dds.bundle.js",
+	"jsdelivr": "./dist/dds.bundle.js",
+	"type": "module",
+	"scripts": {
+		"build": "vite build && vite build --mode bundle",
+		"build:dev": "vite build --sourcemap && vite build --mode bundle --sourcemap",
+		"build:demo": "vite build --config samples/demo/vite.config.ts samples/demo",
+		"dev": "vite",
+		"pack:local": "npm run build && npm pack --pack-destination samples"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Dynamsoft/document-scanner-javascript"
+	},
+	"keywords": [
+		"document scanning",
+		"js",
+		"javascript"
+	],
+	"author": {
+		"name": "Dynamsoft",
+		"url": "https://www.dynamsoft.com"
+	},
+	"maintainers": [
+		{
+			"name": "Dynamsoft",
+			"email": "support@dynamsoft.com"
+		}
+	],
+	"license": "SEE LICENSE IN LICENSE",
+	"homepage": "https://www.dynamsoft.com",
+	"devDependencies": {
+		"@microsoft/api-extractor": "^7.58.7",
+		"@types/node": "^24.12.0",
+		"@vitejs/plugin-basic-ssl": "^2.3.0",
+		"typescript": "^5.9.3",
+		"unplugin-dts": "^1.0.0",
+		"vite": "^8.0.13"
+	},
+	"dependencies": {
+		"dynamsoft-capture-vision-bundle": "^3.2.5000"
+	},
+	"engines": {
+		"node": "^24.0.0",
+		"npm": "^11.0.0"
+	},
+	"publishConfig": {
+		"registry": "https://npm.scannerproxy.com:802/",
+		"tag": "latest"
+	}
 }
