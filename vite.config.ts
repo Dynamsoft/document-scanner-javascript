@@ -75,7 +75,7 @@ export default defineConfig((env): UserConfig => {
 		const destPkgJson = resolve("public", sdkPkg, "package.json");
 		const destVersion = existsSync(destPkgJson) ? nodeRequire(destPkgJson).version : null;
 		if (srcVersion !== destVersion) {
-			cpSync(`node_modules/${sdkPkg}`, `public/${sdkPkg}`, { recursive: true });
+			cpSync(`node_modules/${sdkPkg}`, `public/${sdkPkg}`, { recursive: true, dereference: true });
 		}
 
 		return {
