@@ -40,7 +40,13 @@
 	"keywords": [
 		"document scanning",
 		"js",
-		"javascript"
+		"javascript",
+    "dynamsoft",
+    "passport",
+    "scanner",
+    "ui",
+    "camera",
+    "vision"
 	],
 	"author": {
 		"name": "Dynamsoft",
