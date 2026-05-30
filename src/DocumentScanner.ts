@@ -24,8 +24,8 @@ import {
 	EnumResultStatus,
 	UtilizedTemplateNames,
 } from "./views/utils/types";
-import { getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
-import { showLoadingScreen } from "./views/utils/LoadingScreen";
+import { createStyle, getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
+import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./views/utils/LoadingScreen";
 
 /**
  * Default path to the Dynamsoft Camera Enhancer UI XML configuration file.
@@ -429,6 +429,11 @@ class DocumentScanner {
 	private showScannerLoadingOverlay(message?: string) {
 		const configContainer = getElement(this.config.scannerViewConfig?.container);
 		if (!configContainer) return;
+
+		//  Parent container must be visible to show loading screen
+		const mainContainer = getElement(this.config.container);
+		if (mainContainer) mainContainer.style.display = "block";
+
 		this.loadingScreen = showLoadingScreen(configContainer, { message });
 		configContainer.style.display = "block";
 		configContainer.style.position = "relative";
@@ -537,6 +542,10 @@ class DocumentScanner {
 		try {
 			this.initializeDDSConfig();
 
+			// Show loading overlay before the camera overlay starts after DCV loads
+			createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);
+			this.showScannerLoadingOverlay("Loading...");
+
 			await this.initializeDCVResources();
 
 			this.resources.onResultUpdated = (result) => {
@@ -584,8 +593,15 @@ class DocumentScanner {
 		} catch (ex: any) {
 			this.isInitialized = false;
 
+			// Do not leave blank scanner box on screen after failed initialization
+			const mainContainer = getElement(this.config.container);
+			if (mainContainer) mainContainer.style.display = "none";
+
 			let errMsg = ex?.message || ex;
 			throw new Error(`Initialization Failed: ${errMsg}`);
+		} finally {
+			// Hide overlay, keep container visible for DocumentScannerView
+			this.hideScannerLoadingOverlay();
 		}
 	}
 
