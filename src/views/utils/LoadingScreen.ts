@@ -148,7 +148,7 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #323234;
+    background-color: var(--dds-bg-toolbar, #323234);
     z-index: 998;
     opacity: 1;
     transition: opacity 0.2s ease-out;

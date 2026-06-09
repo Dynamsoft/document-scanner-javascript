@@ -627,6 +627,18 @@ export default class DocumentScannerView {
 		// Temporary: Setup toast message filtering until DCE updates
 		this.setupSmartToastFilter(DCEContainer.shadowRoot);
 
+		try {
+			const capabilities = this.resources.cameraEnhancer?.getCapabilities?.() as any;
+			if (!capabilities?.torch) {
+				const torchBtn = DCEContainer.shadowRoot.querySelector(
+					".dce-mn-torch",
+				) as HTMLElement | null;
+				if (torchBtn) torchBtn.style.display = "none";
+			}
+		} catch (error) {
+			console.warn("Error checking torch capabilities:", error);
+		}
+
 		// If showCorrectionView is false, hide smartCapture
 		if (this.config._showCorrectionView === false) {
 			if (this.DCE_ELEMENTS.smartCaptureBtn)
@@ -647,7 +659,8 @@ export default class DocumentScannerView {
 
 		// Add orange border to thumbnail preview if onThumbnailClicked callback is provided
 		if (this.resources.onThumbnailClicked && this.DCE_ELEMENTS.thumbnailPreview) {
-			(this.DCE_ELEMENTS.thumbnailPreview as HTMLElement).style.border = "2px solid #fe8e14";
+			(this.DCE_ELEMENTS.thumbnailPreview as HTMLElement).style.border =
+				"2px solid var(--dds-primary, #fe8e14)";
 			(this.DCE_ELEMENTS.thumbnailPreview as HTMLElement).style.cursor = "pointer";
 		}
 
@@ -1140,7 +1153,7 @@ export default class DocumentScannerView {
 		cameraOptions.forEach((options) => {
 			const o = options as HTMLElement;
 			if (o.getAttribute("data-device-id") === selectedCamera?.deviceId) {
-				o.style.border = "2px solid #fe814a";
+				o.style.border = "2px solid var(--dds-primary, #fe814a)";
 			} else {
 				o.style.border = "none";
 			}
@@ -1160,7 +1173,7 @@ export default class DocumentScannerView {
 			const height = o.getAttribute("data-height");
 
 			if (height === heightMap[resolutionLvl]) {
-				o.style.border = "2px solid #fe814a";
+				o.style.border = "2px solid var(--dds-primary, #fe814a)";
 			} else {
 				o.style.border = "none";
 			}
@@ -1524,7 +1537,9 @@ export default class DocumentScannerView {
 		const cvRouter = this.cvRouter;
 
 		this.boundsDetectionEnabled = newBoundsDetectionState;
-		container.style.color = this.boundsDetectionEnabled ? "#fe814a" : "#fff";
+		container.style.color = this.boundsDetectionEnabled
+			? "var(--dds-primary, #fe814a)"
+			: "var(--dds-toolbar-btn-inactive, #fff)";
 		offIcon.style.display = this.boundsDetectionEnabled ? "none" : "block";
 		onIcon.style.display = this.boundsDetectionEnabled ? "block" : "none";
 
@@ -1614,7 +1629,9 @@ export default class DocumentScannerView {
 		}
 
 		this.smartCaptureEnabled = newSmartCaptureState;
-		container.style.color = this.smartCaptureEnabled ? "#fe814a" : "#fff";
+		container.style.color = this.smartCaptureEnabled
+			? "var(--dds-primary, #fe814a)"
+			: "var(--dds-toolbar-btn-inactive, #fff)";
 		offIcon.style.display = this.smartCaptureEnabled ? "none" : "block";
 		onIcon.style.display = this.smartCaptureEnabled ? "block" : "none";
 
@@ -1707,7 +1724,9 @@ export default class DocumentScannerView {
 		}
 
 		this.autoCropEnabled = newSmartCaptureState;
-		container.style.color = this.autoCropEnabled ? "#fe814a" : "#fff";
+		container.style.color = this.autoCropEnabled
+			? "var(--dds-primary, #fe814a)"
+			: "var(--dds-toolbar-btn-inactive, #fff)";
 		offIcon.style.display = this.autoCropEnabled ? "none" : "block";
 		onIcon.style.display = this.autoCropEnabled ? "block" : "none";
 	}

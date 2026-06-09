@@ -24,7 +24,14 @@ import {
 	EnumResultStatus,
 	UtilizedTemplateNames,
 } from "./views/utils/types";
-import { createStyle, getElement, isEmptyObject, shouldCorrectImage } from "./views/utils";
+import {
+	applyTheme,
+	createStyle,
+	getElement,
+	isEmptyObject,
+	shouldCorrectImage,
+	ThemeColor,
+} from "./views/utils";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./views/utils/LoadingScreen";
 
 /**
@@ -275,6 +282,26 @@ export interface DocumentScannerConfig {
 	 * @stable
 	 */
 	enableFrameVerification?: boolean;
+	/**
+	 * Override the default colors used across all views and the loading screen.
+	 *
+	 * @see {@link ThemeColor} for the full list of themeable fields.
+	 *
+	 * @example
+	 * ```typescript
+	 * new Dynamsoft.DocumentScanner({
+	 *     license: "YOUR_LICENSE_KEY_HERE",
+	 *     themeColor: {
+	 *         primary: "#0066cc",
+	 *         backgroundView: "#1a1a1a",
+	 *     }
+	 * });
+	 * ```
+	 *
+	 * @public
+	 * @stable
+	 */
+	themeColor?: ThemeColor;
 }
 
 /**
@@ -541,6 +568,7 @@ class DocumentScanner {
 
 		try {
 			this.initializeDDSConfig();
+			applyTheme(this.config.themeColor);
 
 			// Show loading overlay before the camera overlay starts after DCV loads
 			createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);

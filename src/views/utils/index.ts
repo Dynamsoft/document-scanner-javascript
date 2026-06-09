@@ -23,17 +23,17 @@ const DEFAULT_CONTROLS_STYLE = `
   .dds-controls {
     display: flex;
     height: 8rem;
-    background-color: #323234;
+    background-color: var(--dds-bg-toolbar, #323234);
     align-items: center;
     font-size: 12px;
     font-family: Verdana;
-    color: white;
+    color: var(--dds-toolbar-btn-inactive, #ffffff);
     width: 100%;
   }
 
   .dds-control-btn {
-    background-color: #323234;
-    color: white;
+    background-color: var(--dds-bg-toolbar, #323234);
+    color: var(--dds-toolbar-btn-inactive, #ffffff);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -44,6 +44,18 @@ const DEFAULT_CONTROLS_STYLE = `
     gap: 0.5rem;
     text-align: center;
     user-select: none;
+  }
+
+  /* :active applies to correction & result toolbars only — the scanner subfooter
+     toggles get their colors from inline styles in DocumentScannerView.ts */
+  .dds-control-btn:not(.disabled):active {
+    color: var(--dds-primary, #fe8e14);
+  }
+  .dds-control-btn:not(.disabled):active svg [fill]:not([fill="none"]) {
+    fill: var(--dds-primary, #fe8e14);
+  }
+  .dds-control-btn:not(.disabled):active svg [stroke]:not([stroke="none"]) {
+    stroke: var(--dds-primary, #fe8e14);
   }
 
   .dds-control-btn.hide {
@@ -64,11 +76,21 @@ const DEFAULT_CONTROLS_STYLE = `
     min-height: 40px;
   }
 
-  .dds-control-icon img,
-  .dds-control-icon svg {
+  .dds-control-btn svg {
     width: 32px;
     height: 32px;
-    fill: #fe8e14;
+  }
+  /* Recolor each path/shape that has its own inline fill/stroke (otherwise the
+     hardcoded #fff in icons.ts wins over inheritance from the <svg>). */
+  .dds-control-btn svg [fill]:not([fill="none"]) {
+    fill: var(--dds-toolbar-btn-inactive, #ffffff);
+  }
+  .dds-control-btn svg [stroke]:not([stroke="none"]) {
+    stroke: var(--dds-toolbar-btn-inactive, #ffffff);
+  }
+  .dds-control-btn img {
+    width: 32px;
+    height: 32px;
   }
 
   .dds-control-text {
@@ -184,24 +206,149 @@ export function shouldCorrectImage(flow: EnumFlowType) {
 }
 
 /**
- * Creates and injects a CSS style element into the document head.
- *
- * @remarks
- * Idempotent: if a style element with the given `id` already exists, no new element is created.
- *
- * @param id - Unique identifier for the style element
- * @param style - CSS content to inject
+ * Inject a `<style>` element into the document head. Idempotent: skips if an
+ * element with the given `id` already exists. {@link applyTheme} manages its
+ * own style tag separately because it needs to overwrite on later calls.
  *
  * @public
  */
 export function createStyle(id: string, style: string) {
-	// Initialize styles if not already done
 	if (!document.getElementById(id)) {
 		const styleSheet = document.createElement("style");
 		styleSheet.id = id;
 		styleSheet.textContent = style;
 		document.head.appendChild(styleSheet);
 	}
+}
+
+/**
+ * Override the default colors used across all views. Every field is optional;
+ * unset fields fall back to the library default.
+ *
+ * @public
+ */
+export interface ThemeColor {
+	/**
+	 * Brand accent. Themes the shutter button, the continuous-mode "Done" button,
+	 * active toggle labels in the scanner mode selector, selected camera/resolution
+	 * option borders, and the pressed state of correction/result toolbar buttons.
+	 *
+	 * @defaultValue "#fe8e14"
+	 * @public
+	 */
+	primary?: string;
+	/**
+	 * Default color for toolbar and navigation buttons: correction/result toolbar
+	 * icons & labels at rest, the scanner header nav icons (camera select, upload,
+	 * torch, close), and inactive toggle labels in the scanner mode selector.
+	 *
+	 * @defaultValue "#ffffff"
+	 * @public
+	 */
+	toolbarButtonInactive?: string;
+	/**
+	 * "On" status indicator color on scanner mode selector toggles.
+	 *
+	 * @defaultValue "#43cc48"
+	 * @public
+	 */
+	activeIndicator?: string;
+	/**
+	 * "Off" status indicator color on scanner mode selector toggles.
+	 *
+	 * @defaultValue "#575757"
+	 * @public
+	 */
+	inactiveIndicator?: string;
+	/**
+	 * Stroke and corner-handle color of the boundary quadrilateral in the
+	 * correction view. Independent of {@link ThemeColor.primary}.
+	 *
+	 * @defaultValue "#fe8e14"
+	 * @public
+	 */
+	correctionQuad?: string;
+	/**
+	 * Body background for the correction and result views.
+	 *
+	 * @defaultValue "#575757"
+	 * @public
+	 */
+	backgroundView?: string;
+	/**
+	 * Chrome background: the toolbar in correction/result views, the scanner
+	 * header bar, and the loading screen overlay.
+	 *
+	 * @defaultValue "#323234"
+	 * @public
+	 */
+	backgroundToolbar?: string;
+}
+
+const THEME_VAR_MAP: Record<keyof ThemeColor, string> = {
+	primary: "--dds-primary",
+	toolbarButtonInactive: "--dds-toolbar-btn-inactive",
+	activeIndicator: "--dds-active-indicator",
+	inactiveIndicator: "--dds-inactive-indicator",
+	correctionQuad: "--dds-correction-quad",
+	backgroundView: "--dds-bg-view",
+	backgroundToolbar: "--dds-bg-toolbar",
+};
+
+const THEME_DEFAULTS: Required<ThemeColor> = {
+	primary: "#fe8e14",
+	toolbarButtonInactive: "#ffffff",
+	activeIndicator: "#43cc48",
+	inactiveIndicator: "#575757",
+	correctionQuad: "#fe8e14",
+	backgroundView: "#575757",
+	backgroundToolbar: "#323234",
+};
+
+let resolvedTheme: Required<ThemeColor> = { ...THEME_DEFAULTS };
+
+/**
+ * Apply a theme: inject CSS variables for view stylesheets and cache the resolved
+ * values for non-CSS sinks (canvas drawing styles). Called on every
+ * {@link DocumentScanner.initialize}; later calls replace the previous theme.
+ *
+ * @internal
+ */
+export function applyTheme(theme?: ThemeColor) {
+	resolvedTheme = { ...THEME_DEFAULTS, ...theme };
+
+	const styleEl = document.getElementById("dds-theme-style");
+	const vars: string[] = [];
+	for (const key of Object.keys(THEME_VAR_MAP) as (keyof ThemeColor)[]) {
+		const value = theme?.[key];
+		if (value) vars.push(`${THEME_VAR_MAP[key]}: ${value};`);
+	}
+
+	if (!vars.length) {
+		styleEl?.remove();
+		return;
+	}
+
+	const css = `:root {\n  ${vars.join("\n  ")}\n}`;
+	if (styleEl) {
+		styleEl.textContent = css;
+	} else {
+		const newStyle = document.createElement("style");
+		newStyle.id = "dds-theme-style";
+		newStyle.textContent = css;
+		document.head.appendChild(newStyle);
+	}
+}
+
+/**
+ * Read the resolved color for a {@link ThemeColor} field. Use this for non-CSS
+ * sinks (canvas drawing styles, libraries that don't resolve `var(...)`); CSS
+ * rules should consume the variables directly.
+ *
+ * @internal
+ */
+export function getThemeColor(key: keyof ThemeColor): string {
+	return resolvedTheme[key];
 }
 
 /**

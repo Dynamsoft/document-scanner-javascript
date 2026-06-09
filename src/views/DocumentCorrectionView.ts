@@ -11,7 +11,7 @@ import {
 	DSImageData,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, createStyle, getElement } from "./utils";
+import { createControls, createStyle, getElement, getThemeColor } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
 	ToolbarButtonConfig,
@@ -186,6 +186,7 @@ export default class DocumentCorrectionView {
 	private imageEditorView!: ImageEditorView;
 	private layer!: DrawingLayer;
 	private currentCorrectionResolver?: (result: DocumentResult) => void;
+	private quadColor: string = "#fe8e14";
 
 	/**
 	 * The current scan result, guaranteed present while the correction view is active.
@@ -253,7 +254,9 @@ export default class DocumentCorrectionView {
 		this.layer = this.imageEditorView.createDrawingLayer();
 		this.imageEditorView.setOriginalImage(this.originalImage);
 
-		this.setupDrawingLayerStyle(); // Set style for drawing layer
+		this.quadColor = getThemeColor("correctionQuad");
+
+		this.setupDrawingLayerStyle();
 		this.setupInitialDetectedQuad();
 		this.setupCorrectionControls();
 		this.setupQuadConstraints();
@@ -266,10 +269,9 @@ export default class DocumentCorrectionView {
 	}
 
 	/**
-	 * Configure the visual appearance of the drawing layer used to display and manipulate document boundaries.
-	 *
-	 * @remarks
-	 * Sets 5px orange (#FE8E14) stroke, transparent fill. Called by {@link initialize}.
+	 * Configure the visual appearance of the drawing layer used to display and
+	 * manipulate document boundaries. Sets a 5px stroke (themed via
+	 * {@link ThemeColor.correctionQuad}) with a transparent fill.
 	 *
 	 * @internal
 	 */
@@ -277,7 +279,7 @@ export default class DocumentCorrectionView {
 		const styleID = DrawingStyleManager.createDrawingStyle({
 			lineWidth: 5,
 			fillStyle: "transparent",
-			strokeStyle: "#FE8E14",
+			strokeStyle: this.quadColor,
 			paintMode: "stroke",
 		});
 
@@ -376,7 +378,7 @@ export default class DocumentCorrectionView {
 	 * 3. Calculates corner control size as 10% of the smaller image dimension for touch-friendly interaction
 	 * 4. Locks the quadrilateral position (prevents dragging the entire shape)
 	 * 5. Configures corner controls to be draggable for boundary adjustment
-	 * 6. Sets up visual feedback: corners become transparent during drag, orange (#FE8E14) when released
+	 * 6. Sets up visual feedback: corners become transparent during drag, themed color when released
 	 * 7. Adds the quadrilateral to the layer and makes it the active selection
 	 *
 	 * The quadrilateral corners can be manipulated by the user, but the constraints set up by
@@ -405,6 +407,9 @@ export default class DocumentCorrectionView {
 		fabricObject.lockMovementX = true;
 		fabricObject.lockMovementY = true;
 
+		const quadColor = this.quadColor;
+		fabricObject.cornerColor = quadColor;
+
 		// Make circle transparent to show corner on drag
 		fabricObject.on("mousedown", function (this: any, e: any) {
 			if (e.target?.controls) {
@@ -415,7 +420,7 @@ export default class DocumentCorrectionView {
 		});
 
 		fabricObject.on("mouseup", function (this: any) {
-			this.cornerColor = "#FE8E14";
+			this.cornerColor = quadColor;
 			this.dirty = true;
 			this.canvas?.renderAll();
 		});
@@ -955,7 +960,7 @@ const DEFAULT_CORRECTION_VIEW_CSS = `
     display: flex;
     width: 100%;
     height: 100%;
-    background-color:#575757;
+    background-color: var(--dds-bg-view, #575757);
     font-size: 12px;
     flex-direction: column;
     align-items: center;

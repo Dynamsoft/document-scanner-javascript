@@ -713,7 +713,7 @@ const DEFAULT_RESULT_VIEW_CSS = `
     display: flex;
     width: 100%;
     height: 100%;
-    background-color:#575757;
+    background-color: var(--dds-bg-view, #575757);
     font-size: 12px;
     flex-direction: column;
     align-items: center;

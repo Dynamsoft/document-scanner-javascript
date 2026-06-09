@@ -381,7 +381,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575"
                   data-name="Path 1575"
@@ -410,7 +410,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578"
                   data-name="Path 1578"
@@ -495,7 +495,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613_smart_capture_on" data-name="Group 613" clip-path="url(#clip-pathsmart-capture-on)">
-                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575_smart_capture_on"
                   data-name="Path 1575"
@@ -524,7 +524,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614_smart_capture_off" data-name="Group 614" clip-path="url(#clip-pathsmart-capture-off)">
-                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578_smart_capture_off"
                   data-name="Path 1578"
@@ -597,7 +597,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613_auto_crop_on" data-name="Group 613" clip-path="url(#clip-pathauto-crop-on)">
-                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575_auto_crop_on"
                   data-name="Path 1575"
@@ -626,7 +626,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614_auto_crop_off" data-name="Group 614" clip-path="url(#clip-pathauto-crop-off)">
-                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578_auto_crop_off"
                   data-name="Path 1578"
@@ -662,7 +662,7 @@
               cy="48"
               r="35"
               transform="translate(49 577)"
-              fill="#fe8e14"
+              fill="var(--dds-primary, #fe8e14)"
             />
             <!-- Annulus ring around the button -->
             <circle
@@ -671,7 +671,7 @@
               r="45"
               transform="translate(49 577)"
               fill="none"
-              stroke="#fe8e14"
+              stroke="var(--dds-primary, #fe8e14)"
               stroke-width="6"
               opacity="1"
             />
@@ -836,7 +836,7 @@
       top: 0;
       height: 3rem;
       width: 100%;
-      background-color: #323234;
+      background-color: var(--dds-bg-toolbar, #323234);
       display: flex;
       align-items: center;
       touch-action: none;
@@ -880,7 +880,7 @@
       border-radius: max(1.5vmin, 12px);
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
-      stroke: white;
+      stroke: var(--dds-toolbar-btn-inactive, white);
       stroke-width: 4;
     }
 
@@ -911,7 +911,26 @@
     }
 
     .dce-mn-select-camera-down-icon {
-      color: white;
+      color: var(--dds-toolbar-btn-inactive, white);
+    }
+
+    /* Scanner view header nav icons. The fallback color setter covers any path
+       using fill="currentColor" or stroke="currentColor". */
+    .dce-mn-select-camera-icon svg,
+    .dce-mn-upload-image-icon svg {
+      color: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    .dce-mn-select-camera-icon svg [stroke],
+    .dce-mn-upload-image-icon svg [stroke] {
+      stroke: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    .dce-mn-select-camera-icon svg [fill]:not([fill="none"]),
+    .dce-mn-upload-image-icon svg [fill]:not([fill="none"]) {
+      fill: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    /* Torch: only the root <svg>, so the mask's literal #fff/#000 fills aren't overridden. */
+    .dce-mn-torch > svg {
+      fill: var(--dds-toolbar-btn-inactive, #fff);
     }
 
     .dce-mn-resolution-box {
@@ -1042,7 +1061,7 @@
       position: absolute;
       left: 75%;
       bottom: 3rem;
-      background-color: #fe8e14;
+      background-color: var(--dds-primary, #fe8e14);
       color: white;
       padding: 0.5rem 1.25rem;
       border-radius: 1.5rem;
