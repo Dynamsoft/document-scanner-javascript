@@ -352,6 +352,121 @@ export function getThemeColor(key: keyof ThemeColor): string {
 }
 
 /**
+ * Override the default user-facing strings displayed by the DocumentScanner. Every
+ * field is optional; unset fields fall back to the library default. Toolbar button
+ * labels (Re-take, Apply, Done, etc.) are not configured here — use
+ * `correctionViewConfig.toolbarButtonsConfig` and `resultViewConfig.toolbarButtonsConfig`
+ * for those.
+ *
+ * Strings that include a `{count}` or `{error}` placeholder are noted inline; the
+ * placeholder is substituted at render time.
+ *
+ * @public
+ */
+export interface StringConfig {
+	/** Loading overlay message shown during initial DCV load. @defaultValue "Loading..." */
+	loadingMsg?: string;
+	/** Loading overlay message shown while opening the camera. @defaultValue "Initializing camera..." */
+	initializingCameraMsg?: string;
+	/** Loading overlay message shown while processing a captured or uploaded image. @defaultValue "Processing image..." */
+	processingImageMsg?: string;
+
+	/**
+	 * Label of the "Done" button in continuous scanning mode. The literal substring
+	 * `{count}` is replaced with the current scan count at render time.
+	 *
+	 * @defaultValue "Done ({count})"
+	 */
+	continuousScanDoneBtn?: string;
+
+	/** `title` field passed to the Web Share API when sharing the corrected image. @defaultValue "Scanned Document" */
+	shareTitle?: string;
+	/** Filename prefix for downloaded images. Final filename is `{prefix}-{timestamp}.png`. @defaultValue "document" */
+	downloadFilenamePrefix?: string;
+
+	/** Alert shown when the upload or share button handler throws. @defaultValue "Failed" */
+	uploadShareFailedAlert?: string;
+	/**
+	 * Alert shown when the share/download flow throws. The literal substring `{error}`
+	 * is replaced with the error message at render time.
+	 *
+	 * @defaultValue "Error processing image: {error}"
+	 */
+	shareErrorAlert?: string;
+
+	/** Tooltip on the scanner view header button that opens the camera/resolution picker. @defaultValue "Select Camera or Resolution" */
+	selectCameraBtnTitle?: string;
+	/** Tooltip on the scanner view header button that uploads an image file. @defaultValue "Upload Image" */
+	uploadImageBtnTitle?: string;
+	/** Tooltip on the scanner view header close (X) button. @defaultValue "Close" */
+	closeScannerBtnTitle?: string;
+
+	/** Section heading above the list of cameras in the camera switcher menu. @defaultValue "Camera" */
+	cameraSwitcherCameraLabel?: string;
+	/** Section heading above the list of resolutions in the camera switcher menu. @defaultValue "Resolution" */
+	cameraSwitcherResolutionLabel?: string;
+
+	/** Tooltip / accessible label on the shutter (take photo) button. @defaultValue "Take Photo" */
+	takePhotoBtnTitle?: string;
+}
+
+const STRING_DEFAULTS: Required<StringConfig> = {
+	loadingMsg: "Loading...",
+	initializingCameraMsg: "Initializing camera...",
+	processingImageMsg: "Processing image...",
+	continuousScanDoneBtn: "Done ({count})",
+	shareTitle: "Scanned Document",
+	downloadFilenamePrefix: "document",
+	uploadShareFailedAlert: "Failed",
+	shareErrorAlert: "Error processing image: {error}",
+	selectCameraBtnTitle: "Select Camera or Resolution",
+	uploadImageBtnTitle: "Upload Image",
+	closeScannerBtnTitle: "Close",
+	cameraSwitcherCameraLabel: "Camera",
+	cameraSwitcherResolutionLabel: "Resolution",
+	takePhotoBtnTitle: "Take Photo",
+};
+
+let resolvedStrings: Required<StringConfig> = { ...STRING_DEFAULTS };
+let explicitStringKeys: Set<keyof StringConfig> = new Set();
+
+/**
+ * Apply a string config: merges user overrides over the defaults and caches the
+ * resolved values for later {@link getString} calls. Called on every
+ * {@link DocumentScanner.initialize}; later calls replace the previous config.
+ * Calling with no argument (or `undefined`) resets all strings to defaults.
+ *
+ * @internal
+ */
+export function applyStringConfig(config?: StringConfig) {
+	const explicit = config ? Object.entries(config).filter(([, v]) => v !== undefined) : [];
+	resolvedStrings = { ...STRING_DEFAULTS, ...Object.fromEntries(explicit) };
+	explicitStringKeys = new Set(explicit.map(([k]) => k as keyof StringConfig));
+}
+
+/**
+ * Read the resolved value for a {@link StringConfig} field. Always returns the
+ * default if no override is set.
+ *
+ * @internal
+ */
+export function getString(key: keyof StringConfig): string {
+	return resolvedStrings[key];
+}
+
+/**
+ * Whether the user explicitly provided a value for `key` in the last
+ * {@link applyStringConfig} call. Use this to gate overrides of values that
+ * have an existing source of truth (e.g. labels baked into the DCE UI XML),
+ * so customer-customized XMLs are not clobbered by our defaults.
+ *
+ * @internal
+ */
+export function hasStringOverride(key: keyof StringConfig): boolean {
+	return explicitStringKeys.has(key);
+}
+
+/**
  * Checks if a string contains SVG markup.
  *
  * @remarks

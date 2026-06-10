@@ -1,7 +1,7 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls, createStyle, getElement } from "./utils";
+import { createControls, createStyle, getElement, getString } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import {
@@ -219,7 +219,7 @@ export default class DocumentResultView {
 			}
 		} catch (error) {
 			console.error("Error on upload/share:", error);
-			alert("Failed");
+			alert(getString("uploadShareFailedAlert"));
 		}
 	}
 
@@ -273,7 +273,7 @@ export default class DocumentResultView {
 				throw new Error("Failed to convert image to blob");
 			}
 
-			const file = new File([blob], `document-${Date.now()}.png`, {
+			const file = new File([blob], `${getString("downloadFilenamePrefix")}-${Date.now()}.png`, {
 				type: blob.type,
 			});
 
@@ -291,7 +291,7 @@ export default class DocumentResultView {
 					try {
 						await navigator.share({
 							files: [file],
-							title: "Dynamsoft Document Scanner Shared Image",
+							title: getString("shareTitle"),
 						});
 						return true;
 					} catch (shareError: any) {
@@ -332,7 +332,7 @@ export default class DocumentResultView {
 			// Unexpected error in the overall process
 			let errMsg = ex?.message || ex;
 			console.error("Error in share/download process:", errMsg);
-			alert(`Error processing image: ${errMsg}`);
+			alert(getString("shareErrorAlert").replace("{error}", String(errMsg)));
 		}
 	}
 

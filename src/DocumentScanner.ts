@@ -25,12 +25,15 @@ import {
 	UtilizedTemplateNames,
 } from "./views/utils/types";
 import {
+	applyStringConfig,
 	applyTheme,
 	createStyle,
 	getElement,
+	getString,
 	isEmptyObject,
 	shouldCorrectImage,
 	ThemeColor,
+	type StringConfig,
 } from "./views/utils";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./views/utils/LoadingScreen";
 
@@ -302,6 +305,39 @@ export interface DocumentScannerConfig {
 	 * @stable
 	 */
 	themeColor?: ThemeColor;
+	/**
+	 * Override the default user-facing strings (loading messages, share dialog
+	 * title, download filename prefix, alert text, etc.).
+	 *
+	 * @remarks
+	 * Toolbar button labels (Re-take, Apply, Done, Share, Upload, Correction, Full
+	 * Image, Detect Borders) are not configured here — use
+	 * {@link DocumentCorrectionViewConfig.toolbarButtonsConfig} and
+	 * {@link DocumentResultViewConfig.toolbarButtonsConfig} for those.
+	 *
+	 * The resolved string config is process-global: instantiating a new
+	 * {@link DocumentScanner} replaces any previously applied config. Running two
+	 * scanners with different `stringConfig` values in the same page is not
+	 * supported — the most recently constructed scanner wins for all of them.
+	 *
+	 * @see {@link StringConfig} for the full list of customizable strings.
+	 *
+	 * @example
+	 * ```typescript
+	 * new Dynamsoft.DocumentScanner({
+	 *     license: "YOUR_LICENSE_KEY_HERE",
+	 *     stringConfig: {
+	 *         loadingMsg: "Cargando...",
+	 *         continuousScanDoneBtn: "Listo ({count})",
+	 *         downloadFilenamePrefix: "invoice",
+	 *     }
+	 * });
+	 * ```
+	 *
+	 * @public
+	 * @stable
+	 */
+	stringConfig?: StringConfig;
 }
 
 /**
@@ -569,10 +605,11 @@ class DocumentScanner {
 		try {
 			this.initializeDDSConfig();
 			applyTheme(this.config.themeColor);
+			applyStringConfig(this.config.stringConfig);
 
 			// Show loading overlay before the camera overlay starts after DCV loads
 			createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);
-			this.showScannerLoadingOverlay("Loading...");
+			this.showScannerLoadingOverlay(getString("loadingMsg"));
 
 			await this.initializeDCVResources();
 
@@ -1184,7 +1221,7 @@ class DocumentScanner {
 	 */
 	private async processUploadedFile(file: File): Promise<DocumentResult> {
 		try {
-			this.showScannerLoadingOverlay("Processing image...");
+			this.showScannerLoadingOverlay(getString("processingImageMsg"));
 
 			const { cvRouter } = this.resources;
 			const templateNames = this.config.utilizedTemplateNames;

@@ -21,7 +21,14 @@ import {
 	UtilizedTemplateNames,
 } from "./utils/types";
 import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./utils/LoadingScreen";
-import { createStyle, findClosestResolutionLevel, getElement, isEmptyObject } from "./utils";
+import {
+	createStyle,
+	findClosestResolutionLevel,
+	getElement,
+	getString,
+	hasStringOverride,
+	isEmptyObject,
+} from "./utils";
 
 const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
 
@@ -622,6 +629,8 @@ export default class DocumentScannerView {
 			floatingImageImg: DCEContainer.shadowRoot.querySelector(".dce-mn-floating-image-img"),
 		};
 
+		this.applyDCEStringOverrides(DCEContainer.shadowRoot);
+
 		this.assignDCEClickEvents();
 
 		// Temporary: Setup toast message filtering until DCE updates
@@ -665,6 +674,35 @@ export default class DocumentScannerView {
 		}
 
 		this.initializedDCE = true;
+	}
+
+	/**
+	 * Apply user-configured string overrides to the static text/title attributes that
+	 * ship inside the Camera Enhancer UI XML (header button tooltips, camera switcher
+	 * section labels, shutter button tooltip). Only overrides values the user
+	 * explicitly set in `stringConfig` so customer-customized UI XMLs are preserved.
+	 *
+	 * @internal
+	 */
+	private applyDCEStringOverrides(shadowRoot: ShadowRoot) {
+		const setTitle = (selector: string, key: Parameters<typeof getString>[0]) => {
+			if (!hasStringOverride(key)) return;
+			const el = shadowRoot.querySelector(selector) as HTMLElement | null;
+			if (el) el.title = getString(key);
+		};
+		const setText = (selector: string, key: Parameters<typeof getString>[0]) => {
+			if (!hasStringOverride(key)) return;
+			const el = shadowRoot.querySelector(selector) as HTMLElement | null;
+			if (el) el.textContent = getString(key);
+		};
+
+		setTitle(".dce-mn-select-camera-icon", "selectCameraBtnTitle");
+		setTitle(".dce-mn-upload-image-icon", "uploadImageBtnTitle");
+		setTitle(".dce-mn-close", "closeScannerBtnTitle");
+		setTitle(".dce-mn-take-photo", "takePhotoBtnTitle");
+
+		setText(".dce-mn-camera-container > div:first-child", "cameraSwitcherCameraLabel");
+		setText(".dce-mn-resolutions > div:first-child", "cameraSwitcherResolutionLabel");
 	}
 
 	/**
@@ -847,7 +885,10 @@ export default class DocumentScannerView {
 			".dce-mn-continuous-scan-done-text",
 		);
 		if (textEl) {
-			textEl.textContent = `Done (${this.resources.completedScansCount || 0})`;
+			textEl.textContent = getString("continuousScanDoneBtn").replace(
+				"{count}",
+				String(this.resources.completedScansCount ?? 0),
+			);
 		}
 	}
 
@@ -1287,7 +1328,7 @@ export default class DocumentScannerView {
 		document.body.appendChild(input);
 
 		try {
-			this.showScannerLoadingOverlay("Processing image...");
+			this.showScannerLoadingOverlay(getString("processingImageMsg"));
 
 			// Get file from input
 			const file = await new Promise<File>((resolve, reject) => {
@@ -2081,7 +2122,7 @@ export default class DocumentScannerView {
 				return;
 			}
 
-			this.showScannerLoadingOverlay("Initializing camera...");
+			this.showScannerLoadingOverlay(getString("initializingCameraMsg"));
 
 			configContainer.style.display = "block";
 
@@ -2551,7 +2592,7 @@ export default class DocumentScannerView {
 					this.DCE_ELEMENTS.continuousScanDoneBtn.style.opacity = "0.5";
 				}
 			} else {
-				this.showScannerLoadingOverlay("Processing image...");
+				this.showScannerLoadingOverlay(getString("processingImageMsg"));
 			}
 
 			// Pause camera before normalizing image (only in continuous scanning mode)
