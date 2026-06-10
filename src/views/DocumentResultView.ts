@@ -11,6 +11,7 @@ import {
 	ToolbarButton,
 	ToolbarButtonConfig,
 } from "./utils/types";
+import { canvasToResultItem, FILTER_OPTIONS, rotateCanvas } from "./utils/imageEditing";
 
 /**
  * Configuration interface for customizing toolbar buttons in the {@link DocumentResultView}.
@@ -107,6 +108,25 @@ export interface DocumentResultViewToolbarButtonsConfig {
 	 * @public
 	 */
 	done?: ToolbarButtonConfig;
+
+	/**
+	 * Configuration for the done button. Default behavior: rotate the image 90 degrees clockwise.
+	 *
+	 * @public
+	 */
+	rotate?: ToolbarButtonConfig;
+	/**
+	 * Configuration for the filter button. Default behavior: reveal drop-up menu with the following filters:
+	 *
+	 * 1. Original
+	 * 2. Grayscale
+	 * 3. Black & White
+	 * 4. Sepia
+	 * 5. Inverted
+	 *
+	 * @public
+	 */
+	filter?: ToolbarButtonConfig;
 }
 
 /**
@@ -166,6 +186,20 @@ export interface DocumentResultViewConfig {
 
 export default class DocumentResultView {
 	private currentScanResultViewResolver?: (result: DocumentResult) => void;
+
+	// Edits applied to the corrected image, recomputed from the pristine image on every change.
+	private editState: { rotation: number; filterId: string | null } = {
+		rotation: 0,
+		filterId: null,
+	};
+	private baseCorrectedImage?: DeskewedImageResultItem;
+	// Untouched copy of the corrected image; all edits are derived from this, never mutating it.
+	private pristineCanvas?: HTMLCanvasElement;
+	// The on-screen canvas that edits are drawn into.
+	private displayCanvas?: HTMLCanvasElement;
+	private filterMenuOutsideClick?: (event: MouseEvent) => void;
+	// Timestamp of the last accepted rotate click, used to debounce mouse switch chatter.
+	private lastRotateClickAt = 0;
 
 	constructor(
 		private resources: SharedResources,
@@ -540,6 +574,124 @@ export default class DocumentResultView {
 	}
 
 	/**
+	 * Rotate the corrected image 90 degrees clockwise.
+	 *
+	 * @remarks
+	 * Rotation accumulates ({@link editState}) and is reapplied on top of the active filter by
+	 * {@link applyEdits}, so repeated clicks cycle through 90/180/270/0.
+	 *
+	 * @internal
+	 */
+	private handleRotate(): void {
+		// Some browsers deliver duplicate trusted click events a few ms apart (mouse switch
+		// chatter that other browsers filter out); ignore a click within 50ms of the previous one.
+		// Genuine rapid clicks are >100ms apart, so this never drops an intended rotation.
+		const now = performance.now();
+		if (now - this.lastRotateClickAt < 50) return;
+		this.lastRotateClickAt = now;
+
+		this.editState.rotation = (this.editState.rotation + 90) % 360;
+		this.applyEdits();
+	}
+
+	/**
+	 * Toggle the filter selection menu attached to the filter toolbar button.
+	 *
+	 * @remarks
+	 * The menu is built once from {@link FILTER_OPTIONS} (plus an "Original" entry to clear the filter)
+	 * and cached on the button; subsequent clicks toggle its visibility. Selecting an option records
+	 * it in {@link editState} and triggers {@link applyEdits}.
+	 *
+	 * @internal
+	 */
+	private handleFilter(): void {
+		const filterBtn = document.getElementById("dds-scanResult-filter");
+		if (!filterBtn) return;
+
+		const existingMenu = filterBtn.querySelector(".dds-filter-menu");
+		if (existingMenu) {
+			existingMenu.classList.toggle("show");
+			return;
+		}
+
+		createStyle("dds-filter-dropdown-style", FILTER_DROPDOWN_STYLE);
+
+		const menu = document.createElement("div");
+		menu.className = "dds-filter-menu";
+
+		const options: { id: string | null; label: string }[] = [
+			{ id: null, label: "Original" },
+			...FILTER_OPTIONS,
+		];
+		for (const option of options) {
+			const optionBtn = document.createElement("button");
+			optionBtn.className = "dds-filter-option";
+			optionBtn.textContent = option.label;
+			// Mark and display active filter
+			if (option.id === this.editState.filterId) optionBtn.classList.add("active");
+			optionBtn.addEventListener("click", (event) => {
+				event.stopPropagation();
+				this.editState.filterId = option.id;
+				menu.querySelector(".dds-filter-option.active")?.classList.remove("active");
+				optionBtn.classList.add("active");
+				this.applyEdits();
+				menu.classList.remove("show");
+			});
+			menu.appendChild(optionBtn);
+		}
+
+		// Close the menu when clicking anywhere outside the filter button.
+		this.filterMenuOutsideClick = (event: MouseEvent) => {
+			if (!filterBtn.contains(event.target as Node)) {
+				menu.classList.remove("show");
+			}
+		};
+		document.addEventListener("click", this.filterMenuOutsideClick);
+
+		filterBtn.appendChild(menu);
+		menu.classList.add("show");
+	}
+
+	/**
+	 * Recompute the displayed image from the pristine corrected image, applying the active filter
+	 * and rotation, then publish the edited image so share/upload/done export it.
+	 *
+	 * @remarks
+	 * Edits are always derived from {@link baseCorrectedImage} to not stack edits. The live canvas is redrawn in place (no view rebuild) and the result is wrapped
+	 * via {@link canvasToResultItem} and pushed through {@link SharedResources.onResultUpdated}.
+	 *
+	 * @internal
+	 */
+	private applyEdits(): void {
+		if (!this.baseCorrectedImage || !this.displayCanvas || !this.pristineCanvas) return;
+
+		// Derive from the untouched pristine copy for unstacked edits
+		let working = document.createElement("canvas");
+		const filter = FILTER_OPTIONS.find((option) => option.id === this.editState.filterId);
+		if (filter) {
+			filter.apply(this.pristineCanvas, working);
+		} else {
+			working.width = this.pristineCanvas.width;
+			working.height = this.pristineCanvas.height;
+			working.getContext("2d")?.drawImage(this.pristineCanvas, 0, 0);
+		}
+
+		working = rotateCanvas(working, this.editState.rotation);
+
+		// Redraw the live canvas in place to avoid a full view rebuild.
+		this.displayCanvas.width = working.width;
+		this.displayCanvas.height = working.height;
+		this.displayCanvas.getContext("2d")?.drawImage(working, 0, 0);
+
+		if (this.resources.result) {
+			this.resources.onResultUpdated?.({
+				...this.resources.result,
+				correctedImageResult: canvasToResultItem(working, this.baseCorrectedImage),
+			});
+		}
+	}
+
+	/**
 	 * Create the toolbar controls for the result view.
 	 *
 	 * @returns The HTMLElement containing the toolbar with all configured buttons
@@ -571,6 +723,24 @@ export default class DocumentResultView {
 				className: `${toolbarButtonsConfig?.retake?.className || ""}`,
 				isHidden: toolbarButtonsConfig?.retake?.isHidden || false,
 				isDisabled: !this.scannerView,
+			},
+			{
+				id: `dds-scanResult-rotate`,
+				icon: toolbarButtonsConfig?.rotate?.icon || DDS_ICONS.rotate,
+				label: toolbarButtonsConfig?.rotate?.label || "Rotate",
+				onClick: () => this.handleRotate(),
+				className: `${toolbarButtonsConfig?.rotate?.className || ""}`,
+				isHidden: toolbarButtonsConfig?.rotate?.isHidden || false,
+				isDisabled: !this.resources.result?.correctedImageResult,
+			},
+			{
+				id: `dds-scanResult-filter`,
+				icon: toolbarButtonsConfig?.filter?.icon || DDS_ICONS.filter,
+				label: toolbarButtonsConfig?.filter?.label || "Filter",
+				onClick: () => this.handleFilter(),
+				className: `${toolbarButtonsConfig?.filter?.className || ""}`,
+				isHidden: toolbarButtonsConfig?.filter?.isHidden || false,
+				isDisabled: !this.resources.result?.correctedImageResult,
 			},
 			{
 				id: `dds-scanResult-correct`,
@@ -611,7 +781,10 @@ export default class DocumentResultView {
 			},
 		];
 
-		return createControls(buttons);
+		// Reverse the DOM order so the landscape column (normal `flex-direction: column`) reads
+		// in reverse and its scrollbar still anchors at the top. Portrait is flipped back to the
+		// original left-to-right order via `row-reverse` in DEFAULT_RESULT_VIEW_CSS.
+		return createControls(buttons.reverse());
 	}
 
 	async initialize(): Promise<void> {
@@ -650,6 +823,21 @@ export default class DocumentResultView {
 				maxHeight: "100%",
 				objectFit: "contain",
 			});
+
+			// Capture an immutable pristine copy and the live canvas for rotate/filter editing.
+			this.baseCorrectedImage = this.resources.result
+				.correctedImageResult as DeskewedImageResultItem;
+			this.displayCanvas = scanResultImg;
+			this.pristineCanvas = document.createElement("canvas");
+			this.pristineCanvas.width = scanResultImg.width;
+			this.pristineCanvas.height = scanResultImg.height;
+			this.pristineCanvas.getContext("2d")?.drawImage(scanResultImg, 0, 0);
+			// Preserve filter across scans in continuous scanning mode
+			this.editState = {
+				rotation: 0,
+				filterId: this.resources.enableContinuousScanning ? this.editState.filterId : null,
+			};
+			if (this.editState.filterId !== null) this.applyEdits();
 
 			scanResultViewImageContainer.appendChild(scanResultImg);
 			resultViewWrapper.appendChild(scanResultViewImageContainer);
@@ -701,6 +889,12 @@ export default class DocumentResultView {
 		const container = getElement(this.config.container);
 		if (container) container.textContent = "";
 
+		// Remove the filter menu's document-level click listener so it does not leak across rebuilds.
+		if (this.filterMenuOutsideClick) {
+			document.removeEventListener("click", this.filterMenuOutsideClick);
+			this.filterMenuOutsideClick = undefined;
+		}
+
 		// Clear resolver only if not preserving
 		if (!preserveResolver) {
 			this.currentScanResultViewResolver = undefined;
@@ -719,9 +913,92 @@ const DEFAULT_RESULT_VIEW_CSS = `
     align-items: center;
   }
 
+  /* The footer buttons are reversed in the DOM (see createControls) so the landscape column scrolls
+     from the top. Flip them back here so portrait keeps its original left-to-right order. */
+  .dds-result-view-container .dds-controls {
+    flex-direction: row-reverse;
+  }
+
   @media (orientation: landscape) and (max-width: 1024px) {
     .dds-result-view-container {
       flex-direction: row;
     }
+
+    /* Landscape stays a normal column (top-anchored scroll); reading the reversed DOM top-to-bottom
+       gives the reversed button order. Higher specificity than the row-reverse rule above. */
+    .dds-result-view-container .dds-controls {
+      flex-direction: column;
+    }
+
+    /* Group Re-take next to Done at the top of the landscape column (CSS-only, no DOM/handler change).
+       Done stays first; Re-take floats to the second slot just below it. */
+    .dds-result-view-container #dds-scanResult-done {
+      order: -2;
+    }
+    .dds-result-view-container #dds-scanResult-retake {
+      order: -1;
+    }
+  }
+`;
+
+const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
+  .dds-control-btn {
+    position: relative; /* Anchor the absolutely-positioned filter menu to the button */
+  }
+
+  .dds-filter-menu {
+    position: absolute;
+    /* Sit entirely above the footer (100% spans the button/footer height) with a thin gap. */
+    bottom: calc(100% + 0.25rem);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    background-color: #323234;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .dds-filter-menu.show {
+    display: block;
+  }
+
+  .dds-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: Verdana;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  /* Leading checkmark column to mark active filter */
+  .dds-filter-option::before {
+    content: "✓";
+    width: 1rem;
+    flex: none;
+    text-align: center;
+    color: #fe8e14;
+    visibility: hidden;
+  }
+
+  .dds-filter-option.active::before {
+    visibility: visible;
+  }
+
+  .dds-filter-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .dds-filter-option:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;

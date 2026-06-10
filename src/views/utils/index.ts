@@ -22,8 +22,8 @@ export function getElement(element?: string | HTMLElement | null): HTMLElement |
 const DEFAULT_CONTROLS_STYLE = `
   .dds-controls {
     display: flex;
-    height: 8rem;
-    background-color: var(--dds-bg-toolbar, #323234);
+    height: 5.5rem;
+    background-color: #323234;
     align-items: center;
     font-size: 12px;
     font-family: Verdana;
@@ -105,6 +105,15 @@ const DEFAULT_CONTROLS_STYLE = `
       flex-direction: column;
       height: 100%;
       width: 8rem;
+      /* Stopgap: scroll vertically when the buttons no longer fit (we grew from 4 to 6+ buttons). */
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .dds-control-btn {
+      /* Keep buttons usable instead of squishing; this is what makes the column overflow and scroll. */
+      min-height: 5rem;
+      box-sizing: border-box;
     }
   }
 `;
