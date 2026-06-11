@@ -1132,17 +1132,23 @@ class DocumentScanner {
 	 */
 	dispose(): void {
 		this.scanResultView?.dispose();
+		this.scanResultView = undefined;
 
 		this.correctionView?.dispose();
+		this.correctionView = undefined;
 
 		this.scannerView = undefined;
 
-		// Dispose resources
+		// Dispose resources and clear the references so dispose() is idempotent —
+		// disposing an already-disposed CameraEnhancer throws inside DCV
 		this.resources.cameraEnhancer?.dispose();
+		this.resources.cameraEnhancer = undefined;
 
 		this.resources.cameraView?.dispose();
+		this.resources.cameraView = undefined;
 
 		this.resources.cvRouter?.dispose();
+		this.resources.cvRouter = undefined;
 
 		this.resources.result = undefined;
 		this.resources.onResultUpdated = undefined;
