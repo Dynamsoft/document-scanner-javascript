@@ -516,6 +516,10 @@ export default class DocumentScannerView {
 	}
 
 	async initialize(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
 		// Set default value for autoCrop, smartCapture and boundsDetection modes
 		this.boundsDetectionEnabled =
 			this.config?.enableBoundsDetectionMode ??
@@ -528,10 +532,6 @@ export default class DocumentScannerView {
 		this.frameVerificationEnabled = this.config?.enableFrameVerification ?? true; // Default enabled
 
 		this.config.minVerifiedFramesForAutoCapture = this.getMinVerifiedFramesForAutoCapture();
-
-		if (this.initialized) {
-			return;
-		}
 
 		// Create loading screen style
 		createStyle("dds-loading-screen-style", DEFAULT_LOADING_SCREEN_STYLE);
@@ -2614,8 +2614,12 @@ export default class DocumentScannerView {
 			// Clean up camera and capture (only in single scan mode)
 			if (!this.resources.enableContinuousScanning) {
 				// turn off smart capture (and also auto crop) before closing camera
+				const smartCaptureWasEnabled = this.smartCaptureEnabled;
+				const autoCropWasEnabled = this.autoCropEnabled;
 				await this.toggleSmartCapture(false);
 				this.closeCamera();
+				this.smartCaptureEnabled = smartCaptureWasEnabled;
+				this.autoCropEnabled = autoCropWasEnabled;
 			}
 
 			// Hide loading indicator and re-enable buttons
