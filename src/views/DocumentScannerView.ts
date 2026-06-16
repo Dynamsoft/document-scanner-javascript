@@ -27,7 +27,6 @@ import {
 	getElement,
 	getString,
 	hasStringOverride,
-	isEmptyObject,
 } from "./utils";
 
 const DEFAULT_MIN_VERIFIED_FRAMES_FOR_CAPTURE = 2;
@@ -1825,17 +1824,15 @@ export default class DocumentScannerView {
 	/**
 	 * Toggle the visibility of the scan region guide and trigger recalculation if enabled.
 	 *
-	 * @param enabled - Whether to show the scan region guide. If `true` and a scan region ratio is configured, recalculates the region.
+	 * @param enabled - Whether to show the scan region guide. If `true`, recalculates the scan region.
 	 *
 	 * @remarks
 	 * This method controls the scan region guide (the visual border/overlay indicating where
-	 * documents should be positioned within the viewfinder). It only operates when a scan region
-	 * ratio is configured via {@link DocumentScannerViewConfig.scanRegion}.
+	 * documents should be positioned within the viewfinder).
 	 *
 	 * **When enabled is `true`:**
-	 * - Checks if {@link ScanRegion.ratio} is configured (not empty)
-	 * - If configured, calls {@link calculateScanRegion} to compute and display the guide
-	 * - If not configured, does nothing (no guide to show)
+	 * - Calls {@link calculateScanRegion} — shows the guide if a {@link ScanRegion.ratio} is
+	 *   configured, otherwise applies the visible video region so captures match the preview
 	 *
 	 * **When enabled is `false` or `undefined`:**
 	 * - Does nothing (guide remains hidden or in current state)
@@ -1860,7 +1857,7 @@ export default class DocumentScannerView {
 	 * @internal
 	 */
 	private toggleScanGuide(enabled?: boolean) {
-		if (enabled && !isEmptyObject(this.config?.scanRegion?.ratio)) {
+		if (enabled) {
 			this.calculateScanRegion();
 		}
 	}
@@ -1919,6 +1916,7 @@ export default class DocumentScannerView {
 	 * The method gracefully handles edge cases:
 	 * - Camera not open: exits early without calculation
 	 * - No visible region: exits early without calculation
+	 * - No {@link ScanRegion.ratio} configured: applies the visible video region as the scan region (no guide shown)
 	 * - Extreme aspect ratios: adjusts to fit within viewport constraints
 	 *
 	 * Called by {@link toggleScanGuide} whenever the scan region needs to be shown or recalculated.
@@ -1950,7 +1948,17 @@ export default class DocumentScannerView {
 		// Get the document ratio for the specific document type
 
 		const targetRatio = this.config?.scanRegion?.ratio;
-		if (!targetRatio) return;
+		if (!targetRatio) {
+			cameraEnhancer.setScanRegion({
+				left: Math.round((visibleRegion.x / totalWidth) * 100),
+				right: Math.round(((visibleRegion.x + visibleRegion.width) / totalWidth) * 100),
+				top: Math.round((visibleRegion.y / totalHeight) * 100),
+				bottom: Math.round(((visibleRegion.y + visibleRegion.height) / totalHeight) * 100),
+				isMeasuredInPercentage: true,
+			});
+			cameraView.setScanRegionMaskVisible(false);
+			return;
+		}
 
 		// Calculate the base unit to scale the document dimensions
 		let baseUnit: number;
@@ -2176,6 +2184,8 @@ export default class DocumentScannerView {
 			await this.toggleBoundsDetection(this.boundsDetectionEnabled);
 			await this.toggleSmartCapture(this.smartCaptureEnabled);
 			await this.toggleAutoCrop(this.autoCropEnabled);
+
+			this.toggleScanGuide(true);
 
 			// Show/hide and update continuous scan done button
 			if (this.DCE_ELEMENTS.continuousScanDoneBtn) {
@@ -2570,8 +2580,8 @@ export default class DocumentScannerView {
 			}
 
 			// If theres no detected quads, we shouldnt convert to scanRegionCoordinates since we're using the full image.
-			if (!isEmptyObject(this.config?.scanRegion?.ratio) && !shouldUseLatestFrame) {
-				// If scan region is enabled, convert to scanRegionCoordinates
+			if (!shouldUseLatestFrame) {
+				// A scan region is always active, so convert to scanRegionCoordinates
 				detectedQuadrilateral.points = detectedQuadrilateral.points.map(
 					(point) => this.resources.cameraEnhancer?.convertToScanRegionCoordinates(point) || point,
 				) as Quadrilateral["points"];
