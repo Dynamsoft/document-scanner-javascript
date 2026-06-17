@@ -2784,6 +2784,18 @@ export default class DocumentScannerView {
 		}
 	}
 
+	/** Close the camera and settle any in-flight {@link launch} promise so callers don't hang when disposed mid-capture. */
+	dispose() {
+		this.closeCamera();
+		this.currentScanResolver?.({
+			status: {
+				code: EnumResultStatus.RS_CANCELLED,
+				message: "Disposed",
+			},
+		});
+		this.currentScanResolver = undefined;
+	}
+
 	async launch(): Promise<DocumentResult> {
 		try {
 			await this.initialize();

@@ -1137,6 +1137,7 @@ class DocumentScanner {
 		this.correctionView?.dispose();
 		this.correctionView = undefined;
 
+		this.scannerView?.dispose();
 		this.scannerView = undefined;
 
 		// Dispose resources and clear the references so dispose() is idempotent —
@@ -1168,6 +1169,8 @@ class DocumentScanner {
 		cleanContainer(this.config.resultViewConfig?.container);
 
 		this.isInitialized = false;
+		this.isCapturing = false;
+		this.shouldStopContinuousScanning = false;
 	}
 
 	/**
