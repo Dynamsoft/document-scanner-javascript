@@ -1,7 +1,7 @@
 import { SharedResources } from "../DocumentScanner";
 import DocumentScannerView from "./DocumentScannerView";
 import { DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
-import { createControls, createStyle, getElement, getString } from "./utils";
+import { createControls, createStyle, getElement, getString, shouldCorrectImage } from "./utils";
 import DocumentCorrectionView from "./DocumentCorrectionView";
 import { DDS_ICONS } from "./utils/icons";
 import {
@@ -498,8 +498,12 @@ export default class DocumentResultView {
 					if (scannerContainer) scannerContainer.style.display = "none";
 				}
 
-				// Route through correction view if it exists (always go through correction during retake when it's configured)
-				if (this.correctionView) {
+				// Route through correction view only for flows that need correction
+				if (
+					this.correctionView &&
+					result._flowType !== undefined &&
+					shouldCorrectImage(result._flowType)
+				) {
 					// Hide result view temporarily
 					this.dispose(true); // preserve resolver
 

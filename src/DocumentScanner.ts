@@ -1396,7 +1396,11 @@ class DocumentScanner {
 			}
 
 			// Default routing
-			if (components.correctionView && !components.scanResultView) {
+			if (
+				components.correctionView &&
+				!components.scanResultView &&
+				(scanResult._flowType === undefined || shouldCorrectImage(scanResult._flowType))
+			) {
 				return await components.correctionView.launch();
 			}
 			if (components.scanResultView) {

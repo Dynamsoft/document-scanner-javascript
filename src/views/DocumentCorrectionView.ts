@@ -11,7 +11,7 @@ import {
 	DSImageData,
 } from "dynamsoft-capture-vision-bundle";
 import { SharedResources } from "../DocumentScanner";
-import { createControls, createStyle, getElement, getThemeColor } from "./utils";
+import { createControls, createStyle, getElement, getThemeColor, shouldCorrectImage } from "./utils";
 import { DDS_ICONS } from "./utils/icons";
 import {
 	ToolbarButtonConfig,
@@ -669,6 +669,13 @@ export default class DocumentCorrectionView {
 				if (this.scannerView) {
 					const scannerContainer = getElement((this.scannerView as any).config.container);
 					if (scannerContainer) scannerContainer.style.display = "none";
+				}
+
+				// Auto-cropped captures skip correction
+				if (result._flowType !== undefined && !shouldCorrectImage(result._flowType)) {
+					this.currentCorrectionResolver?.(result);
+					this.dispose();
+					return;
 				}
 
 				// Refresh the correction view with new data
