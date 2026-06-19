@@ -570,7 +570,12 @@ export default class DocumentCorrectionView {
 				className: `${toolbarButtonsConfig?.apply?.className || ""}`,
 				isHidden: toolbarButtonsConfig?.apply?.isHidden || false,
 
-				onClick: () => this.confirmCorrection(),
+				onClick: () => {
+					// Terminal "Keep Scan" (continuous, no result view) → request another capture.
+					if (this.resources.enableContinuousScanning && this.config?._showResultView === false)
+						this.resources.scanMoreRequested = true;
+					this.confirmCorrection();
+				},
 			},
 		];
 

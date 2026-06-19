@@ -1,6 +1,7 @@
 import { BlackwhiteFilter, GrayscaleFilter, InvertFilter, SepiaFilter } from "image-filter-js";
 
 import { DeskewedImageResultItem, EnumImagePixelFormat } from "dynamsoft-capture-vision-bundle";
+import type { StringConfig } from "./index";
 
 /**
  * A selectable image filter for the {@link DocumentResultView} filter menu.
@@ -13,7 +14,8 @@ import { DeskewedImageResultItem, EnumImagePixelFormat } from "dynamsoft-capture
  */
 export interface FilterOption {
 	id: string;
-	label: string;
+	/** {@link StringConfig} key for the menu label, so filter names are configurable. */
+	labelKey: keyof StringConfig;
 	apply: (source: HTMLCanvasElement, target: HTMLCanvasElement) => void;
 }
 
@@ -25,23 +27,23 @@ export interface FilterOption {
 export const FILTER_OPTIONS: FilterOption[] = [
 	{
 		id: "grayscale",
-		label: "Grayscale",
+		labelKey: "filterGrayscaleBtn",
 		apply: (source, target) => new GrayscaleFilter(target).process(source),
 	},
 	{
 		id: "black-white",
-		label: "Black & White",
+		labelKey: "filterBlackWhiteBtn",
 		// threshold ignored when OTSU is enabled; adaptive thresholding disabled.
 		apply: (source, target) => new BlackwhiteFilter(target, 128, true, false, 0, 0).process(source),
 	},
 	{
 		id: "sepia",
-		label: "Sepia",
+		labelKey: "filterSepiaBtn",
 		apply: (source, target) => new SepiaFilter(target).process(source),
 	},
 	{
 		id: "invert",
-		label: "Inverted",
+		labelKey: "filterInvertedBtn",
 		apply: (source, target) => new InvertFilter(target).process(source),
 	},
 ];

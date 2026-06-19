@@ -103,7 +103,7 @@ export interface DocumentResultViewToolbarButtonsConfig {
 	 * Configuration for the done button. Default behavior: completes the scanning workflow.
 	 *
 	 * @remarks
-	 * In continuous scanning mode ({@link DocumentScannerConfig.enableContinuousScanning}), this button is labeled "Keep Scan" by default and returns to the {@link DocumentScannerView} for the next scan.
+	 * In continuous scanning mode ({@link DocumentScannerConfig.enableContinuousScanning}), a separate floating "Scan More" button keeps the current scan and loops back to the {@link DocumentScannerView} for the next capture.
 	 *
 	 * @public
 	 */
@@ -547,7 +547,8 @@ export default class DocumentResultView {
 	 * @returns Promise that resolves when the done handler completes
 	 *
 	 * @remarks
-	 * Invokes {@link DocumentResultViewConfig.onDone} callback, resolves promise, cleans up.
+	 * Invokes {@link DocumentResultViewConfig.onDone}, resolves, cleans up. In continuous mode this ends the
+	 * session; "Scan More" sets {@link SharedResources.scanMoreRequested} first so the loop continues instead.
 	 *
 	 * @internal
 	 */
@@ -624,8 +625,8 @@ export default class DocumentResultView {
 		menu.className = "dds-filter-menu";
 
 		const options: { id: string | null; label: string }[] = [
-			{ id: null, label: "Original" },
-			...FILTER_OPTIONS,
+			{ id: null, label: getString("filterOriginalBtn") },
+			...FILTER_OPTIONS.map((o) => ({ id: o.id, label: getString(o.labelKey) })),
 		];
 		for (const option of options) {
 			const optionBtn = document.createElement("button");
@@ -776,9 +777,7 @@ export default class DocumentResultView {
 			{
 				id: `dds-scanResult-done`,
 				icon: toolbarButtonsConfig?.done?.icon || DDS_ICONS.complete,
-				label:
-					toolbarButtonsConfig?.done?.label ||
-					(this.resources.enableContinuousScanning ? "Keep Scan" : "Done"),
+				label: toolbarButtonsConfig?.done?.label || "Done",
 				className: `${toolbarButtonsConfig?.done?.className || ""}`,
 				isHidden: toolbarButtonsConfig?.done?.isHidden || false,
 				onClick: () => this.handleDone(),
@@ -850,6 +849,8 @@ export default class DocumentResultView {
 			const controlContainer = this.createControls();
 			resultViewWrapper.appendChild(controlContainer);
 
+			if (this.resources.enableContinuousScanning) this.createScanMoreButton(controlContainer);
+
 			const container = getElement(this.config.container);
 			if (container) container.appendChild(resultViewWrapper);
 
@@ -863,6 +864,29 @@ export default class DocumentResultView {
 			console.error(errMsg);
 			alert(errMsg);
 		}
+	}
+
+	/**
+	 * Floating "Scan More" button (continuous mode): a filter drop-up panel on the Done button that requests
+	 * another capture, then reuses {@link handleDone} so the launch loop loops back instead of ending. @internal
+	 */
+	private createScanMoreButton(controls: HTMLElement): void {
+		const doneBtn = controls.querySelector<HTMLElement>("#dds-scanResult-done");
+		if (!doneBtn) return;
+
+		createStyle("dds-filter-dropdown-style", FILTER_DROPDOWN_STYLE);
+		createStyle("dds-scan-more-style", SCAN_MORE_STYLE);
+
+		const panel = document.createElement("div");
+		panel.id = "dds-scanResult-scanMore";
+		panel.className = "dds-filter-menu show";
+		panel.innerHTML = `<button class="dds-filter-option">${DDS_ICONS.plus}<span>${getString("scanMoreBtn")}</span></button>`;
+		panel.firstElementChild!.addEventListener("click", (event) => {
+			event.stopPropagation(); // don't also fire Done's handler
+			this.resources.scanMoreRequested = true;
+			this.handleDone();
+		});
+		doneBtn.appendChild(panel);
 	}
 
 	/**
@@ -957,7 +981,7 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
     left: 50%;
     transform: translateX(-50%);
     width: max-content;
-    background-color: #323234;
+    background-color: var(--dds-filter-menu-bg, #323234);
     border-radius: 0.5rem;
     overflow: hidden;
     display: none;
@@ -973,7 +997,7 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    color: white;
+    color: var(--dds-filter-menu-text, #ffffff);
     background: none;
     border: none;
     cursor: pointer;
@@ -1004,5 +1028,37 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
 
   .dds-filter-option:not(:last-child) {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+/* Look reused from .dds-filter-menu/.dds-filter-option. Desktop/tablet: larger, centred over Done (fits on
+   wide screens). Portrait phone: clamp to the edge (a panel wider than Done can't centre on the edge-most
+   button without overflow). Landscape: beside the column, level with Done. Sizes/gaps in rem, font/icon in px. */
+const SCAN_MORE_STYLE = `
+  #dds-scanResult-scanMore { bottom: calc(100% + 1.5rem); background-color: var(--dds-scan-more-bg, #323234); }
+  #dds-scanResult-scanMore .dds-filter-option { gap: 0.5rem; padding: 0 1.25rem; min-height: 5rem; font-size: 14px; color: var(--dds-scan-more-text, #ffffff); }
+  #dds-scanResult-scanMore .dds-filter-option svg,
+  #dds-scanResult-scanMore .dds-filter-option img { width: 20px; height: 20px; }
+  #dds-scanResult-scanMore .dds-filter-option::before { display: none; }
+
+  @media (max-width: 1024px) {
+    #dds-scanResult-scanMore .dds-filter-option { min-height: 3.5rem; padding: 0 1rem; font-size: 12px; }
+    #dds-scanResult-scanMore .dds-filter-option svg,
+    #dds-scanResult-scanMore .dds-filter-option img { width: 16px; height: 16px; }
+  }
+
+  @media (orientation: portrait) and (max-width: 1024px) {
+    #dds-scanResult-scanMore { left: auto; right: 0.5rem; transform: none; bottom: calc(100% + 1rem); }
+  }
+
+  @media (orientation: landscape) and (max-width: 1024px) {
+    /* Done static → panel's containing block is the unclipped wrapper; centre on Done's 5rem column height. */
+    .dds-result-view-container { position: relative; }
+    .dds-result-view-container #dds-scanResult-done { position: static; }
+    #dds-scanResult-scanMore {
+      bottom: auto; left: auto; right: calc(8rem + 0.25rem);
+      top: 2.5rem; transform: translateY(-50%);
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    }
   }
 `;

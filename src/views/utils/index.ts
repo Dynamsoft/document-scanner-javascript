@@ -292,6 +292,34 @@ export interface ThemeColor {
 	 * @public
 	 */
 	backgroundToolbar?: string;
+	/**
+	 * Panel background of the result view filter drop-up menu.
+	 *
+	 * @defaultValue "#323234"
+	 * @public
+	 */
+	filterMenuBackground?: string;
+	/**
+	 * Text color of the result view filter menu options.
+	 *
+	 * @defaultValue "#ffffff"
+	 * @public
+	 */
+	filterMenuText?: string;
+	/**
+	 * Background of the continuous-mode "Scan More" button.
+	 *
+	 * @defaultValue "#323234"
+	 * @public
+	 */
+	scanMoreBackground?: string;
+	/**
+	 * Text color of the continuous-mode "Scan More" button.
+	 *
+	 * @defaultValue "#ffffff"
+	 * @public
+	 */
+	scanMoreText?: string;
 }
 
 const THEME_VAR_MAP: Record<keyof ThemeColor, string> = {
@@ -302,6 +330,10 @@ const THEME_VAR_MAP: Record<keyof ThemeColor, string> = {
 	correctionQuad: "--dds-correction-quad",
 	backgroundView: "--dds-bg-view",
 	backgroundToolbar: "--dds-bg-toolbar",
+	filterMenuBackground: "--dds-filter-menu-bg",
+	filterMenuText: "--dds-filter-menu-text",
+	scanMoreBackground: "--dds-scan-more-bg",
+	scanMoreText: "--dds-scan-more-text",
 };
 
 const THEME_DEFAULTS: Required<ThemeColor> = {
@@ -312,6 +344,10 @@ const THEME_DEFAULTS: Required<ThemeColor> = {
 	correctionQuad: "#fe8e14",
 	backgroundView: "#575757",
 	backgroundToolbar: "#323234",
+	filterMenuBackground: "#323234",
+	filterMenuText: "#ffffff",
+	scanMoreBackground: "#323234",
+	scanMoreText: "#ffffff",
 };
 
 let resolvedTheme: Required<ThemeColor> = { ...THEME_DEFAULTS };
@@ -417,6 +453,19 @@ export interface StringConfig {
 
 	/** Tooltip / accessible label on the shutter (take photo) button. @defaultValue "Take Photo" */
 	takePhotoBtnTitle?: string;
+
+	/** Label of the continuous-mode "Scan More" button. @defaultValue "Scan More" */
+	scanMoreBtn?: string;
+	/** Result view filter menu: the "no filter" option. @defaultValue "Original" */
+	filterOriginalBtn?: string;
+	/** Result view filter menu: the grayscale option. @defaultValue "Grayscale" */
+	filterGrayscaleBtn?: string;
+	/** Result view filter menu: the black & white option. @defaultValue "Black & White" */
+	filterBlackWhiteBtn?: string;
+	/** Result view filter menu: the sepia option. @defaultValue "Sepia" */
+	filterSepiaBtn?: string;
+	/** Result view filter menu: the inverted option. @defaultValue "Inverted" */
+	filterInvertedBtn?: string;
 }
 
 const STRING_DEFAULTS: Required<StringConfig> = {
@@ -434,6 +483,12 @@ const STRING_DEFAULTS: Required<StringConfig> = {
 	cameraSwitcherCameraLabel: "Camera",
 	cameraSwitcherResolutionLabel: "Resolution",
 	takePhotoBtnTitle: "Take Photo",
+	scanMoreBtn: "Scan More",
+	filterOriginalBtn: "Original",
+	filterGrayscaleBtn: "Grayscale",
+	filterBlackWhiteBtn: "Black & White",
+	filterSepiaBtn: "Sepia",
+	filterInvertedBtn: "Inverted",
 };
 
 let resolvedStrings: Required<StringConfig> = { ...STRING_DEFAULTS };

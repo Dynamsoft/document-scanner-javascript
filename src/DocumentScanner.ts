@@ -202,13 +202,13 @@ export interface DocumentScannerConfig {
 	 */
 	showCorrectionView?: boolean;
 	/**
-	 * Enable continuous scanning mode where the scanner loops back after each successful scan instead of exiting. {@link DocumentScanner.launch} only resolves to the last scanned result. Use {@link onDocumentScanned} callback to get scan results.
+	 * Enable continuous scanning mode where the scanner can loop back to capture more documents instead of exiting after a single scan. {@link DocumentScanner.launch} only resolves to the last scanned result. Use {@link onDocumentScanned} callback to get scan results.
 	 *
 	 * @remarks
 	 * When enabled:
-	 * - The scanner automatically loops back to capture another document after each successful scan
+	 * - The result view shows a "Scan More" button alongside "Done"; tapping "Scan More" loops back to capture another document, while "Done" ends the session
 	 * - The {@link onDocumentScanned} callback triggers after each scan with the result; this is the only way to get the scanned results as {@link DocumentScanner.launch} only returns the last scanned result
-	 * - Users can exit by clicking the close button (X) or by calling {@link DocumentScanner.stopContinuousScanning}
+	 * - Users can also exit by clicking the close button (X) or by calling {@link DocumentScanner.stopContinuousScanning}
 	 * - The DocumentScanner only retains the most recent scan result
 	 *
 	 * @defaultValue false
@@ -220,7 +220,7 @@ export interface DocumentScannerConfig {
 	 * Callback invoked after each successful scan in continuous scanning mode.
 	 *
 	 * @remarks
-	 * This callback is only called when {@link enableContinuousScanning} is true. The scanner loops back to capture another document after this callback completes. The callback receives a {@link DocumentResult} containing the original image, corrected image, detected boundaries, and scan status.
+	 * This callback is only called when {@link enableContinuousScanning} is true, after each scan the user keeps (via either "Scan More" or "Done"). The callback receives a {@link DocumentResult} containing the original image, corrected image, detected boundaries, and scan status.
 	 *
 	 * @param result - The {@link DocumentResult} of the scan
 	 *
@@ -407,6 +407,8 @@ export interface SharedResources {
 	 * @internal
 	 */
 	onThumbnailClicked?: (result: DocumentResult) => void | Promise<void>;
+	/** Set by "Scan More" so the launch loop loops back instead of ending the session. @internal */
+	scanMoreRequested?: boolean;
 }
 
 /**
@@ -1435,7 +1437,7 @@ class DocumentScanner {
 	 *
 	 * **Scanning Modes:**
 	 * - **Single-scan mode (default)**: Captures one document and returns the result
-	 * - **Continuous scanning mode** ({@link DocumentScannerConfig.enableContinuousScanning}): Loops after each scan, invoking {@link DocumentScannerConfig.onDocumentScanned} with each result. The loop continues until the user clicks the close button (X) or {@link stopContinuousScanning} is called. Returns the last scanned result.
+	 * - **Continuous scanning mode** ({@link DocumentScannerConfig.enableContinuousScanning}): Invokes {@link DocumentScannerConfig.onDocumentScanned} with each scan, and loops back to capture another document whenever the user taps "Scan More". The loop ends when the user taps "Done", clicks the close button (X), or {@link stopContinuousScanning} is called. Returns the last scanned result.
 	 *
 	 * **File Processing:**
 	 * Passing a {@link File} object allows processing an existing image file, bypassing camera input and the {@link DocumentScannerView}.
@@ -1515,6 +1517,7 @@ class DocumentScanner {
 				this.shouldStopContinuousScanning = false;
 
 				while (!this.shouldStopContinuousScanning) {
+					this.resources.scanMoreRequested = false;
 					const result = await this.performSingleScan(file);
 
 					// Exit on cancellation (user clicked close button)
@@ -1527,12 +1530,12 @@ class DocumentScanner {
 						return result;
 					}
 
-					// On success, invoke callback and continue loop
+					// On success, report it; loop back only on "Scan More", else "Done" ends the session.
 					if (result.status.code === EnumResultStatus.RS_SUCCESS) {
 						this.resources.completedScansCount = (this.resources.completedScansCount ?? 0) + 1;
 						await this.config.onDocumentScanned?.(result);
-						// Loop back to scan next document
-						continue;
+						if (this.resources.scanMoreRequested) continue;
+						break;
 					}
 				}
 
