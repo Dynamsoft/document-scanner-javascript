@@ -1031,18 +1031,18 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
   }
 `;
 
-/* Look reused from .dds-filter-menu/.dds-filter-option. Desktop/tablet: larger, centred over Done (fits on
-   wide screens). Portrait phone: clamp to the edge (a panel wider than Done can't centre on the edge-most
-   button without overflow). Landscape: beside the column, level with Done. Sizes/gaps in rem, font/icon in px. */
 const SCAN_MORE_STYLE = `
   #dds-scanResult-scanMore { bottom: calc(100% + 1.5rem); background-color: var(--dds-scan-more-bg, #323234); }
-  #dds-scanResult-scanMore .dds-filter-option { gap: 0.5rem; padding: 0 1.25rem; min-height: 5rem; font-size: 14px; color: var(--dds-scan-more-text, #ffffff); }
+  #dds-scanResult-scanMore .dds-filter-option { gap: 0.5rem; padding: 0 1.25rem; min-height: 4rem; font-size: 14px; color: var(--dds-scan-more-text, #ffffff); }
   #dds-scanResult-scanMore .dds-filter-option svg,
   #dds-scanResult-scanMore .dds-filter-option img { width: 20px; height: 20px; }
   #dds-scanResult-scanMore .dds-filter-option::before { display: none; }
+  /* Pressed: recolour both the label and the plus icon (the icon's fill is hardcoded, so target it directly). */
+  #dds-scanResult-scanMore .dds-filter-option:active { color: var(--dds-primary, #fe8e14); }
+  #dds-scanResult-scanMore .dds-filter-option:active svg [fill]:not([fill="none"]) { fill: var(--dds-primary, #fe8e14); }
 
   @media (max-width: 1024px) {
-    #dds-scanResult-scanMore .dds-filter-option { min-height: 3.5rem; padding: 0 1rem; font-size: 12px; }
+    #dds-scanResult-scanMore .dds-filter-option { min-height: 3rem; padding: 0 1rem; font-size: 12px; }
     #dds-scanResult-scanMore .dds-filter-option svg,
     #dds-scanResult-scanMore .dds-filter-option img { width: 16px; height: 16px; }
   }
