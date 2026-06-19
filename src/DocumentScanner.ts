@@ -210,6 +210,7 @@ export interface DocumentScannerConfig {
 	 * - The {@link onDocumentScanned} callback triggers after each scan with the result; this is the only way to get the scanned results as {@link DocumentScanner.launch} only returns the last scanned result
 	 * - Users can also exit by clicking the close button (X) or by calling {@link DocumentScanner.stopContinuousScanning}
 	 * - The DocumentScanner only retains the most recent scan result
+	 * - A thumbnail preview of the last scan appears in the camera view, but only when both {@link showCorrectionView} and {@link showResultView} are disabled (otherwise scans route through those views instead). See {@link onThumbnailClicked} to make it clickable.
 	 *
 	 * @defaultValue false
 	 * @public
@@ -245,12 +246,12 @@ export interface DocumentScannerConfig {
 	 * Callback invoked when the thumbnail preview is clicked in continuous scanning mode.
 	 *
 	 * @remarks
-	 * This callback is only invoked when:
+	 * The thumbnail preview itself only appears (and this callback only fires) when:
 	 * - {@link enableContinuousScanning} is enabled
 	 * - {@link showCorrectionView} is disabled
 	 * - {@link showResultView} is disabled
 	 *
-	 * The thumbnail preview displays the most recently scanned document. By default, clicking it does nothing unless this callback is defined, allowing you to implement custom behavior such as re-editing the image.
+	 * The thumbnail displays the most recently scanned document. Defining this callback also gives it a primary-coloured border and pointer cursor; without it, clicking does nothing. Use it to implement custom behaviour such as re-editing the image.
 	 *
 	 * @param result - The {@link DocumentResult} of the last scanned document
 	 *
