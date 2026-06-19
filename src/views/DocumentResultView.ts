@@ -977,7 +977,7 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
     background: none;
     border: none;
     cursor: pointer;
-    font-family: Verdana;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;

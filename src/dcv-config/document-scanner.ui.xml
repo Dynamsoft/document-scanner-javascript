@@ -830,6 +830,7 @@
       user-select: none;
       display: flex;
       flex-direction: column;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
     }
 
     .dce-header {
@@ -942,7 +943,7 @@
       line-height: max(2vmin, 16px);
       padding: max(0.5vmin, 4px);
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: center;
       color: #fff;
       border-radius: max(0.75vmin, 6px);
@@ -951,7 +952,7 @@
     }
 
     .dce-mn-camera-and-resolution-settings {
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       position: absolute;
       top: calc(24px + max(3vmin, 24px));
       left: 0;
@@ -1021,7 +1022,7 @@
       text-align: center;
       color: inherit;
       font-size: 12px;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
     }
 
     .dce-footer {
@@ -1065,7 +1066,7 @@
       color: white;
       padding: 0.5rem 1.25rem;
       border-radius: 1.5rem;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       font-size: 12px;
       font-weight: bold;
       cursor: pointer;
@@ -1154,7 +1155,7 @@
       left: 50%;
       bottom: 50%;
       transform: translateX(-50%);
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       color: #fff;
       pointer-events: none;
     }
@@ -1174,7 +1175,7 @@
       left: 50%;
       bottom: 50%;
       transform: translateX(-50%);
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       color: #fff;
       border-radius: max(0.5vmin, 4px);
       background: rgba(100, 100, 100, 0.5);
@@ -1204,7 +1205,7 @@
       padding: max(0.5vmin, 4px) max(1vmin, 8px);
       margin: 12px;
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: left;
       color: #fff;
       border-radius: max(0.75vmin, 6px);
@@ -1223,7 +1224,7 @@
       padding: max(0.5vmin, 4px);
       margin: 12px;
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: center;
       color: #fff;
       border-radius: max(0.75vmin, 6px);

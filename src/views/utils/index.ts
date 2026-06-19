@@ -26,7 +26,7 @@ const DEFAULT_CONTROLS_STYLE = `
     background-color: #323234;
     align-items: center;
     font-size: 12px;
-    font-family: Verdana;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: var(--dds-toolbar-btn-inactive, #ffffff);
     width: 100%;
   }

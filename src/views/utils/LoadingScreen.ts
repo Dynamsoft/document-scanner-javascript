@@ -180,7 +180,7 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
 
   .dds-loading-message {
     color: white;
-    font-family: "Verdana";
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 14px;
     text-align: center;
     max-width: 200px;
