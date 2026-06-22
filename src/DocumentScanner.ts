@@ -1534,7 +1534,10 @@ class DocumentScanner {
 					if (result.status.code === EnumResultStatus.RS_SUCCESS) {
 						this.resources.completedScansCount = (this.resources.completedScansCount ?? 0) + 1;
 						await this.config.onDocumentScanned?.(result);
-						if (this.resources.scanMoreRequested) continue;
+						// In thumbnail-only mode (no correction/result views) there is no "Scan More" button;
+						// each capture implicitly continues and the user ends via "Done" (RS_CANCELLED) or close.
+						const thumbnailOnlyMode = !this.showCorrectionView() && !this.showResultView();
+						if (this.resources.scanMoreRequested || thumbnailOnlyMode) continue;
 						break;
 					}
 				}

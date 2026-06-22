@@ -665,10 +665,10 @@ export default class DocumentScannerView {
 			poweredByDynamsoft.style.display = "none";
 		}
 
-		// Add orange border to thumbnail preview if onThumbnailClicked callback is provided
+		// Add a subdued border to thumbnail preview if onThumbnailClicked callback is provided
 		if (this.resources.onThumbnailClicked && this.DCE_ELEMENTS.thumbnailPreview) {
 			(this.DCE_ELEMENTS.thumbnailPreview as HTMLElement).style.border =
-				"2px solid var(--dds-primary, #fe8e14)";
+				"2px solid rgba(255, 255, 255, 0.4)";
 			(this.DCE_ELEMENTS.thumbnailPreview as HTMLElement).style.cursor = "pointer";
 		}
 
