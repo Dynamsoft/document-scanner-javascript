@@ -44,12 +44,12 @@ import { DEFAULT_LOADING_SCREEN_STYLE, showLoadingScreen } from "./views/utils/L
  * This CDN-hosted XML file defines the camera view UI layout and controls for the scanner view.
  * You can override this by setting {@link DocumentScannerConfig.scannerViewConfig.cameraEnhancerUIPath} to self-host or customize the resource.
  *
- * @defaultValue "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/document-scanner.ui.xml"
+ * @defaultValue "https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.5.0/dist/document-scanner.ui.xml"
  *
  * @internal
  */
 const DEFAULT_DCE_UI_PATH =
-	"https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/document-scanner.ui.xml";
+	"https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.5.0/dist/document-scanner.ui.xml";
 
 /**
  * Default paths to Dynamsoft Capture Vision engine resources (WASM files and dependencies).
