@@ -1029,6 +1029,16 @@ const FILTER_DROPDOWN_STYLE = ` /* Filter button customization */
   .dds-filter-option:not(:last-child) {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  /* Landscape: the controls column clips overflow-x, cutting off the centred drop-up. Make the button
+     static so the menu anchors to the (relative) wrapper instead, then pin it left of the 8rem column. */
+  @media (orientation: landscape) and (max-width: 1024px) {
+    .dds-result-view-container { position: relative; }
+    #dds-scanResult-filter { position: static; }
+    #dds-scanResult-filter .dds-filter-menu {
+      inset: auto calc(8rem + 0.5rem) 0.5rem auto; transform: none;
+    }
+  }
 `;
 
 const SCAN_MORE_STYLE = `
