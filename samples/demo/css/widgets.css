@@ -1,0 +1,59 @@
+/* Live-chat trigger. Visible on landing (all viewports), desktop result, and
+   the desktop camera overlay, but not the DDV editor or MDS. Replaces Comm100's
+   native float button; consent is handled by GTM/Cookiebot in index.html. */
+
+.livechat-btn {
+	display: none;
+
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	transform: translateX(-50%);
+	z-index: 50;
+
+	color: var(--fg);
+	background: var(--brand-orange);
+	padding: 8px 16px;
+	font-size: var(--button-font-size);
+	font-weight: var(--button-font-weight);
+
+	box-shadow: var(--shadow-dropdown);
+	border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+/* lg + tall enough to fit content: switch to fixed. 804 = literal of
+   --landing-desktop-min-height (796) + 8px buffer; bump both together. */
+@media (min-width: 1024px) and (min-height: 804px) {
+	.livechat-btn {
+		position: fixed;
+	}
+}
+
+.livechat-btn:hover {
+	background: var(--brand-orange-hover);
+}
+
+body[data-view="landing"] .livechat-btn {
+	display: inline-block;
+}
+
+/* lg and up. Scanner stage only while the camera overlay is open — the DDV
+   edit-viewer hub (no data-scanner-open) keeps the button hidden. */
+@media (min-width: 1024px) {
+	body[data-view="result"] .livechat-btn,
+	body[data-view="scanner"][data-scanner-open] .livechat-btn {
+		display: inline-block;
+	}
+}
+
+/* Above the scanner SDK overlay (z up to 999). */
+body[data-view="scanner"][data-scanner-open] .livechat-btn {
+	z-index: 1000;
+}
+
+/* third-party:begin comm100-float-hide */
+/* Comm100 sets inline styles on its float button, hence !important. */
+[id*="comm100-float-button"] {
+	display: none !important;
+}
+/* third-party:end comm100-float-hide */

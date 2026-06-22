@@ -1,0 +1,20 @@
+{
+	"name": "demo",
+	"version": "1.0.0",
+	"description": "Demo for Dynamsoft Mobile Document Scanner JS",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite dev",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@vitejs/plugin-basic-ssl": "^2.3.0",
+		"dynamsoft-document-scanner": "file:../dynamsoft-document-scanner-1.4.2.tgz",
+		"dynamsoft-document-viewer": "4.0.0",
+		"vite": "^8.0.16"
+	}
+}

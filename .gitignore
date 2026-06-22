@@ -1,3 +1,9 @@
 dist
 node_modules
 public
+
+# npm pack
+*.tgz
+
+# Sample angular cache
+.angular

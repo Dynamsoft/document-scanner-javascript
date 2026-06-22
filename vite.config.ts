@@ -68,14 +68,21 @@ function sampleIndex(): Plugin {
 export default defineConfig((env): UserConfig => {
 	// ---- Dev server ----
 	if (env.command === "serve") {
-		// Serve dynamsoft-capture-vision-bundle in /public
+		// Serve runtime resources in /public for single file samples
 		const nodeRequire = createRequire(import.meta.url);
-		const sdkPkg = "dynamsoft-capture-vision-bundle";
-		const srcVersion: string = nodeRequire(resolve(`node_modules/${sdkPkg}/package.json`)).version;
-		const destPkgJson = resolve("public", sdkPkg, "package.json");
-		const destVersion = existsSync(destPkgJson) ? nodeRequire(destPkgJson).version : null;
-		if (srcVersion !== destVersion) {
-			cpSync(`node_modules/${sdkPkg}`, `public/${sdkPkg}`, { recursive: true, dereference: true });
+		const SDK_RESOURCES = ["dynamsoft-capture-vision-bundle", "dynamsoft-capture-vision-data"];
+		for (const sdkPkg of SDK_RESOURCES) {
+			const srcVersion: string = nodeRequire(
+				resolve(`node_modules/${sdkPkg}/package.json`),
+			).version;
+			const destPkgJson = resolve("public", sdkPkg, "package.json");
+			const destVersion = existsSync(destPkgJson) ? nodeRequire(destPkgJson).version : null;
+			if (srcVersion !== destVersion) {
+				cpSync(`node_modules/${sdkPkg}`, `public/${sdkPkg}`, {
+					recursive: true,
+					dereference: true,
+				});
+			}
 		}
 
 		return {

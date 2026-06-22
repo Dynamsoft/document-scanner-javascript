@@ -3,123 +3,261 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Dynamsoft Document Scanner</title>
+		<title>Dynamsoft Mobile Document Scanner</title>
 		<link rel="stylesheet" href="./css/index.css" />
-		<!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.4.2/dist/dds.bundle.js"></script> -->
-		<!-- To use locally: -->
-		<script src="../../dist/dds.bundle.js"></script>
+		<link rel="stylesheet" href="./css/landing.css" />
+		<link rel="stylesheet" href="./css/result.css" />
+		<!-- third-party:begin livechat-styles -->
+		<link rel="stylesheet" href="./css/widgets.css" />
+		<!-- third-party:end livechat-styles -->
+
+		<!-- third-party:begin gtm-head -->
+		<!-- Google Tag Manager — drives Cookiebot consent + analytics.
+		     Deferred and skipped under WebDriver. Matching <noscript>
+		     fallback is at the top of <body> per the HTML spec. -->
+		<script>
+			if (!navigator.webdriver) {
+				setTimeout(() => {
+					(function (w, d, s, l, i) {
+						w[l] = w[l] || [];
+						w[l].push({
+							"gtm.start": new Date().getTime(),
+							event: "gtm.js",
+						});
+						var f = d.getElementsByTagName(s)[0],
+							j = d.createElement(s),
+							dl = l != "dataLayer" ? "&l=" + l : "";
+						j.async = true;
+						j.src = "//www.googletagmanager.com/gtm.js?id=" + i + dl;
+						f.parentNode.insertBefore(j, f);
+					})(window, document, "script", "dataLayer", "GTM-538F83");
+				}, 0);
+			}
+		</script>
+		<!-- third-party:end gtm-head -->
 	</head>
 
-	<body>
-		<div class="logo">
-			<!-- Logo -->
+	<body data-view="landing">
+		<!-- third-party:begin gtm-noscript -->
+		<!-- GTM fallback for users with JavaScript disabled. -->
+		<noscript>
+			<iframe
+				src="https://www.googletagmanager.com/ns.html?id=GTM-538F83"
+				height="0"
+				width="0"
+				style="display: none; visibility: hidden"
+			></iframe>
+		</noscript>
+		<!-- third-party:end gtm-noscript -->
+
+		<!-- SVG sprite — defines reusable icons referenced via <use> below. -->
+		<svg style="display: none" aria-hidden="true">
+			<defs>
+				<symbol id="icon-external-link" viewBox="0 0 24 24">
+					<path
+						d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+					/>
+				</symbol>
+			</defs>
+		</svg>
+
+		<div class="logo" id="page-logo">
 			<a class="logo-container" href="https://www.dynamsoft.com" target="_blank">
-				<img class="logo-img" src="./assets/dynamsoftLogo.png" alt="dynamsoft-logo" />
+				<img src="./assets/dynamsoftLogo.svg" alt="dynamsoft-logo" />
 			</a>
 		</div>
 
-		<!-- Mobile View -->
-		<div id="mobile-view" class="container">
-			<div class="header">Dynamsoft Document Scanner</div>
+		<!-- ===== Landing: welcome screen with the scan entry point ===== -->
+		<section id="landing-section">
+			<!-- Mobile: banner over a white content panel (see css/landing.css). -->
+			<div id="mobile-view" class="mobile-landing">
+				<div
+					class="mobile-landing-banner"
+					role="img"
+					aria-label="Documents being scanned with the Dynamsoft Mobile Document Scanner"
+				></div>
 
-			<button class="start-button" id="start-scan">Scan with Live Camera</button>
+				<div class="mobile-landing-content">
+					<div class="mobile-landing-brand">
+						<a
+							class="mobile-landing-logo"
+							href="https://www.dynamsoft.com"
+							target="_blank"
+							rel="noopener"
+						>
+							<img src="./assets/dynamsoftLogo.svg" alt="Dynamsoft" />
+						</a>
+						<h1 class="mobile-landing-title">Mobile Document Scanner</h1>
+					</div>
+
+					<div class="mobile-landing-text">
+						<p class="mobile-landing-tagline">Scan, Review, Export to PDF</p>
+						<p class="mobile-landing-description">
+							Capture multi-page documents with automatic border detection and perspective
+							correction, then export them as a single PDF
+						</p>
+					</div>
+
+					<div class="mobile-landing-actions">
+						<button type="button" class="mobile-landing-primary" id="startCameraScan">
+							Continue
+						</button>
+						<p class="privacy-disclaimer">
+							By proceeding, you agree to our
+							<a href="https://www.dynamsoft.com/privacy-statement/" target="_blank" rel="noopener"
+								>Privacy Policy</a
+							>
+						</p>
+					</div>
+
+					<div id="home-error"></div>
+				</div>
+			</div>
+
+			<!-- Desktop: swapped with #mobile-view at lg+ (see css/landing.css). -->
+			<div id="desktop-view" class="container">
+				<div class="header">Mobile Document Scanner</div>
+
+				<div class="description">
+					Dynamsoft Mobile Document Scanner snaps images of your documents and performs perspective
+					cropping to produce corrected scans, ready to review and export as a multi-page PDF.
+				</div>
+
+				<div class="qr-container">
+					<div>Scan to Open on Mobile</div>
+					<img
+						src="./assets/qr-code.png"
+						alt="QR code linking to demo.dynamsoft.com/document-scanner — scan to open the demo on a mobile device"
+						class="qr-code"
+					/>
+				</div>
+
+				<div class="quick-start">
+					<h3 class="quick-start-title">Continue on Desktop</h3>
+					<div class="quick-start-actions">
+						<button type="button" class="secondary-button compact" id="desktop-proceed">
+							Scan from camera
+						</button>
+					</div>
+					<p class="note">
+						Note: Desktop cameras may have limited performance. Mobile scanning is recommended for
+						best results.
+					</p>
+					<p class="privacy-disclaimer">
+						By proceeding, you agree to our
+						<a href="https://www.dynamsoft.com/privacy-statement/" target="_blank" rel="noopener"
+							>Privacy Policy</a
+						>
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- ===== Scanner: edit-viewer hub + the camera overlay it launches
+		     (body[data-scanner-open] swaps them) ===== -->
+		<section id="scanner-section">
+			<div id="edit-viewer-container"></div>
+			<div id="scanner-container"></div>
+		</section>
+
+		<!-- ===== Result: header + scrollable document inset + action footer ===== -->
+		<div id="result-section">
+			<div class="result-header">
+				<h2>Result</h2>
+				<div class="info-menu" id="info-menu">
+					<button type="button" class="info-btn" aria-label="More info">i</button>
+					<div class="info-dropdown">
+						<a
+							href="https://www.dynamsoft.com/mobile-document-scanner/docs/web/introduction/index.html"
+							target="_blank"
+							rel="noopener"
+						>
+							About
+							<svg width="14" height="14" fill="currentColor" aria-hidden="true">
+								<use href="#icon-external-link" />
+							</svg>
+						</a>
+						<a
+							href="https://github.com/Dynamsoft/document-scanner-javascript"
+							target="_blank"
+							rel="noopener"
+						>
+							Github Project
+							<svg width="14" height="14" fill="currentColor" aria-hidden="true">
+								<use href="#icon-external-link" />
+							</svg>
+						</a>
+						<a href="https://www.dynamsoft.com/contact/" target="_blank" rel="noopener">
+							Contact Us
+							<svg width="14" height="14" fill="currentColor" aria-hidden="true">
+								<use href="#icon-external-link" />
+							</svg>
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- Scrollable document view — one image per scanned page. -->
+			<div class="result-inset">
+				<div id="inset-pages"></div>
+			</div>
+
+			<div id="result-error"></div>
+
+			<div class="action-buttons">
+				<button type="button" class="btn-rescan">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+						<path
+							d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+						/>
+					</svg>
+					Restart scan
+				</button>
+				<button type="button" class="btn-download">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+					</svg>
+					Download
+				</button>
+			</div>
 		</div>
 
-		<!-- Desktop View (initially hidden) -->
-		<div id="desktop-view" class="container" style="display: none">
-			<div class="header">Dynamsoft Document Scanner</div>
+		<!-- third-party:begin livechat-button -->
+		<!-- Trigger handled by src/chrome.ts — opens the Comm100 panel. -->
+		<button type="button" class="livechat-btn">Chat with us</button>
+		<!-- third-party:end livechat-button -->
 
-			<div class="description">
-				Dynamsoft Document Scanner snaps an image of your document and performs perspective cropping
-				to produce a corrected scan.
-				<a
-					class="description-link"
-					href="https://dynamsoft.com/mobile-web-capture/docs/guides/document-scanner.html"
-					target="_blank"
-					>Learn more.</a
-				>
-			</div>
-
-			<div class="qr-container">
-				<div>Scan to Open on Mobile</div>
-				<img
-					src="./assets/qr-code.png"
-					alt="https://demo.dynamsoft.com/document-scanner"
-					class="qr-code"
-				/>
-			</div>
-
-			<div class="quick-start">
-				<div class="quick-start-header">
-					<div>Quick Start Option:</div>
-					<button class="desktop-button" id="desktop-proceed">Continue on Desktop</button>
-				</div>
-				<div class="note">
-					Note: Desktop cameras may have limited performance. Mobile scanning is recommended for
-					best results.
-				</div>
-			</div>
-		</div>
-
-		<div class="footer">Powered by Dynamsoft</div>
-
+		<!-- third-party:begin comm100 -->
+		<!-- Comm100 Live Chat — install snippet (from Comm100's admin panel).
+		     widgets.css hides the native float button so .livechat-btn is the
+		     single trigger. -->
+		<div id="comm100-button-20242b05-3781-4d86-9b7f-fab63ddcdde3"></div>
 		<script>
-			const mobileView = document.getElementById("mobile-view");
-			const desktopView = document.getElementById("desktop-view");
-			const startScanButton = document.getElementById("start-scan");
-			const desktopProceedButton = document.getElementById("desktop-proceed");
-
-			let firstLoad = true;
-
-			// Handle view switching based on device type
-			function detectDeviceAndSetView() {
-				if (window.innerWidth < 1024 || !firstLoad) {
-					mobileView.style.display = "flex";
-					desktopView.style.display = "none";
-				} else {
-					mobileView.style.display = "none";
-					desktopView.style.display = "flex";
+			var Comm100API = Comm100API || {};
+			(function (t) {
+				function e(e) {
+					var a = document.createElement("script"),
+						c = document.getElementsByTagName("script")[0];
+					a.type = "text/javascript";
+					a.async = true;
+					a.src = e + t.site_id;
+					c.parentNode.insertBefore(a, c);
 				}
-			}
-
-			// Call function on page load
-			window.addEventListener("load", detectDeviceAndSetView);
-
-			// Initialize the Dynamsoft Document Scanner
-			const documentScanner = new Dynamsoft.DocumentScanner({
-				license: "YOUR_LICENSE_KEY_HERE",
-				scannerViewConfig: {
-					cameraEnhancerUIPath: "../../dist/document-scanner.ui.xml",
-				},
-				resultViewConfig: {
-					toolbarButtonsConfig: {
-						done: {
-							label: "Return Home",
-						},
-					},
-				},
-			});
-
-			// Start scan button handler
-			startScanButton.addEventListener("click", async function () {
-				mobileView.style.display = "none";
-				desktopView.style.display = "none";
-
-				try {
-					await documentScanner.launch();
-					detectDeviceAndSetView();
-				} catch (error) {
-					console.error("Error scanning:", error);
-					detectDeviceAndSetView();
-				}
-			});
-
-			// Desktop proceed button handler
-			desktopProceedButton.addEventListener("click", function () {
-				desktopView.style.display = "none";
-				mobileView.style.display = "flex";
-				firstLoad = false;
-			});
+				t.chat_buttons = t.chat_buttons || [];
+				t.chat_buttons.push({
+					code_plan: "20242b05-3781-4d86-9b7f-fab63ddcdde3",
+					div_id: "comm100-button-20242b05-3781-4d86-9b7f-fab63ddcdde3",
+				});
+				t.site_id = 90003305;
+				t.main_code_plan = "20242b05-3781-4d86-9b7f-fab63ddcdde3";
+				e("https://vue.comm100.com/livechat.ashx?siteId=");
+				setTimeout(function () {
+					if (!t.loaded) e("https://standby.comm100vue.com/livechat.ashx?siteId=");
+				}, 5000);
+			})(Comm100API || {});
 		</script>
+		<!-- third-party:end comm100 -->
+
+		<script type="module" src="./src/index.ts"></script>
 	</body>
 </html>

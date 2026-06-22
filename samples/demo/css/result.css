@@ -1,0 +1,182 @@
+/* Result — dark theme. Pinned to the viewport so the column divides a
+   fixed-height box: fixed header, scrolling document inset, fixed footer. */
+body[data-view="result"] #result-section {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	inset: 0;
+	background: var(--bg-page);
+	color: var(--fg);
+}
+
+/* Shared centered-flex containers. */
+.result-header,
+.info-btn,
+.btn-rescan,
+.btn-download {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.result-header {
+	padding: 20px 16px 12px;
+	position: relative;
+	flex: 0 0 auto;
+}
+
+.result-header h2 {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--fg);
+}
+
+/* Info button + dropdown. */
+.info-menu {
+	position: absolute;
+	right: 16px;
+}
+
+.info-btn {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 2px solid var(--fg);
+	color: var(--fg);
+	font-size: 14px;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.info-dropdown {
+	display: none;
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	background: var(--bg-card);
+	overflow: hidden;
+	min-width: 180px;
+	box-shadow: var(--shadow-dropdown);
+	z-index: 100;
+}
+
+.info-menu.open .info-dropdown {
+	display: block;
+}
+
+.info-dropdown a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 16px;
+	color: var(--fg);
+	text-decoration: none;
+	font-size: 14px;
+	gap: 12px;
+}
+
+.info-dropdown a:hover {
+	background: var(--bg-line);
+}
+
+.info-dropdown a svg {
+	flex-shrink: 0;
+	opacity: 0.6;
+}
+
+/* Scrollable document inset — one image per scanned page. */
+.result-inset {
+	flex: 1 1 auto;
+	min-height: 0;
+	margin: 0 16px;
+	background: var(--bg-card);
+	border-radius: var(--radius-md);
+	overflow-y: auto;
+	padding: 16px;
+}
+
+#inset-pages {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+#inset-pages img {
+	display: block;
+	width: min(100%, 640px);
+	height: auto;
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-dropdown);
+	background: var(--bg-light);
+}
+
+/* Inline error (e.g. PDF export failure) above the action buttons. */
+#result-error {
+	flex: 0 0 auto;
+	margin: 0 16px;
+}
+
+#result-error:empty {
+	display: none;
+}
+
+/* Bottom action buttons. */
+.action-buttons {
+	flex: 0 0 auto;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+	padding: 16px;
+}
+
+/* Result CTAs — shared shape, different palettes. */
+.btn-rescan,
+.btn-download {
+	padding: 16px 8px;
+	font-size: 15px;
+	font-weight: 500;
+	gap: 8px;
+}
+
+.btn-rescan {
+	background: var(--bg-button);
+	color: var(--fg);
+}
+
+.btn-rescan:hover {
+	background: var(--bg-button-hover);
+}
+
+.btn-download {
+	background: var(--brand-orange);
+	color: var(--fg);
+}
+
+.btn-download:hover {
+	background: var(--brand-orange-hover);
+}
+
+.btn-download:disabled {
+	background: var(--bg-disabled);
+	color: var(--fg-mono);
+	cursor: not-allowed;
+}
+
+/* md+ — wider gutters, constrained footer. */
+@media (min-width: 768px) {
+	.result-inset {
+		margin: 0 32px;
+	}
+
+	#result-error {
+		margin: 0 32px;
+	}
+
+	.action-buttons {
+		padding: 24px 32px 32px;
+		max-width: 800px;
+		width: 100%;
+		margin: 0 auto;
+	}
+}

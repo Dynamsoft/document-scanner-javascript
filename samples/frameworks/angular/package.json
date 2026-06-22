@@ -1,30 +1,26 @@
 {
-	"name": "hello-world",
-	"version": "0.0.0",
-	"scripts": {
-		"ng": "ng",
-		"start": "ng serve --ssl",
-		"build": "ng build",
-		"watch": "ng build --watch --configuration development"
-	},
+	"name": "mds-angular",
+	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
-		"@angular/common": "^20.3.16",
-		"@angular/compiler": "^20.3.16",
-		"@angular/core": "^20.3.16",
-		"@angular/forms": "^20.3.16",
-		"@angular/platform-browser": "^20.3.16",
-		"@angular/platform-browser-dynamic": "^20.3.16",
-		"@angular/router": "^20.3.16",
-		"dynamsoft-document-scanner": "1.4.2",
-		"rxjs": "~7.8.0",
-		"tslib": "^2.3.0",
-		"zone.js": "^0.15.1"
+		"@angular/core": "^22.0.2",
+		"@angular/platform-browser": "^22.0.2",
+		"dynamsoft-document-scanner": "file:../../dynamsoft-document-scanner-1.4.2.tgz"
 	},
 	"devDependencies": {
-		"@angular-devkit/build-angular": "^20.3.14",
-		"@angular/cli": "^20.3.14",
-		"@angular/compiler-cli": "^20.3.14",
-		"typescript": "~5.9.2"
+		"@angular/build": "^22.0.3",
+		"@angular/cli": "^22.0.3",
+		"@angular/compiler-cli": "^22.0.2",
+		"typescript": "~6.0.3"
+	},
+	"//": "overrides force-patch transitive build-time deps flagged by npm audit",
+	"overrides": {
+		"esbuild": "0.28.1",
+		"piscina": "5.2.0",
+		"@babel/core": "7.29.7"
+	},
+	"scripts": {
+		"dev": "ng serve --port 5173",
+		"build": "ng build"
 	}
 }
