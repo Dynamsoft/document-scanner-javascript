@@ -131,9 +131,9 @@ body[data-view="landing"] #landing-section {
 .mobile-landing-content {
 	flex: 0 0 auto;
 	gap: 32px;
-	/* third-party:begin livechat-btn-padding */
+	/* sanitize:begin livechat-btn-padding */
 	/* 50px bottom clears the ~37px-tall docked .livechat-btn. */
-	/* third-party:end livechat-btn-padding */
+	/* sanitize:end livechat-btn-padding */
 	padding: 40px 16px 50px;
 }
 

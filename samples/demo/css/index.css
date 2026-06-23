@@ -119,9 +119,9 @@ button {
 }
 
 /* Shared radius for every rectangular surface (.info-btn keeps its 50%). */
-/* third-party:begin livechat-btn-radius */
+/* sanitize:begin livechat-btn-radius */
 .livechat-btn,
-/* third-party:end livechat-btn-radius */
+/* sanitize:end livechat-btn-radius */
 .secondary-button.compact,
 .mobile-landing-primary,
 .btn-rescan,

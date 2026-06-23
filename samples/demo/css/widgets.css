@@ -1,4 +1,4 @@
-/* third-party:file */
+/* sanitize:file */
 /* Live-chat trigger. Visible on landing (all viewports), desktop result, and
    the desktop camera overlay, but not the DDV editor or MDS. Replaces Comm100's
    native float button; consent is handled by GTM/Cookiebot in index.html. */
@@ -52,9 +52,9 @@ body[data-view="scanner"][data-scanner-open] .livechat-btn {
 	z-index: 1000;
 }
 
-/* third-party:begin comm100-float-hide */
+/* sanitize:begin comm100-float-hide */
 /* Comm100 sets inline styles on its float button, hence !important. */
 [id*="comm100-float-button"] {
 	display: none !important;
 }
-/* third-party:end comm100-float-hide */
+/* sanitize:end comm100-float-hide */

@@ -7,11 +7,11 @@
 		<link rel="stylesheet" href="./css/index.css" />
 		<link rel="stylesheet" href="./css/landing.css" />
 		<link rel="stylesheet" href="./css/result.css" />
-		<!-- third-party:begin livechat-styles -->
+		<!-- sanitize:begin livechat-styles -->
 		<link rel="stylesheet" href="./css/widgets.css" />
-		<!-- third-party:end livechat-styles -->
+		<!-- sanitize:end livechat-styles -->
 
-		<!-- third-party:begin gtm-head -->
+		<!-- sanitize:begin gtm-head -->
 		<!-- Google Tag Manager — drives Cookiebot consent + analytics.
 		     Deferred and skipped under WebDriver. Matching <noscript>
 		     fallback is at the top of <body> per the HTML spec. -->
@@ -34,11 +34,11 @@
 				}, 0);
 			}
 		</script>
-		<!-- third-party:end gtm-head -->
+		<!-- sanitize:end gtm-head -->
 	</head>
 
 	<body data-view="landing">
-		<!-- third-party:begin gtm-noscript -->
+		<!-- sanitize:begin gtm-noscript -->
 		<!-- GTM fallback for users with JavaScript disabled. -->
 		<noscript>
 			<iframe
@@ -48,7 +48,7 @@
 				style="display: none; visibility: hidden"
 			></iframe>
 		</noscript>
-		<!-- third-party:end gtm-noscript -->
+		<!-- sanitize:end gtm-noscript -->
 
 		<!-- SVG sprite — defines reusable icons referenced via <use> below. -->
 		<svg style="display: none" aria-hidden="true">
@@ -222,12 +222,12 @@
 			</div>
 		</div>
 
-		<!-- third-party:begin livechat-button -->
+		<!-- sanitize:begin livechat-button -->
 		<!-- Trigger handled by src/chrome.ts — opens the Comm100 panel. -->
 		<button type="button" class="livechat-btn">Chat with us</button>
-		<!-- third-party:end livechat-button -->
+		<!-- sanitize:end livechat-button -->
 
-		<!-- third-party:begin comm100 -->
+		<!-- sanitize:begin comm100 -->
 		<!-- Comm100 Live Chat — install snippet (from Comm100's admin panel).
 		     widgets.css hides the native float button so .livechat-btn is the
 		     single trigger. -->
@@ -256,7 +256,7 @@
 				}, 5000);
 			})(Comm100API || {});
 		</script>
-		<!-- third-party:end comm100 -->
+		<!-- sanitize:end comm100 -->
 
 		<script type="module" src="./src/index.ts"></script>
 	</body>

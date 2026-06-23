@@ -4,9 +4,9 @@
 import { $ } from "./dom.js";
 import { preloadScanner, restartScan, startScanFlow } from "./scanner.js";
 import { downloadPdf } from "./results.js";
-// third-party:begin comm100-bridge
+// sanitize:begin comm100-bridge
 import "./chrome.js";
-// third-party:end comm100-bridge
+// sanitize:end comm100-bridge
 
 $<HTMLButtonElement>("startCameraScan").addEventListener("click", startScanFlow);
 $<HTMLButtonElement>("desktop-proceed").addEventListener("click", startScanFlow);

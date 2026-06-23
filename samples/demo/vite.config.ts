@@ -50,7 +50,7 @@ export default defineConfig({
 	base: "./",
 	plugins: [
 		basicSsl(),
-		// third-party:begin iis-web-config
+		// sanitize:begin iis-web-config
 		{
 			// IIS-specific MIME mapping (web.config) for `.data` files;
 			// stripped from sanitized downstream builds.
@@ -60,7 +60,7 @@ export default defineConfig({
 				if (existsSync(src)) cpSync(src, resolve(here, "dist/web.config"));
 			},
 		},
-		// third-party:end iis-web-config
+		// sanitize:end iis-web-config
 	],
 	server: {
 		host: "0.0.0.0",
