@@ -1,6 +1,6 @@
 name: Publish Package
 permissions:
-  contents: read
+  contents: write # To attach assets to releases
 
 on:
   release:
@@ -30,14 +30,22 @@ jobs:
         run: npm run build
 
         # GitHub renders `> [!NOTE]` blocks as styled callouts; npm shows the raw
-              # `[!NOTE]` marker instead. Convert the marker to a plain bold label
-              # (`> **Note**`) so the published README reads well. Runs on the
-              # checked-out copy only and never committed, so the repo source keeps its
-              # GitHub admonitions.
+        # `[!NOTE]` marker instead. Convert the marker to a plain bold label
+        # (`> **Note**`) so the published README reads well. Runs on the
+        # checked-out copy only and never committed, so the repo source keeps its
+        # GitHub admonitions.
       - name: Strip GFM admonitions from README (npm only)
         run: |
           sed -i -E 's/^([[:space:]]*>)[[:space:]]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$/\1 **\L\u\2**/Ig' README.md
         
+      - name: Upload dist as a release asset
+        if: github.event_name == 'release'
+        run: |
+          zip -r dist.zip dist
+          gh release upload "${{ github.event.release.tag_name }}" dist.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to npm
         run: |
           if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
