@@ -1,3 +1,4 @@
+# sanitize:file
 name: Change Request Report Draft
 description: Full change request report template outlining the entire development process
 title: "Change Request Report Draft: Release {solution} vX.y.z"

@@ -1,3 +1,4 @@
+# sanitize:file
 name: Release Checklist
 description: This is the full list of tasks required for a release.
 title: "Release version vX.y.z"
