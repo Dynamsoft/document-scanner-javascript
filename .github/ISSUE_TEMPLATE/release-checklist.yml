@@ -16,10 +16,9 @@ body:
             - 3.1.3. Replace the version from the intended `vX.Y.z` with beta versioning where necessary, e.g. `package.json`
             - 3.1.4. Run `npm install` and `npm run build`
             - 3.1.5. Verify that the build works, samples work, framework samples work, etc. **using local resources** (testing the internal `npm` repository comes in step 3.3)
-            - 3.1.6. Create a signed git tag with beta versioning: `git tag -a v{beta version} -m "{product name} SDK v{beta version}" -s`
-            - 3.1.7. Commit changes with message: `git commit -am "release v{beta version}`
-            - 3.1.8. Push the new beta branch and beta tag to the development repository: `git push origin -u {branch name}`, `git push origin tag v{beta version}`
-            - 3.1.9. Create a pull request from the beta branch to main to confirm the changes, but **never merge this pull request**
+            - 3.1.6. Commit changes with message: `git commit -am "release v{beta version}`
+            - 3.1.7. Create a signed git tag with beta versioning: `git tag -a v{beta version} -m "{product name} SDK v{beta version}" -s`
+            - 3.1.8. Push the new beta branch and beta tag to the development repository: `git push {remote name} -u HEAD`, `git push origin tag v{beta version}`
           - [ ] 3.2. Publish to the internal `npm` repository from the beta branch
             - 3.2.1. First time set-up: create an npmjs account, and run `npm adduser` to add the account, then log in to the internal repository with `npm login --registry https://npm.scannerproxy.com:802/` (verify login with `npm whoami --registry https://npm.scannerproxy.com:802/`)
             - 3.2.2. While on the beta branch, publish to the internal repository with `npm publish --registry https://npm.scannerproxy.com:802`, and check status on `https://npm.scannerproxy.com:802/-/web/detail/@{package name}`
