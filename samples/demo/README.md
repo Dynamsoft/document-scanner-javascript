@@ -110,9 +110,7 @@ Both engines are self-hosted: `vite.config.ts` mirrors `dynamsoft-capture-vision
 <!-- sanitize:begin docs-section -->
 ## Third-party integrations
 
-The deployed demo carries Google Tag Manager, the Comm100 live-chat widget, and an IIS `web.config`. All of it is fenced with `sanitize:begin <name>` / `sanitize:end <name>` markers, and the purely sanitize files are `src/chrome.ts`, `css/widgets.css`, and `web.config`.
-
-`mise run sanitize-public` strips these in place for review — it removes every fenced block and the whole sanitize files (`src/chrome.ts`, `css/widgets.css`, `web.config`), along with lockfiles, `.npmrc`, the root `publishConfig`, and repo-specific `.github` data. To stage a public snapshot, `mise run export-public <branch>` merges this branch onto a downstream remote branch; run `sanitize-public` on the result, then commit and push.
+The deployed demo carries Google Tag Manager, the Comm100 live-chat widget, and an IIS `web.config`. All of it is fenced with `sanitize:begin <name>` / `sanitize:end <name>` markers, and the purely third-party files are `src/chrome.ts`, `css/widgets.css`, and `web.config`. Use text stream editors to strip the marked blocks and files before pushing to the public repository.
 <!-- sanitize:end docs-section -->
 
 ## SDK API reference
