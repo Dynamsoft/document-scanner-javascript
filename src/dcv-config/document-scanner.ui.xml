@@ -85,7 +85,7 @@
           <div class="dce-mn-resolutions">
             <div style="font-size: 12px; color: white; margin: 12px">Resolution</div>
             <div class="dce-mn-resolution-option" data-width="640" data-height="480">480P</div>
-            <div class="dce-mn-resolution-option" data-width="1080" data-height="720">720P</div>
+            <div class="dce-mn-resolution-option" data-width="1280" data-height="720">720P</div>
             <div class="dce-mn-resolution-option" data-width="1920" data-height="1080">1080P</div>
             <div class="dce-mn-resolution-option" data-width="2560" data-height="1440">2K</div>
             <div class="dce-mn-resolution-option" data-width="3840" data-height="2160">4K</div>

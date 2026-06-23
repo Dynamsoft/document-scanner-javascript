@@ -1122,18 +1122,26 @@ export default class DocumentScannerView {
 				const resHeight = option.getAttribute("data-height");
 				const resWidth = option.getAttribute("data-width");
 				if (deviceId) {
-					this.resources.cameraEnhancer?.selectCamera(deviceId).then(() => {
-						this.toggleScanGuide(true);
-					});
-				} else if (resHeight && resWidth) {
 					this.resources.cameraEnhancer
-						?.setResolution({
-							width: parseInt(resWidth),
-							height: parseInt(resHeight),
-						})
-						.then(() => {
-							this.toggleScanGuide(true);
-						});
+						?.selectCamera(deviceId)
+						.catch((error) => console.warn(`Camera error (selectCamera ${deviceId}):`, error))
+						.finally(() => this.toggleScanGuide(true));
+				} else if (resHeight && resWidth) {
+					const width = parseInt(resWidth);
+					const height = parseInt(resHeight);
+					this.resources.cameraEnhancer?.setScanRegion({
+						left: 0,
+						right: 100,
+						top: 0,
+						bottom: 100,
+						isMeasuredInPercentage: true,
+					});
+					this.resources.cameraEnhancer
+						?.setResolution({ width, height })
+						.catch((error) =>
+							console.warn(`Camera error (setResolution ${width}x${height}):`, error),
+						)
+						.finally(() => this.toggleScanGuide(true));
 				}
 
 				if (settingsContainer.style.display !== "none") {
@@ -1930,22 +1938,30 @@ export default class DocumentScannerView {
 	 *
 	 * @internal
 	 */
-	private calculateScanRegion() {
+	private calculateScanRegion(retryCount = 0) {
 		const { cameraEnhancer, cameraView } = this.resources;
 
-		if (!cameraEnhancer?.isOpen() || !cameraView) return;
+		if (!cameraView) return;
 
-		// Get visible region of video
-		const visibleRegion = cameraView.getVisibleRegionOfVideo({ inPixels: true });
-
-		if (!visibleRegion) return;
-
-		// Get the total video dimensions
 		const video = cameraView.getVideoElement();
+		const ready =
+			cameraEnhancer?.isOpen() &&
+			video?.readyState >= 2 &&
+			video.videoWidth > 0 &&
+			video.videoHeight > 0;
+
+		if (!ready || !cameraEnhancer) {
+			if (retryCount < 60) {
+				requestAnimationFrame(() => this.calculateScanRegion(retryCount + 1));
+			}
+			return;
+		}
+
 		const totalWidth = video.videoWidth;
 		const totalHeight = video.videoHeight;
 
-		// Get the document ratio for the specific document type
+		const visibleRegion = cameraView.getVisibleRegionOfVideo({ inPixels: true });
+		if (!visibleRegion) return;
 
 		const targetRatio = this.config?.scanRegion?.ratio;
 		if (!targetRatio) {
@@ -2011,19 +2027,17 @@ export default class DocumentScannerView {
 		const absoluteTop = visibleRegion.y + scanTop;
 		const absoluteBottom = visibleRegion.y + scanBottom;
 
-		const left = (absoluteLeft / totalWidth) * 100;
-		const right = (absoluteRight / totalWidth) * 100;
-		const top = (absoluteTop / totalHeight) * 100;
-		const bottom = (absoluteBottom / totalHeight) * 100;
-
-		// Apply scan region
+		const clamp = (n: number) => Math.min(100, Math.max(0, Math.round(n)));
 		const region = {
-			left: Math.round(left),
-			right: Math.round(right),
-			top: Math.round(top),
-			bottom: Math.round(bottom),
+			left: clamp((absoluteLeft / totalWidth) * 100),
+			right: clamp((absoluteRight / totalWidth) * 100),
+			top: clamp((absoluteTop / totalHeight) * 100),
+			bottom: clamp((absoluteBottom / totalHeight) * 100),
 			isMeasuredInPercentage: true,
 		};
+
+		// Bail on a degenerate region rather than letting setScanRegion throw "invalid scanning region".
+		if (region.left >= region.right || region.top >= region.bottom) return;
 
 		cameraView?.setScanRegionMaskVisible(true);
 		cameraEnhancer.setScanRegion(region);
