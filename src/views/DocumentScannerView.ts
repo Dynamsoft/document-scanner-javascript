@@ -1965,13 +1965,7 @@ export default class DocumentScannerView {
 
 		const targetRatio = this.config?.scanRegion?.ratio;
 		if (!targetRatio) {
-			cameraEnhancer.setScanRegion({
-				left: Math.round((visibleRegion.x / totalWidth) * 100),
-				right: Math.round(((visibleRegion.x + visibleRegion.width) / totalWidth) * 100),
-				top: Math.round((visibleRegion.y / totalHeight) * 100),
-				bottom: Math.round(((visibleRegion.y + visibleRegion.height) / totalHeight) * 100),
-				isMeasuredInPercentage: true,
-			});
+			cameraEnhancer.setScanRegion(null as any);
 			cameraView.setScanRegionMaskVisible(false);
 			return;
 		}
