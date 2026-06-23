@@ -1,3 +1,4 @@
+// third-party:file
 // Bridges .livechat-btn clicks to the Comm100 chat installed in index.html.
 
 export {}; // Make this a module so `declare global` is legal.

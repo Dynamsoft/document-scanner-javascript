@@ -17,12 +17,12 @@ samples/demo/
 │   ├── index.css            # shared stylesheet — palette in :root tokens, scanner stage
 │   ├── landing.css          # landing page, one for mobile and desktop
 │   ├── result.css           # result view — header, PDF inset, action footer
+# third-party:begin widgets-css
 │   └── widgets.css          # live-chat and cookies disclaimer
+# third-party:end widgets-css
 ├── tsconfig.json            # IDE/LSP project config (Vite handles build)
 ├── vite.config.ts           # demo-build config: bundles src/ + mirrors SDK resources into public/
 ├── assets/                  # static assets (logo, QR code)
-├── scripts/
-│   └── strip-integrations.sh # removes the third-party (GTM/Comm100/IIS) blocks in place
 └── src/                     # TypeScript source
     ├── dom.ts               # $<T>(id) helper, isMobile
     ├── view.ts              # body[data-view] state, scanner-overlay sub-state, info menu
@@ -30,7 +30,9 @@ samples/demo/
     ├── ddv.ts               # DDV engine init, shared document, edit-viewer hub
     ├── scanner.ts           # DocumentScanner instance + flow orchestration
     ├── results.ts           # page-image inset, PDF export, download
+# third-party:begin chrome-ts
     ├── chrome.ts            # live-chat bridge
+# third-party:end chrome-ts
     └── index.ts             # entry — wires DOM events to the exports above
 ```
 
@@ -78,7 +80,9 @@ and opening the link to the Vite server (default `https://localhost:4173/`). Bec
 ```
 samples/demo/dist/
 ├── index.html
+# third-party:begin web-config
 ├── web.config                            # IIS MIME map for .data files
+# third-party:end web-config
 ├── assets/                               # bundled demo + SDK ESM + styles
 │   ├── index-<hash>.js
 │   └── index-<hash>.css
@@ -103,15 +107,13 @@ Both engines are self-hosted: `vite.config.ts` mirrors `dynamsoft-capture-vision
 
 `dynamsoft-document-viewer` is pinned to an exact version: Dynamsoft packages ship breaking changes in minor releases, so upgrades should be deliberate and verified against the scan/review/export flow.
 
+<!-- third-party:begin docs-section -->
 ## Third-party integrations
 
-The deployed demo carries Google Tag Manager, the Comm100 live-chat widget, and an IIS `web.config`. All of it is fenced with `third-party:begin <name>` / `third-party:end <name>` markers; run
+The deployed demo carries Google Tag Manager, the Comm100 live-chat widget, and an IIS `web.config`. All of it is fenced with `third-party:begin <name>` / `third-party:end <name>` markers, and the purely third-party files are `src/chrome.ts`, `css/widgets.css`, and `web.config`.
 
-```shell
-sh scripts/strip-integrations.sh
-```
-
-to remove every fenced block (and the purely third-party files `src/chrome.ts`, `css/widgets.css`, `web.config`) in place, e.g. before publishing a sanitised fork. Re-running is a no-op.
+`mise run sanitize-public` strips these in place for review — it removes every fenced block and the whole third-party files (`src/chrome.ts`, `css/widgets.css`, `web.config`), along with lockfiles, `.npmrc`, the root `publishConfig`, and repo-specific `.github` data. To stage a public snapshot, `mise run export-public <branch>` merges this branch onto a downstream remote branch; run `sanitize-public` on the result, then commit and push.
+<!-- third-party:end docs-section -->
 
 ## SDK API reference
 

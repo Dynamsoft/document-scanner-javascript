@@ -1,3 +1,4 @@
+/* third-party:file */
 /* Live-chat trigger. Visible on landing (all viewports), desktop result, and
    the desktop camera overlay, but not the DDV editor or MDS. Replaces Comm100's
    native float button; consent is handled by GTM/Cookiebot in index.html. */
