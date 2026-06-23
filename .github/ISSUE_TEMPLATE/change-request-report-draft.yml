@@ -8,7 +8,6 @@ body:
       label: Report Title
       value: |
         # {solution} vX.y.z Release Change Request Report Draft
-
   - type: markdown
     attributes:
       value: |
@@ -16,14 +15,13 @@ body:
   - type: textarea
     attributes:
       label: Repositories
-      description: Provide links to production and internal repositories and registries, for the solution and assets including samples and documentation.
+      description: Provide links to production and internal repositories and registries for the solution and assets, including samples and documentation.
       value: |
-        1. [Internal development repository](https://github.com/Dynamsoft/mrz-scanner-javascript-dev/)
-        2. [Internal `npm` repository](https://npm.scannerproxy.com:802/-/web/detail/dynamsoft-mrz-scanner)
-        3. [Production repository](https://github.com/Dynamsoft/mrz-scanner-javascript)
-        4. [Production `npm` repository](https://www.npmjs.com/package/dynamsoft-mrz-scanner)
-        5. [Documentation repository](https://github.com/dynamsoft-docs/mrz-scanner-docs-js)
-
+        1. [Internal development repository](https://github.com/Dynamsoft/document-scanner-javascript-dev/)
+        2. [Internal `npm` repository](https://npm.scannerproxy.com:802/-/web/detail/dynamsoft-document-scanner)
+        3. [Production repository](https://github.com/Dynamsoft/document-scanner-javascript)
+        4. [Production `npm` repository](https://www.npmjs.com/package/dynamsoft-document-scanner)
+        5. [Documentation repository](https://github.com/dynamsoft-docs/mobile-document-scanner-docs-js)
   - type: markdown
     attributes:
       value: |
@@ -36,7 +34,6 @@ body:
         2026-01-05: Begin development and upgrade process
         2026-01-06 - 2026-01-09: Internal testing
         2026-01-12: Public release
-
   - type: markdown
     attributes:
       value: |
@@ -50,7 +47,6 @@ body:
         Bob - consulting for release workflow
         Charlie - testing and QA
         Dylan - supervisor
-
   - type: markdown
     attributes:
       value: |
@@ -68,7 +64,6 @@ body:
         2. Use the new frame clarity value from DCV to select the best frame for capture.
         3. Add multi-page scanning support (with and without DDV) along with samples.
         4. Collected issues organised into the MDS JS v1.4.0 planner.
-
   - type: markdown
     attributes:
       value: |
@@ -78,10 +73,9 @@ body:
       label: Impact Analysis
       description: Describe the potential impact of the change on the project or operations, including any risks, dependencies, or possible side effects.
       value: |
-        The breaking change introduced by switching the template file from `html` to `xml` may cause issues for a limited number of customers.
+        The breaking change introduced by switching the template file from `.html` to `.xml` may cause issues for a limited number of customers.
 
-        Customers will need to update DCV resources if they are self hosting them.
-
+        Customers will need to update DCV resources if they are self-hosting them.
   - type: markdown
     attributes:
       value: |
@@ -94,9 +88,7 @@ body:
       description: Summarise breaking changes.
       value: |
         - Rename `document-scanner.ui.html` to `document-scanner.ui.xml`, the declarative UI configuration template for DCV.
-          - This affects self hosting users only - users must update the path in the `scannerViewConfig.cameraEnhancerUIPath` property accordingly and rebuild the library.
-
-
+          - This affects self-hosting users only: they must update the path in the `scannerViewConfig.cameraEnhancerUIPath` property accordingly and rebuild the library.
   - type: markdown
     attributes:
       value: |
@@ -111,14 +103,10 @@ body:
         - Select the clearest of multiple video frames on scan with `enableFrameVerification` (default `true`).
         - Add continuous scanning mode to make multiple scans on a single `launch()`, enabled by `enableContinuousScanning` (default `false`).
           - Add `onDocumentScanned` handler to get single scan results in continuous scanning mode.
-          - Add a thumbnail scan preview in the scanner view for continuous scanning mode with an optional `onThumbnailClicked` click handler.
-          - Add `stopContinuousScanning` to programmatically stop the scanning loop.
-        - Add `enableBoundsDetectionMode` to set default bounds detection mode.
 
         #### UI/UX Improvements
 
         - Remove the animated shutter spinner.
-
   - type: markdown
     attributes:
       value: |
@@ -128,9 +116,8 @@ body:
       label: Samples
       description: Summarise changes and improvements to samples.
       value: |
-        - Add sample demonstrating minimal code to integrate MDS with Dynamsoft Document Scanner (DDV) to scan to PDF with continuous scanning.
+        - Add sample demonstrating minimal code to integrate MDS with Dynamsoft Document Viewer (DDV) to scan to PDF with continuous scanning.
         - Add minimal MDS-only continuous scanning sample.
-
   - type: markdown
     attributes:
       value: |
@@ -143,7 +130,6 @@ body:
         - Fix "Torch not supported" message appearing unnecessarily.
         - Update framework sample dependencies to resolve security vulnerabilities.
         - Remove memory leak caused by logging results to console.
-
   - type: markdown
     attributes:
       value: |
@@ -155,7 +141,6 @@ body:
       value: |
         - Add guides on using continuous scan mode and integrating with DDV.
         - Add full [`tsdoc`](https://tsdoc.org/) annotation coverage for all MDS APIs to bring API references to IDEs and allow content extraction with compatible development tools.
-
   - type: markdown
     attributes:
       value: |
@@ -166,7 +151,6 @@ body:
       description: List direct core library dependencies (i.e. DCV).
       value: |
         - [Dynamsoft Capture Vision JS 3.2.4000](https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/release-notes/dcvb-3.html#324000-11112025)
-
   - type: markdown
     attributes:
       value: |
@@ -188,14 +172,13 @@ body:
         ```
 
         Result: `npm audit` found no vulnerabilities
-
   - type: markdown
     attributes:
       value: |
-        ### `codeql database analyse`
+        ### `codeql database analyze`
   - type: textarea
     attributes:
-      label: "`codeql database analyse`"
+      label: "`codeql database analyze`"
       description: Submit the SARIF output and HTML report summary from the local CodeQL scan run on the development repository.
       value: |
         Audit time: 2026 January 9
@@ -203,7 +186,6 @@ body:
         Total findings: 0
 
         The CodeQL review yielded 0 findings based on the generated SARIF report.
-
   - type: markdown
     attributes:
       value: |
@@ -212,4 +194,4 @@ body:
     attributes:
       label: Link the final code review/approval for a release.
       value: |
-        Final release pull request in the production repository reviewed and approved by Tim: https://github.com/Dynamsoft/mrz-scanner-javascript-dev/pull/85
+        Final release pull request in the production repository reviewed and approved by Tim: https://github.com/Dynamsoft/document-scanner-javascript-dev/pull/85
