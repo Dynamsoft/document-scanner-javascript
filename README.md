@@ -742,7 +742,7 @@ Of these three properties, we focus on `cameraEnhancerUIPath`. Here we omit `con
 > [!TIP]
 > If the performance of **MDS** does not meet your needs, you may require an algorithm template **customized for your usage scenario** for better results. Please contact our experienced [Technical Support Team](https://www.dynamsoft.com/company/contact/) to discuss your requirements. We can tailor a suitable template for you, which you can then apply by updating `templateFilePath`.
 
-`cameraEnhancerUIPath` points to a file hosted on the jsDelivr CDN by default (see [Self-Host Resources: Point to Resources](#point-to-resources)):
+`cameraEnhancerUIPath` points to a file hosted on the jsDelivr CDN by default (see [Self-Host Resources](#self-host-resources)):
 [https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.5.0/dist/document-scanner.ui.xml](https://cdn.jsdelivr.net/npm/dynamsoft-document-scanner@1.5.0/dist/document-scanner.ui.xml).
 
 This file defines the UI for `DocumentScannerView`. Since files on the CDN **cannot be modified directly**, you must use a **local version** to customize the UI. `cameraEnhancerUIPath` specifies the file path to this local version of the UI.
