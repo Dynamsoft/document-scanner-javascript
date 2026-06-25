@@ -1,4 +1,8 @@
-import { DSImageData, Quadrilateral, DeskewedImageResultItem } from "dynamsoft-capture-vision-bundle";
+import {
+	DSImageData,
+	Quadrilateral,
+	DeskewedImageResultItem,
+} from "dynamsoft-capture-vision-bundle";
 
 /**
  * Enumeration of available view types in the Document Scanner system.
@@ -9,18 +13,18 @@ import { DSImageData, Quadrilateral, DeskewedImageResultItem } from "dynamsoft-c
  * @public
  */
 export enum EnumDDSViews {
-  /**
-   * Main camera view for capturing documents.
-   */
-  Scanner = "scanner",
-  /**
-   * Final view displaying processed document results.
-   */
-  Result = "scan-result",
-  /**
-   * Intermediate view for adjusting detected document boundaries.
-   */
-  Correction = "correction",
+	/**
+	 * Main camera view for capturing documents.
+	 */
+	Scanner = "scanner",
+	/**
+	 * Final view displaying processed document results.
+	 */
+	Result = "scan-result",
+	/**
+	 * Intermediate view for adjusting detected document boundaries.
+	 */
+	Correction = "correction",
 }
 
 /**
@@ -33,16 +37,16 @@ export enum EnumDDSViews {
  * @public
  */
 export const DEFAULT_TEMPLATE_NAMES = {
-  /**
-   * Template name for detecting document boundaries.
-   * @defaultValue "DetectDocumentBoundaries_Default"
-   */
-  detect: "DetectDocumentBoundaries_Default",
-  /**
-   * Template name for normalizing (correcting and enhancing) detected documents.
-   * @defaultValue "NormalizeDocument_Default"
-   */
-  normalize: "NormalizeDocument_Default",
+	/**
+	 * Template name for detecting document boundaries.
+	 * @defaultValue "DetectDocumentBoundaries_Default"
+	 */
+	detect: "DetectDocumentBoundaries_Default",
+	/**
+	 * Template name for normalizing (correcting and enhancing) detected documents.
+	 * @defaultValue "NormalizeDocument_Default"
+	 */
+	normalize: "NormalizeDocument_Default",
 };
 
 /**
@@ -56,8 +60,8 @@ export const DEFAULT_TEMPLATE_NAMES = {
  * @public
  */
 export interface UtilizedTemplateNames {
-  detect: string;
-  normalize: string;
+	detect: string;
+	normalize: string;
 }
 
 /**
@@ -69,18 +73,18 @@ export interface UtilizedTemplateNames {
  * @public
  */
 export enum EnumResultStatus {
-  /**
-   * Document was successfully captured and processed.
-   */
-  RS_SUCCESS = 0,
-  /**
-   * User cancelled the scanning operation.
-   */
-  RS_CANCELLED = 1,
-  /**
-   * Scanning or processing failed due to an error.
-   */
-  RS_FAILED = 2,
+	/**
+	 * Document was successfully captured and processed.
+	 */
+	RS_SUCCESS = 0,
+	/**
+	 * User cancelled the scanning operation.
+	 */
+	RS_CANCELLED = 1,
+	/**
+	 * Scanning or processing failed due to an error.
+	 */
+	RS_FAILED = 2,
 }
 
 /**
@@ -92,26 +96,26 @@ export enum EnumResultStatus {
  * @public
  */
 export enum EnumFlowType {
-  /**
-   * User manually captured the document via camera button.
-   */
-  MANUAL = "manual",
-  /**
-   * Document was automatically captured when stable boundaries were detected.
-   */
-  SMART_CAPTURE = "smartCapture",
-  /**
-   * Document was detected and cropped automatically without user intervention.
-   */
-  AUTO_CROP = "autoCrop",
-  /**
-   * Document image was uploaded from device storage.
-   */
-  UPLOADED_IMAGE = "uploadedImage",
-  /**
-   * Document was loaded from a static file path or URL.
-   */
-  STATIC_FILE = "staticFile",
+	/**
+	 * User manually captured the document via camera button.
+	 */
+	MANUAL = "manual",
+	/**
+	 * Document was automatically captured when stable boundaries were detected.
+	 */
+	SMART_CAPTURE = "smartCapture",
+	/**
+	 * Document was detected and cropped automatically without user intervention.
+	 */
+	AUTO_CROP = "autoCrop",
+	/**
+	 * Document image was uploaded from device storage.
+	 */
+	UPLOADED_IMAGE = "uploadedImage",
+	/**
+	 * Document was loaded from a static file path or URL.
+	 */
+	STATIC_FILE = "staticFile",
 }
 
 /**
@@ -132,15 +136,15 @@ export enum EnumFlowType {
  * @public
  */
 export type ResultStatus = {
-  /**
-   * Status code (success, cancellation, or failure).
-   * @see {@link EnumResultStatus}
-   */
-  code: EnumResultStatus;
-  /**
-   * Optional error message (typically populated when failed).
-   */
-  message?: string;
+	/**
+	 * Status code (success, cancellation, or failure).
+	 * @see {@link EnumResultStatus}
+	 */
+	code: EnumResultStatus;
+	/**
+	 * Optional error message (typically populated when failed).
+	 */
+	message?: string;
 };
 
 /**
@@ -162,31 +166,31 @@ export type ResultStatus = {
  * @public
  */
 export interface DocumentResult {
-  /**
-   * Status of the scan operation.
-   * @public
-   */
-  status: ResultStatus;
-  /**
-   * Perspective-corrected and enhanced image.
-   * @public
-   */
-  correctedImageResult?: DeskewedImageResultItem;
-  /**
-   * Original captured image before processing.
-   * @public
-   */
-  originalImageResult?: DSImageData;
-  /**
-   * Detected document boundaries (quadrilateral).
-   * @public
-   */
-  detectedQuadrilateral?: Quadrilateral;
-  /**
-   * Internal property tracking capture method.
-   * @internal
-   */
-  _flowType?: EnumFlowType;
+	/**
+	 * Status of the scan operation.
+	 * @public
+	 */
+	status: ResultStatus;
+	/**
+	 * Perspective-corrected and enhanced image.
+	 * @public
+	 */
+	correctedImageResult?: DeskewedImageResultItem;
+	/**
+	 * Original captured image before processing.
+	 * @public
+	 */
+	originalImageResult?: DSImageData;
+	/**
+	 * Detected document boundaries (quadrilateral).
+	 * @public
+	 */
+	detectedQuadrilateral?: Quadrilateral;
+	/**
+	 * Internal property tracking capture method.
+	 * @internal
+	 */
+	_flowType?: EnumFlowType;
 }
 
 /**
@@ -212,7 +216,9 @@ export interface DocumentResult {
  *
  * @public
  */
- export type ToolbarButtonConfig = Partial<Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">>;
+export type ToolbarButtonConfig = Partial<
+	Pick<ToolbarButton, "icon" | "label" | "className" | "isHidden">
+>;
 
 /**
  * Interface defining toolbar button properties and behavior.
@@ -223,53 +229,53 @@ export interface DocumentResult {
  * @public
  */
 export interface ToolbarButton {
-  /**
-   * Unique identifier for the button.
-   *
-   * @public
-   */
-  id: string;
-  /**
-   * Path or data URL to the button icon image.
-   *
-   * @public
-   */
-  icon: string;
-  /**
-   * Text label displayed below the button icon.
-   *
-   * @public
-   */
-  label: string;
-  /**
-   * Click handler function invoked when the button is clicked.
-   *
-   * @remarks
-   * This handler can be synchronous or asynchronous. When provided through {@link ToolbarButtonConfig}, it overrides the button's default behavior.
-   *
-   * @public
-   */
-  onClick?: () => void | Promise<void>;
-  /**
-   * Additional CSS class name to apply to the button element.
-   *
-   * @public
-   */
-  className?: string;
-  /**
-   * Flag indicating whether the button is disabled (non-interactive).
-   *
-   * @defaultValue false
-   *
-   * @public
-   */
-  isDisabled?: boolean;
-  /**
-   * Flag indicating whether the button is hidden from the toolbar.
-   *
-   * @defaultValue false
-   *
-   * @public
-   */
-  isHidden?: boolean;
+	/**
+	 * Unique identifier for the button.
+	 *
+	 * @public
+	 */
+	id: string;
+	/**
+	 * Path or data URL to the button icon image.
+	 *
+	 * @public
+	 */
+	icon: string;
+	/**
+	 * Text label displayed below the button icon.
+	 *
+	 * @public
+	 */
+	label: string;
+	/**
+	 * Click handler function invoked when the button is clicked.
+	 *
+	 * @remarks
+	 * This handler can be synchronous or asynchronous. When provided through {@link ToolbarButtonConfig}, it overrides the button's default behavior.
+	 *
+	 * @public
+	 */
+	onClick?: () => void | Promise<void>;
+	/**
+	 * Additional CSS class name to apply to the button element.
+	 *
+	 * @public
+	 */
+	className?: string;
+	/**
+	 * Flag indicating whether the button is disabled (non-interactive).
+	 *
+	 * @defaultValue false
+	 *
+	 * @public
+	 */
+	isDisabled?: boolean;
+	/**
+	 * Flag indicating whether the button is hidden from the toolbar.
+	 *
+	 * @defaultValue false
+	 *
+	 * @public
+	 */
+	isHidden?: boolean;
 }
