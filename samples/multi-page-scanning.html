@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dynamsoft Mobile Document Scanner - Multi-Page Scanning</title>
+		<style>
+			#results canvas {
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Dynamsoft Mobile Document Scanner</h1>
+		<div id="results"></div>
+
+		<script type="module">
+			import { DocumentScanner } from "../dist/dds.bundle.esm.js";
+
+			const resultContainer = document.querySelector("#results");
+
+			const documentScanner = new DocumentScanner({
+				license: "YOUR_LICENSE_KEY_HERE",
+				// Self-host the DCV engine bundle + runtime data from the root dev
+				// server's /public (mirrored there by the root vite config).
+				engineResourcePaths: {
+					dcvBundle: "/dynamsoft-capture-vision-bundle/dist",
+					dcvData: "/dynamsoft-capture-vision-data",
+				},
+				scannerViewConfig: {
+					cameraEnhancerUIPath: "../dist/document-scanner.ui.xml",
+					enableAutoCropMode: true,
+					enableSmartCaptureMode: true,
+				},
+				// Keep the camera open and emit each captured page as it is scanned.
+				enableContinuousScanning: true,
+				onDocumentScanned: (result) => {
+					resultContainer.appendChild(result.correctedImageResult.toCanvas());
+				},
+			});
+
+			documentScanner.launch();
+		</script>
+	</body>
+</html>

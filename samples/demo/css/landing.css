@@ -1,0 +1,320 @@
+/* Landing — #mobile-view (banner + white card) or #desktop-view
+   (QR + quick-start panel), depending on viewport width. */
+
+body[data-view="landing"] #landing-section {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Shared centered column-flex containers. */
+.container,
+.qr-container,
+.mobile-landing-content,
+.mobile-landing-brand,
+.mobile-landing-actions,
+.quick-start-actions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/* Desktop landing — container + header + description. */
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+	flex: 1;
+	justify-content: flex-start;
+	width: 100%;
+	overflow-y: auto;
+}
+
+.header {
+	text-align: center;
+	padding: 1rem 0;
+	font-size: 36px;
+	font-weight: 600;
+	color: var(--fg);
+}
+
+.description {
+	text-align: center;
+	max-width: 800px;
+	margin: 0 auto 20px;
+	color: var(--fg-muted);
+	line-height: 1.5;
+}
+
+/* Desktop landing — QR + quick-start panel. */
+.qr-container {
+	margin: 30px 0;
+}
+
+.qr-code {
+	width: 150px;
+	height: 150px;
+	margin: 20px 0;
+	background: var(--bg-light);
+	padding: 8px;
+}
+
+.quick-start {
+	background-color: var(--bg-card);
+	padding: 24px 20px;
+	max-width: 800px;
+	width: 100%;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.quick-start-title {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--fg);
+	margin-bottom: 16px;
+}
+
+.quick-start-actions {
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.note {
+	color: var(--fg-faint);
+	font-size: 0.9rem;
+	line-height: 1.5;
+	margin: 0 auto;
+	max-width: 480px;
+}
+
+/* Compact button — desktop quick-start actions. */
+.secondary-button.compact {
+	background-color: var(--bg-button);
+	color: var(--fg);
+	font-weight: var(--button-font-weight);
+	min-width: var(--button-min-width);
+	padding: var(--button-padding);
+	font-size: var(--button-font-size);
+}
+
+.secondary-button.compact:hover {
+	background-color: var(--bg-button-hover);
+}
+
+.secondary-button.compact:disabled {
+	background-color: var(--bg-disabled);
+	color: var(--fg-mono);
+	cursor: not-allowed;
+}
+
+/* Mobile landing — banner over white content card. */
+.mobile-landing {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-height: 100dvh;
+	background: var(--bg-light);
+	color: var(--fg-on-light);
+}
+
+/* Product photo at 45% of viewport height; cover crops the square source into
+   the wide banner. The gradient adds a subtle dark overlay for depth. */
+.mobile-landing-banner {
+	flex: 0 0 auto;
+	height: 45dvh;
+	background:
+		linear-gradient(0deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)),
+		url("../assets/banner.jpg") center / cover no-repeat;
+}
+
+.mobile-landing-content {
+	flex: 0 0 auto;
+	gap: 32px;
+	padding: 40px 16px 50px;
+}
+
+.mobile-landing-brand {
+	gap: 4px;
+	max-width: 322px;
+	width: 100%;
+}
+
+.mobile-landing-logo {
+	display: inline-flex;
+}
+
+.mobile-landing-logo img {
+	height: 40px;
+	width: auto;
+	display: block;
+}
+
+.mobile-landing-title {
+	font-size: 24px;
+	font-weight: 500;
+	line-height: 1.5;
+	letter-spacing: -0.01em;
+	color: var(--fg-on-light);
+	text-align: center;
+}
+
+.mobile-landing-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-width: 322px;
+	width: 100%;
+	text-align: center;
+}
+
+.mobile-landing-tagline {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--fg-on-light);
+}
+
+.mobile-landing-description {
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.5;
+	color: var(--fg-on-light);
+}
+
+.mobile-landing-actions {
+	gap: 16px;
+	width: 100%;
+	max-width: 370px;
+}
+
+.mobile-landing-primary {
+	min-width: var(--button-min-width);
+	height: 48px;
+	font-size: var(--button-font-size);
+	font-weight: var(--button-font-weight);
+	line-height: 1.4;
+	padding: 0 16px;
+	background: var(--fg-on-light);
+	color: var(--bg-light);
+}
+
+.mobile-landing-primary:hover {
+	background: var(--bg-card-alt);
+}
+
+.mobile-landing-primary:disabled {
+	background: var(--bg-disabled);
+	color: var(--fg-mono);
+	cursor: not-allowed;
+}
+
+/* Privacy disclaimer — dark-theme defaults; the mobile override below
+   adjusts for the white card. */
+.privacy-disclaimer {
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	color: var(--fg-faint);
+	text-align: center;
+	padding: 0 24px;
+}
+
+.privacy-disclaimer a {
+	color: var(--fg);
+	font-weight: 500;
+	text-decoration: underline;
+}
+
+/* Light-card override (mobile): softer link to avoid harsh contrast. */
+.mobile-landing-content .privacy-disclaimer {
+	color: var(--fg-on-light);
+}
+
+.mobile-landing-content .privacy-disclaimer a {
+	color: var(--fg-on-light-muted);
+}
+
+/* Separate the disclaimer from the .note above it. */
+.quick-start .privacy-disclaimer {
+	margin-top: 12px;
+}
+
+/* Error message — mobile + desktop landings. */
+.error-message {
+	background: var(--error-bg);
+	color: var(--error-fg);
+	padding: 14px 16px;
+	border-left: 3px solid var(--error-border);
+	margin-top: 12px;
+	width: 100%;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+#home-error {
+	width: 100%;
+	max-width: 370px;
+}
+
+#home-error:empty {
+	display: none;
+}
+
+/* Light variant for the white mobile card. */
+.mobile-landing-content .error-message {
+	background: var(--error-bg-light);
+	color: var(--error-fg-light);
+	border-left-color: var(--error-border);
+}
+
+/* Landing swap is pure CSS so the correct view renders before any JS runs
+   (otherwise the mobile view flashes on desktop). Both default to display:flex
+   from the centered-column-flex group; these ID rules outrank the class. */
+#desktop-view {
+	display: none;
+}
+
+@media (min-width: 1024px) {
+	#mobile-view {
+		display: none;
+	}
+
+	#desktop-view {
+		display: flex;
+	}
+}
+
+/* Below lg — mobile landing renders its own logo, so hide the global. */
+@media (max-width: 1023px) {
+	body[data-view="landing"] #page-logo {
+		display: none;
+	}
+
+	.container {
+		padding: 10px 16px;
+	}
+
+	.header {
+		font-size: 28px;
+		padding-top: 0.5rem;
+		padding-bottom: 1rem;
+	}
+}
+
+/* Landscape phones — tighten the content; the banner is capped by its
+   own max-height. */
+@media (orientation: landscape) and (max-width: 1023px) {
+	.mobile-landing-content {
+		padding: 24px 16px 56px;
+		gap: 20px;
+	}
+}
+
+/* lg+ desktop landing — ensure the body is tall enough that the absolute
+   chat tab settles below content. */
+@media (min-width: 1024px) {
+	body[data-view="landing"] {
+		min-height: var(--landing-desktop-min-height);
+	}
+}
