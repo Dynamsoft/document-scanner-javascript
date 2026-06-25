@@ -1,6 +1,6 @@
 {
 	"name": "dynamsoft-document-scanner",
-	"version": "1.5.0",
+	"version": "1.5.0-beta202606250001",
 	"description": "Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows.",
 	"files": [
 		"/dist",
