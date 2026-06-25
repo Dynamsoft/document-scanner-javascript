@@ -41,12 +41,12 @@
 		"document scanning",
 		"js",
 		"javascript",
-    "dynamsoft",
-    "passport",
-    "scanner",
-    "ui",
-    "camera",
-    "vision"
+		"dynamsoft",
+		"passport",
+		"scanner",
+		"ui",
+		"camera",
+		"vision"
 	],
 	"author": {
 		"name": "Dynamsoft",
