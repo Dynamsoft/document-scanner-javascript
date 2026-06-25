@@ -251,6 +251,8 @@ export default class DocumentCorrectionView {
 		if (container) container.appendChild(correctionViewWrapper);
 
 		this.imageEditorView = await ImageEditorView.createInstance(imageEditorViewElement);
+		// Disable the built-in magnifier loupe. TODO: implement properly next version.
+		(this.imageEditorView as unknown as { isUseMagnifier: boolean }).isUseMagnifier = false;
 		this.layer = this.imageEditorView.createDrawingLayer();
 		this.imageEditorView.setOriginalImage(this.originalImage);
 
