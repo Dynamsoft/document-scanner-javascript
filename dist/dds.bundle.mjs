@@ -4,7 +4,7 @@
 * @website http://www.dynamsoft.com
 * @copyright Copyright 2026, Dynamsoft Corporation
 * @author Dynamsoft
-* @version 1.5.0
+* @version 1.5.0-beta202606250003
 * @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v3.2.2000.
 * More info on DDS JS: https://www.dynamsoft.com/mobile-document-scanner/docs/web/introduction/index.html
 */
@@ -1388,7 +1388,7 @@ function je(e, t) {
 	return {
 		...t,
 		imageData: {
-			bytes: n ? new Uint8Array(n.data.buffer) : new Uint8Array(),
+			bytes: n ? new Uint8Array(n.data.buffer) : /* @__PURE__ */ new Uint8Array(),
 			width: e.width,
 			height: e.height,
 			stride: e.width * 4,

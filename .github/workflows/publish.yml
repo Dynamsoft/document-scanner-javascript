@@ -30,7 +30,7 @@ jobs:
         # not render GFM admonitions.
       - name: Strip GFM admonitions from README (npm only)
         run: |
-          sed -i -E 's/^([[:space:]]*>)[[:space:]]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$/\1 **\L\u\2**/Ig' README.md
+          sed -i -E 's/^([[:space:]]*>)[[:space:]]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$/\1 **\L\u\2**\n\1/Ig' README.md
 
       # Reuse same npm pack by both the upload and publish so release asset
       # matches npm tarball
