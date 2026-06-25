@@ -4,20 +4,20 @@
  * @public
  */
 interface LoadingScreenOptions {
-  /**
-   * Optional message to display below the spinner.
-   *
-   * @public
-   */
-  message?: string;
-  /**
-   * Spinner size in pixels.
-   *
-   * @defaultValue 32
-   *
-   * @public
-   */
-  spinnerSize?: number;
+	/**
+	 * Optional message to display below the spinner.
+	 *
+	 * @public
+	 */
+	message?: string;
+	/**
+	 * Spinner size in pixels.
+	 *
+	 * @defaultValue 32
+	 *
+	 * @public
+	 */
+	spinnerSize?: number;
 }
 
 /**
@@ -37,20 +37,20 @@ interface LoadingScreenOptions {
  * @public
  */
 export function showLoadingScreen(container: HTMLElement, options: LoadingScreenOptions = {}) {
-  const { message, spinnerSize = 32 } = options;
+	const { message, spinnerSize = 32 } = options;
 
-  const overlayDiv = document.createElement("div");
-  overlayDiv.className = "dds-loading-screen";
+	const overlayDiv = document.createElement("div");
+	overlayDiv.className = "dds-loading-screen";
 
-  const loadingDiv = document.createElement("div");
-  loadingDiv.className = "dds-loading";
+	const loadingDiv = document.createElement("div");
+	loadingDiv.className = "dds-loading";
 
-  // Create the loading content container
-  const contentDiv = document.createElement("div");
-  contentDiv.className = "dds-loading-content";
+	// Create the loading content container
+	const contentDiv = document.createElement("div");
+	contentDiv.className = "dds-loading-content";
 
-  // Add spinner
-  const spinner = `
+	// Add spinner
+	const spinner = `
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
@@ -65,74 +65,72 @@ export function showLoadingScreen(container: HTMLElement, options: LoadingScreen
       <path d="M12 3a9 9 0 1 0 9 9"></path>
     </svg>
   `;
-  contentDiv.innerHTML = spinner;
+	contentDiv.innerHTML = spinner;
 
-  // Add message only if provided
-  if (message) {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "dds-loading-message";
-    messageDiv.textContent = message;
-    contentDiv.appendChild(messageDiv);
-  }
+	// Add message only if provided
+	if (message) {
+		const messageDiv = document.createElement("div");
+		messageDiv.className = "dds-loading-message";
+		messageDiv.textContent = message;
+		contentDiv.appendChild(messageDiv);
+	}
 
-  loadingDiv.appendChild(contentDiv);
-  overlayDiv.appendChild(loadingDiv);
-  container.appendChild(overlayDiv);
+	loadingDiv.appendChild(contentDiv);
+	overlayDiv.appendChild(loadingDiv);
+	container.appendChild(overlayDiv);
 
-  return {
-    /**
-     * The loading screen overlay element.
-     *
-     * @public
-     */
-    element: overlayDiv,
-    /**
-     * Update or remove the loading message.
-     *
-     * @param newMessage - The new message to display, or null to remove the message
-     *
-     * @public
-     */
-    updateMessage: (newMessage: string | null) => {
-      let messageEl = loadingDiv.querySelector(".dds-loading-message");
+	return {
+		/**
+		 * The loading screen overlay element.
+		 *
+		 * @public
+		 */
+		element: overlayDiv,
+		/**
+		 * Update or remove the loading message.
+		 *
+		 * @param newMessage - The new message to display, or null to remove the message
+		 *
+		 * @public
+		 */
+		updateMessage: (newMessage: string | null) => {
+			let messageEl = loadingDiv.querySelector(".dds-loading-message");
 
-      if (newMessage === null) {
-        // Remove message if exists
-        messageEl?.remove();
-        return;
-      }
+			if (newMessage === null) {
+				// Remove message if exists
+				messageEl?.remove();
+				return;
+			}
 
-      if (messageEl) {
-        // Update existing message
-        messageEl.textContent = newMessage;
-      } else {
-        // Create new message element
-        messageEl = document.createElement("div");
-        messageEl.className = "dds-loading-message";
-        messageEl.textContent = newMessage;
-        contentDiv.appendChild(messageEl);
-      }
-    },
-    /**
-     * Hide the loading screen with a fade-out animation.
-     *
-     * @remarks
-     * The overlay is removed from the DOM after a 200ms fade-out transition.
-     *
-     * @public
-     */
-    hide: () => {
-      if (overlayDiv?.parentNode) {
-        overlayDiv.classList.add("fade-out");
-        setTimeout(() => {
-          overlayDiv.parentNode?.removeChild(overlayDiv);
-        }, 200);
-      }
-    },
-  };
+			if (messageEl) {
+				// Update existing message
+				messageEl.textContent = newMessage;
+			} else {
+				// Create new message element
+				messageEl = document.createElement("div");
+				messageEl.className = "dds-loading-message";
+				messageEl.textContent = newMessage;
+				contentDiv.appendChild(messageEl);
+			}
+		},
+		/**
+		 * Hide the loading screen with a fade-out animation.
+		 *
+		 * @remarks
+		 * The overlay is removed from the DOM after a 200ms fade-out transition.
+		 *
+		 * @public
+		 */
+		hide: () => {
+			if (overlayDiv?.parentNode) {
+				overlayDiv.classList.add("fade-out");
+				setTimeout(() => {
+					overlayDiv.parentNode?.removeChild(overlayDiv);
+				}, 200);
+			}
+		},
+	};
 }
-
-
 
 /**
  * Default CSS styles for loading screens.
@@ -150,7 +148,7 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #323234;
+    background-color: var(--dds-bg-toolbar, #323234);
     z-index: 998;
     opacity: 1;
     transition: opacity 0.2s ease-out;
@@ -182,7 +180,7 @@ export const DEFAULT_LOADING_SCREEN_STYLE = `
 
   .dds-loading-message {
     color: white;
-    font-family: "Verdana";
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 14px;
     text-align: center;
     max-width: 200px;
