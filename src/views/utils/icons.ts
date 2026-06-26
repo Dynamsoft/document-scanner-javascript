@@ -1,5 +1,8 @@
 export const DDS_ICONS = {
-  fullImage: `
+	rotate: `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#fff" d="M15.55 5.55 11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10l4.55-4.45zM19.93 11c-.17-1.39-.72-2.73-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47h2.02zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03zm3.89-2.42 1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48z"/></svg>`,
+	filter: `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#fff" d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>`,
+	plus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#fff" d="M13.25 4.75a1.25 1.25 0 0 0-2.5 0v6h-6a1.25 1.25 0 0 0 0 2.5h6v6a1.25 1.25 0 0 0 2.5 0v-6h6a1.25 1.25 0 0 0 0-2.5h-6v-6z"/></svg>`,
+	fullImage: `
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewBox="0 0 25 25">
   <defs>
     <clipPath id="fullImageclip-path">
@@ -29,7 +32,7 @@ export const DDS_ICONS = {
 </svg>
 
 `,
-  autoBounds: `<svg xmlns="http://www.w3.org/2000/svg" width="25.04" height="25" viewBox="0 0 25.04 25">
+	autoBounds: `<svg xmlns="http://www.w3.org/2000/svg" width="25.04" height="25" viewBox="0 0 25.04 25">
   <g id="bounds-detection" transform="translate(0.02)">
     <g id="Group_306" data-name="Group 306" transform="translate(-0.02)">
       <path id="Path_982" data-name="Path 982" d="M.791,8.146h.02a.468.468,0,0,0,.516-.416.455.455,0,0,0,0-.063V1.927a1,1,0,0,1,1-1H7.957A.468.468,0,0,0,8.436.492.468.468,0,0,0,7.977.013H2.247A1.913,1.913,0,0,0,.333,1.927v5.74A.468.468,0,0,0,.791,8.146Z" transform="translate(-0.293 -0.012)" fill="#fff"/>
@@ -44,7 +47,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+	finish: `<svg id="finish" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
   <defs>
     <clipPath id="finishclip-path">
       <rect id="Rectangle_2775" data-name="Rectangle 2775" width="24" height="24" fill="currentColor"/>
@@ -56,7 +59,7 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  upload: `<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+	upload: `<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
   <defs>
     <style>
       .cls-1 {
@@ -79,30 +82,22 @@ export const DDS_ICONS = {
   </g>
 </svg>
 `,
-  share: `
+	share: `
 <svg id="sharePng" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #fff;
-        stroke-width: 0px;
-      }
-    </style>
-  </defs>
   <g id="sharePng">
-    <path class="cls-1"
+    <path fill="#fff" stroke-width="0"
       d="m17.05,14.93c-.27,0-.48.22-.48.5v5.95l-2.97-6.18c-.1-.21-.32-.32-.54-.26-.22.05-.37.25-.37.49v8.07c0,.28.21.5.48.5s.48-.22.48-.5v-5.95l2.97,6.18c.08.17.25.28.43.28.04,0,.07,0,.11-.01.22-.05.37-.25.37-.49v-8.07c0-.28-.21-.5-.48-.5Z" />
-    <path class="cls-1"
+    <path fill="#fff" stroke-width="0"
       d="m8.64,14.93h-1.94c-.27,0-.48.22-.48.5v8.07c0,.28.21.5.48.5s.48-.22.48-.5v-3.53h1.46c1.34,0,2.42-1.13,2.42-2.52s-1.09-2.52-2.42-2.52Zm0,4.03h-1.46v-3.04h1.46c.81,0,1.46.68,1.46,1.52s-.66,1.52-1.46,1.52Z" />
-    <path class="cls-1"
+    <path fill="#fff" stroke-width="0"
       d="m23.52,18.62c.27,0,.48-.22.48-.5v-.67c0-1.39-1.09-2.52-2.42-2.52s-2.42,1.13-2.42,2.52v4.03c0,1.39,1.09,2.52,2.42,2.52s2.42-1.13,2.42-2.52v-.67c0-.28-.21-.5-.48-.5h-1.29c-.27,0-.48.22-.48.5s.21.5.48.5h.81v.17c0,.84-.65,1.52-1.46,1.52s-1.46-.68-1.46-1.52v-4.03c0-.84.65-1.52,1.46-1.52s1.46.68,1.46,1.52v.67c0,.28.21.5.48.5Z" />
-    <path class="cls-1"
+    <path fill="#fff" stroke-width="0"
       d="m3.65,22.96H1.58c-.27,0-.49-.21-.49-.48V1.52c0-.26.22-.48.49-.48h12.45c.16,0,.31.03.47.05v3.42c0,.84.71,1.52,1.58,1.52h3.55c.01.15.05.3.05.45v6.01c0,.29.24.52.54.52s.54-.23.54-.52v-6.01c0-.33-.03-.65-.08-.97,0,0,0,0,0,0,0,0,0-.02,0-.02-.45-2.77-2.72-4.97-5.6-5.4-.01,0-.02,0-.03,0,0,0,0,0,0,0-.33-.05-.66-.08-1-.08H1.58C.71,0,0,.68,0,1.52v20.96c0,.84.71,1.52,1.58,1.52h2.07c.3,0,.54-.23.54-.52s-.24-.52-.54-.52ZM15.58,1.28c1.86.52,3.31,1.92,3.85,3.71h-3.36c-.27,0-.49-.21-.49-.48V1.28Z" />
     <path transform="scale(0.4, -0.4) translate(8, -30)" stroke="#fff" fill="#fff" stroke-width="1px" d="M19.489,15.009h0c-.008,0-.014,0-.022,0a4.465,4.465,0,0,0-3.749,2.052l-7-3.5a4.482,4.482,0,0,0,0-3.1l7-3.5a4.466,4.466,0,0,0,3.771,2.053l.018,0A4.516,4.516,0,1,0,15.282,6.06L8.257,9.574a4.49,4.49,0,1,0-4.793,6.814,4.548,4.548,0,0,0,1.043.122,4.468,4.468,0,0,0,3.755-2.056l7.018,3.511a4.485,4.485,0,1,0,4.209-2.956M17.13,1.914a3.508,3.508,0,1,1,2.366,6.1h-.01l-.011,0a3.476,3.476,0,0,1-3.112-1.932l0-.006a3.525,3.525,0,0,1,.769-4.162M3.693,15.415a3.5,3.5,0,1,1,3.931-4.967v0a3.47,3.47,0,0,1,0,3.119l0,0a3.479,3.479,0,0,1-3.931,1.842m17.636,7.066a3.5,3.5,0,0,1-4.971-4.53l0,0a3.477,3.477,0,0,1,3.126-1.936l.011,0a3.5,3.5,0,0,1,1.831,6.472" />
   </g>
 </svg>
 `,
-  normalize: `<svg id="normalize" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="24" viewBox="0 0 19 24">
+	normalize: `<svg id="normalize" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="24" viewBox="0 0 19 24">
 <defs>
   <clipPath id="normalizeclip-path">
     <rect id="Rectangle_2772" data-name="Rectangle 2772" width="19" height="24" fill="#fff"/>
@@ -124,7 +119,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  retake: `<svg id="re-take" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.761" height="23" viewBox="0 0 28.761 23">
+	retake: `<svg id="re-take" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.761" height="23" viewBox="0 0 28.761 23">
 <defs>
 <clipPath id="retakeclip-path">
   <rect id="Rectangle_2773" data-name="Rectangle 2773" width="28.761" height="23" fill="#fff"/>
@@ -136,7 +131,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  complete: `
+	complete: `
 <svg id="continue" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
 <defs>
 <clipPath id="continueclip-path">
@@ -149,7 +144,7 @@ export const DDS_ICONS = {
 </g>
 </svg>
 `,
-  downloadPNG: `
+	downloadPNG: `
 <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
 <defs>
 <style>

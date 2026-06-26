@@ -85,7 +85,7 @@
           <div class="dce-mn-resolutions">
             <div style="font-size: 12px; color: white; margin: 12px">Resolution</div>
             <div class="dce-mn-resolution-option" data-width="640" data-height="480">480P</div>
-            <div class="dce-mn-resolution-option" data-width="1080" data-height="720">720P</div>
+            <div class="dce-mn-resolution-option" data-width="1280" data-height="720">720P</div>
             <div class="dce-mn-resolution-option" data-width="1920" data-height="1080">1080P</div>
             <div class="dce-mn-resolution-option" data-width="2560" data-height="1440">2K</div>
             <div class="dce-mn-resolution-option" data-width="3840" data-height="2160">4K</div>
@@ -381,7 +381,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613" data-name="Group 613" clip-path="url(#clip-pathbounds-detection-on)">
-                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575"
                   data-name="Path 1575"
@@ -410,7 +410,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614" data-name="Group 614" clip-path="url(#clip-pathdce-mn-bounds-off)">
-                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578"
                   data-name="Path 1578"
@@ -495,7 +495,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613_smart_capture_on" data-name="Group 613" clip-path="url(#clip-pathsmart-capture-on)">
-                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574_smart_capture_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575_smart_capture_on"
                   data-name="Path 1575"
@@ -524,7 +524,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614_smart_capture_off" data-name="Group 614" clip-path="url(#clip-pathsmart-capture-off)">
-                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577_smart_capture_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578_smart_capture_off"
                   data-name="Path 1578"
@@ -597,7 +597,7 @@
                 </clipPath>
               </defs>
               <g id="Group_613_auto_crop_on" data-name="Group 613" clip-path="url(#clip-pathauto-crop-on)">
-                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#43cc48" />
+                <path id="Path_1574_auto_crop_on" data-name="Path 1574" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-active-indicator, #43cc48)" />
                 <path
                   id="Path_1575_auto_crop_on"
                   data-name="Path 1575"
@@ -626,7 +626,7 @@
                 </clipPath>
               </defs>
               <g id="Group_614_auto_crop_off" data-name="Group 614" clip-path="url(#clip-pathauto-crop-off)">
-                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="#575757" />
+                <path id="Path_1577_auto_crop_off" data-name="Path 1577" d="M10,0A10,10,0,1,1,0,10,10,10,0,0,1,10,0" fill="var(--dds-inactive-indicator, #575757)" />
                 <path
                   id="Path_1578_auto_crop_off"
                   data-name="Path 1578"
@@ -662,7 +662,7 @@
               cy="48"
               r="35"
               transform="translate(49 577)"
-              fill="#fe8e14"
+              fill="var(--dds-primary, #fe8e14)"
             />
             <!-- Annulus ring around the button -->
             <circle
@@ -671,7 +671,7 @@
               r="45"
               transform="translate(49 577)"
               fill="none"
-              stroke="#fe8e14"
+              stroke="var(--dds-primary, #fe8e14)"
               stroke-width="6"
               opacity="1"
             />
@@ -830,13 +830,14 @@
       user-select: none;
       display: flex;
       flex-direction: column;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
     }
 
     .dce-header {
       top: 0;
       height: 3rem;
       width: 100%;
-      background-color: #323234;
+      background-color: var(--dds-bg-toolbar, #323234);
       display: flex;
       align-items: center;
       touch-action: none;
@@ -880,7 +881,7 @@
       border-radius: max(1.5vmin, 12px);
       background: rgba(100, 100, 100, 0.5);
       cursor: pointer;
-      stroke: white;
+      stroke: var(--dds-toolbar-btn-inactive, white);
       stroke-width: 4;
     }
 
@@ -911,7 +912,26 @@
     }
 
     .dce-mn-select-camera-down-icon {
-      color: white;
+      color: var(--dds-toolbar-btn-inactive, white);
+    }
+
+    /* Scanner view header nav icons. The fallback color setter covers any path
+       using fill="currentColor" or stroke="currentColor". */
+    .dce-mn-select-camera-icon svg,
+    .dce-mn-upload-image-icon svg {
+      color: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    .dce-mn-select-camera-icon svg [stroke],
+    .dce-mn-upload-image-icon svg [stroke] {
+      stroke: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    .dce-mn-select-camera-icon svg [fill]:not([fill="none"]),
+    .dce-mn-upload-image-icon svg [fill]:not([fill="none"]) {
+      fill: var(--dds-toolbar-btn-inactive, #fff);
+    }
+    /* Torch: only the root <svg>, so the mask's literal #fff/#000 fills aren't overridden. */
+    .dce-mn-torch > svg {
+      fill: var(--dds-toolbar-btn-inactive, #fff);
     }
 
     .dce-mn-resolution-box {
@@ -923,7 +943,7 @@
       line-height: max(2vmin, 16px);
       padding: max(0.5vmin, 4px);
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: center;
       color: #fff;
       border-radius: max(0.75vmin, 6px);
@@ -932,7 +952,7 @@
     }
 
     .dce-mn-camera-and-resolution-settings {
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       position: absolute;
       top: calc(24px + max(3vmin, 24px));
       left: 0;
@@ -1002,7 +1022,7 @@
       text-align: center;
       color: inherit;
       font-size: 12px;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
     }
 
     .dce-footer {
@@ -1042,11 +1062,11 @@
       position: absolute;
       left: 75%;
       bottom: 3rem;
-      background-color: #fe8e14;
+      background-color: var(--dds-primary, #fe8e14);
       color: white;
       padding: 0.5rem 1.25rem;
       border-radius: 1.5rem;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       font-size: 12px;
       font-weight: bold;
       cursor: pointer;
@@ -1135,7 +1155,7 @@
       left: 50%;
       bottom: 50%;
       transform: translateX(-50%);
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       color: #fff;
       pointer-events: none;
     }
@@ -1155,7 +1175,7 @@
       left: 50%;
       bottom: 50%;
       transform: translateX(-50%);
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       color: #fff;
       border-radius: max(0.5vmin, 4px);
       background: rgba(100, 100, 100, 0.5);
@@ -1185,7 +1205,7 @@
       padding: max(0.5vmin, 4px) max(1vmin, 8px);
       margin: 12px;
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: left;
       color: #fff;
       border-radius: max(0.75vmin, 6px);
@@ -1204,7 +1224,7 @@
       padding: max(0.5vmin, 4px);
       margin: 12px;
       box-sizing: border-box;
-      font-family: Verdana;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
       text-align: center;
       color: #fff;
       border-radius: max(0.75vmin, 6px);

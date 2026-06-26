@@ -1,7 +1,13 @@
-<div class="dds-hello-world-page">
-  <div class="dds-title">
-    <h2 class="dds-title-text">Hello World for Angular</h2>
-    <img class="dds-title-logo" src="/favicon.ico" alt="logo" />
-  </div>
-  <div id="results"></div>
+<div class="mds-hello-world-page">
+	<div class="mds-title">
+		<h2 class="mds-title-text">Hello World for Angular</h2>
+	</div>
+	<div class="mds-result-container">
+		@if (result().image) {
+			<img class="result-img" [src]="result().image" alt="scanned document" />
+		}
+		@if (result().message) {
+			<div class="result-data">{{ result().message }}</div>
+		}
+	</div>
 </div>
