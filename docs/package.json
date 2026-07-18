@@ -1,0 +1,27 @@
+{
+	"name": "mds-docs",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=20.19.0"
+	},
+	"scripts": {
+		"api": "typedoc",
+		"dev": "npm run api && vitepress dev",
+		"build": "npm run api && vitepress build",
+		"preview": "vitepress preview",
+		"lint": "vp lint",
+		"fmt": "vp fmt",
+		"check": "vp check",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"build:versions": "ds-docs-build-versions"
+	},
+	"devDependencies": {
+		"@dynamsoft/vitepress-docs": "file:../../vitepress-docs",
+		"typedoc": "^0.28.5",
+		"typedoc-plugin-markdown": "^4.12.0",
+		"typedoc-vitepress-theme": "^1.1.2",
+		"vite-plus": "0.2.4",
+		"vitepress": "^2.0.0-alpha.18"
+	}
+}
