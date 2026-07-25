@@ -1,15 +1,4 @@
 {
-	"compilerOptions": {
-		"target": "ES2020",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"strict": true,
-		"noEmit": true,
-		"skipLibCheck": true,
-		"resolveJsonModule": true,
-		"allowJs": true,
-		"checkJs": true
-	},
-	"include": ["env.d.ts", ".vitepress/**/*.ts", ".vitepress/**/*.mts", ".vitepress/**/*.vue", "scripts/**/*.mjs"]
+	"extends": "@dynamsoft-docs/vitepress-docs/tsconfig.base.json",
+	"include": ["env.d.ts", ".vitepress/**/*.ts", ".vitepress/**/*.mts", ".vitepress/**/*.vue"]
 }

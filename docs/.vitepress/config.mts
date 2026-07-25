@@ -1,4 +1,4 @@
-import { defineDynamsoftConfig, loadApiSidebar } from "@dynamsoft/vitepress-docs/config";
+import { defineDynamsoftConfig, loadApiSidebar } from "@dynamsoft-docs/vitepress-docs/config";
 
 // defineDynamsoftConfig supplies the fleet-wide mechanics: versioned `base`
 // from themeConfig.docsRoot + the DOCS_VERSION env var, GitHub-style GFM
@@ -8,13 +8,6 @@ export default defineDynamsoftConfig({
 	title: "Mobile Document Scanner JS Edition",
 	description:
 		"Documentation for Dynamsoft Mobile Document Scanner JavaScript Edition (MDS): scan, enhance, and correct document images in the browser.",
-	vite: {
-		// Same binding as the SDK's dev server: reachable through the
-		// container's proxied interface, not just loopback.
-		server: {
-			host: "0.0.0.0",
-		},
-	},
 	// The React/Vue guides tell the reader to open the sample dev server
 	// (e.g. http://localhost:8080/index) — instructions, not dead links.
 	ignoreDeadLinks: [/^https?:\/\/localhost/],

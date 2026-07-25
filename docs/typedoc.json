@@ -1,20 +1,16 @@
 {
 	"$schema": "https://typedoc.org/schema.json",
+	"extends": ["@dynamsoft-docs/vitepress-docs/typedoc.base.json"],
 	"name": "Mobile Document Scanner API Reference",
-	"entryPoints": [
-		"../src/build/index.ts"
-	],
+	"entryPoints": ["../src/build/index.ts"],
 	"tsconfig": "../tsconfig.json",
-	"plugin": [
-		"typedoc-plugin-markdown",
-		"typedoc-vitepress-theme"
-	],
 	"out": "api",
 	"docsRoot": ".",
 	"gitRevision": "v1.4.2",
 	"sourceLinkTemplate": "https://github.com/Dynamsoft/document-scanner-javascript/blob/{gitRevision}/{path}#L{line}",
-	"cleanOutputDir": true,
-	"readme": "none",
+	// The v1.4.2-era TSDoc needs looser checking and the DCV custom
+	// modifier tags; the v1.5 line dropped these, so they stay here
+	// rather than in the theme's typedoc.base.json.
 	"skipErrorChecking": true,
 	"validation": {
 		"notExported": false,
@@ -23,22 +19,6 @@
 	"compilerOptions": {
 		"ignoreDeprecations": "6.0"
 	},
-	"excludePrivate": true,
-	"excludeInternal": true,
-	"githubPages": false,
-	"externalSymbolLinkMappings": {
-		"typescript": {
-			"File": "https://developer.mozilla.org/en-US/docs/Web/API/File"
-		},
-		"dynamsoft-capture-vision-bundle": {
-			"ImageEditorView": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
-			"DetectedQuadResultItem": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
-			"DT_Quad": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
-			"Quadrilateral": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
-			"DrawingLayer": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html"
-		}
-	},
-	"basePath": "..",
 	"modifierTags": [
 		"@alpha",
 		"@beta",
@@ -75,5 +55,18 @@
 		"@useDeclaredType",
 		"@primaryExport",
 		"@stable"
-	]
+	],
+	"externalSymbolLinkMappings": {
+		"typescript": {
+			"File": "https://developer.mozilla.org/en-US/docs/Web/API/File"
+		},
+		"dynamsoft-capture-vision-bundle": {
+			"ImageEditorView": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
+			"DetectedQuadResultItem": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
+			"DT_Quad": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
+			"Quadrilateral": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html",
+			"DrawingLayer": "https://www.dynamsoft.com/capture-vision/docs/web/programming/javascript/api-reference/index.html"
+		}
+	},
+	"basePath": ".."
 }

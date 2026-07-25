@@ -1,3 +1,3 @@
-import DynamsoftTheme from "@dynamsoft/vitepress-docs";
+import DynamsoftTheme from "@dynamsoft-docs/vitepress-docs";
 
 export default DynamsoftTheme;
