@@ -20,14 +20,18 @@ export default defineDynamsoftConfig({
 			api: "API Reference",
 		},
 		nav: [
-			{ text: "Download", link: "https://www.dynamsoft.com/mobile-document-scanner/downloads/" },
+			{
+				text: "Download",
+				link: "https://www.dynamsoft.com/mobile-document-scanner/downloads/",
+			},
 		],
 		sidebar: [
-			{ text: "Introduction", link: "/introduction/" },
+			{ text: "Introduction", link: "/" },
 			{
 				text: "User Guide",
+				link: "/guide/",
+				collapsed: false,
 				items: [
-					{ text: "Developer Guide", link: "/guide/" },
 					{ text: "Angular Guide", link: "/guide/angular" },
 					{ text: "React Guide", link: "/guide/react" },
 					{ text: "Vue Guide", link: "/guide/vue" },
@@ -36,6 +40,7 @@ export default defineDynamsoftConfig({
 			{
 				text: "API Reference",
 				link: "/api/",
+				collapsed: false,
 				items: loadApiSidebar(),
 			},
 			{ text: "Changelog", link: "/changelog" },

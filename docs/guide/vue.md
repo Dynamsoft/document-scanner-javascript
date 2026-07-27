@@ -23,7 +23,7 @@ Mobile Document Scanner integrates easily with Vue applications. Just as in plai
 ## Requirements
 
 - **Node.js 20.19.0 or later**
-- [Base requirements](/introduction/index.md#system-requirements)
+- [Base requirements](/index.md#system-requirements)
 
 ## License
 

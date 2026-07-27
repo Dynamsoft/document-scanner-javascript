@@ -10,7 +10,7 @@
 # Scan Documents with Mobile Document Scanner
 
 > [!TIP]
-> Read the [Introduction](/introduction/index.md) for common use cases, an overview of the SDK architecture, and system requirements.
+> Read the [Introduction](/index.md) for common use cases, an overview of the SDK architecture, and system requirements.
 
 Dynamsoft's **Mobile Document Scanner JavaScript Edition (MDS)** is a web SDK designed for scanning documents. MDS captures images of the documents and enhances their quality to professional standards, making it an ideal tool for mobile document scanning.
 
