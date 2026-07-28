@@ -1,4 +1,10 @@
 {
 	"extends": "@dynamsoft-docs/vitepress-docs/tsconfig.base.json",
-	"include": ["env.d.ts", ".vitepress/**/*.ts", ".vitepress/**/*.mts", ".vitepress/**/*.vue"]
+	"include": [
+		"env.d.ts",
+		".vitepress/**/*.ts",
+		".vitepress/**/*.mts",
+		".vitepress/**/*.vue",
+		"typedoc.config.mjs"
+	]
 }
