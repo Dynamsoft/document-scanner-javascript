@@ -1,0 +1,23 @@
+# The library at the root, and the docs site, which shares its lockfile.
+packages:
+  - "."
+  - "docs"
+catalog:
+  # Vite+ and its core release together, so their versions stay level. The core
+  # stands in for Vite, so Vitest, VitePress, and the plugins run on it.
+  vite-plus: 1.5.1
+  vite: npm:@voidzero-dev/vite-plus-core@1.5.1
+  # Vite+ pins its Vitest exactly, so the two Vitest packages move with it.
+  "@vitest/browser-playwright": 5.1.0
+  "@vitest/coverage-v8": 5.1.0
+overrides:
+  vite: "catalog:"
+peerDependencyRules:
+  allowedVersions:
+    # The core of Vite+ is Vite under its own version number.
+    vite: "1"
+auditConfig:
+  ignoreGhsas:
+    # minimatch before 11.0.1 can be slow on some glob patterns. Only TypeDoc uses it,
+    # with the patterns of the docs config, and TypeDoc 0.28 breaks on minimatch 11.
+    - GHSA-g3hv-75wg-m249

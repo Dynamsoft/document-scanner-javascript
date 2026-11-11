@@ -12,30 +12,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: Set up Node
-        uses: actions/setup-node@v6
+      # Install the whole workspace for `vp check` on `docs/`.
+      - name: Set up Vite+ and install
+        uses: voidzero-dev/setup-vp@v1.22.0
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          node-version-file: package.json
+          cache: true
+          run-install: |
+            - args: ["--frozen-lockfile"]
 
-      - name: Install dependencies
-        run: npm ci
+      # Check the release before it is published. The contract and end-to-end
+      # suites need a test license, which this job does not have.
+      - name: Format, lint and type check
+        run: vp check
+
+      - name: Unit tests and checks on the built files
+        run: vp test run --project 'unit*' --project artifacts
 
       - name: Build package
-        run: npm run build
+        run: vp run build
 
-        # Convert tags like `> [!NOTE]` to `> **Note**` because npm does
-        # not render GFM admonitions.
-      - name: Strip GFM admonitions from README (npm only)
+      # The repository README is a hand-written landing stub; npm should
+      # carry the full user guide, generated from the authored guide by
+      # the docs theme's npm-readme script (absolutizes site-relative
+      # links, downgrades GFM admonitions to the npm-safe `> **Note**`
+      # form). CI workspace only — a generated README is never tracked in
+      # git. The script is dependency-free and the theme repo is public,
+      # so a plain checkout + node run needs no npm install and no auth.
+      - name: Check out docs theme (npm README generator)
+        uses: actions/checkout@v7
+        with:
+          repository: dynamsoft-docs/vitepress-docs
+          path: vitepress-docs
+
+      - name: Generate npm README from the user guide
         run: |
-          sed -i -E 's/^([[:space:]]*>)[[:space:]]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][[:space:]]*$/\1 **\L\u\2**/Ig' README.md
+          node vitepress-docs/scripts/npm-readme.mjs docs/guide/index.md \
+            --site https://www.dynamsoft.com/mobile-document-scanner/docs/web/ > README.gen
+          mv README.gen README.md
 
-      # Reuse same npm pack by both the upload and publish so release asset
-      # matches npm tarball
+      # One tarball serves as the release asset and as the npm upload.
       - name: Pack the publishable tarball
-        run: npm pack
+        run: vp pm pack
 
       - name: Upload dist and npm tarball as release assets
         run: |
@@ -45,10 +65,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_NAME: ${{ github.event.release.tag_name }}
 
+      # The package manager publishes through trusted publishing, and pnpm adds
+      # provenance on its own. Its git checks guard a developer's machine, and they
+      # fail here for two reasons: the job runs on a release tag, not on main, and the
+      # generated README leaves the working tree unclean. A published GitHub
+      # release is the approval to publish.
       - name: Publish to npm
         run: |
           if [[ "${{ github.event.release.prerelease }}" != "false" ]]; then
-            npm publish *.tgz --tag beta
+            vp pm publish *.tgz --no-git-checks --tag beta
           else
-            npm publish *.tgz
+            vp pm publish *.tgz --no-git-checks
           fi

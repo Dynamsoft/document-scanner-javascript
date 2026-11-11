@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dynamsoft Mobile Document Scanner - Hello World</title>
+	</head>
+	<body>
+		<h1>Dynamsoft Mobile Document Scanner</h1>
+		<p id="status">Scanning…</p>
+		<a id="download" download="scan.pdf" hidden>Download the PDF</a>
+
+		<script type="module">
+			import { DocumentScanner } from "@dynamsoft/document-scanner";
+
+			const scanner = new DocumentScanner({
+				license: "YOUR_LICENSE_KEY_HERE",
+				resources: {
+					captureVision: { rootDirectory: `${location.origin}/engine/` },
+				},
+				output: { format: "pdf" },
+			});
+
+			const result = await scanner.scan();
+			const status = document.getElementById("status");
+			if (result.status === "success") {
+				status.textContent = `Scanned ${result.pages.length} page(s).`;
+				if (result.output?.format === "pdf") {
+					const download = document.getElementById("download");
+					download.href = URL.createObjectURL(result.output.document);
+					download.hidden = false;
+				}
+			} else if (result.status === "failed") {
+				status.textContent = `The scan failed (${result.error.kind}): ${result.error.message}`;
+			} else {
+				status.textContent = "The scan was cancelled.";
+			}
+		</script>
+	</body>
+</html>

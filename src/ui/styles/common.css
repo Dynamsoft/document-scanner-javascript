@@ -1,0 +1,259 @@
+/*
+	Sizes, resets, and the looks that several screens share. The resets are wrapped
+	in :where() so one class can override them.
+*/
+
+/*
+	The size variables: spacing, corner radius, and the sizes of controls, icons, and
+	text. Every screen sits inside the .mds-scanner element, so every screen gets
+	them. Each dialog sits outside that element, in its own shadow root. The capture
+	screen sets the variables too, so it works outside a session. The viewer areas of
+	the rectify and edit screens get the variables but not the resets below, because
+	Document Viewer styles its own elements.
+*/
+.mds-scanner,
+.mds-capture,
+.mds-overlay {
+	--mds-space-1: 4px;
+	--mds-space-2: 8px;
+	--mds-space-3: 12px;
+	--mds-space-4: 16px;
+	--mds-space-6: 24px;
+
+	--mds-radius: 6px;
+	--mds-radius-large: 12px;
+
+	/* The blur behind a panel that shows the screen through it. */
+	--mds-blur: 2px;
+
+	/* Touch target sizes. */
+	--mds-control: 40px;
+	--mds-control-large: 48px;
+	--mds-shutter: 64px;
+
+	--mds-icon: 24px;
+	--mds-icon-small: 16px;
+	--mds-badge-size: 20px;
+	--mds-dialog: 320px;
+
+	/*
+		Inter where the page has it. The document scanner loads no web font, so
+		elsewhere the system font shows.
+	*/
+	--mds-font: Inter, system-ui, sans-serif;
+	--mds-text: 14px;
+	--mds-text-small: 10px;
+	--mds-text-large: 16px;
+	/* The line heights of the dialogs' text. */
+	--mds-line: 20px;
+	--mds-line-large: 24px;
+}
+
+/*
+	The layers of the .mds-scanner element when it covers the viewport, and of the
+	dialogs, below the 32-bit maximum so a page can still go above the document
+	scanner. A modal dialog is above every z-index anyway. Both values are public and
+	stable (ScannerSettings.container).
+*/
+body > .mds-scanner,
+.mds-overlay {
+	--mds-z-scanner: 2000000000;
+	--mds-z-overlay: 2000000001;
+}
+
+/*
+	The document scanner's own element in each container. The screens position
+	themselves against it.
+*/
+.mds-scanner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* On document.body, which has no size of its own, it covers the viewport instead. */
+body > .mds-scanner {
+	position: fixed;
+	inset: 0;
+	z-index: var(--mds-z-scanner);
+	background: var(--mds-background);
+}
+
+/* While another container's screen shows. Must outrank the rules above. */
+.mds-scanner[hidden] {
+	display: none;
+}
+
+/* One screen per phase, stacked so the one showing covers the rest. */
+.mds-screen {
+	position: absolute;
+	inset: 0;
+}
+
+/* Must outrank the rule above. A hidden screen would still take taps. */
+.mds-screen[hidden] {
+	display: none;
+}
+
+/*
+	The capture screen stays laid out while hidden, so that the camera's video never
+	leaves the page. WebKit on iOS draws a camera video that starts again smaller
+	than its box. Document Viewer shows its parts with visibility: visible, so the
+	other screens cannot hide this way.
+*/
+.mds-screen-capture[hidden] {
+	display: block;
+	visibility: hidden;
+}
+
+/* Widths and heights include the padding and border. */
+.mds-capture,
+.mds-rectify,
+.mds-edit,
+.mds-overlay,
+:where(
+		.mds-capture,
+		.mds-rectify-header,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-mode-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-edit-filters,
+		.mds-overlay
+	)
+	*,
+:where(
+		.mds-capture,
+		.mds-rectify-header,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-mode-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-edit-filters,
+		.mds-overlay
+	)
+	*::before,
+:where(
+		.mds-capture,
+		.mds-rectify-header,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-mode-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-edit-filters,
+		.mds-overlay
+	)
+	*::after {
+	box-sizing: border-box;
+}
+
+/* Clear the browser's button styling. */
+:where(
+		.mds-capture,
+		.mds-rectify-header,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-mode-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-edit-filters,
+		.mds-overlay
+	)
+	button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	appearance: none;
+	border: none;
+	border-radius: var(--mds-radius);
+	padding: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* The document scanner's own focus ring. The designs leave it out. */
+:where(
+		.mds-capture,
+		.mds-rectify-header,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-mode-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-edit-filters,
+		.mds-overlay
+	)
+	:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+/* Icons inherit currentColor, so one file serves every color. */
+:where(
+		.mds-capture,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-overlay
+	)
+	.mds-icon {
+	display: block;
+	flex: none;
+	width: var(--mds-icon);
+	height: var(--mds-icon);
+}
+
+:where(
+		.mds-capture,
+		.mds-rectify-footer,
+		.mds-edit-header,
+		.mds-edit-float-bar,
+		.mds-edit-footer,
+		.mds-overlay
+	)
+	.mds-icon
+	> svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/*
+	Document Viewer paints the element behind its canvas white, and sizes the canvas
+	in whole pixels. Where a viewer area has a fractional size, as on many phones, a
+	strip of that element shows at the right and the bottom, so it lets the stage
+	show through instead.
+*/
+.mds-rectify-viewer > .ddv-main-canvas,
+.mds-edit-viewer > .ddv-main-canvas {
+	background: transparent;
+}
+
+/* The page-count badge. */
+.mds-capture-count {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* A circle for one digit and a pill for more. */
+	min-width: var(--mds-badge-size);
+	height: var(--mds-badge-size);
+	padding: 0 var(--mds-space-1);
+	border-radius: var(--mds-badge-size);
+	background: var(--mds-badge);
+	/* Parts the badge from the icon or the image it sits on. */
+	box-shadow: 0 0 0 2px var(--mds-background);
+	color: var(--mds-on-surface);
+	font-size: var(--mds-text-small);
+	font-weight: 600;
+	line-height: 1;
+}
+
+.mds-capture-count:empty {
+	display: none;
+}

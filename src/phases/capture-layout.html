@@ -1,0 +1,41 @@
+<!-- The built-in content of the capture screen's areas, one template for each.
+     Pass a copy of a template, changed, as phases.capture.layout.<area>. -->
+<template data-mds-area="header">
+	<button type="button" data-mds-button="cancel">
+		<span class="mds-icon" data-mds-icon="cancel"></span>
+	</button>
+	<div class="mds-capture-buttons">
+		<button type="button" data-mds-button="autoCapture" aria-pressed="false">
+			<span class="mds-icon" data-mds-icon="auto-capture-off"></span>
+			<span class="mds-icon" data-mds-icon="auto-capture-on"></span>
+		</button>
+		<button type="button" data-mds-button="torch" aria-pressed="false">
+			<span class="mds-icon" data-mds-icon="torch"></span>
+		</button>
+		<span class="mds-capture-divider"></span>
+		<button
+			type="button"
+			data-mds-button="cameraSwitcher"
+			aria-haspopup="menu"
+			aria-expanded="false"
+		>
+			<span class="mds-icon" data-mds-icon="camera-switcher"></span>
+		</button>
+	</div>
+	<div class="mds-camera-menu" role="menu" hidden></div>
+</template>
+<template data-mds-area="footer">
+	<div class="mds-capture-footer-side">
+		<button type="button" data-mds-button="loadImage">
+			<span class="mds-icon" data-mds-icon="load-image"></span>
+		</button>
+	</div>
+	<button type="button" data-mds-button="shutter"></button>
+	<div class="mds-capture-footer-side">
+		<button type="button" data-mds-button="thumbnail">
+			<span class="mds-capture-thumbnail-image"></span>
+			<span class="mds-capture-count"></span>
+			<span class="mds-icon" data-mds-icon="caret"></span>
+		</button>
+	</div>
+</template>

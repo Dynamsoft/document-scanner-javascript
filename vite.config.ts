@@ -1,144 +1,278 @@
-import { defineConfig, type Plugin, type UserConfig } from "vite";
-import { readFileSync, readdirSync, cpSync, copyFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
-import { createRequire } from "node:module";
-import dts from "unplugin-dts/vite";
+import { defineConfig, lazyPlugins } from "vite-plus";
+import { playwright } from "vite-plus/test/browser-playwright";
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import pkg from "./package.json" with { type: "json" };
+import tsconfig from "./tsconfig.json" with { type: "json" };
+import { defaultSettings } from "./src/settings/settings";
+import { VITEST_BROWSERS } from "./vite/browsers-container";
+import { devPageIndex, engineResources } from "./vite/dev-server";
+import { ENGINES, captureVisionCoreVersion, engineVersion } from "./vite/engines";
+import { rawImports } from "./vite/raw-imports";
 
-const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
-const DCV = Object.keys(pkg.dependencies).find((k) =>
-	k.includes("dynamsoft-capture-vision-bundle"),
-)!;
+// Pass tsconfig's target by hand, because `vp pack` does not read it.
+const TARGET: string = tsconfig.compilerOptions.target;
+
+// The entry point. `vp dev` maps the package name to it, so the pages in dev/ need no build.
+const ENTRY = "src/index.ts";
+
+// The capture screen's markup, published as written.
+const CAPTURE_LAYOUT = "src/phases/capture-layout.html";
+const RECTIFY_LAYOUT = "src/phases/rectify-layout.html";
+const EDIT_LAYOUT = "src/phases/edit-layout.html";
 
 const banner = `/*!
-* Dynamsoft Document Scanner JavaScript Library
-* @product Dynamsoft Document Scanner JS Edition Bundle
-* @website http://www.dynamsoft.com
+* Dynamsoft Mobile Document Scanner, JavaScript Edition
+* @product Dynamsoft Mobile Document Scanner
+* @website https://www.dynamsoft.com
 * @copyright Copyright ${new Date().getUTCFullYear()}, Dynamsoft Corporation
 * @author Dynamsoft
 * @version ${pkg.version}
-* @fileoverview Dynamsoft Document Scanner (DDS) is a ready-to-use SDK for capturing and enhancing document images with automatic border detection, correction, and customizable workflows. Uses Dynamsoft Capture Vision Bundle v3.2.2000.
-* More info on DDS JS: https://www.dynamsoft.com/mobile-document-scanner/docs/web/introduction/index.html
-*/`;
-
-// Copy the DCV UI XML alongside the UMD bundle (consumers fetch it at runtime).
-function copyUiXml(): Plugin {
-	return {
-		name: "dds:copy-ui-xml",
-		writeBundle() {
-			copyFileSync("src/dcv-config/document-scanner.ui.xml", "dist/document-scanner.ui.xml");
-		},
-	};
-}
+* @fileoverview Capture and enhance document images with automatic border detection, correction, review, and export. Built against ${ENGINES.map((name) => `${name}@${engineVersion(name)}`).join(", ")}.
+* More info: https://www.dynamsoft.com/mobile-document-scanner/docs/web/index.html
+*/
+${thirdPartyNotices().join("\n")}`;
 
 /**
- * Preserve the rollup-era output set by emitting both dds.bundle.esm.js and
- * dds.bundle.mjs (identical content). unplugin-dts already writes the bundled
- * declaration to dds.bundle.d.ts directly, so no rename is needed.
+ * Make one legal comment for each section of `THIRD-PARTY-NOTICES.md`, with its
+ * heading and the license in its code block. The banner carries them, because an
+ * app that loads only a bundle gets no other copy.
  */
-function preserveLegacyEsmOutputs(): Plugin {
-	return {
-		name: "dds:preserve-legacy-esm-outputs",
-		writeBundle() {
-			copyFileSync("dist/dds.bundle.esm.js", "dist/dds.bundle.mjs");
-		},
-	};
+function thirdPartyNotices(): string[] {
+	// Resolve beside this file, so that the config loads from any working directory.
+	const notices = readFileSync(new URL("THIRD-PARTY-NOTICES.md", import.meta.url), "utf-8");
+	return notices
+		.split(/^## /m)
+		.slice(1)
+		.map((section) => {
+			const name = section.slice(0, section.indexOf("\n")).trim();
+			const license = /```\n([\s\S]*?)\n```/.exec(section)?.[1];
+			if (license === undefined)
+				throw new Error(`THIRD-PARTY-NOTICES.md: ${name} has no license block`);
+			// A "*/" in the text would end the comment early.
+			const lines = [name, "", ...license.split("\n")].map((line) =>
+				` * ${line.replaceAll("*/", "* /")}`.trimEnd(),
+			);
+			return `/*!\n${lines.join("\n")}\n */`;
+		});
 }
 
-// Auto-generate sample listing at / from the samples directory for dev server.
-function sampleIndex(): Plugin {
-	return {
-		name: "sample-index",
-		configureServer(server) {
-			server.middlewares.use((req, res, next) => {
-				if (req.url !== "/") return next();
-				const files = readdirSync("samples")
-					.filter((f) => String(f).endsWith(".html"))
-					.map((f) => `samples/${f}`);
-				const links = files.map((f) => `<li><a href="/${f}">${f}</a></li>`).join("\n");
-				res.setHeader("content-type", "text/html");
-				res.end(
-					`<meta name="viewport" content="width=device-width,initial-scale=1"><style>li{margin:.5rem 0}li a{font-size:1.25rem}</style><h2>Samples</h2><ul>${links}</ul>`,
-				);
-			});
-		},
-	};
-}
+// The installed engines' versions, which an engine passed in through `engines`
+// must match.
+const ENGINE_DEFINES = {
+	"import.meta.env.ENGINE_VERSIONS": JSON.stringify({
+		captureVision: engineVersion("dynamsoft-capture-vision-bundle"),
+		captureVisionCore: captureVisionCoreVersion(),
+		documentViewer: engineVersion("dynamsoft-document-viewer"),
+	}),
+};
 
-export default defineConfig((env): UserConfig => {
-	// ---- Dev server ----
-	if (env.command === "serve") {
-		// Serve runtime resources in /public for single file samples
-		const nodeRequire = createRequire(import.meta.url);
-		const SDK_RESOURCES = ["dynamsoft-capture-vision-bundle", "dynamsoft-capture-vision-data"];
-		for (const sdkPkg of SDK_RESOURCES) {
-			const srcVersion: string = nodeRequire(
-				resolve(`node_modules/${sdkPkg}/package.json`),
-			).version;
-			const destPkgJson = resolve("public", sdkPkg, "package.json");
-			const destVersion = existsSync(destPkgJson) ? nodeRequire(destPkgJson).version : null;
-			if (srcVersion !== destVersion) {
-				cpSync(`node_modules/${sdkPkg}`, `public/${sdkPkg}`, {
-					recursive: true,
-					dereference: true,
-				});
-			}
-		}
+const ENGINE_IMPORT = {
+	group: ["dynamsoft-*"],
+	allowTypeImports: true,
+	message: "only src/engines may import an engine for its value",
+};
 
-		return {
-			plugins: [basicSsl(), sampleIndex()],
-			appType: "mpa",
-			// Do not crawl into /samples/demo/
-			optimizeDeps: { entries: ["samples/*.html"] },
-			server: {
-				host: "0.0.0.0",
-				forwardConsole: true,
-				// headers: {
-				//   // Enable SharedArrayBuffer so DCV can use the multi-threaded (pthread)
-				//   // WASM variant for better performance, do not use until upgraded to 3.4.2000
-				//   "Cross-Origin-Opener-Policy": "same-origin",
-				//   "Cross-Origin-Embedder-Policy": "require-corp",
-				// },
+// The test servers need no console forwarding.
+const QUIET_SERVER = { forwardConsole: false };
+
+// Build browser mode per project. Vitest names browser instances after their
+// project, so projects that share one object get the wrong names.
+const browserMode = () => ({
+	enabled: true,
+	provider: playwright({ connectOptions: VITEST_BROWSERS.connectOptions }),
+	headless: true,
+	instances: (["chromium", "firefox", "webkit"] as const).map((browser) => ({ browser })),
+});
+
+export default defineConfig({
+	// ---- Tasks (vp run) ----
+	run: {
+		tasks: {
+			// Check the coverage floor, from the only instance that can report it.
+			coverage: {
+				command: 'vp test run --coverage --project "unit (chromium)"',
+				cache: false,
 			},
-		};
-	}
-
-	/**
-	 * ----Library builds----
-	 * Pass 1: vite build              → dds.bundle.esm.js + dds.bundle.mjs + dds.bundle.d.ts (DCV external)
-	 * Pass 2: vite build --mode bundle → dds.bundle.js (UMD, DCV inlined) + document-scanner.ui.xml
-	 */
-	const bundle = env.mode === "bundle";
-
-	return {
-		plugins: bundle
-			? [copyUiXml()]
-			: [dts({ bundleTypes: true, tsconfigPath: "./tsconfig.json" }), preserveLegacyEsmOutputs()],
-		resolve: {
-			conditions: ["browser"],
-			mainFields: ["browser", "module", "main"],
+			// The end-to-end suite. Arguments go to `playwright test`.
+			e2e: { command: "playwright test", cache: false },
+			// Run every suite, stopping at the first that fails.
+			"test:all": { command: ["vp test", "vp run coverage", "vp run e2e"], cache: false },
 		},
-		build: {
-			emptyOutDir: !bundle,
-			copyPublicDir: false,
-			lib: {
-				entry: resolve(
-					import.meta.dirname,
-					bundle ? "src/build/dds.bundle.ts" : "src/build/dds.bundle.esm.ts",
-				),
-				name: "Dynamsoft",
-				formats: bundle ? ["umd"] : ["es"],
-				fileName: bundle ? () => "dds.bundle.js" : () => "dds.bundle.esm.js",
-			},
-			rollupOptions: {
-				external: bundle ? [] : [DCV],
-				output: {
-					globals: { [DCV]: "Dynamsoft" },
-					banner,
-					exports: "named",
-					extend: true,
+	},
+
+	// ---- Dev server (vp dev) ----
+	plugins: lazyPlugins(() => [basicSsl(), devPageIndex(), engineResources()]),
+	resolve: { alias: { [pkg.name]: fileURLToPath(new URL(ENTRY, import.meta.url)) } },
+	appType: "mpa",
+	define: ENGINE_DEFINES,
+	// The test fixtures are listed so that bundling the engines does not reload the
+	// first test's page.
+	optimizeDeps: { entries: ["dev/*.html", "tests/e2e/fixtures/*.html"] },
+	server: {
+		host: "0.0.0.0",
+		forwardConsole: { unhandledErrors: true, logLevels: ["error", "warn", "info", "log", "debug"] },
+		headers: {
+			"Cross-Origin-Opener-Policy": "same-origin",
+			"Cross-Origin-Embedder-Policy": "require-corp",
+		},
+	},
+
+	// ---- Tests (vp test) ----
+	test: {
+		projects: [
+			{
+				server: QUIET_SERVER,
+				test: {
+					name: "unit",
+					globalSetup: ["vite/browsers-container.ts"],
+					include: ["src/**/*.test.ts"],
+					exclude: ["src/**/*.contract.test.ts"],
+					browser: browserMode(),
 				},
 			},
+			{
+				server: QUIET_SERVER,
+				test: {
+					name: "contract",
+					globalSetup: ["tests/license.ts", "vite/browsers-container.ts"],
+					include: ["src/**/*.contract.test.ts"],
+					// The engines load their WebAssembly on first use.
+					testTimeout: 60_000,
+					browser: browserMode(),
+				},
+			},
+			{
+				// These tests run in Node, so they skip the root config.
+				extends: false,
+				test: {
+					name: "artifacts",
+					// The checks read the built files, so they build first.
+					globalSetup: ["tests/build.ts"],
+					include: ["tests/artifacts/**/*.test.ts"],
+					environment: "node",
+				},
+			},
+		],
+		// Only the Chromium instance can report v8 coverage.
+		coverage: {
+			include: ["src/**/*.ts"],
+			exclude: [
+				"src/**/*.test.ts",
+				// Each drives the real engines, so only the end-to-end specs named run it.
+				"src/flow/document-scanner.ts", // tests/e2e/flow/
+				"src/phases/edit.ts", // tests/e2e/phases/edit.spec.ts
+				"src/phases/rectify.ts", // tests/e2e/phases/rectify.spec.ts
+			],
+			thresholds: { 100: true, perFile: true },
 		},
-	};
+	},
+
+	// ---- Static checks (vp check) ----
+	staged: {
+		"*": "vp check --fix",
+		// The related unit tests, but not the contract tests, which need the license
+		// server. Then the artifact suite, whose snapshot of the public API fails when
+		// the API changed, so that a developer accepts the change before committing it.
+		"{src/**/*,tests/*}.ts": [
+			'vp test related --project "unit*"',
+			() => "vp test run --project artifacts",
+		],
+	},
+	fmt: {
+		// oxfmt's markdown printer ignores useTabs.
+		ignorePatterns: ["**/*.md"],
+	},
+	lint: {
+		jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
+		rules: {
+			"vite-plus/prefer-vite-plus-imports": "error",
+			// Its autofix strips the explicit `| undefined` that isolatedDeclarations
+			// (vp pack dts) requires on optional parameter properties (TS9025).
+			"typescript/no-duplicate-type-constituents": "off",
+			"no-restricted-imports": ["error", { patterns: [ENGINE_IMPORT] }],
+		},
+		overrides: [
+			{ files: ["src/engines/**"], rules: { "no-restricted-imports": "off" } },
+			// The build reads only the settings, so it loads no screen or engine code. An
+			// override replaces the whole rule, so it restates the engine pattern.
+			{
+				files: ["vite.config.ts"],
+				rules: {
+					"no-restricted-imports": [
+						"error",
+						{
+							patterns: [
+								{
+									group: ["./src/**", "!./src/settings/**"],
+									message: "vite.config.ts may import only src/settings",
+								},
+								ENGINE_IMPORT,
+							],
+						},
+					],
+				},
+			},
+		],
+		options: { typeAware: true, typeCheck: true },
+	},
+
+	// ---- Library packaging (vp pack) ----
+	// Two passes, because `external` applies to a whole bundle.
+	pack: [
+		{
+			name: "esm",
+			entry: { "document-scanner": ENTRY },
+			format: ["esm"],
+			platform: "browser",
+			target: TARGET,
+			deps: { neverBundle: ENGINES },
+			// Use oxc, because tsc needs TypeScript installed. oxc needs each export's
+			// type written out.
+			dts: { generator: "oxc" },
+			clean: true,
+			define: ENGINE_DEFINES,
+			banner: { js: banner },
+			outputOptions: { exports: "named" },
+			// Fixed names, because they are public URLs.
+			hash: false,
+			outExtensions: () => ({ js: ".mjs", dts: ".d.mts" }),
+			plugins: [rawImports()],
+			// Generate the published defaults from the library's own code.
+			onSuccess: () => {
+				mkdirSync("dist/defaults", { recursive: true });
+				writeFileSync(
+					"dist/defaults/settings.json",
+					`${JSON.stringify(defaultSettings(), null, "\t")}\n`,
+				);
+				// The built-in templates of each screen's areas, for a host application to
+				// copy into phases.<phase>.layout. The copies are .xml, because dev servers
+				// inject a live-reload script into HTML.
+				copyFileSync(CAPTURE_LAYOUT, "dist/defaults/capture-layout.xml");
+				copyFileSync(RECTIFY_LAYOUT, "dist/defaults/rectify-layout.xml");
+				copyFileSync(EDIT_LAYOUT, "dist/defaults/edit-layout.xml");
+			},
+			publint: { level: "error" },
+			attw: { profile: "esm-only", level: "error" },
+		},
+		{
+			name: "iife",
+			entry: { "document-scanner": ENTRY },
+			format: ["iife"],
+			globalName: "Dynamsoft",
+			platform: "browser",
+			target: TARGET,
+			deps: { alwaysBundle: ENGINES, onlyBundle: ENGINES },
+			define: ENGINE_DEFINES,
+			plugins: [rawImports()],
+			dts: false,
+			clean: false,
+			minify: true,
+			banner: { js: banner },
+			hash: false,
+			// `extend` adds to a Dynamsoft global the page already has.
+			outputOptions: { exports: "named", extend: true },
+		},
+	],
 });

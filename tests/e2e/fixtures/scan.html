@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document scanner under test</title>
+	</head>
+	<body>
+		<!-- For scenarios that name a container. It fills the viewport. -->
+		<div id="container" style="position: fixed; inset: 0"></div>
+		<script type="module">
+			import { DocumentScanner } from "@dynamsoft/document-scanner";
+
+			// The page the end-to-end tests drive. A test's own settings arrive as
+			// `window.scannerSettings`, and go over the license and engine resources. A
+			// test that starts from a file gives it as `window.scanFile`, a promise.
+			const scanner = new DocumentScanner({
+				license: import.meta.env.VITE_TEST_LICENSE,
+				resources: { captureVision: { rootDirectory: `${location.origin}/engine/` } },
+				...window.scannerSettings,
+			});
+			const result = Promise.resolve(window.scanFile).then((file) => scanner.scan(file));
+			window.scan = { scanner, result };
+		</script>
+	</body>
+</html>

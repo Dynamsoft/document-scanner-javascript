@@ -1,0 +1,96 @@
+/* The dialogs' styles, on top of common.css. */
+
+/*
+	The dialog covers the viewport and draws the tint itself, because ::backdrop
+	cannot yet be relied on to inherit custom properties.
+*/
+.mds-overlay {
+	position: fixed;
+	inset: 0;
+	/*
+		Above the document scanner when it covers the viewport, for a dialog that could
+		not open modally.
+	*/
+	z-index: var(--mds-z-overlay);
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	max-height: none;
+	margin: 0;
+	border: none;
+	padding: var(--mds-space-4);
+	background: color-mix(in srgb, var(--mds-background) 50%, transparent);
+	color: inherit;
+	font-family: var(--mds-font);
+}
+
+/* Scoped to [open], or the dialog would show while closed. */
+.mds-overlay[open] {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.mds-overlay::backdrop {
+	background: none;
+}
+
+/* As wide as the dialog allows, up to --mds-dialog. */
+.mds-overlay-panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--mds-space-6);
+	width: 100%;
+	max-width: var(--mds-dialog);
+	padding: var(--mds-space-4);
+	border-radius: var(--mds-radius-large);
+	background: color-mix(in srgb, var(--mds-background) 90%, transparent);
+	-webkit-backdrop-filter: blur(var(--mds-blur));
+	backdrop-filter: blur(var(--mds-blur));
+	color: var(--mds-on-surface);
+}
+
+/* The title and the message, centered as one block. */
+.mds-overlay-text {
+	text-align: center;
+}
+
+.mds-overlay-panel h2 {
+	margin: 0 0 var(--mds-space-2);
+	font-size: var(--mds-text-large);
+	font-weight: 600;
+	line-height: var(--mds-line-large);
+}
+
+.mds-overlay-panel p {
+	margin: 0;
+	color: color-mix(in srgb, var(--mds-on-surface) 80%, transparent);
+	font-size: var(--mds-text);
+	line-height: var(--mds-line);
+}
+
+.mds-overlay-panel a {
+	color: var(--mds-primary);
+}
+
+/* The buttons share the panel's width equally. */
+.mds-overlay-actions {
+	display: flex;
+	align-self: stretch;
+	gap: var(--mds-space-4);
+}
+
+.mds-overlay-actions button {
+	flex: 1;
+	height: var(--mds-control);
+	background: color-mix(in srgb, var(--mds-on-surface) 15%, transparent);
+	color: color-mix(in srgb, var(--mds-on-surface) 80%, transparent);
+	font-size: var(--mds-text);
+	font-weight: 500;
+}
+
+.mds-overlay-actions .mds-overlay-destructive {
+	background: color-mix(in srgb, var(--mds-error) 30%, transparent);
+	color: var(--mds-error);
+}
