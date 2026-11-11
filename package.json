@@ -1,6 +1,6 @@
 {
 	"name": "@dynamsoft/document-scanner",
-	"version": "2.0.0",
+	"version": "2.0.0-beta202611110002",
 	"description": "Dynamsoft Mobile Document Scanner is a ready-to-use SDK for capturing, processing, editing, and exporting document images in the browser from cameras.",
 	"keywords": [
 		"camera",
