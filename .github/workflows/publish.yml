@@ -1,6 +1,6 @@
 name: Publish Package
 permissions:
-  contents: write # To attach assets to releases
+  contents: read
   id-token: write # OIDC token for npm trusted publishing
 
 on:
@@ -53,17 +53,8 @@ jobs:
             --site https://www.dynamsoft.com/mobile-document-scanner/docs/web/ > README.gen
           mv README.gen README.md
 
-      # One tarball serves as the release asset and as the npm upload.
       - name: Pack the publishable tarball
         run: vp pm pack
-
-      - name: Upload dist and npm tarball as release assets
-        run: |
-          zip -r dist.zip dist
-          gh release upload "$TAG_NAME" dist.zip *.tgz --clobber
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG_NAME: ${{ github.event.release.tag_name }}
 
       # The package manager publishes through trusted publishing, and pnpm adds
       # provenance on its own. Its git checks guard a developer's machine, and they
