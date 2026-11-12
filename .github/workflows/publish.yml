@@ -56,15 +56,20 @@ jobs:
       - name: Pack the publishable tarball
         run: vp pm pack
 
-      # The package manager publishes through trusted publishing, and pnpm adds
-      # provenance on its own. Its git checks guard a developer's machine, and they
+      # The first publish of the package uses a token, because npm accepts a
+      # trusted publisher only for a package that exists. pnpm reads the token
+      # from the environment through the npmrc line, so it never reaches disk.
+      # Its git checks guard a developer's machine, and they
       # fail here for two reasons: the job runs on a release tag, not on main, and the
       # generated README leaves the working tree unclean. A published GitHub
       # release is the approval to publish.
       - name: Publish to npm
+        env:
+          NPM_PAT: ${{ secrets.NPM_PAT }}
         run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_PAT}' >> "$HOME/.npmrc"
           if [[ "${{ github.event.release.prerelease }}" != "false" ]]; then
-            vp pm publish *.tgz --no-git-checks --tag beta
+            vp pm publish *.tgz --no-git-checks --access public --provenance --tag beta
           else
-            vp pm publish *.tgz --no-git-checks
+            vp pm publish *.tgz --no-git-checks --access public --provenance
           fi
