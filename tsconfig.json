@@ -1,16 +1,15 @@
 {
 	"compilerOptions": {
-		"target": "es2019",
+		"target": "es2022",
+		"module": "preserve",
 		"moduleResolution": "bundler",
 		"strict": true,
 		"skipLibCheck": true,
 		"esModuleInterop": true,
 		"sourceMap": false,
-		"declaration": true,
-		"declarationMap": true,
-		"declarationDir": "./dist/types",
 		"noImplicitAny": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"types": ["node", "vite-plus/client"]
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["src/**/*.ts", "tests/**/*.ts", "vite/**/*.ts", "*.config.ts"]
 }

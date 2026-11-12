@@ -1,0 +1,397 @@
+/*
+	The capture screen's styles, on top of common.css. The engine adds no shadow
+	root, so every selector is scoped by an mds- class.
+*/
+
+.mds-capture {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-width: 100px;
+	min-height: 100px;
+	background: var(--mds-background);
+	color: var(--mds-on-surface);
+	font-family: var(--mds-font);
+	font-size: var(--mds-text);
+	user-select: none;
+}
+
+.mds-capture-header {
+	display: flex;
+	flex: none;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--mds-space-2);
+	min-height: 56px;
+	padding: var(--mds-space-2);
+}
+
+.mds-capture-buttons {
+	display: flex;
+	align-items: center;
+	gap: var(--mds-space-2);
+}
+
+.mds-capture-header > [data-mds-button="cancel"],
+.mds-capture-buttons > button {
+	width: var(--mds-control);
+	height: var(--mds-control);
+}
+
+/* Separates the camera switcher from the toggles. */
+.mds-capture-divider {
+	flex: none;
+	align-self: center;
+	width: 1px;
+	height: var(--mds-icon-small);
+	background: color-mix(in srgb, var(--mds-on-surface) 30%, transparent);
+}
+
+/* A pressed toggle recolors its icon. */
+.mds-capture [data-mds-button][aria-pressed="true"] {
+	color: var(--mds-active);
+}
+
+/* The auto-capture toggle shows only the icon of its state. */
+.mds-capture
+	[data-mds-button="autoCapture"][aria-pressed="true"]
+	[data-mds-icon="auto-capture-off"],
+.mds-capture
+	[data-mds-button="autoCapture"][aria-pressed="false"]
+	[data-mds-icon="auto-capture-on"] {
+	display: none;
+}
+
+/*
+	Taps on the icons go to the toggle. A press hides the icon under the finger,
+	and some browsers then leave the toggle stuck in :active.
+*/
+.mds-capture [data-mds-button="autoCapture"] [data-mds-icon] {
+	pointer-events: none;
+}
+
+/* The hidden attribute must outrank the display in common.css. */
+.mds-capture button[hidden] {
+	display: none;
+}
+
+.mds-capture [data-mds-button][disabled] {
+	color: var(--mds-inactive);
+	cursor: default;
+}
+
+/* Running its action, or under the finger. A held control ignores a press. */
+.mds-capture [data-mds-button][data-mds-running],
+.mds-capture [data-mds-button]:active:not([aria-disabled="true"]) {
+	color: var(--mds-inactive);
+}
+
+/*
+	A stacking context of its own, so the engine's layers stay under the document
+	scanner's bars.
+*/
+.mds-capture [data-mds-area="viewfinder"] {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	isolation: isolate;
+	/* The camera's picture is sized from the viewfinder's size. */
+	container-type: size;
+}
+
+/*
+	The document scanner fits the video itself. The engine sets these styles inline, so
+	they need !important. The engine's layer, and the one inside it, keep a stale
+	aspect-ratio: 1 that squares the video in Firefox, so both are pinned to the box.
+*/
+.mds-capture .mds-camera-layer,
+.mds-capture .mds-camera-layer > div {
+	position: absolute !important;
+	inset: 0 !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	aspect-ratio: auto !important;
+}
+
+/*
+	Behind everything else in the viewfinder, such as the outline, the spinner, and
+	markup of the host application's own. The viewfinder's stacking context keeps
+	it above the screen's background.
+*/
+.mds-capture .mds-camera-layer {
+	z-index: -1 !important;
+}
+
+/*
+	The video fills the viewfinder regardless of a page's own rules,
+	since the video has to match the border outline.
+*/
+.mds-capture [data-mds-area="viewfinder"] video {
+	width: 100% !important;
+	height: 100% !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	max-width: none !important;
+	max-height: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	object-fit: contain !important;
+	/* Fills the letterbox that contain leaves. */
+	background: var(--mds-background);
+}
+
+.mds-capture .mds-boundary {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.mds-capture .mds-boundary polygon {
+	fill: color-mix(in srgb, var(--mds-primary) 20%, transparent);
+	stroke: var(--mds-primary);
+	stroke-width: 2;
+	stroke-linejoin: round;
+}
+
+/*
+	The box over the camera's picture, which the video's contain fit fills. The screen
+	sets the frame's size. The box has no size until then.
+*/
+.mds-capture .mds-camera-picture {
+	--mds-frame-width: 0;
+	--mds-frame-height: 0;
+	position: absolute;
+	inset: 0;
+	width: min(100cqw, 100cqh * var(--mds-frame-width) / max(var(--mds-frame-height), 1));
+	height: min(100cqh, 100cqw * var(--mds-frame-height) / max(var(--mds-frame-width), 1));
+	margin: auto;
+	container-type: size;
+	pointer-events: none;
+}
+
+/*
+	A centered A4 shape, as large as 90% of the picture's width and height allow,
+	which leaves 5% on each side. The dark halo keeps the light border visible on white paper.
+*/
+.mds-capture .mds-scan-region {
+	position: absolute;
+	inset: 0;
+	width: min(90cqw, 90cqh * 210 / 297);
+	height: min(90cqw * 297 / 210, 90cqh);
+	margin: auto;
+	border: 2px solid color-mix(in srgb, var(--mds-on-surface) 70%, transparent);
+	border-radius: var(--mds-radius);
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--mds-background) 50%, transparent),
+		inset 0 0 0 1px color-mix(in srgb, var(--mds-background) 50%, transparent);
+}
+
+/*
+	The hint near the top of the viewfinder, on the screen's background, which keeps
+	it readable on white paper. It stays laid out while empty, as a live region, but
+	shows nothing.
+*/
+.mds-capture .mds-capture-hint {
+	position: absolute;
+	top: var(--mds-space-4);
+	inset-inline: var(--mds-space-4);
+	width: fit-content;
+	margin: 0 auto;
+	color: var(--mds-on-surface);
+	font-size: var(--mds-text-large);
+	line-height: var(--mds-line-large);
+	text-align: center;
+	text-wrap: balance;
+	pointer-events: none;
+}
+
+.mds-capture .mds-capture-hint:not(:empty) {
+	padding: var(--mds-space-2) var(--mds-space-4);
+	border-radius: var(--mds-radius-large);
+	background: color-mix(in srgb, var(--mds-background) 70%, transparent);
+}
+
+/* A busy spinner, centered in the part it sits in. */
+.mds-capture .mds-spinner {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: var(--mds-icon);
+	height: var(--mds-icon);
+	margin: auto;
+	border: 2px solid color-mix(in srgb, var(--mds-on-surface) 25%, transparent);
+	border-top-color: var(--mds-on-surface);
+	border-radius: 50%;
+	animation: mds-spin 0.8s linear infinite;
+}
+
+/* The hidden attribute must outrank the display above. */
+.mds-capture .mds-spinner[hidden] {
+	display: none;
+}
+
+/*
+	Over the viewfinder. The disc behind the ring keeps it visible on white paper.
+	The shadow widens the disc.
+*/
+.mds-capture .mds-spinner-viewfinder {
+	width: var(--mds-control);
+	height: var(--mds-control);
+	border-width: 3px;
+	border-color: color-mix(in srgb, var(--mds-on-surface) 30%, transparent);
+	border-top-color: var(--mds-on-surface);
+	background: color-mix(in srgb, var(--mds-background) 60%, transparent);
+	box-shadow: 0 0 0 8px color-mix(in srgb, var(--mds-background) 60%, transparent);
+}
+
+/* On the page image. The tinted disc keeps the ring visible. */
+.mds-capture .mds-spinner-thumbnail {
+	background: color-mix(in srgb, var(--mds-background) 40%, transparent);
+}
+
+@keyframes mds-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Reduced motion slows the ring. A still ring would look stuck. */
+@media (prefers-reduced-motion: reduce) {
+	.mds-capture .mds-spinner {
+		animation-duration: 2.4s;
+	}
+}
+
+/* Positioned from the root, so the list can extend below the header. */
+.mds-camera-menu {
+	position: absolute;
+	top: var(--mds-space-1);
+	right: var(--mds-space-1);
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	width: 194px;
+	max-width: calc(100% - var(--mds-space-2));
+	max-height: calc(100% - var(--mds-space-2));
+	padding: var(--mds-space-1);
+	overflow-y: auto;
+	border-radius: var(--mds-radius);
+	background: color-mix(in srgb, var(--mds-background) 90%, transparent);
+	-webkit-backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px);
+}
+
+/* The hidden attribute must outrank the display above. */
+.mds-camera-menu[hidden] {
+	display: none;
+}
+
+.mds-camera-menu-item {
+	display: block;
+	flex: none;
+	height: var(--mds-control-large);
+	padding: 0 var(--mds-space-3);
+	overflow: hidden;
+	line-height: var(--mds-control-large);
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.mds-camera-menu-item[aria-checked="true"] {
+	background: var(--mds-background);
+	color: var(--mds-active);
+}
+
+/* Equal sides, so the shutter sits on the center line at any width. */
+.mds-capture-footer {
+	display: flex;
+	flex: none;
+	align-items: center;
+	padding: var(--mds-space-6);
+}
+
+.mds-capture-footer-side {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+}
+
+.mds-capture-footer-side > button {
+	width: var(--mds-control-large);
+	height: var(--mds-control-large);
+}
+
+:where(.mds-capture) [data-mds-button="shutter"] {
+	position: relative;
+	flex: none;
+	width: var(--mds-shutter);
+	height: var(--mds-shutter);
+	border-radius: 50%;
+}
+
+:where(.mds-capture) [data-mds-button="shutter"]::before,
+:where(.mds-capture) [data-mds-button="shutter"]::after {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+}
+
+:where(.mds-capture) [data-mds-button="shutter"]::before {
+	inset: 0;
+	border: 3px solid currentColor;
+	opacity: 0.5;
+}
+
+:where(.mds-capture) [data-mds-button="shutter"]::after {
+	inset: 5px;
+	background: currentColor;
+}
+
+/* The badge and caret sit outside the page image, so only that image clips. */
+:where(.mds-capture) [data-mds-button="thumbnail"] {
+	position: relative;
+}
+
+.mds-capture-thumbnail-image {
+	display: block;
+	width: var(--mds-control-large);
+	height: var(--mds-control-large);
+	border-radius: var(--mds-radius);
+	background: color-mix(in srgb, var(--mds-on-surface) 15%, transparent);
+	overflow: hidden;
+}
+
+.mds-capture-thumbnail-image > img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Centered on the page image's corner, so it straddles it. */
+.mds-capture-count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform: translate(-50%, -50%);
+}
+
+:where(.mds-capture) [data-mds-button="thumbnail"] > .mds-icon {
+	position: absolute;
+	top: 50%;
+	left: calc(100% + var(--mds-space-1));
+	width: var(--mds-icon-small);
+	height: var(--mds-icon-small);
+	opacity: 0.5;
+	transform: translateY(-50%);
+}

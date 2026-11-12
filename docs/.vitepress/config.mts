@@ -1,0 +1,43 @@
+import { defineDynamsoftConfig, loadApiSidebar } from "@dynamsoft-docs/vitepress-docs/config";
+
+// defineDynamsoftConfig supplies the fleet-wide mechanics: versioned `base`
+// from themeConfig.docsRoot + the DOCS_VERSION env var, GitHub-style GFM
+// alerts, nav-bar banner conventions, local search, and theme bundling —
+// see the theme README. Everything below is MDS-specific.
+export default defineDynamsoftConfig({
+	title: "Mobile Document Scanner JS Edition",
+	description:
+		"Documentation for Dynamsoft Mobile Document Scanner JavaScript Edition (MDS): scan, enhance, and correct document images in the browser.",
+	themeConfig: {
+		// Root URL path of the published docs site on www.dynamsoft.com.
+		docsRoot: "/mobile-document-scanner/docs/web/",
+		dynamsoftChrome: true,
+		breadcrumbLabels: {
+			guide: "User Guide",
+			api: "API Reference",
+		},
+		nav: [
+			{ text: "Download", link: "https://www.dynamsoft.com/mobile-document-scanner/downloads/" },
+		],
+		sidebar: [
+			{ text: "Introduction", link: "/" },
+			{
+				text: "User Guide",
+				link: "/guide/",
+				collapsed: false,
+				items: [
+					{ text: "Migrate from 1.x", link: "/guide/migration" },
+					{ text: "Framework Samples", link: "/guide/frameworks" },
+					{ text: "Troubleshooting", link: "/guide/troubleshooting" },
+				],
+			},
+			{
+				text: "API Reference",
+				link: "/api/",
+				collapsed: false,
+				items: loadApiSidebar(),
+			},
+			{ text: "Changelog", link: "/changelog" },
+		],
+	},
+});

@@ -1,0 +1,115 @@
+{
+	"CaptureVisionTemplates": [
+		{
+			"Name": "mds-detect",
+			"ImageROIProcessingNameArray": ["mds-roi-detect"]
+		}
+	],
+	"TargetROIDefOptions": [
+		{
+			"Name": "mds-roi-detect",
+			"TaskSettingNameArray": ["mds-task-detect"]
+		}
+	],
+	"DocumentNormalizerTaskSettingOptions": [
+		{
+			"Name": "mds-task-detect",
+			"SectionArray": [
+				{
+					"Section": "ST_REGION_PREDETECTION",
+					"ImageParameterName": "mds-image-detect",
+					"StageArray": [
+						{
+							"Stage": "SST_PREDETECT_REGIONS"
+						}
+					]
+				},
+				{
+					"Section": "ST_DOCUMENT_DETECTION",
+					"ContentType": "CT_DOCUMENT",
+					"ImageParameterName": "mds-image-detect",
+					"StageArray": [
+						{
+							"Stage": "SST_ASSEMBLE_LONG_LINES"
+						},
+						{
+							"Stage": "SST_ASSEMBLE_LOGICAL_LINES"
+						},
+						{
+							"Stage": "SST_DETECT_CORNERS"
+						},
+						{
+							"Stage": "SST_DETECT_EDGES"
+						},
+						{
+							"Stage": "SST_DETECT_QUADS"
+						}
+					]
+				}
+			]
+		}
+	],
+	"ImageParameterOptions": [
+		{
+			"Name": "mds-image-detect",
+			"ApplicableStages": [
+				{
+					"Stage": "SST_CONVERT_TO_GRAYSCALE",
+					"ColourConversionModes": [
+						{
+							"Mode": "CICM_GENERAL"
+						},
+						{
+							"Mode": "CICM_EDGE_ENHANCEMENT"
+						},
+						{
+							"Mode": "CICM_HSV",
+							"ReferChannel": "H_CHANNEL"
+						}
+					]
+				},
+				{
+					"Stage": "SST_BINARIZE_IMAGE",
+					"BinarizationModes": [
+						{
+							"Mode": "BM_LOCAL_BLOCK",
+							"BlockSizeX": 25,
+							"BlockSizeY": 25,
+							"EnableFillBinaryVacancy": 0,
+							"ThresholdCompensation": 5
+						}
+					]
+				},
+				{
+					"Stage": "SST_BINARIZE_TEXTURE_REMOVED_GRAYSCALE",
+					"BinarizationModes": [
+						{
+							"Mode": "BM_LOCAL_BLOCK",
+							"BlockSizeX": 25,
+							"BlockSizeY": 25,
+							"EnableFillBinaryVacancy": 0,
+							"ThresholdCompensation": 5
+						}
+					]
+				},
+				{
+					"Stage": "SST_DETECT_TEXT_ZONES",
+					"TextDetectionMode": {
+						"Mode": "TTDM_WORD",
+						"Direction": "HORIZONTAL",
+						"Sensitivity": 7
+					}
+				},
+				{
+					"Stage": "SST_DETECT_TEXTURE",
+					"TextureDetectionModes": [
+						{
+							"Mode": "TDM_GENERAL_WIDTH_CONCENTRATION",
+							"Sensitivity": 8
+						}
+					]
+				}
+			]
+		}
+	]
+}
