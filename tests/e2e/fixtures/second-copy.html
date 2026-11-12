@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document scanner after another copy of Capture Vision</title>
+	</head>
+	<body>
+		<script type="module">
+			import { DocumentScanner } from "@dynamsoft/document-scanner";
+
+			// The page the second-copy scenarios drive. `window.otherCopy` names the
+			// version of Capture Vision that loads first, from the CDN, so it owns
+			// window.Dynamsoft. With a license, that copy is licensed with it first, as
+			// another SDK would do.
+			const { version, license } = window.otherCopy;
+			const cdn = "https://cdn.jsdelivr.net/npm/";
+			await new Promise((resolve, reject) => {
+				const script = document.createElement("script");
+				script.src = `${cdn}dynamsoft-capture-vision-bundle@${version}/dist/dcv.bundle.js`;
+				script.onload = resolve;
+				script.onerror = reject;
+				document.head.append(script);
+			});
+			if (license !== undefined) {
+				const other = window.Dynamsoft;
+				other.Core.CoreModule.engineResourcePaths = { rootDirectory: cdn };
+				await other.License.LicenseManager.initLicense(license, { executeNow: true }).catch(
+					() => undefined,
+				);
+			}
+			const scanner = new DocumentScanner({
+				license: import.meta.env.VITE_TEST_LICENSE,
+				resources: { captureVision: { rootDirectory: `${location.origin}/engine/` } },
+			});
+			window.scan = { scanner, result: scanner.scan() };
+		</script>
+	</body>
+</html>

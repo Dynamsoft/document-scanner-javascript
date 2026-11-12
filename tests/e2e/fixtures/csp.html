@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'self'; script-src 'self' blob: 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net https://*.dynamsoft.com https://*.dynamsoftonline.com; img-src 'self' blob:; style-src 'self' blob:; font-src 'self' data:"
+		/>
+		<title>Scanner under a restrictive content security policy</title>
+	</head>
+	<body>
+		<script type="module">
+			import { DocumentScanner } from "@dynamsoft/document-scanner";
+
+			// By default, the engines load from the CDN on another origin.
+			window.violations = [];
+			document.addEventListener("securitypolicyviolation", (event) =>
+				window.violations.push(`${event.effectiveDirective} ${event.blockedURI}`),
+			);
+			// The shutter takes the page, so the scan needs no page in view.
+			window.scanner = new DocumentScanner({
+				license: import.meta.env.VITE_TEST_LICENSE,
+				output: { format: "pdf" },
+				phases: { capture: { autoCapture: false } },
+			});
+			window.preloaded = window.scanner.preload().then(
+				() => "loaded",
+				(error) => `failed: ${error?.message ?? error}`,
+			);
+		</script>
+	</body>
+</html>

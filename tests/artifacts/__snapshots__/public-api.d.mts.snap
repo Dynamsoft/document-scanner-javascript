@@ -1,0 +1,326 @@
+import { EngineResourcePaths } from "dynamsoft-capture-vision-bundle";
+type ScannerError = {
+  readonly kind: "license";
+  readonly message: string;
+  readonly reason: LicenseErrorReason;
+} | {
+  readonly kind: "cameraPermission";
+  readonly message: string;
+} | {
+  readonly kind: "cameraUnavailable";
+  readonly message: string;
+} | {
+  readonly kind: "container";
+  readonly message: string;
+  readonly selector?: string;
+} | {
+  readonly kind: "engineLoad";
+  readonly message: string;
+  readonly engine: "captureVision" | "documentViewer";
+} | {
+  readonly kind: "internal";
+  readonly message: string;
+};
+type LicenseErrorReason = "expired" | "rejected" | "unreachable";
+type ScannerStateReason = "disposed" | "sessionRunning";
+export declare class ScannerStateError extends DOMException {
+  readonly reason: ScannerStateReason;
+  constructor(reason: ScannerStateReason);
+}
+declare const CAPTURE_SCREEN_BUTTONS: readonly ["cancel", "autoCapture", "torch", "cameraSwitcher", "shutter", "loadImage", "thumbnail"];
+type CaptureScreenButton = (typeof CAPTURE_SCREEN_BUTTONS)[number];
+declare const RECTIFY_SCREEN_BUTTONS: readonly ["apply", "retake", "cancel", "undo", "detectBoundary", "fullImage"];
+type RectifyScreenButton = (typeof RECTIFY_SCREEN_BUTTONS)[number];
+type AfterCaptureButton = Exclude<RectifyScreenButton, "cancel">;
+type FromEditButton = Exclude<RectifyScreenButton, "retake">;
+declare const EDIT_SCREEN_BUTTONS: readonly ["cancel", "addPage", "done", "thumbnails", "previousPage", "nextPage", "delete", "undo", "redo", "rectify", "rotate", "filter"];
+type EditScreenButton = (typeof EDIT_SCREEN_BUTTONS)[number];
+declare const EDIT_MODE_BUTTONS: readonly ["cancel", "apply"];
+type EditModeButton = (typeof EDIT_MODE_BUTTONS)[number];
+interface ButtonEvent<Button extends string = string> {
+  readonly button: Button;
+  readonly phase: PhaseName;
+  readonly mode?: RectifyMode | EditMode;
+  preventDefault(): void;
+  readonly defaultPrevented: boolean;
+}
+interface ButtonSettings<Button extends string = string> {
+  hidden?: boolean;
+  onClick?: (event: ButtonEvent<Button>) => void | Promise<void>;
+}
+type ButtonSettingsFor<Button extends string> = { readonly [Name in Button]?: ButtonSettings<Name>; };
+declare const FILTER_NAMES: readonly ["none", "blackAndWhite", "gray", "removeShadow", "saveInk", "enhance"];
+type FilterName = (typeof FILTER_NAMES)[number];
+type WithTooltips<K extends string> = { readonly [P in K | `${K}Tooltip`]: string; };
+type CommonStrings = Readonly<{
+  dismiss: string;
+  fileErrorTitle: string;
+  fileErrorMessage: string;
+  pageErrorTitle: string;
+  pageErrorMessage: string;
+  finishErrorTitle: string;
+  finishErrorMessage: string;
+  pageLimitNoticeTitle: string;
+  pageLimitNoticeMessage: string;
+  discardTitle: string;
+  discardMessage: string;
+  discard: string;
+  keepScanning: string;
+  trialNoticeTitle: string;
+  trialNoticeMessage: string;
+  licenseExpiredTitle: string;
+  licenseExpiredMessage: string;
+  licenseErrorTitle: string;
+  licenseErrorMessage: string;
+}>;
+type CaptureStrings = WithTooltips<CaptureScreenButton> & Readonly<{
+  moveCloser: string;
+  moveFarther: string;
+}>;
+type RectifyStrings = Readonly<{
+  apply: string;
+  keep: string;
+  detectBoundary: string;
+  fullImage: string;
+  undo: string;
+  retake: string;
+  cancel: string;
+  title: string;
+}>;
+declare const EDIT_ICON_BUTTONS: readonly ["cancel", "thumbnails", "previousPage", "nextPage"];
+type EditIconButton = (typeof EDIT_ICON_BUTTONS)[number];
+type FilterStrings = { readonly [F in FilterName as `filter${Capitalize<F>}`]: string; };
+type EditStrings = WithTooltips<EditIconButton> & FilterStrings & Readonly<{
+  addPage: string;
+  done: string;
+  delete: string;
+  undo: string;
+  redo: string;
+  rectify: string;
+  rotate: string;
+  filter: string;
+  modeApply: string;
+  modeCancel: string;
+}>;
+interface StringSettings {
+  common?: Partial<CommonStrings>;
+  capture?: Partial<CaptureStrings>;
+  rectify?: Partial<RectifyStrings>;
+  edit?: Partial<EditStrings>;
+}
+interface ThemeTokens {
+  primary?: string;
+  background?: string;
+  surface?: string;
+  onSurface?: string;
+  active?: string;
+  inactive?: string;
+  badge?: string;
+  error?: string;
+}
+type ThemeToken = keyof ThemeTokens;
+interface ScannerSettings {
+  license?: string;
+  resources?: ResourceSettings;
+  engines?: EngineSettings;
+  container?: HTMLElement | string;
+  theme?: ThemeTokens;
+  strings?: StringSettings;
+  output?: OutputSettings;
+  maxPages?: number | "unlimited";
+  phases?: PhaseSettings;
+}
+type OutputSettings = {
+  format: "pdf";
+} | {
+  format: "tiff";
+} | ({
+  format: "images";
+} & ImageEncoding);
+interface ResourceSettings {
+  captureVision?: EngineResourcePaths;
+  documentViewer?: string;
+}
+interface EngineSettings {
+  captureVision?: typeof import("dynamsoft-capture-vision-bundle");
+  documentViewer?: typeof import("dynamsoft-document-viewer");
+}
+interface PhaseSettings {
+  capture?: CaptureSettings;
+  rectify?: RectifySettings | false;
+  edit?: EditSettings | false;
+}
+interface CaptureSettings {
+  autoCapture?: boolean;
+  minStableFrames?: number;
+  waitForFraming?: boolean;
+  layout?: CaptureLayout;
+  buttons?: ButtonSettingsFor<CaptureScreenButton>;
+}
+interface CaptureLayout {
+  header?: HTMLTemplateElement | false;
+  viewfinder?: HTMLTemplateElement;
+  footer?: HTMLTemplateElement | false;
+}
+interface RectifySettings {
+  container?: HTMLElement | string;
+  modes?: RectifyModes;
+  layout?: RectifyLayout;
+}
+interface RectifyLayout {
+  header?: HTMLTemplateElement | false;
+  footer?: HTMLTemplateElement | false;
+}
+interface RectifyModes {
+  afterCapture?: RectifyModeSettings<AfterCaptureButton> | false;
+  fromEdit?: RectifyModeSettings<FromEditButton> | false;
+}
+type RectifyMode = keyof RectifyModes;
+interface RectifyModeSettings<Button extends RectifyScreenButton = RectifyScreenButton> {
+  buttons?: ButtonSettingsFor<Button>;
+}
+interface EditSettings {
+  container?: HTMLElement | string;
+  buttons?: ButtonSettingsFor<EditScreenButton>;
+  modes?: EditModes;
+  modeButtons?: ButtonSettingsFor<EditModeButton>;
+  layout?: EditLayout;
+}
+interface EditLayout {
+  header?: HTMLTemplateElement | false;
+  footer?: HTMLTemplateElement | false;
+}
+interface EditModes {
+  filter?: FilterModeSettings | false;
+}
+type EditMode = keyof EditModes;
+interface FilterModeSettings {
+  available?: readonly FilterName[];
+}
+type OverlayName = "trialNotice" | "licenseError" | "fileError" | "pageError" | "finishError" | "pageLimitNotice" | "discardConfirmation";
+type PhaseName = "capture" | "rectify" | "edit";
+type ModeName = "afterCapture" | "fromEdit" | "filter";
+type Navigation = {
+  readonly type: "phase";
+  readonly from: PhaseName | null;
+  readonly to: PhaseName;
+} | {
+  readonly type: "mode";
+  readonly phase: "rectify" | "edit";
+  readonly from: ModeName | null;
+  readonly to: ModeName | null;
+} | {
+  readonly type: "overlay";
+  readonly phase: PhaseName;
+  readonly overlay: OverlayName;
+  readonly open: boolean;
+};
+type PageId = string & {
+  readonly __brand: "PageId";
+};
+type ImageEncoding = {
+  encoding: "png";
+} | {
+  encoding: "jpeg";
+  quality?: number;
+};
+interface PageImageBase {
+  readonly width: number;
+  readonly height: number;
+  toCanvas(options?: {
+    scale?: number;
+  }): Promise<HTMLCanvasElement>;
+  toBlob(encoding?: ImageEncoding): Promise<Blob>;
+}
+interface RasterImage extends PageImageBase {
+  readonly kind: "raster";
+}
+interface VectorImage extends PageImageBase {
+  readonly kind: "vector";
+  toPdf(): Promise<Blob>;
+}
+type PageImage = RasterImage | VectorImage;
+interface Quadrilateral {
+  readonly points: readonly [Point, Point, Point, Point];
+}
+interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+interface ScannedPage {
+  readonly id: PageId;
+  readonly index: number;
+  readonly origin: "camera" | "file";
+  readonly original: PageImage;
+  readonly processed: PageImage;
+  readonly boundary: Quadrilateral;
+}
+interface DocumentState {
+  readonly pageCount: number;
+  readonly currentIndex: number;
+  readonly undoCount: number;
+  readonly redoCount: number;
+}
+type DocumentChange = {
+  readonly type: "pagesAdded";
+  readonly pages: readonly ScannedPage[];
+  readonly state: DocumentState;
+} | {
+  readonly type: "pagesRemoved";
+  readonly indices: readonly number[];
+  readonly state: DocumentState;
+} | {
+  readonly type: "pagesReordered";
+  readonly state: DocumentState;
+} | {
+  readonly type: "pageEdited";
+  readonly page: ScannedPage;
+  readonly state: DocumentState;
+} | {
+  readonly type: "historyChanged";
+  readonly state: DocumentState;
+};
+type ScanOutput = {
+  readonly format: "pdf";
+  readonly document: Blob;
+} | {
+  readonly format: "tiff";
+  readonly document: Blob;
+} | {
+  readonly format: "images";
+  readonly images: readonly Blob[];
+};
+type ScannedPages = readonly [ScannedPage, ...ScannedPage[]];
+interface SuccessfulScan {
+  readonly status: "success";
+  readonly pages: ScannedPages;
+  readonly output?: ScanOutput;
+}
+type ScanResult = SuccessfulScan | {
+  readonly status: "cancelled";
+} | {
+  readonly status: "failed";
+  readonly error: ScannerError;
+};
+interface ScannerEvents {
+  documentChange: DocumentChange;
+  done: SuccessfulScan;
+  error: ScannerError;
+  navigate: Navigation;
+}
+type ScannerEventName = keyof ScannerEvents;
+export declare class DocumentScanner {
+  #private;
+  constructor(settings: ScannerSettings);
+  preload(): Promise<void>;
+  scan(file?: Blob): Promise<ScanResult>;
+  finish(): Promise<boolean>;
+  cancel(): void;
+  reset(): void;
+  dispose(): void;
+  getSettings(): ScannerSettings;
+  on<Name extends ScannerEventName>(event: Name, listener: (payload: ScannerEvents[Name]) => void | Promise<void>): () => void;
+  getDdvViewer(type: "editViewer" | "perspectiveViewer"): unknown;
+}
+type CaptureScreenArea = "header" | "viewfinder" | "footer";
+export type { AfterCaptureButton, ButtonEvent, ButtonSettings, ButtonSettingsFor, CaptureLayout, CaptureScreenArea, CaptureScreenButton, CaptureSettings, DocumentChange, DocumentState, EditLayout, EditMode, EditModeButton, EditModes, EditScreenButton, EditSettings, EngineSettings, FilterModeSettings, FilterName, FromEditButton, ImageEncoding, LicenseErrorReason, ModeName, Navigation, OutputSettings, OverlayName, PageId, PageImage, PageImageBase, PhaseName, PhaseSettings, Point, Quadrilateral, RasterImage, RectifyLayout, RectifyMode, RectifyModeSettings, RectifyModes, RectifyScreenButton, RectifySettings, ResourceSettings, ScanOutput, ScanResult, ScannedPage, ScannedPages, ScannerError, ScannerEventName, ScannerEvents, ScannerSettings, ScannerStateReason, StringSettings, SuccessfulScan, ThemeToken, ThemeTokens, VectorImage };

@@ -1,9 +1,24 @@
-
+dist
 node_modules
 public
 
-# npm pack
+# Tarballs made by vp pm pack
 *.tgz
 
 # Sample angular cache
 .angular
+
+# Assembled multi-version docs tree
+/_site
+
+# Unit test output: coverage reports, and Vitest's screenshots, attachments and reports
+/coverage
+.vitest/
+
+# Reports from devices, which the dev server takes at /__report
+/reports
+
+# End-to-end test output and generated camera videos
+/test-results
+/playwright-report
+/tests/e2e/.videos
